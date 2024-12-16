@@ -12,7 +12,7 @@ import AppTrackingTransparency
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
       // Google Maps API Key setup
-    GMSServices.provideAPIKey("AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg")
+    GMSServices.provideAPIKey("APIKEY")
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
