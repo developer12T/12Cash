@@ -4,12 +4,15 @@ import 'package:_12sale_app/core/components/CustomerDropdownSearch.dart';
 import 'package:_12sale_app/core/components/badge/CustomBadge.dart';
 import 'package:_12sale_app/core/components/table/ShopRouteTable.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/SaleRoute.dart';
 import 'package:_12sale_app/function/SavetoStorage.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ShopRouteScreen extends StatefulWidget {
   final String day;
@@ -45,6 +48,18 @@ class _ShopRouteScreenState extends State<ShopRouteScreen> {
     setState(() {
       routes = routeFilter;
     });
+  }
+
+  Future<void> _launchUrl(url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+      webViewConfiguration: const WebViewConfiguration(
+        enableJavaScript: true,
+      ),
+    )) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   @override
@@ -106,6 +121,33 @@ class _ShopRouteScreenState extends State<ShopRouteScreen> {
                     countBackgroundColor: Colors.white,
                   ),
                 ],
+              ),
+            ),
+            SizedBox(
+              height: screenWidth / 30,
+            ),
+            Expanded(child: PolylineWithLabels()),
+            SizedBox(
+              height: screenWidth / 30,
+            ),
+            TextButton.icon(
+              icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
+              ),
+              onPressed: () async {
+                // final String url =
+                //     'https://www.google.com/maps/dir/?api=1&origin=${origin.latitude},${origin.longitude}'
+                //     '&destination=${destination.latitude},${destination.longitude}'
+                //     '&waypoints=$waypointsString'
+                //     '&travelmode=$travelMode';
+                final Uri url = Uri.parse(
+                    "https://www.google.com/maps/dir/?api=1&origin=13.689600,100.608600&destination=13.918764,100.56767&waypoints=13.760493,100.474507|13.71104,100.517814&travelmode=driving");
+                _launchUrl(url);
+              },
+              label: Text(
+                "เปิด Google Maps",
+                style: Styles.white18(context),
               ),
             ),
             SizedBox(

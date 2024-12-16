@@ -109,12 +109,12 @@ class _MyAppState extends State<MyApp> {
             ],
             textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
           ),
-          home: PolylineWithLabels(),
+          // home: PolylineWithLabels(),
           // home: SettingsScreen(),
           // home: const LoginScreen(),
-          // home: const HomeScreen(
-          //   index: 0,
-          // ),
+          home: const HomeScreen(
+            index: 0,
+          ),
           // home: NotificationScreen(),
           // home: HomeScreen2(),
           // home: CustomBottomNavBar(),

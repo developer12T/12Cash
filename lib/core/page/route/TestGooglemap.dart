@@ -1,10 +1,14 @@
 import 'dart:math';
 import 'dart:convert';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
+import 'package:custom_info_window/custom_info_window.dart';
 
 class PolylineWithLabels extends StatefulWidget {
   @override
@@ -12,24 +16,42 @@ class PolylineWithLabels extends StatefulWidget {
 }
 
 class _PolylineWithLabelsState extends State<PolylineWithLabels> {
+  CustomInfoWindowController _customInfoWindowController =
+      CustomInfoWindowController();
   GoogleMapController? _mapController;
+  String apikey = 'AIzaSyAQ9F4z5GhkeW5n8z03OK7H5CcMpzUAZr0';
+
   Set<Polyline> _polylines = {};
+  List<LatLng> polylineCoordinates = [];
+  PolylinePoints polylinePoints = PolylinePoints();
+
   List<Widget> _distanceLabels = [];
   List<LatLng> routePoints = [];
   Set<Marker> _markers = {};
-  static const LatLng origin = LatLng(37.7749, -122.4194); // San Francisco, CA
-  static const LatLng waypoint1 = LatLng(36.7783, -119.4179); // Fresno, CA
-  static const LatLng waypoint2 = LatLng(34.0522, -118.2437); // Los Angeles, CA
-  static const LatLng destination = LatLng(32.7157, -117.1611); // San Diego, CA
+  static const LatLng origin =
+      LatLng(13.689600, 100.608600); // San Francisco, CA
+  static const LatLng waypoint1 = LatLng(13.760493, 100.474507); // Fresno, CA
+  static const LatLng waypoint2 =
+      LatLng(13.711040, 100.517814); // Los Angeles, CA
+  static const LatLng destination =
+      LatLng(13.918764, 100.567671); // San Diego, CA
   // PolylinePoints polylinePoints = PolylinePoints();
   @override
   void initState() {
     super.initState();
     _initializeMarkers();
+    _getPolyline();
+    // _fetchRouteAndDisplay();
     routePoints = [origin, waypoint1, waypoint2, destination];
     _addPolyline();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _generateDistanceLabels());
+    // WidgetsBinding.instance
+    //     .addPostFrameCallback((_) => _generateDistanceLabels());
+  }
+
+  @override
+  void dispose() {
+    _customInfoWindowController.dispose();
+    super.dispose();
   }
 
   void _addPolyline() {
@@ -37,14 +59,10 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
       _polylines.add(
         Polyline(
           polylineId: PolylineId('route'),
-          points: routePoints,
-          color: Colors.blue,
+          points: polylineCoordinates,
+          color: Colors.red,
           width: 5,
           zIndex: 2,
-          // patterns: [
-          //   PatternItem.dash(30),
-          //   PatternItem.gap(20),
-          // ],
           consumeTapEvents: true,
           onTap: () {
             print('Polyline tapped!');
@@ -52,6 +70,108 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
         ),
       );
     });
+    setState(() {});
+  }
+
+  _getPolyline() async {
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      googleApiKey: apikey,
+      request: PolylineRequest(
+        origin: PointLatLng(origin.latitude, origin.longitude),
+        destination: PointLatLng(destination.latitude, destination.longitude),
+        mode: TravelMode.driving,
+        wayPoints: [
+          PolylineWayPoint(
+              location: "${waypoint1.latitude},${waypoint1.longitude}"),
+          PolylineWayPoint(
+              location: "${waypoint2.latitude},${waypoint2.longitude}"),
+        ],
+      ),
+    );
+    if (result.points.isNotEmpty) {
+      result.points.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+      var dio = Dio();
+      var response = await dio.get(
+        "https://maps.googleapis.com/maps/api/directions/json?origin=13.689600,100.608600&destination=13.918764,100.567671&waypoints=13.760493,100.474507|13.71104,100.517814&key=AIzaSyAQ9F4z5GhkeW5n8z03OK7H5CcMpzUAZr0",
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      for (int i = 0; i < routePoints.length - 1; i++) {
+        LatLng start = _findClosestPoint(routePoints[i]);
+        LatLng end = _findClosestPoint(routePoints[i + 1]);
+        LatLng midpoint = LatLng(
+          (start.latitude + end.latitude) / 2,
+          (start.longitude + end.longitude) / 2,
+        );
+        _markers.add(
+          Marker(
+            markerId: MarkerId('tooltip$i'),
+            position: midpoint,
+            icon: await TextOnImage(
+              text:
+                  "${response.data['routes'][0]['legs'][i]['distance']['text']}\n${response.data['routes'][0]['legs'][i]['duration']['text']}",
+            ).toBitmapDescriptor(
+                logicalSize: const Size(100, 100),
+                imageSize: const Size(100, 100)),
+            // infoWindow: InfoWindow(
+            //   title: 'Distance$i',
+            //   snippet: '500 miles, 6 hours',
+            // ),
+          ),
+        );
+        setState(() {});
+      }
+
+      // Calculate the midpoint
+
+      // for (int i = 0; i < result.points.length - 1; i++) {
+      //   LatLng start = polylineCoordinates[i];
+      //   LatLng end = polylineCoordinates[i + 1];
+      //   LatLng midpoint = _calculateMidpoint(start, end);
+      //   _markers.add(
+      //     Marker(
+      //       markerId: MarkerId('tooltip$i'),
+      //       position: midpoint,
+      //       icon: await TextOnImage(
+      //         text: "500 miles, $i hours",
+      //       ).toBitmapDescriptor(
+      //           logicalSize: const Size(100, 100),
+      //           imageSize: const Size(100, 100)),
+      //       // infoWindow: InfoWindow(
+      //       //   title: 'Distance$i',
+      //       //   snippet: '500 miles, 6 hours',
+      //       // ),
+      //     ),
+      //   );
+      //   setState(() {});
+      // }
+    }
+    _addPolyLine();
+  }
+
+  LatLng _findClosestPoint(LatLng target) {
+    LatLng closestPoint = polylineCoordinates.first;
+    double minDistance = double.infinity;
+
+    for (LatLng point in polylineCoordinates) {
+      double distance = _calculateDistance(target, point);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestPoint = point;
+      }
+    }
+    return closestPoint;
+  }
+
+  double _calculateDistance(LatLng p1, LatLng p2) {
+    final double latDiff = p1.latitude - p2.latitude;
+    final double lngDiff = p1.longitude - p2.longitude;
+    return latDiff * latDiff + lngDiff * lngDiff;
   }
 
   void _initializeMarkers() async {
@@ -60,11 +180,10 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
       Marker(
         markerId: MarkerId('origin'),
         position: origin,
-        infoWindow: InfoWindow(
-          title: 'Origin',
-          snippet: 'Label: WP1',
+        infoWindow: const InfoWindow(
+          title: 'ป้าแจ้ว',
+          snippet: 'MBE2400001',
         ),
-        // icon: BitmapDescriptor.fromBytes(encodedContent),
         icon: await const CountWidget(count: 1).toBitmapDescriptor(
           logicalSize: const Size(25, 25),
           imageSize: const Size(50, 50),
@@ -76,8 +195,12 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
       Marker(
         markerId: MarkerId('waypoint1'),
         position: waypoint1,
-        infoWindow: InfoWindow(title: 'Waypoint 1'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow:
+            InfoWindow(title: 'ร้านพี่น้อย ตลาดเทเวศร์', snippet: "MBE2400002"),
+        icon: await const CountWidget(count: 2).toBitmapDescriptor(
+          logicalSize: const Size(25, 25),
+          imageSize: const Size(50, 50),
+        ),
       ),
     );
 
@@ -85,8 +208,11 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
       Marker(
         markerId: MarkerId('waypoint2'),
         position: waypoint2,
-        infoWindow: InfoWindow(title: 'Waypoint 2'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        infoWindow: InfoWindow(title: 'ร้านพี่น้อย', snippet: "MBE2400003"),
+        icon: await const CountWidget(count: 3).toBitmapDescriptor(
+          logicalSize: const Size(25, 25),
+          imageSize: const Size(50, 50),
+        ),
       ),
     );
 
@@ -94,86 +220,45 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
       Marker(
         markerId: MarkerId('destination'),
         position: destination,
-        infoWindow: InfoWindow(title: 'Destination'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow:
+            InfoWindow(title: 'ร้านสายหยุดร้าน9', snippet: "MBE2400004"),
+        icon: await const CountWidget(count: 4).toBitmapDescriptor(
+          logicalSize: const Size(25, 25),
+          imageSize: const Size(50, 50),
+        ),
       ),
     );
     setState(() {});
   }
 
-  Future<void> _generateDistanceLabels() async {
-    if (_mapController == null) return;
+  // Future<void> _generateDistanceLabels() async {
+  //   if (_mapController == null) return;
 
-    List<Widget> labels = [];
-    for (int i = 0; i < routePoints.length - 1; i++) {
-      LatLng start = routePoints[i];
-      LatLng end = routePoints[i + 1];
-      LatLng midpoint = _calculateMidpoint(start, end);
+  //   for (int i = 0; i < routePoints.length - 1; i++) {
+  //     LatLng start = polylineCoordinates[i];
+  //     LatLng end = polylineCoordinates[i + 1];
+  //     LatLng midpoint = _calculateMidpoint(start, end);
+  //     // LatLng center = getCenterOfPolyline(polylineCoordinates[i]);
+  //     // print("Center$i : $center");
 
-      _markers.add(
-        Marker(
-          markerId: MarkerId('tooltip$i'),
-          position: midpoint,
-          icon: await TextOnImage(
-            text: "Hello World",
-          ).toBitmapDescriptor(
-              logicalSize: const Size(100, 100),
-              imageSize: const Size(100, 100)),
-          infoWindow: InfoWindow(
-            title: 'Distance$i',
-            snippet: '500 miles, 6 hours',
-          ),
-        ),
-      );
-      setState(() {});
-
-      // Get distance and duration for the segment
-      // final result = await _getDistanceAndDuration(start, end);
-      // if (result == null) continue;
-
-      // final String distance = result['distance'].toString();
-      // final String duration = result['duration'].toString();
-
-      // Convert LatLng midpoint to screen position
-      ScreenCoordinate screenPosition =
-          await _mapController!.getScreenCoordinate(end);
-
-      labels.add(Positioned(
-        left: screenPosition.x.toDouble(),
-        top: screenPosition.y.toDouble(),
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              )
-            ],
-          ),
-          child: Column(
-            children: [
-              Text(
-                '10',
-                style: TextStyle(fontSize: 12, color: Colors.black),
-              ),
-              Text(
-                '10',
-                style: TextStyle(fontSize: 12, color: Colors.black),
-              ),
-            ],
-          ),
-        ),
-      ));
-    }
-
-    setState(() {
-      _distanceLabels = labels;
-    });
-  }
+  //     _markers.add(
+  //       Marker(
+  //         markerId: MarkerId('tooltip$i'),
+  //         position: midpoint,
+  //         icon: await TextOnImage(
+  //           text: "500 miles, $i hours",
+  //         ).toBitmapDescriptor(
+  //             logicalSize: const Size(100, 100),
+  //             imageSize: const Size(100, 100)),
+  //         // infoWindow: InfoWindow(
+  //         //   title: 'Distance$i',
+  //         //   snippet: '500 miles, 6 hours',
+  //         // ),
+  //       ),
+  //     );
+  //     setState(() {});
+  //   }
+  // }
 
   _addPolyLine() {
     PolylineId id = PolylineId("poly");
@@ -181,6 +266,23 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
         Polyline(polylineId: id, color: Colors.red, points: routePoints);
     // polylines[id] = polyline;
     setState(() {});
+  }
+
+  LatLng getCenterOfPolyline(List<LatLng> polylineCoordinates) {
+    double totalLat = 0.0;
+    double totalLng = 0.0;
+
+    // Loop through all coordinates to sum up latitudes and longitudes
+    for (LatLng point in polylineCoordinates) {
+      totalLat += point.latitude;
+      totalLng += point.longitude;
+    }
+
+    // Find the average (center point)
+    double centerLat = totalLat / polylineCoordinates.length;
+    double centerLng = totalLng / polylineCoordinates.length;
+
+    return LatLng(centerLat, centerLng);
   }
 
   LatLng _calculateMidpoint(LatLng start, LatLng end) {
@@ -210,27 +312,22 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Polyline with Labels')),
-      body: Stack(
-        children: [
-          GoogleMap(
-            markers: _markers,
-            initialCameraPosition: CameraPosition(
-              target: origin,
-              zoom: 7,
-            ),
-            onMapCreated: (controller) {
-              setState(() {
-                _mapController = controller;
-              });
-              _generateDistanceLabels();
-            },
-            polylines: _polylines,
+    return Stack(
+      children: [
+        GoogleMap(
+          markers: _markers,
+          initialCameraPosition: CameraPosition(
+            target: origin,
+            zoom: 14,
           ),
-          ..._distanceLabels,
-        ],
-      ),
+          onMapCreated: (controller) {
+            setState(() {
+              _mapController = controller;
+            });
+          },
+          polylines: _polylines,
+        ),
+      ],
     );
   }
 }
@@ -261,14 +358,18 @@ class TextOnImage extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Text(
-          text,
-          style: TextStyle(color: Colors.black),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 1),
+              borderRadius: BorderRadius.circular(8)),
+          width: 100,
+          child: Text(
+            text,
+            style: TextStyle(color: Colors.black, fontSize: 16),
+          ),
         ),
-        Text(
-          text,
-          style: TextStyle(color: Colors.black),
-        )
       ],
     );
   }
