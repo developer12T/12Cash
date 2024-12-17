@@ -10,22 +10,53 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- General permissions for the flutter_background plugin -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!-- Adapt to the foreground service type(s) desired, these are just examples -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- foregroundServiceType: remoteMessaging -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
 
     <application
         android:label="12Cash"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <service
+            android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
+            android:foregroundServiceType="dataSync|remoteMessaging"
+            android:exported="false" />
+
+        <service
+            android:name="id.flutter.flutter_background_service.BackgroundService"
+            android:exported="true" />
+
+        <!-- This is required -->
+        <service
+            android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
+            android:stopWithTask="false"  
+            android:foregroundServiceType="connectedDevice"
+            android:exported="false" />
+
+
+        <!-- Adapt to the foreground service type(s) desired, these are just examples -->
+        <!-- <service
+            android:name="de.julianassmann.flutter_background.IsolateHolderService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|specialUse|..." /> -->
+
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAQ9F4z5GhkeW5n8z03OK7H5CcMpzUAZr0" />
-
-
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationBroadcastReceiver"
+            android:exported="true" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
             android:exported="true" />
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.receivers.DismissedNotificationReceiver"
@@ -41,6 +72,11 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+        <!-- <service
+            android:name="id.flutter.flutter_background_service.BackgroundService"
+            android:foregroundServiceType="WhatForegroundServiceTypeDoYouWant"
+        /> -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -51,6 +87,11 @@
             android:hardwareAccelerated="true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
+
+            <!-- <service
+                android:name="id.flutter.flutter_background_service.BackgroundService"
+                android:foregroundServiceType="WhatForegroundServiceTypeDoYouWant"
+            /> -->
 
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user

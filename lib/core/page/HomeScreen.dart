@@ -23,6 +23,7 @@ import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -214,13 +215,13 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       case 1:
         return const Icon(
-          Icons.add,
+          Icons.add_location_alt_outlined,
           size: 40,
           color: Styles.primaryColor,
         );
       case 2:
         return const Icon(
-          Icons.add_home_work,
+          Icons.add_business,
           size: 40,
           color: Styles.primaryColor,
         );
@@ -418,26 +419,26 @@ class _HomeScreenState extends State<HomeScreen> {
           child: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.home,
+                icon: FaIcon(
+                  FontAwesomeIcons.house,
                 ),
                 label: "menu".tr(gender: "home"),
               ),
               BottomNavigationBarItem(
-                icon: const Icon(
-                  Icons.route_rounded,
+                icon: FaIcon(
+                  FontAwesomeIcons.route,
                 ),
                 label: "menu".tr(gender: "route"),
               ),
               BottomNavigationBarItem(
-                icon: const Icon(
-                  Icons.store,
+                icon: FaIcon(
+                  FontAwesomeIcons.shop,
                 ),
                 label: "menu".tr(gender: "shop"),
               ),
               BottomNavigationBarItem(
-                icon: const Icon(
-                  Icons.inventory_rounded,
+                icon: FaIcon(
+                  FontAwesomeIcons.clipboardList,
                 ),
                 label: "menu".tr(
                   gender: "manage",

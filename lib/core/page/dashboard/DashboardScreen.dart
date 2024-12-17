@@ -39,9 +39,18 @@ class Dashboardscreen extends StatefulWidget {
 }
 
 class _DashboardscreenState extends State<Dashboardscreen> {
+  String reason = '';
+  int _current = 0;
   Timer? _locationTimer;
   late Map<String, String> languages = {};
   String? selectedLanguageCode;
+  final CarouselSliderController _controller = CarouselSliderController();
+
+  void onPageChange(int index, CarouselPageChangedReason changeReason) {
+    setState(() {
+      reason = changeReason.toString();
+    });
+  }
 
   @override
   void initState() {
@@ -84,6 +93,41 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   List<ShippingModel> shuppingList = [];
 
   Widget build(BuildContext context) {
+    List<Widget> menuList = [
+      MenuDashboard(
+        title_1: "dashboard.menu.sale_report".tr(),
+        icon_1: Icons.description,
+        title_2: "dashboard.menu.data_analysis".tr(),
+        icon_2: Icons.equalizer,
+        title_3: "dashboard.menu.setting".tr(),
+        icon_3: Icons.settings,
+        onTap3: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const SettingScreen()),
+          );
+        },
+        title_4: "dashboard.menu.campaign".tr(),
+        icon_4: Icons.campaign_rounded,
+        title_5: "dashboard.menu.history".tr(),
+        icon_5: Icons.history,
+        title_6: "dashboard.menu.schedule".tr(),
+        icon_6: Icons.schedule,
+      ),
+      MenuDashboard(
+        title_1: "dashboard.menu.logistic".tr(),
+        icon_1: Icons.local_shipping,
+        title_2: "dashboard.menu.send_money".tr(),
+        icon_2: Icons.payments,
+        title_3: "dashboard.menu.mall".tr(),
+        icon_3: Icons.shopping_bag,
+        title_4: "dashboard.menu.credit_limit".tr(),
+        icon_4: Icons.credit_card,
+        title_5: "dashboard.menu.warehouse".tr(),
+        icon_5: Icons.warehouse,
+        title_6: "dashboard.menu.more".tr(),
+        icon_6: Icons.more_horiz,
+      ),
+    ];
     selectedLanguageCode = context.locale.toString().split("_")[0];
     double screenWidth = MediaQuery.of(context).size.width;
     return Container(
@@ -92,148 +136,44 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         // width: screenWidth / 1.5,
         child: Column(
           children: [
-            SizedBox(height: 350, width: screenWidth, child: LineChartSample()),
+            SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
             CarouselSlider(
-              items: [
-                MenuDashboard(
-                  title_1: "dashboard.menu.sale_report".tr(),
-                  icon_1: Icons.description,
-                  title_2: "dashboard.menu.data_analysis".tr(),
-                  icon_2: Icons.equalizer,
-                  title_3: "dashboard.menu.setting".tr(),
-                  icon_3: Icons.settings,
-                  onTap3: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => const SettingScreen()),
-                    );
-                  },
-                  title_4: "dashboard.menu.campaign".tr(),
-                  icon_4: Icons.campaign_rounded,
-                  title_5: "dashboard.menu.history".tr(),
-                  icon_5: Icons.history,
-                  title_6: "dashboard.menu.schedule".tr(),
-                  icon_6: Icons.schedule,
-                ),
-                MenuDashboard(
-                  title_1: "dashboard.menu.logistic".tr(),
-                  icon_1: Icons.local_shipping,
-                  title_2: "dashboard.menu.send_money".tr(),
-                  icon_2: Icons.payments,
-                  title_3: "dashboard.menu.mall".tr(),
-                  icon_3: Icons.shopping_bag,
-                  title_4: "dashboard.menu.credit_limit".tr(),
-                  icon_4: Icons.credit_card,
-                  title_5: "dashboard.menu.warehouse".tr(),
-                  icon_5: Icons.warehouse,
-                  title_6: "dashboard.menu.more".tr(),
-                  icon_6: Icons.more_horiz,
-                ),
-              ],
+              items: menuList.map((item) => item).toList(),
+              carouselController: _controller,
               options: CarouselOptions(
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _current = index;
+                  });
+                },
+                pageSnapping: true,
+                // aspectRatio: 2.0,
                 // autoPlay: true,
                 disableCenter: true,
                 enlargeCenterPage: true,
                 viewportFraction: 1.0, // Show one row fully at a time
               ),
             ),
-            // MenuDashboard(
-            //   title_1: "dashboard.menu.sale_report".tr(),
-            //   icon_1: Icons.description,
-            //   title_2: "dashboard.menu.data_analysis".tr(),
-            //   icon_2: Icons.equalizer,
-            //   title_3: "dashboard.menu.setting".tr(),
-            //   icon_3: Icons.settings,
-            //   title_4: "dashboard.menu.campaign".tr(),
-            //   icon_4: Icons.campaign_rounded,
-            //   title_5: "dashboard.menu.history".tr(),
-            //   icon_5: Icons.history,
-            //   title_6: "dashboard.menu.schedule".tr(),
-            //   icon_6: Icons.schedule,
-            // ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-            //   children: [
-            //     MenuButton(
-            //       color: Styles.successButtonColor,
-            //       icon: Icons.notifications_active_outlined,
-            //       label: "Local Noti",
-            //       onPressed: () {
-            //         Navigator.of(context).push(
-            //           MaterialPageRoute(
-            //               builder: (context) => NotificationScreen()),
-            //         );
-            //       },
-            //     ),
-            //     DropdownButton<String>(
-            //       icon: const Icon(
-            //         Icons.chevron_left,
-            //       ),
-            //       // isExpanded: true,
-            //       value: selectedLanguageCode,
-            //       hint: Text(
-            //         'เลือกภาษา',
-            //         style: Styles.black18(context),
-            //       ),
-            //       items: languages.entries
-            //           .map(
-            //             (entry) => DropdownMenuItem<String>(
-            //               value: entry.key,
-            //               child: Text(
-            //                 entry.value,
-            //                 style: Styles.black18(context),
-            //               ),
-            //               // Display language name
-            //             ),
-            //           )
-            //           .toList(),
-            //       onChanged: (value) async {
-            //         switch (value) {
-            //           case "en":
-            //             await context.setLocale(const Locale('en', 'US'));
-            //             break;
-            //           case "th":
-            //             await context.setLocale(const Locale('th', 'TH'));
-            //             break;
-            //           default:
-            //         }
-            //         //  log(locale.toString(), name: toString());
-            //         Navigator.pushReplacement(
-            //           context,
-            //           MaterialPageRoute(
-            //               builder: (context) => const HomeScreen(
-            //                     index: 0,
-            //                   )),
-            //         );
-            //         print(context.locale.toString().split("_")[0]);
-            //         setState(() {
-            //           selectedLanguageCode = value;
-            //         });
-            //       },
-            //     ),
-            //     MenuButton(
-            //       color: Styles.successButtonColor,
-            //       icon: Icons.settings,
-            //       label: "Setting",
-            //       onPressed: () {
-            //         Navigator.of(context).push(
-            //           MaterialPageRoute(builder: (context) => SettingScreen()),
-            //         );
-            //       },
-            //     ),
-            //     MenuButton(
-            //       color: Colors.black,
-            //       icon: Icons.print,
-            //       label: "BL Printer",
-            //       onPressed: () {
-            //         Navigator.of(context).push(
-            //           MaterialPageRoute(
-            //               builder: (context) => BluetoothPrinterScreen4()),
-            //         );
-            //       },
-            //     ),
-            //   ],
-            // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: menuList.asMap().entries.map((entry) {
+                return GestureDetector(
+                  onTap: () => _controller.animateToPage(entry.key),
+                  child: Container(
+                    width: 12.0,
+                    height: 12.0,
+                    margin: EdgeInsets.symmetric(horizontal: 4.0),
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black)
+                            .withOpacity(_current == entry.key ? 0.9 : 0.4)),
+                  ),
+                );
+              }).toList(),
+            ),
+
             SizedBox(height: screenWidth / 25),
             const WeightCudeCard(),
             // SizedBox(height: screenWidth / 25),

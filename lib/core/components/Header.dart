@@ -93,14 +93,6 @@ class _HeaderState extends State<Header> {
                         children: [
                           Stack(
                             children: [
-                              Transform.translate(
-                                offset: Offset(20, 20),
-                                child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  color: Colors.red, // Appears below
-                                ),
-                              ),
                               Container(
                                 color: Styles.primaryColor,
                                 height: screenWidth / 4,

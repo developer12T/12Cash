@@ -211,370 +211,363 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
       ),
       body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints viewportConstraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints:
-                BoxConstraints(minHeight: viewportConstraints.maxHeight),
-            child: IntrinsicHeight(
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                margin: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: screenWidth / 80),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(
-                                  0.2), // Shadow color with transparency
-                              spreadRadius: 2, // Spread of the shadow
-                              blurRadius: 8, // Blur radius of the shadow
-                              offset: const Offset(0,
-                                  4), // Offset of the shadow (horizontal, vertical)
+        return Container(
+          padding: const EdgeInsets.all(8.0),
+          margin: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: screenWidth / 80),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black
+                            .withOpacity(0.2), // Shadow color with transparency
+                        spreadRadius: 2, // Spread of the shadow
+                        blurRadius: 8, // Blur radius of the shadow
+                        offset: const Offset(0,
+                            4), // Offset of the shadow (horizontal, vertical)
+                      ),
+                    ],
+                    // border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.store,
+                                  size: 40,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "ข้อมูลร้านค้า",
+                                  style: Styles.black24(context),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {},
+                                  child: BoxShadowCustom(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Styles.successButtonColor),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.login,
+                                            size: 40,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "เช็คอิน",
+                                            style: Styles.white18(context),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: screenWidth / 40,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      onEdit =
+                                          !onEdit; // Toggle the value of onEdit
+                                    });
+                                    if (onEdit) {
+                                      _editStore();
+                                    }
+                                  },
+                                  child: BoxShadowCustom(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: onEdit
+                                              ? Styles.primaryColor
+                                              : Styles.successButtonColor),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            onEdit
+                                                ? Icons.edit
+                                                : Icons.save_outlined,
+                                            size: 40,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            onEdit ? "แก้ไข" : "บันทึก",
+                                            style: Styles.white18(context),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                        SizedBox(height: screenWidth / 37),
+                        _buildCustomFormField(
+                            'ชื่อร้านค้า',
+                            storeNameController.text,
+                            Icons.store,
+                            storeNameController,
+                            readOnly: onEdit),
+                        _buildCustomFormField(
+                            'เลขประจำตัวผู้เสียภาษี',
+                            '${widget.store.taxId}',
+                            Icons.person_outline,
+                            storeTaxConroller),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildCustomFormField(
+                                  max: 10,
+                                  'โทรศัพท์',
+                                  '${storePhoneController.text}',
+                                  Icons.phone,
+                                  storePhoneController,
+                                  keypadType: TextInputType.number,
+                                  readOnly: onEdit),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: Container(
+                                  color:
+                                      onEdit ? Colors.grey[200] : Colors.white,
+                                  child: DropdownSearchCustom<RouteStore>(
+                                    enabled: onEdit,
+                                    initialSelectedValue:
+                                        widget.initialSelectedRoute.route == ''
+                                            ? null
+                                            : widget.initialSelectedRoute,
+                                    label: "รูท",
+                                    titleText: "รูท",
+                                    icon: Icon(Icons.route_outlined),
+                                    fetchItems: (filter) => getRoutes(filter),
+                                    onChanged: (RouteStore? selected) async {
+                                      if (selected != null) {
+                                        setState(() {
+                                          widget.initialSelectedRoute =
+                                              RouteStore(route: selected.route);
+                                          selectedRoute = selected.route;
+                                        });
+                                      }
+                                    },
+                                    itemAsString: (RouteStore data) =>
+                                        data.route,
+                                    itemBuilder: (context, item, isSelected) {
+                                      return Column(
+                                        children: [
+                                          ListTile(
+                                            title: Text(
+                                              " ${item.route}",
+                                              style: Styles.black18(context),
+                                            ),
+                                            selected: isSelected,
+                                          ),
+                                          Divider(
+                                            color: Colors.grey[
+                                                200], // Color of the divider line
+                                            thickness:
+                                                1, // Thickness of the line
+                                            indent:
+                                                16, // Left padding for the divider line
+                                            endIndent:
+                                                16, // Right padding for the divider line
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
-                          // border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.store,
-                                        size: 40,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        "ข้อมูลร้านค้า",
-                                        style: Styles.black24(context),
-                                      ),
-                                    ],
+                        _buildCustomFormField(
+                            'ไลน์',
+                            storeLineIdController.text,
+                            Icons.alternate_email,
+                            storeLineIdController,
+                            readOnly: onEdit),
+                        _buildCustomFormField(
+                            'ประเภทร้านค้า',
+                            '${widget.store.typeName}',
+                            Icons.store_mall_directory,
+                            storeShoptypeController),
+                        _buildCustomFormField(
+                            'หมายเหตุ',
+                            storeNoteController.text,
+                            Icons.note,
+                            storeNoteController,
+                            readOnly: onEdit),
+                        // SizedBox(height: screenWidth / 37),
+                        _buildCustomFormField(
+                            'ที่อยู่',
+                            '${widget.store.address} ${widget.store.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.store.subDistrict} ${widget.store.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.store.district} ${widget.store.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.store.province} ${widget.store.postcode}',
+                            Icons.location_on_rounded,
+                            storeAddressController),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            onEdit
+                                ? ShowPhotoButton(
+                                    checkNetwork: true,
+                                    label: "ร้านค้า",
+                                    icon: Icons.image_not_supported_outlined,
+                                    imagePath: widget.store.imageList.isNotEmpty
+                                        ? (widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "store")
+                                                .isNotEmpty
+                                            ? widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "store")
+                                                .last
+                                                .path
+                                            : null)
+                                        : null,
+                                  )
+                                : IconButtonWithLabel(
+                                    label: "ร้านค้า",
+                                    icon: Icons.photo_camera,
+                                    imagePath: widget.store.imageList.isNotEmpty
+                                        ? (widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "store")
+                                                .isNotEmpty
+                                            ? widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "store")
+                                                .last
+                                                .path
+                                            : null)
+                                        : null,
+                                    onImageSelected: (String imagePath) async {
+                                      final newImage = ImageItem(
+                                          name: imagePath,
+                                          path: imagePath,
+                                          type: "store");
+                                      widget.store.imageList.add(newImage);
+                                    },
                                   ),
-                                  Row(children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          onEdit =
-                                              !onEdit; // Toggle the value of onEdit
-                                        });
-                                        if (onEdit) {
-                                          _editStore();
-                                        }
-                                      },
-                                      child: BoxShadowCustom(
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              color: onEdit
-                                                  ? Styles.primaryColor
-                                                  : Styles.successButtonColor),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                onEdit
-                                                    ? Icons.edit
-                                                    : Icons.save_outlined,
-                                                size: 40,
-                                                color: Colors.white,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                onEdit ? "แก้ไข" : "บันทึก",
-                                                style: Styles.white18(context),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ])
-                                ],
-                              ),
-                              SizedBox(height: screenWidth / 37),
-                              _buildCustomFormField(
-                                  'ชื่อร้านค้า',
-                                  storeNameController.text,
-                                  Icons.store,
-                                  storeNameController,
-                                  readOnly: onEdit),
-                              _buildCustomFormField(
-                                  'เลขประจำตัวผู้เสียภาษี',
-                                  '${widget.store.taxId}',
-                                  Icons.person_outline,
-                                  storeTaxConroller),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildCustomFormField(
-                                        max: 10,
-                                        'โทรศัพท์',
-                                        '${storePhoneController.text}',
-                                        Icons.phone,
-                                        storePhoneController,
-                                        keypadType: TextInputType.number,
-                                        readOnly: onEdit),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 16.0),
-                                      child: Container(
-                                        color: onEdit
-                                            ? Colors.grey[200]
-                                            : Colors.white,
-                                        child: DropdownSearchCustom<RouteStore>(
-                                          enabled: onEdit,
-                                          initialSelectedValue: widget
-                                                      .initialSelectedRoute
-                                                      .route ==
-                                                  ''
-                                              ? null
-                                              : widget.initialSelectedRoute,
-                                          label: "รูท",
-                                          titleText: "รูท",
-                                          icon: Icon(Icons.route_outlined),
-                                          fetchItems: (filter) =>
-                                              getRoutes(filter),
-                                          onChanged:
-                                              (RouteStore? selected) async {
-                                            if (selected != null) {
-                                              setState(() {
-                                                widget.initialSelectedRoute =
-                                                    RouteStore(
-                                                        route: selected.route);
-                                                selectedRoute = selected.route;
-                                              });
-                                            }
-                                          },
-                                          itemAsString: (RouteStore data) =>
-                                              data.route,
-                                          itemBuilder:
-                                              (context, item, isSelected) {
-                                            return Column(
-                                              children: [
-                                                ListTile(
-                                                  title: Text(
-                                                    " ${item.route}",
-                                                    style:
-                                                        Styles.black18(context),
-                                                  ),
-                                                  selected: isSelected,
-                                                ),
-                                                Divider(
-                                                  color: Colors.grey[
-                                                      200], // Color of the divider line
-                                                  thickness:
-                                                      1, // Thickness of the line
-                                                  indent:
-                                                      16, // Left padding for the divider line
-                                                  endIndent:
-                                                      16, // Right padding for the divider line
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              _buildCustomFormField(
-                                  'ไลน์',
-                                  storeLineIdController.text,
-                                  Icons.alternate_email,
-                                  storeLineIdController,
-                                  readOnly: onEdit),
-                              _buildCustomFormField(
-                                  'ประเภทร้านค้า',
-                                  '${widget.store.typeName}',
-                                  Icons.store_mall_directory,
-                                  storeShoptypeController),
-                              _buildCustomFormField(
-                                  'หมายเหตุ',
-                                  storeNoteController.text,
-                                  Icons.note,
-                                  storeNoteController,
-                                  readOnly: onEdit),
-                              // SizedBox(height: screenWidth / 37),
-                              _buildCustomFormField(
-                                  'ที่อยู่',
-                                  '${widget.store.address} ${widget.store.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.store.subDistrict} ${widget.store.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.store.district} ${widget.store.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.store.province} ${widget.store.postcode}',
-                                  Icons.location_on_rounded,
-                                  storeAddressController),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  onEdit
-                                      ? ShowPhotoButton(
-                                          checkNetwork: true,
-                                          label: "ร้านค้า",
-                                          icon: Icons
-                                              .image_not_supported_outlined,
-                                          imagePath: widget
-                                                  .store.imageList.isNotEmpty
-                                              ? (widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "store")
-                                                      .isNotEmpty
-                                                  ? widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "store")
-                                                      .last
-                                                      .path
-                                                  : null)
-                                              : null,
-                                        )
-                                      : IconButtonWithLabel(
-                                          label: "ร้านค้า",
-                                          icon: Icons.photo_camera,
-                                          imagePath: widget
-                                                  .store.imageList.isNotEmpty
-                                              ? (widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "store")
-                                                      .isNotEmpty
-                                                  ? widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "store")
-                                                      .last
-                                                      .path
-                                                  : null)
-                                              : null,
-                                          onImageSelected:
-                                              (String imagePath) async {
-                                            final newImage = ImageItem(
-                                                name: imagePath,
-                                                path: imagePath,
-                                                type: "store");
-                                            widget.store.imageList
-                                                .add(newImage);
-                                          },
-                                        ),
-                                  onEdit
-                                      ? ShowPhotoButton(
-                                          checkNetwork: true,
-                                          label: "ร้านค้า",
-                                          icon: Icons
-                                              .image_not_supported_outlined,
-                                          imagePath: widget
-                                                  .store.imageList.isNotEmpty
-                                              ? (widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "tax")
-                                                      .isNotEmpty
-                                                  ? widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "tax")
-                                                      .last
-                                                      .path
-                                                  : null)
-                                              : null,
-                                        )
-                                      : IconButtonWithLabel(
-                                          label: "ภ.พ.20",
-                                          icon: Icons.photo_camera,
-                                          imagePath: widget
-                                                  .store.imageList.isNotEmpty
-                                              ? (widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "tax")
-                                                      .isNotEmpty
-                                                  ? widget.store.imageList
-                                                      .where((image) =>
-                                                          image.type == "tax")
-                                                      .last
-                                                      .path
-                                                  : null)
-                                              : null,
-                                          onImageSelected:
-                                              (String imagePath) async {
-                                            final newImage = ImageItem(
-                                                name: imagePath,
-                                                path: imagePath,
-                                                type: "tax");
+                            onEdit
+                                ? ShowPhotoButton(
+                                    checkNetwork: true,
+                                    label: "ร้านค้า",
+                                    icon: Icons.image_not_supported_outlined,
+                                    imagePath: widget.store.imageList.isNotEmpty
+                                        ? (widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "tax")
+                                                .isNotEmpty
+                                            ? widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "tax")
+                                                .last
+                                                .path
+                                            : null)
+                                        : null,
+                                  )
+                                : IconButtonWithLabel(
+                                    label: "ภ.พ.20",
+                                    icon: Icons.photo_camera,
+                                    imagePath: widget.store.imageList.isNotEmpty
+                                        ? (widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "tax")
+                                                .isNotEmpty
+                                            ? widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "tax")
+                                                .last
+                                                .path
+                                            : null)
+                                        : null,
+                                    onImageSelected: (String imagePath) async {
+                                      final newImage = ImageItem(
+                                          name: imagePath,
+                                          path: imagePath,
+                                          type: "tax");
 
-                                            widget.store.imageList
-                                                .add(newImage);
-                                          },
-                                        ),
-                                  onEdit
-                                      ? ShowPhotoButton(
-                                          checkNetwork: true,
-                                          label: "สำเนาบัตรปปช.",
-                                          icon: Icons
-                                              .image_not_supported_outlined,
-                                          imagePath:
-                                              widget.store.imageList.isNotEmpty
-                                                  ? (widget.store.imageList
-                                                          .where((image) =>
-                                                              image.type ==
-                                                              "person")
-                                                          .isNotEmpty
-                                                      ? widget.store.imageList
-                                                          .where((image) =>
-                                                              image.type ==
-                                                              "person")
-                                                          .last
-                                                          .path
-                                                      : null)
-                                                  : null,
-                                        )
-                                      : IconButtonWithLabel(
-                                          label: "สำเนาบัตรปปช.",
-                                          icon: Icons.photo_camera,
-                                          imagePath:
-                                              widget.store.imageList.isNotEmpty
-                                                  ? (widget.store.imageList
-                                                          .where((image) =>
-                                                              image.type ==
-                                                              "person")
-                                                          .isNotEmpty
-                                                      ? widget.store.imageList
-                                                          .where((image) =>
-                                                              image.type ==
-                                                              "person")
-                                                          .last
-                                                          .path
-                                                      : null)
-                                                  : null,
-                                          onImageSelected:
-                                              (String imagePath) async {
-                                            final newImage = ImageItem(
-                                                name: imagePath,
-                                                path: imagePath,
-                                                type: "person");
-                                            widget.store.imageList
-                                                .add(newImage);
-                                          },
-                                        ),
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
+                                      widget.store.imageList.add(newImage);
+                                    },
+                                  ),
+                            onEdit
+                                ? ShowPhotoButton(
+                                    checkNetwork: true,
+                                    label: "สำเนาบัตรปปช.",
+                                    icon: Icons.image_not_supported_outlined,
+                                    imagePath: widget.store.imageList.isNotEmpty
+                                        ? (widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "person")
+                                                .isNotEmpty
+                                            ? widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "person")
+                                                .last
+                                                .path
+                                            : null)
+                                        : null,
+                                  )
+                                : IconButtonWithLabel(
+                                    label: "สำเนาบัตรปปช.",
+                                    icon: Icons.photo_camera,
+                                    imagePath: widget.store.imageList.isNotEmpty
+                                        ? (widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "person")
+                                                .isNotEmpty
+                                            ? widget.store.imageList
+                                                .where((image) =>
+                                                    image.type == "person")
+                                                .last
+                                                .path
+                                            : null)
+                                        : null,
+                                    onImageSelected: (String imagePath) async {
+                                      final newImage = ImageItem(
+                                          name: imagePath,
+                                          path: imagePath,
+                                          type: "person");
+                                      widget.store.imageList.add(newImage);
+                                    },
+                                  ),
+                          ],
+                        )
+                      ],
                     ),
-                    SizedBox(height: screenWidth / 37),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              SizedBox(height: screenWidth / 37),
+            ],
           ),
         );
       }),

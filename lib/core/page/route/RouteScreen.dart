@@ -112,18 +112,20 @@ class _RoutescreenState extends State<Routescreen> {
           await _mapController.getScreenCoordinate(midpoint);
 
       setState(() {
-        distanceLabels.add(Positioned(
-          left: screenPosition.x.toDouble(),
-          top: screenPosition.y.toDouble(),
-          child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(4),
-            child: Text(
-              '120 km',
-              style: TextStyle(fontSize: 12, color: Colors.black),
+        distanceLabels.add(
+          Positioned(
+            left: screenPosition.x.toDouble(),
+            top: screenPosition.y.toDouble(),
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.all(4),
+              child: Text(
+                '120 km',
+                style: TextStyle(fontSize: 12, color: Colors.black),
+              ),
             ),
           ),
-        ));
+        );
       });
     }
   }

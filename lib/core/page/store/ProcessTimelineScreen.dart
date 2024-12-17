@@ -480,11 +480,16 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
                     oppositeContentsBuilder: (context, index) {
                       // Define a list of icons for each step
                       final List<IconData> stepIcons = [
-                        Icons.handshake, // Icon for "Prospect"
-                        Icons.store_mall_directory, // Icon for "Tour"
-                        Icons.map, // Icon for "Offer"
-                        Icons.check_circle_outlined, // Icon for "Contract"
+                        Icons.privacy_tip, // Icon for "Prospect"
+                        Icons.person_pin, // Icon for "Tour"
+                        Icons.location_on_rounded, // Icon for "Offer"
+                        Icons.verified_user_outlined, // Icon for "Contract"
                       ];
+
+                      // final List<FaIcon> stepIcons = [
+                      //   FaIcon(FontAwesomeIcons.google),
+
+                      // ];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 5.0),
                         child: GestureDetector(

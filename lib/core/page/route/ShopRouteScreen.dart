@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/CustomerDropdownSearch.dart';
 import 'package:_12sale_app/core/components/badge/CustomBadge.dart';
 import 'package:_12sale_app/core/components/table/ShopRouteTable.dart';
@@ -126,33 +127,33 @@ class _ShopRouteScreenState extends State<ShopRouteScreen> {
             SizedBox(
               height: screenWidth / 30,
             ),
-            Expanded(child: PolylineWithLabels()),
+            Expanded(child: BoxShadowCustom(child: PolylineWithLabels())),
             SizedBox(
               height: screenWidth / 30,
             ),
-            TextButton.icon(
-              icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white),
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
-              ),
-              onPressed: () async {
-                // final String url =
-                //     'https://www.google.com/maps/dir/?api=1&origin=${origin.latitude},${origin.longitude}'
-                //     '&destination=${destination.latitude},${destination.longitude}'
-                //     '&waypoints=$waypointsString'
-                //     '&travelmode=$travelMode';
-                final Uri url = Uri.parse(
-                    "https://www.google.com/maps/dir/?api=1&origin=13.689600,100.608600&destination=13.918764,100.56767&waypoints=13.760493,100.474507|13.71104,100.517814&travelmode=driving");
-                _launchUrl(url);
-              },
-              label: Text(
-                "เปิด Google Maps",
-                style: Styles.white18(context),
-              ),
-            ),
-            SizedBox(
-              height: screenWidth / 30,
-            ),
+            // TextButton.icon(
+            //   icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white),
+            //   style: ButtonStyle(
+            //     backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
+            //   ),
+            //   onPressed: () async {
+            //     // final String url =
+            //     //     'https://www.google.com/maps/dir/?api=1&origin=${origin.latitude},${origin.longitude}'
+            //     //     '&destination=${destination.latitude},${destination.longitude}'
+            //     //     '&waypoints=$waypointsString'
+            //     //     '&travelmode=$travelMode';
+            //     final Uri url = Uri.parse(
+            //         "https://www.google.com/maps/dir/?api=1&origin=13.689600,100.608600&destination=13.918764,100.56767&waypoints=13.760493,100.474507|13.71104,100.517814&travelmode=driving");
+            //     _launchUrl(url);
+            //   },
+            //   label: Text(
+            //     "เปิด Google Maps",
+            //     style: Styles.white18(context),
+            //   ),
+            // ),
+            // SizedBox(
+            //   height: screenWidth / 30,
+            // ),
             Expanded(
               child: ShopRouteTable(
                 day: widget.day,

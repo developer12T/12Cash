@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/styles/style.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +21,8 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
       CustomInfoWindowController();
   GoogleMapController? _mapController;
   String apikey = 'AIzaSyAQ9F4z5GhkeW5n8z03OK7H5CcMpzUAZr0';
+  int sumDistance = 0;
+  int sumDuration = 0;
 
   Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
@@ -101,6 +104,41 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
           },
         ),
       );
+      if (response.data != null &&
+          response.data['routes'] != null &&
+          response.data['routes'].isNotEmpty &&
+          response.data['routes'][0]['legs'] != null) {
+        for (var i = 0; i < response.data['routes'][0]['legs'].length; i++) {
+          final distanceValue =
+              response.data['routes'][0]['legs'][i]['distance']['value'];
+
+          final durationValue =
+              response.data['routes'][0]['legs'][i]['duration']['value'];
+
+          if (durationValue is int) {
+            sumDuration +=
+                durationValue; // Add directly if it's already an integer
+          } else if (durationValue is String) {
+            sumDuration += int.parse(durationValue); // Parse if it's a string
+          } else {
+            print("Unexpected data type for distance value: $durationValue");
+          }
+
+          // Handle both int and String types
+          if (distanceValue is int) {
+            sumDistance +=
+                distanceValue; // Add directly if it's already an integer
+          } else if (distanceValue is String) {
+            sumDistance += int.parse(distanceValue); // Parse if it's a string
+          } else {
+            print("Unexpected data type for distance value: $distanceValue");
+          }
+        }
+        print("Total distance: $sumDistance meters");
+      } else {
+        print("Invalid API response structure");
+      }
+
       for (int i = 0; i < routePoints.length - 1; i++) {
         LatLng start = _findClosestPoint(routePoints[i]);
         LatLng end = _findClosestPoint(routePoints[i + 1]);
@@ -108,6 +146,7 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
           (start.latitude + end.latitude) / 2,
           (start.longitude + end.longitude) / 2,
         );
+
         _markers.add(
           Marker(
             markerId: MarkerId('tooltip$i'),
@@ -310,8 +349,21 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
     return null;
   }
 
+  Future<void> _launchUrl(url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+      webViewConfiguration: const WebViewConfiguration(
+        enableJavaScript: true,
+      ),
+    )) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Stack(
       children: [
         GoogleMap(
@@ -326,6 +378,51 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
             });
           },
           polylines: _polylines,
+        ),
+        Positioned(
+          right: 10,
+          top: 10,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "ระยะทางรวม ${(sumDistance / 1000).toStringAsFixed(2)} กม.",
+                  style: Styles.black18(context),
+                ),
+                Text(
+                  "เวลารวม ${((sumDuration / 60) / 60).toStringAsFixed(2)} ชม.",
+                  style: Styles.black18(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          left: 2,
+          top: 245,
+          child: TextButton.icon(
+            icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
+            ),
+            onPressed: () async {
+              // final String url =
+              //     'https://www.google.com/maps/dir/?api=1&origin=${origin.latitude},${origin.longitude}'
+              //     '&destination=${destination.latitude},${destination.longitude}'
+              //     '&waypoints=$waypointsString'
+              //     '&travelmode=$travelMode';
+              final Uri url = Uri.parse(
+                  "https://www.google.com/maps/dir/?api=1&origin=13.689600,100.608600&destination=13.918764,100.56767&waypoints=13.760493,100.474507|13.71104,100.517814&travelmode=driving");
+              _launchUrl(url);
+            },
+            label: Text(
+              "เปิด Google Maps",
+              style: Styles.white18(context),
+            ),
+          ),
         ),
       ],
     );
