@@ -3,22 +3,28 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class WaterFilledRectangle extends StatefulWidget {
+  final bool isWithdraw;
   final double width;
   final double height;
   final double depth;
-  final double fillPercentage;
+  final double fillStockPercentage;
+  final double fillWithdrawPercentage;
   final Color borderColor;
-  final Color waterColor;
+  final Color stockColor;
+  final Color withdrawColor;
   final TextStyle? textStyle;
 
   const WaterFilledRectangle({
     Key? key,
+    required this.isWithdraw,
     required this.width,
     required this.height,
     required this.depth,
-    required this.fillPercentage,
-    this.borderColor = Colors.grey,
-    this.waterColor = Styles.primaryColor,
+    required this.fillStockPercentage,
+    required this.fillWithdrawPercentage,
+    this.borderColor = Colors.black,
+    this.stockColor = Colors.green,
+    this.withdrawColor = Colors.red,
     this.textStyle,
   }) : super(key: key);
 
@@ -63,15 +69,17 @@ class _WaterFilledRectangleState extends State<WaterFilledRectangle>
               return CustomPaint(
                 size: Size(widget.width * 2, widget.height * 2),
                 painter: RectanglePainter(
+                  isWithdraw: widget.isWithdraw,
                   // angle: _controller.value * 2 * pi,
                   width: widget.width,
                   height: widget.height,
                   depth: widget.depth,
-                  fillPercentage: widget.fillPercentage,
+                  fillStockPercentage: widget.fillStockPercentage,
                   rotationAngle: _rotationAngle,
                   // rotationAngle: _controller.value * 2 * pi,
                   borderColor: widget.borderColor,
-                  waterColor: widget.waterColor.withOpacity(0.5),
+                  stockColor: widget.stockColor.withOpacity(0.5),
+                  withdrawColor: widget.withdrawColor.withOpacity(0.5),
                   textStyle: widget.textStyle,
                   context: context,
                 ),
@@ -91,25 +99,29 @@ class _WaterFilledRectangleState extends State<WaterFilledRectangle>
 
 class RectanglePainter extends CustomPainter {
   // final double angle;
+  final bool isWithdraw;
   final double width;
   final double height;
   final double depth;
-  final double fillPercentage;
+  final double fillStockPercentage;
   final double rotationAngle;
   final Color borderColor;
-  final Color waterColor;
+  final Color stockColor;
+  final Color withdrawColor;
   final TextStyle? textStyle;
   final BuildContext context;
 
   RectanglePainter({
     // required this.angle,
+    required this.isWithdraw,
     required this.width,
     required this.height,
     required this.depth,
-    required this.fillPercentage,
+    required this.fillStockPercentage,
     required this.rotationAngle,
     required this.borderColor,
-    required this.waterColor,
+    required this.stockColor,
+    required this.withdrawColor,
     this.textStyle,
     required this.context,
   });
@@ -158,65 +170,196 @@ class RectanglePainter extends CustomPainter {
     }
 
     // Draw water
-    final waterHeight = (height * 2) * fillPercentage;
-    final waterVertices = [
-      Offset3D(-width, height - waterHeight, depth),
-      Offset3D(width, height - waterHeight, depth),
-      Offset3D(width, height, depth),
-      Offset3D(-width, height, depth),
-      Offset3D(-width, height - waterHeight, -depth),
-      Offset3D(width, height - waterHeight, -depth),
-      Offset3D(width, height, -depth),
-      Offset3D(-width, height, -depth),
-    ];
+    // final freeHeight = (height * 2) * (1 - fillStockPercentage);
 
-    final rotatedWaterVertices =
-        waterVertices.map((v) => rotateY(v, rotationAngle)).toList();
-    final projectedWater =
-        rotatedWaterVertices.map((v) => project3D(v, size)).toList();
+    if (isWithdraw) {
+      final freeHeight = (height * 2) * 0.5; // 60
 
-    final waterFaces = [
-      [0, 1, 2, 3],
-      [4, 5, 6, 7],
-      [0, 1, 5, 4],
-      [3, 2, 6, 7],
-      [0, 3, 7, 4],
-      [1, 2, 6, 5],
-    ];
+      final wateHeight = (height * 2) * 0.5; // 50
 
-    for (final face in waterFaces) {
-      final path = Path()
-        ..moveTo(projectedWater[face[0]].dx, projectedWater[face[0]].dy)
-        ..lineTo(projectedWater[face[1]].dx, projectedWater[face[1]].dy)
-        ..lineTo(projectedWater[face[2]].dx, projectedWater[face[2]].dy)
-        ..lineTo(projectedWater[face[3]].dx, projectedWater[face[3]].dy)
-        ..close();
+      final waterVertices = [
+        Offset3D(-width, -height, depth), // Water vertices
+        Offset3D(width, -height, depth), // Water vertices
 
-      paint.style = PaintingStyle.fill;
-      paint.color = waterColor;
-      canvas.drawPath(path, paint);
+        Offset3D(width, height - freeHeight, depth),
+        Offset3D(-width, height - freeHeight, depth),
+
+        Offset3D(-width, -height, -depth), // Water vertices
+        Offset3D(width, -height, -depth), // Water vertices
+
+        Offset3D(width, height - freeHeight, -depth),
+        Offset3D(-width, height - freeHeight, -depth),
+      ];
+
+      final waterVertices2 = [
+        Offset3D(-width, height - wateHeight, depth), // Water vertices
+        Offset3D(width, height - wateHeight, depth), // Water vertices
+
+        Offset3D(width, height, depth),
+        Offset3D(-width, height, depth),
+
+        Offset3D(-width, height - wateHeight, -depth), // Water vertices
+        Offset3D(width, height - wateHeight, -depth), // Water vertices
+
+        Offset3D(width, height, -depth),
+        Offset3D(-width, height, -depth),
+      ];
+
+      final rotatedWaterVertices =
+          waterVertices.map((v) => rotateY(v, rotationAngle)).toList();
+      final projectedWater =
+          rotatedWaterVertices.map((v) => project3D(v, size)).toList();
+
+      final waterFaces = [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [0, 1, 5, 4],
+        [3, 2, 6, 7],
+        [0, 3, 7, 4],
+        [1, 2, 6, 5],
+      ];
+
+      final rotatedWaterVertices2 =
+          waterVertices2.map((v) => rotateY(v, rotationAngle)).toList();
+      final projectedWater2 =
+          rotatedWaterVertices2.map((v) => project3D(v, size)).toList();
+
+      final waterFaces2 = [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [0, 1, 5, 4],
+        [3, 2, 6, 7],
+        [0, 3, 7, 4],
+        [1, 2, 6, 5],
+      ];
+
+      for (final face in waterFaces) {
+        final path = Path()
+          ..moveTo(projectedWater[face[0]].dx, projectedWater[face[0]].dy)
+          ..lineTo(projectedWater[face[1]].dx, projectedWater[face[1]].dy)
+          ..lineTo(projectedWater[face[2]].dx, projectedWater[face[2]].dy)
+          ..lineTo(projectedWater[face[3]].dx, projectedWater[face[3]].dy)
+          ..close();
+
+        paint.style = PaintingStyle.fill;
+        paint.color = withdrawColor;
+        canvas.drawPath(path, paint);
+      }
+
+      for (final face in waterFaces2) {
+        final path = Path()
+          ..moveTo(projectedWater2[face[0]].dx, projectedWater2[face[0]].dy)
+          ..lineTo(projectedWater2[face[1]].dx, projectedWater2[face[1]].dy)
+          ..lineTo(projectedWater2[face[2]].dx, projectedWater2[face[2]].dy)
+          ..lineTo(projectedWater2[face[3]].dx, projectedWater2[face[3]].dy)
+          ..close();
+
+        paint.style = PaintingStyle.fill;
+        paint.color = stockColor;
+        canvas.drawPath(path, paint);
+      }
+
+      // Draw "XX%" text
+      final percentageText = "${(fillStockPercentage * 100).toInt()}%";
+      // final percentageText2 = "${(fillStockPercentage + 0.4 * 100).toInt()}%";
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: "Stock: $percentageText",
+          style: fillStockPercentage > 0.39
+              ? Styles.black24(context)
+              : Styles.black24(context),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+
+      final textPainter2 = TextPainter(
+        text: TextSpan(
+          text: "Withdraw + Stock: 80%",
+          style: fillStockPercentage > 0.39
+              ? Styles.black24(context)
+              : Styles.black24(context),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+
+      textPainter.layout();
+      textPainter2.layout();
+
+      final textX = size.width / 2 - textPainter.width / 2;
+      final textY = size.height / 2 + height / 4 - textPainter.height / 2;
+
+      textPainter.paint(
+        canvas,
+        Offset(textX, textY + 20),
+      );
+      textPainter2.paint(
+        canvas,
+        Offset(textX - 50, textY - 50),
+      );
+    } else {
+      final wateHeight = (height * 2) * fillStockPercentage; // 50
+      final waterVertices2 = [
+        Offset3D(-width, height - wateHeight, depth), // Water vertices
+        Offset3D(width, height - wateHeight, depth), // Water vertices
+
+        Offset3D(width, height, depth),
+        Offset3D(-width, height, depth),
+
+        Offset3D(-width, height - wateHeight, -depth), // Water vertices
+        Offset3D(width, height - wateHeight, -depth), // Water vertices
+
+        Offset3D(width, height, -depth),
+        Offset3D(-width, height, -depth),
+      ];
+      final rotatedWaterVertices2 =
+          waterVertices2.map((v) => rotateY(v, rotationAngle)).toList();
+      final projectedWater2 =
+          rotatedWaterVertices2.map((v) => project3D(v, size)).toList();
+
+      final waterFaces2 = [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [0, 1, 5, 4],
+        [3, 2, 6, 7],
+        [0, 3, 7, 4],
+        [1, 2, 6, 5],
+      ];
+      for (final face in waterFaces2) {
+        final path = Path()
+          ..moveTo(projectedWater2[face[0]].dx, projectedWater2[face[0]].dy)
+          ..lineTo(projectedWater2[face[1]].dx, projectedWater2[face[1]].dy)
+          ..lineTo(projectedWater2[face[2]].dx, projectedWater2[face[2]].dy)
+          ..lineTo(projectedWater2[face[3]].dx, projectedWater2[face[3]].dy)
+          ..close();
+
+        paint.style = PaintingStyle.fill;
+        paint.color = stockColor;
+        canvas.drawPath(path, paint);
+      }
+
+      // Draw "XX%" text
+      final percentageText = "${(fillStockPercentage * 100).toInt()}%";
+      // final percentageText2 = "${(fillStockPercentage + 0.4 * 100).toInt()}%";
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: "Stock: $percentageText",
+          style: fillStockPercentage > 0.39
+              ? Styles.black24(context)
+              : Styles.black24(context),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+
+      textPainter.layout();
+
+      final textX = size.width / 2 - textPainter.width / 2;
+      final textY = size.height / 2 + height / 4 - textPainter.height / 2;
+
+      textPainter.paint(
+        canvas,
+        Offset(textX, textY),
+      );
     }
-
-    // Draw "XX%" text
-    final percentageText = "${(fillPercentage * 100).toInt()}%";
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: percentageText,
-        style: fillPercentage > 0.39
-            ? Styles.white24(context)
-            : Styles.black24(context),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-
-    final textX = size.width / 2 - textPainter.width / 2;
-    final textY = size.height / 2 + height / 4 - textPainter.height / 2;
-
-    textPainter.paint(
-      canvas,
-      Offset(textX, textY),
-    );
   }
 
   Offset3D rotateY(Offset3D vertex, double angle) {

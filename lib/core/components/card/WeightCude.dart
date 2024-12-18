@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/BuildTextRowDetailShop.dart';
 import 'package:_12sale_app/core/page/Ractangle3D.dart';
+import 'package:_12sale_app/core/page/report/UtilzeDetail.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:flutter/material.dart';
 
@@ -40,11 +41,26 @@ class _WeightCudeCardState extends State<WeightCudeCard> {
               SizedBox(
                 height: screenWidth / 15,
               ),
-              WaterFilledRectangle(
-                width: screenWidth / 6,
-                height: screenWidth / 9,
-                depth: screenWidth / 6,
-                fillPercentage: 0.40,
+              Hero(
+                tag: 'rectangle',
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UtilzedDetail(),
+                      ),
+                    );
+                  },
+                  child: WaterFilledRectangle(
+                    isWithdraw: true,
+                    width: screenWidth / 5,
+                    height: screenWidth / 9,
+                    depth: screenWidth / 6,
+                    fillStockPercentage: 0.75,
+                    fillWithdrawPercentage: 0.40,
+                  ),
+                ),
               ),
               // Row(
               //   children: [

@@ -10,6 +10,7 @@ import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Store.dart';
+import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,6 +45,10 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
   late TextEditingController storeAddressController;
 
   String selectedRoute = "";
+
+  final LocationService locationService = LocationService();
+  String latitude = '';
+  String longitude = '';
 
   @override
   initState() {
@@ -170,7 +175,30 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
     }
   }
 
-  Future<void> _loadImage() async {}
+  Future<void> fetchLocation() async {
+    try {
+      // Initialize the location service
+      await locationService.initialize();
+
+      // Get latitude and longitude
+      double? lat = await locationService.getLatitude();
+      double? lon = await locationService.getLongitude();
+
+      setState(() {
+        latitude = lat?.toString() ?? "Unavailable";
+        longitude = lon?.toString() ?? "Unavailable";
+      });
+      print("${latitude}, ${longitude}");
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          latitude = "Error fetching latitude";
+          longitude = "Error fetching longitude";
+        });
+      }
+      print("Error: $e");
+    }
+  }
 
   @override
   void dispose() {
@@ -258,7 +286,9 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                             Row(
                               children: [
                                 GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    fetchLocation();
+                                  },
                                   child: BoxShadowCustom(
                                     child: Container(
                                       padding: const EdgeInsets.all(8),

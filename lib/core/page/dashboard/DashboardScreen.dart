@@ -162,7 +162,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                   child: Container(
                     width: 12.0,
                     height: 12.0,
-                    margin: EdgeInsets.symmetric(horizontal: 4.0),
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
                     decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: (Theme.of(context).brightness == Brightness.dark

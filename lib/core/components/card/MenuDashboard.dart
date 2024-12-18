@@ -6,7 +6,7 @@ import 'package:_12sale_app/core/styles/style.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-class MenuDashboard extends StatelessWidget {
+class MenuDashboard extends StatefulWidget {
   final IconData icon_1;
   final String title_1;
   void Function()? onTap1;
@@ -48,14 +48,20 @@ class MenuDashboard extends StatelessWidget {
   });
 
   @override
+  State<MenuDashboard> createState() => _MenuDashboardState();
+}
+
+class _MenuDashboardState extends State<MenuDashboard> {
+  @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
         Row(
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: onTap1,
+                onTap: widget.onTap1,
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
@@ -72,12 +78,12 @@ class MenuDashboard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        icon_1,
+                        widget.icon_1,
                         size: 60,
                         color: Styles.primaryColor,
                       ),
                       Text(
-                        title_1,
+                        widget.title_1,
                         style: Styles.black24(context),
                       )
                     ],
@@ -106,12 +112,12 @@ class MenuDashboard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        icon_2,
+                        widget.icon_2,
                         size: 60,
                         color: Styles.primaryColor,
                       ),
                       Text(
-                        title_2,
+                        widget.title_2,
                         style: Styles.black24(context),
                       )
                     ],
@@ -143,12 +149,12 @@ class MenuDashboard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        icon_3,
+                        widget.icon_3,
                         size: 60,
                         color: Styles.primaryColor,
                       ),
                       Text(
-                        title_3,
+                        widget.title_3,
                         style: Styles.black24(context),
                       )
                     ],
@@ -164,6 +170,7 @@ class MenuDashboard extends StatelessWidget {
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
+                  // color: Colors.amber,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(16),
                   ),
@@ -173,18 +180,41 @@ class MenuDashboard extends StatelessWidget {
                   ),
                   color: Colors.white,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Icon(
-                      icon_4,
-                      size: 60,
-                      color: Styles.primaryColor,
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: Container(
+                        height: screenWidth / 18,
+                        width: screenWidth / 18,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.all(Radius.circular(360)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "1",
+                            style: Styles.white18(context),
+                          ),
+                        ),
+                      ),
                     ),
-                    Text(
-                      title_4,
-                      style: Styles.black24(context),
-                    )
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          widget.icon_4,
+                          size: 60,
+                          color: Styles.primaryColor,
+                        ),
+                        Text(
+                          widget.title_4,
+                          style: Styles.black24(context),
+                        )
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -203,12 +233,12 @@ class MenuDashboard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      icon_5,
+                      widget.icon_5,
                       size: 60,
                       color: Styles.primaryColor,
                     ),
                     Text(
-                      title_5,
+                      widget.title_5,
                       style: Styles.black24(context),
                     )
                   ],
@@ -232,12 +262,12 @@ class MenuDashboard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      icon_6,
+                      widget.icon_6,
                       size: 60,
                       color: Styles.primaryColor,
                     ),
                     Text(
-                      title_6,
+                      widget.title_6,
                       style: Styles.black24(context),
                     )
                   ],

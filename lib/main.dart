@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:_12sale_app/core/components/Gird.dart';
 import 'package:_12sale_app/core/page/CustomBottomBar.dart';
 import 'package:_12sale_app/core/page/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/Square3D.dart';
+import 'package:_12sale_app/core/page/announce/Announce.dart';
 import 'package:_12sale_app/core/page/printer/BluetoothPrinterScreen.dart';
 import 'package:_12sale_app/core/page/printer/PrinterBluetoothScreen.dart';
 import 'package:_12sale_app/core/page/printer/TestPrint.dart';
@@ -20,6 +23,7 @@ import 'package:_12sale_app/data/service/localNotification.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart'; // For date localization
 import 'package:flutter/services.dart';
@@ -60,6 +64,10 @@ void main() async {
 
   // Get the first camera from the list
   // final firstCamera = cameras.first;
+
+  // Initialize port for communication between TaskHandler and UI.
+  FlutterForegroundTask.initCommunicationPort();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -78,6 +86,76 @@ void main() async {
   });
 }
 
+// The callback function should always be a top-level or static function.
+@pragma('vm:entry-point')
+void startCallback() {
+  FlutterForegroundTask.setTaskHandler(MyTaskHandler());
+}
+
+class MyTaskHandler extends TaskHandler {
+  static const String incrementCountCommand = 'incrementCount';
+
+  int _count = 0;
+
+  void _incrementCount() {
+    _count++;
+
+    // Update notification content.
+    FlutterForegroundTask.updateService(
+        notificationTitle: 'Hello MyTaskHandler :)',
+        notificationText: 'count: $_count');
+
+    // Send data to main isolate.
+    FlutterForegroundTask.sendDataToMain(_count);
+  }
+
+  // Called when the task is started.
+  @override
+  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
+    print('onStart(starter: ${starter.name})');
+    _incrementCount();
+  }
+
+  // Called based on the eventAction set in ForegroundTaskOptions.
+  @override
+  void onRepeatEvent(DateTime timestamp) {
+    _incrementCount();
+  }
+
+  // Called when the task is destroyed.
+  @override
+  Future<void> onDestroy(DateTime timestamp) async {
+    print('onDestroy');
+  }
+
+  // Called when data is sent using `FlutterForegroundTask.sendDataToTask`.
+  @override
+  void onReceiveData(Object data) {
+    print('onReceiveData: $data');
+    if (data == incrementCountCommand) {
+      _incrementCount();
+    }
+  }
+
+  // Called when the notification button is pressed.
+  @override
+  void onNotificationButtonPressed(String id) {
+    print('onNotificationButtonPressed: $id');
+  }
+
+  // Called when the notification itself is pressed.
+  @override
+  void onNotificationPressed() {
+    print('onNotificationPressed');
+  }
+
+  // Called when the notification itself is dismissed.
+  @override
+  void onNotificationDismissed() {
+    print('onNotificationDismissed');
+  }
+}
+
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 class MyApp extends StatefulWidget {
@@ -89,6 +167,115 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
+  final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
+
+  Future<void> _requestPermissions() async {
+    // Android 13+, you need to allow notification permission to display foreground service notification.
+    //
+    // iOS: If you need notification, ask for permission.
+    final NotificationPermission notificationPermission =
+        await FlutterForegroundTask.checkNotificationPermission();
+    if (notificationPermission != NotificationPermission.granted) {
+      await FlutterForegroundTask.requestNotificationPermission();
+    }
+
+    if (Platform.isAndroid) {
+      // Android 12+, there are restrictions on starting a foreground service.
+      //
+      // To restart the service on device reboot or unexpected problem, you need to allow below permission.
+      if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+        // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
+        await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+      }
+
+      // Use this utility only if you provide services that require long-term survival,
+      // such as exact alarm service, healthcare service, or Bluetooth communication.
+      //
+      // This utility requires the "android.permission.SCHEDULE_EXACT_ALARM" permission.
+      // Using this permission may make app distribution difficult due to Google policy.
+      if (!await FlutterForegroundTask.canScheduleExactAlarms) {
+        // When you call this function, will be gone to the settings page.
+        // So you need to explain to the user why set it.
+        await FlutterForegroundTask.openAlarmsAndRemindersSettings();
+      }
+    }
+  }
+
+  void _initService() {
+    FlutterForegroundTask.init(
+      androidNotificationOptions: AndroidNotificationOptions(
+        channelId: 'foreground_service',
+        channelName: 'Foreground Service Notification',
+        channelDescription:
+            'This notification appears when the foreground service is running.',
+        onlyAlertOnce: true,
+      ),
+      iosNotificationOptions: const IOSNotificationOptions(
+        showNotification: false,
+        playSound: false,
+      ),
+      foregroundTaskOptions: ForegroundTaskOptions(
+        eventAction: ForegroundTaskEventAction.repeat(5000),
+        autoRunOnBoot: true,
+        autoRunOnMyPackageReplaced: true,
+        allowWakeLock: true,
+        allowWifiLock: true,
+      ),
+    );
+  }
+
+  Future<ServiceRequestResult> _startService() async {
+    if (await FlutterForegroundTask.isRunningService) {
+      return FlutterForegroundTask.restartService();
+    } else {
+      return FlutterForegroundTask.startService(
+        serviceId: 256,
+        notificationTitle: 'Foreground Service is running',
+        notificationText: 'Tap to return to the app',
+        notificationButtons: [
+          const NotificationButton(id: 'btn_hello', text: 'hello'),
+        ],
+        notificationInitialRoute: '/',
+        callback: startCallback,
+      );
+    }
+  }
+
+  Future<ServiceRequestResult> _stopService() {
+    return FlutterForegroundTask.stopService();
+  }
+
+  void _onReceiveTaskData(Object data) {
+    print('onReceiveTaskData: $data');
+    _taskDataListenable.value = data;
+  }
+
+  void _incrementCount() {
+    FlutterForegroundTask.sendDataToTask(MyTaskHandler.incrementCountCommand);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Add a callback to receive data sent from the TaskHandler.
+    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Request permissions and initialize the service.
+      _requestPermissions();
+      _initService();
+      _startService();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Remove a callback to receive data sent from the TaskHandler.
+    FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+    _taskDataListenable.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -97,6 +284,22 @@ class _MyAppState extends State<MyApp> {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
+          routes: {
+            '/': (context) => const HomeScreen(
+                  index: 0,
+                ),
+            '/route': (context) => const HomeScreen(
+                  index: 1,
+                ),
+            '/store': (context) => const HomeScreen(
+                  index: 2,
+                ),
+            '/manage': (context) => const HomeScreen(
+                  index: 3,
+                ),
+            '/announce': (context) => const Announce(),
+          },
+          initialRoute: '/',
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
@@ -112,16 +315,60 @@ class _MyAppState extends State<MyApp> {
           // home: PolylineWithLabels(),
           // home: SettingsScreen(),
           // home: const LoginScreen(),
-          home: const HomeScreen(
-            index: 0,
-          ),
+          // home: const HomeScreen(
+          //   index: 0,
+          // ),
           // home: NotificationScreen(),
           // home: HomeScreen2(),
           // home: CustomBottomNavBar(),
           // home: BluetoothPrinterScreen4(),
           // home: AddToCartAnimationPage(),
+          // home: Column(
+          //   children: [
+          //     Expanded(child: _buildCommunicationDataText()),
+          //     _buildServiceControlButtons(),
+          //   ],
+          // ),
         );
       },
+    );
+  }
+
+  Widget _buildCommunicationDataText() {
+    return ValueListenableBuilder(
+      valueListenable: _taskDataListenable,
+      builder: (context, data, _) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('You received data from TaskHandler:'),
+              Text('$data', style: Theme.of(context).textTheme.headlineMedium),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildServiceControlButtons() {
+    buttonBuilder(String text, {VoidCallback? onPressed}) {
+      return ElevatedButton(
+        onPressed: onPressed,
+        child: Text(text),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buttonBuilder('start service', onPressed: _startService),
+          buttonBuilder('stop service', onPressed: _stopService),
+          buttonBuilder('increment count', onPressed: _incrementCount),
+        ],
+      ),
     );
   }
 }
