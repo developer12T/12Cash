@@ -6,6 +6,7 @@ import 'package:_12sale_app/core/components/button/Button.dart';
 import 'package:_12sale_app/core/components/card/DuplicateCard.dart';
 import 'package:_12sale_app/core/components/card/StoreCardAll.dart';
 import 'package:_12sale_app/core/components/card/StoreCardNew.dart';
+import 'package:_12sale_app/core/page/store/DetailSimilarDtore.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/DuplicateStore.dart';
@@ -118,7 +119,7 @@ class _CheckStoreDuplicateScreen2State
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => DetailStoreScreen(
+                                  builder: (context) => DetailSimilarStore(
                                       initialSelectedRoute: RouteStore(
                                           route: widget.stores[index].route),
                                       store: widget.stores[index],

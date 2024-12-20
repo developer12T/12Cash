@@ -3,6 +3,7 @@ import 'package:_12sale_app/data/models/DuplicateStore.dart';
 import 'package:_12sale_app/data/models/Store.dart';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:path/path.dart';
 import 'package:toastification/toastification.dart'; // Ensure this package is imported
 import 'package:_12sale_app/core/styles/style.dart'; // Adjust the path as needed
@@ -43,8 +44,13 @@ void showToastDuplicateMenu({
   TextStyle? descriptionStyle,
 }) {
   toastification.show(
-    icon: const Icon(
-      Icons.info_outline,
+    // icon:  const Icon(
+    //   Icons.priority_high,
+    //   color: Styles.failTextColor,
+    //   size: 50,
+    // ),
+    icon: const FaIcon(
+      FontAwesomeIcons.triangleExclamation,
       color: Styles.failTextColor,
       size: 50,
     ),
@@ -52,6 +58,7 @@ void showToastDuplicateMenu({
     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     context: context,
     primaryColor: Colors.red,
+    // autoCloseDuration: const Duration(seconds: 5),
     type: type,
     style: style,
     title: Column(
@@ -67,11 +74,17 @@ void showToastDuplicateMenu({
         ),
         GestureDetector(
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return CheckStoreDuplicateScreen2(
-                stores: stores,
-              );
-            }));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return CheckStoreDuplicateScreen2(
+                    stores: stores,
+                  );
+                },
+              ),
+            );
+            toastification.dismissAll();
           },
           child: Container(
             decoration: BoxDecoration(

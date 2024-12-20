@@ -93,12 +93,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
             ),
             Expanded(
               child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => BluetoothPrinterScreen4()),
-                  );
-                },
+                onTap: widget.onTap2,
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
@@ -127,12 +122,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
             ),
             Expanded(
               child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => const SettingScreen()),
-                  );
-                },
+                onTap: widget.onTap3,
                 child: Container(
                   height: 150,
                   decoration: BoxDecoration(
@@ -167,110 +157,120 @@ class _MenuDashboardState extends State<MenuDashboard> {
         Row(
           children: [
             Expanded(
-              child: Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  // color: Colors.amber,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
+              child: GestureDetector(
+                onTap: widget.onTap4,
+                child: Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    // color: Colors.amber,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                    ),
+                    border: Border.all(
+                      color: Colors.grey[350]!,
+                      width: 1.0,
+                    ),
+                    color: Colors.white,
                   ),
-                  border: Border.all(
-                    color: Colors.grey[350]!,
-                    width: 1.0,
-                  ),
-                  color: Colors.white,
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Positioned(
-                      right: 10,
-                      top: 10,
-                      child: Container(
-                        height: screenWidth / 18,
-                        width: screenWidth / 18,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.all(Radius.circular(360)),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "1",
-                            style: Styles.white18(context),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Positioned(
+                        right: 10,
+                        top: 10,
+                        child: Container(
+                          height: screenWidth / 18,
+                          width: screenWidth / 18,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(360)),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "1",
+                              style: Styles.white18(context),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          widget.icon_4,
-                          size: 60,
-                          color: Styles.primaryColor,
-                        ),
-                        Text(
-                          widget.title_4,
-                          style: Styles.black24(context),
-                        )
-                      ],
-                    ),
-                  ],
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            widget.icon_4,
+                            size: 60,
+                            color: Styles.primaryColor,
+                          ),
+                          Text(
+                            widget.title_4,
+                            style: Styles.black24(context),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
             Expanded(
-              child: Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.grey[350]!,
-                    width: 1.0,
-                  ),
-                  color: Colors.white,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      widget.icon_5,
-                      size: 60,
-                      color: Styles.primaryColor,
+              child: GestureDetector(
+                onTap: widget.onTap5,
+                child: Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey[350]!,
+                      width: 1.0,
                     ),
-                    Text(
-                      widget.title_5,
-                      style: Styles.black24(context),
-                    )
-                  ],
+                    color: Colors.white,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        widget.icon_5,
+                        size: 60,
+                        color: Styles.primaryColor,
+                      ),
+                      Text(
+                        widget.title_5,
+                        style: Styles.black24(context),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
             Expanded(
-              child: Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    bottomRight: Radius.circular(16),
-                  ),
-                  border: Border.all(
-                    color: Colors.grey[350]!,
-                    width: 1.0,
-                  ),
-                  color: Colors.white,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      widget.icon_6,
-                      size: 60,
-                      color: Styles.primaryColor,
+              child: GestureDetector(
+                onTap: widget.onTap6,
+                child: Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(16),
                     ),
-                    Text(
-                      widget.title_6,
-                      style: Styles.black24(context),
-                    )
-                  ],
+                    border: Border.all(
+                      color: Colors.grey[350]!,
+                      width: 1.0,
+                    ),
+                    color: Colors.white,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        widget.icon_6,
+                        size: 60,
+                        color: Styles.primaryColor,
+                      ),
+                      Text(
+                        widget.title_6,
+                        style: Styles.black24(context),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),

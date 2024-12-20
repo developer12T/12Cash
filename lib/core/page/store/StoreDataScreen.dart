@@ -110,28 +110,6 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
   Future<void> uploadFormDataWithDio(
       String imagePath, String typeImage, BuildContext context) async {
     try {
-      // final dio = Dio();
-      // var formData = FormData.fromMap({
-      //   'storeImage': await MultipartFile.fromFile(imagePath),
-      //   'area': "BE211",
-      // });
-      // var response = await dio.post(
-      //   'http://192.168.44.57:8000/api/upload',
-      //   data: formData,
-      //   options: Options(
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   ),
-      // );
-
-      // print("Image uploaded successfully ${response.data}");
-
-      // final localImage = ImageItem(
-      //     name: response.data['data']['ImageName'],
-      //     path: imagePath,
-      //     type: typeImage);
-
       final newImage = ImageItem(
         name: imagePath.split('/').last,
         path: imagePath,
@@ -145,25 +123,27 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
           if (imageList.length > 0) {
             imageList.removeWhere((item) => item.type == 'store');
           }
-          imageList.insert(0, newImage);
+          imageList.add(newImage);
           break;
         case 'tax':
           setState(() {
             taxIdImagePath = imagePath;
           });
-          if (imageList.length > 1) {
+          if (imageList.any((item) => item.type == 'tax')) {
             imageList.removeWhere((item) => item.type == 'tax');
           }
-          imageList.insert(1, newImage);
+          imageList.add(newImage);
           break;
         case 'person':
           setState(() {
             personalImagePath = imagePath;
           });
-          if (imageList.length > 2) {
+          if (imageList.any((item) => item.type == 'person')) {
             imageList.removeWhere((item) => item.type == 'person');
           }
-          imageList.insert(2, newImage);
+          // print(
+          //     "idCardImage ${imageList.any((item) => item.type == 'person')}");
+          imageList.add(newImage);
           break;
         default:
       }

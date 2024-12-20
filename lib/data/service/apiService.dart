@@ -43,8 +43,8 @@ class ApiService {
             data: body, queryParameters: queryParams, options: options);
       }
 
-      print('Response: ${response.data}');
-      return response.data; // Return the response data
+      print('Response: ${response}');
+      return response; // Return the response data
     } catch (e) {
       print('Error occurred: $e');
       return null; // Return null or handle errors based on your need

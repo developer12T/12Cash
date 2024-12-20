@@ -10,6 +10,7 @@ import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/data/models/Route.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -130,20 +131,28 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
   // }
   Future<void> _getStoreDataNew() async {
     // Initialize Dio
-    Dio dio = Dio();
+    // Dio dio = Dio();
 
-    // Replace with your API endpoint
-    const String apiUrl =
-        "http://192.168.44.57:8005/api/cash/store/getStore?area=BE214&type=new";
+    // // Replace with your API endpoint
+    // const String apiUrl =
+    //     "http://192.168.44.57:8005/api/cash/store/getStore?area=BE214&type=new";
 
     try {
-      final response = await dio.get(
-        apiUrl,
-        options: Options(
-          headers: {
-            "Content-Type": "application/json",
-          },
-        ),
+      // final response = await dio.get(
+      //   apiUrl,
+      //   options: Options(
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   ),
+      // );
+
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/store/getStore?area=BE211&type=new', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
@@ -166,21 +175,30 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
 
   Future<void> _getStoreDataAll() async {
     // Initialize Dio
-    Dio dio = Dio();
+    // Dio dio = Dio();
 
-    // Replace with your API endpoint
-    const String apiUrl =
-        "http://192.168.44.57:8005/api/cash/store/getStore?area=BE214&type=all";
+    // // Replace with your API endpoint
+    // const String apiUrl =
+    //     "http://192.168.44.57:8005/api/cash/store/getStore?area=BE214&type=all";
 
     try {
-      final response = await dio.get(
-        apiUrl,
-        options: Options(
-          headers: {
-            "Content-Type": "application/json",
-          },
-        ),
+      // final response = await dio.get(
+      //   apiUrl,
+      //   options: Options(
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   ),
+      // );
+
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/store/getStore?area=BE211&type=all', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
       );
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
         print(response.data['data']);

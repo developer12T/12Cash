@@ -80,6 +80,7 @@ dependencies:
   # device_info_plus: ^11.2.0
   flutter_foreground_task: ^8.17.0
   flutter_chat_ui: ^1.6.15
+  syncfusion_flutter_datagrid: ^28.1.35
   
 
 

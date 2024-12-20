@@ -15,7 +15,7 @@ class IconButtonWithLabel extends StatefulWidget {
   final double borderRadius;
   final EdgeInsetsGeometry padding;
   final Function(String imagePath)? onImageSelected; // Callback for image path
-
+  bool checkNetwork;
   IconButtonWithLabel({
     super.key,
     required this.icon,
@@ -26,6 +26,7 @@ class IconButtonWithLabel extends StatefulWidget {
     this.borderRadius = 8.0,
     this.padding = const EdgeInsets.symmetric(vertical: 16),
     this.onImageSelected, // Optional parameter for callback
+    this.checkNetwork = false,
   });
 
   @override
@@ -121,12 +122,28 @@ class _IconButtonWithLabelState extends State<IconButtonWithLabel> {
                     ],
                   )
                 : ClipRRect(
-                    child: Image.file(
-                      File(widget.imagePath!),
-                      width: screenWidth / 4,
-                      height: screenWidth / 4,
-                      fit: BoxFit.cover,
-                    ),
+                    child: widget.checkNetwork == false
+                        ? Image.file(
+                            File(widget.imagePath!),
+                            width: screenWidth / 4,
+                            height: screenWidth / 4,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            widget.imagePath!,
+                            width: screenWidth / 4,
+                            height: screenWidth / 4,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                  size: 50,
+                                ),
+                              );
+                            },
+                          ),
                   ),
           ),
         ),

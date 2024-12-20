@@ -15,6 +15,7 @@ import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/LoginScreen.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
+import 'package:_12sale_app/core/page/route/OrderScreen.dart';
 import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
 import 'package:_12sale_app/core/page/route/TossAddToCartScreen.dart';
 
@@ -209,13 +210,16 @@ class _MyAppState extends State<MyApp> {
         channelDescription:
             'This notification appears when the foreground service is running.',
         onlyAlertOnce: true,
+        playSound: true,
+        priority: NotificationPriority.HIGH,
+        showBadge: true,
       ),
       iosNotificationOptions: const IOSNotificationOptions(
         showNotification: false,
         playSound: false,
       ),
       foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(5000),
+        eventAction: ForegroundTaskEventAction.repeat(10000),
         autoRunOnBoot: true,
         autoRunOnMyPackageReplaced: true,
         allowWakeLock: true,

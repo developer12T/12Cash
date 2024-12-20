@@ -27,6 +27,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timelines/timelines.dart';
 import 'package:toastification/toastification.dart';
 
+import '../../../data/service/apiService.dart';
+
 const kTileHeight = 50.0;
 const completeColor = Color(0xff5e6172);
 const inProgressColor = Styles.primaryColor;
@@ -219,6 +221,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 
   Future<void> postData2() async {
     // Initialize Dio
+
     Dio dio = Dio();
     String jsonData = '''
 {
@@ -269,15 +272,30 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           ),
         );
       }
+      print((_storeData.imageList.any((item) => item.type == 'person')));
       String type =
-          "store${imageList.length > 1 != null ? ",document" : ""}${imageList.length > 2 != null ? ",personal" : ""}";
+          "store${(_storeData.imageList.any((item) => item.type == 'tax')) ? ",document" : ""}${(_storeData.imageList.any((item) => item.type == 'person')) ? ",idCard" : ""}";
 
       var formData = FormData.fromMap(
         {'storeImages': imageList, 'types': type, "store": jsonData},
       );
 
+      // ApiService apiService = ApiService();
+      // await apiService.init(); // Load .env before making any API calls
+
+      // var response = await apiService.request(
+      //   endpoint:
+      //       'api/cash/store/addStore', // You only need to pass the endpoint, the base URL is handled
+      //   method: 'POST',
+      //   headers: {
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      // );
+      print(formData);
+      print(imageList);
+
       var response = await dio.post(
-        'https://a382-171-103-242-50.ngrok-free.app/api/cash/store/addStore',
+        'http://192.168.44.57:8005/api/cash/store/addStore',
         data: formData,
         options: Options(
           headers: {
@@ -285,6 +303,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           },
         ),
       );
+
       if (response.statusCode == 201 || response.statusCode == 200) {
         print("Image uploaded successfully ${response.data}");
         if (response.data['message'] == 'similar store') {
@@ -298,7 +317,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           showToastDuplicateMenu(
             stores: duplicateStores,
             context: context,
-            icon: const Icon(Icons.info_outline),
+            icon: const Icon(Icons.priority_high),
             type: ToastificationType.error,
             primaryColor: Colors.red,
             titleStyle: Styles.headerRed18(context),
@@ -308,10 +327,12 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             description:
                 "${"store.processtimeline_screen.toasting_similar_des".tr()} ",
           );
+          Navigator.pop(context);
         } else if (response.data['message'] == 'Store added successfully') {
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),
             context: context,
+            primaryColor: Colors.green,
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(

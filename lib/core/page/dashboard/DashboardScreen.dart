@@ -8,6 +8,7 @@ import 'package:_12sale_app/core/components/button/MenuButton.dart';
 import 'package:_12sale_app/core/components/card/MenuDashboard.dart';
 import 'package:_12sale_app/core/components/card/WeightCude.dart';
 import 'package:_12sale_app/core/components/chart/BarChart.dart';
+import 'package:_12sale_app/core/components/chart/ItemSummarize.dart';
 import 'package:_12sale_app/core/components/chart/LineChart.dart';
 import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
@@ -20,6 +21,7 @@ import 'package:_12sale_app/data/models/Customer.dart';
 import 'package:_12sale_app/data/models/Shipping.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +32,8 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+
+import '../../components/table/TestGridTable.dart';
 
 class Dashboardscreen extends StatefulWidget {
   const Dashboardscreen({super.key});
@@ -89,6 +93,57 @@ class _DashboardscreenState extends State<Dashboardscreen> {
     });
   }
 
+  Widget bottomTitleWidgets(
+      double value, TitleMeta meta, BuildContext context) {
+    Widget text;
+    switch (value.toInt()) {
+      case 1:
+        text = Text('JAN', style: Styles.black18(context));
+        break;
+      case 2:
+        text = Text('FEB', style: Styles.black18(context));
+        break;
+      case 3:
+        text = Text('MAR', style: Styles.black18(context));
+        break;
+      case 4:
+        text = Text('APR', style: Styles.black18(context));
+        break;
+      case 5:
+        text = Text('MAY', style: Styles.black18(context));
+        break;
+      case 6:
+        text = Text('JUN', style: Styles.black18(context));
+        break;
+      case 7:
+        text = Text('JUL', style: Styles.black18(context));
+        break;
+      case 8:
+        text = Text('AUG', style: Styles.black18(context));
+        break;
+      case 9:
+        text = Text('SEP', style: Styles.black18(context));
+        break;
+      case 10:
+        text = Text('OCT', style: Styles.black18(context));
+        break;
+      case 11:
+        text = Text('NOV', style: Styles.black18(context));
+        break;
+      case 12:
+        text = Text('DEC', style: Styles.black18(context));
+        break;
+      default:
+        text = Text('', style: Styles.black18(context));
+        break;
+    }
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      child: text,
+    );
+  }
+
   List<CustomerModel> customerList = [];
   List<ShippingModel> shuppingList = [];
 
@@ -99,6 +154,11 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         icon_1: Icons.description,
         title_2: "dashboard.menu.data_analysis".tr(),
         icon_2: Icons.equalizer,
+        onTap2: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const Testgridtable()),
+          );
+        },
         title_3: "dashboard.menu.setting".tr(),
         icon_3: Icons.settings,
         onTap3: () {
@@ -136,7 +196,9 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         // width: screenWidth / 1.5,
         child: Column(
           children: [
-            SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
+            // SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
+            SizedBox(height: 335, width: screenWidth, child: ItemSummarize()),
+
             CarouselSlider(
               items: menuList.map((item) => item).toList(),
               carouselController: _controller,
