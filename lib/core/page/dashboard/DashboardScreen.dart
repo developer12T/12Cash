@@ -152,6 +152,11 @@ class _DashboardscreenState extends State<Dashboardscreen> {
       MenuDashboard(
         title_1: "dashboard.menu.sale_report".tr(),
         icon_1: Icons.description,
+        onTap1: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => NotificationScreen()),
+          );
+        },
         title_2: "dashboard.menu.data_analysis".tr(),
         icon_2: Icons.equalizer,
         onTap2: () {
