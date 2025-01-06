@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/card/CartCard.dart';
-import 'package:_12sale_app/core/components/table/CartSTable.dart';
 import 'package:_12sale_app/core/page/route/OrderScreen.dart';
 import 'package:_12sale_app/core/page/route/PromotionScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';

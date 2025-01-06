@@ -81,6 +81,8 @@ dependencies:
   flutter_foreground_task: ^8.17.0
   flutter_chat_ui: ^1.6.15
   syncfusion_flutter_datagrid: ^28.1.35
+  syncfusion_flutter_charts: ^28.1.36
+  image: ^4.5.2
 
 dev_dependencies:
   flutter_test:

@@ -6,11 +6,15 @@ import 'package:_12sale_app/data/models/Store.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+import 'package:location/location.dart';
 
 class PolicyScreen extends StatefulWidget {
   const PolicyScreen({super.key});
@@ -41,6 +45,47 @@ class _PolicyScreenState extends State<PolicyScreen> {
     fetchLocation();
     _loadPrivacyPolicy();
     _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> checkRequestLocation() async {
+    // final status = await Permission.location.request();
+    if (await Permission.locationWhenInUse.serviceStatus.isEnabled) {
+      print(
+          'requestLocation : ${await Permission.locationWhenInUse.serviceStatus.isEnabled}');
+    } else {
+      Navigator.of(context).pop();
+      print(
+          'requestLocation : ${await Permission.locationWhenInUse.serviceStatus.isEnabled}');
+      showCommonAlert(context);
+    }
+  }
+
+  void showCommonAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "แจ้งเตือน !",
+            style: Styles.headerBlack24(context),
+          ),
+          content: Text(
+            "กรุณาเปิดการใช้งานโลเคชั่นเพื่อทำการเพื่มร้านค้า",
+            style: Styles.black18(context),
+          ),
+          actions: [
+            TextButton(
+              child: Text("ตกลง", style: Styles.black18(context)),
+              onPressed: () async {
+                Location location = Location();
+                await location.requestService();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _loadPrivacyPolicy() async {
@@ -232,53 +277,59 @@ class _PolicyScreenState extends State<PolicyScreen> {
               Checkbox(
                 value: _isCheckboxChecked,
                 onChanged: _isCheckboxEnabled
-                    ? (value) {
+                    ? (value) async {
                         // print("${DateTime.now()}");
-                        setState(() {
-                          _isCheckboxChecked = value ?? false;
-                          _storeData ??= Store(
-                            storeId: "",
-                            name: "",
-                            taxId: "",
-                            tel: "",
-                            route: "",
-                            type: "",
-                            typeName: "",
-                            address: "",
-                            district: "",
-                            subDistrict: "",
-                            province: "",
-                            provinceCode: "",
-                            postcode: "",
-                            zone: "",
-                            area: "",
-                            latitude: latitude,
-                            longitude: longitude,
-                            lineId: "",
-                            note: "",
-                            approve: Approve(
-                              dateSend: "",
-                              dateAction: "",
-                              appPerson: "",
-                            ),
-                            status: "",
-                            policyConsent: PolicyConsent(status: "", date: ""),
-                            imageList: [],
-                            shippingAddress: [],
-                            createdDate: "",
-                            updatedDate: "",
-                          );
+                        if (await Permission
+                            .locationWhenInUse.serviceStatus.isEnabled) {
+                          setState(() {
+                            _isCheckboxChecked = value ?? false;
+                            _storeData ??= Store(
+                              storeId: "",
+                              name: "",
+                              taxId: "",
+                              tel: "",
+                              route: "",
+                              type: "",
+                              typeName: "",
+                              address: "",
+                              district: "",
+                              subDistrict: "",
+                              province: "",
+                              provinceCode: "",
+                              postcode: "",
+                              zone: "",
+                              area: "",
+                              latitude: latitude,
+                              longitude: longitude,
+                              lineId: "",
+                              note: "",
+                              approve: Approve(
+                                dateSend: "",
+                                dateAction: "",
+                                appPerson: "",
+                              ),
+                              status: "",
+                              policyConsent:
+                                  PolicyConsent(status: "", date: ""),
+                              imageList: [],
+                              shippingAddress: [],
+                              createdDate: "",
+                              updatedDate: "",
+                            );
 
-                          // Update only the policyConsent field using copyWith
-                          _storeData = _storeData?.copyWith(
-                            policyConsent: PolicyConsent(
-                              status: 'Agree',
-                              date: DateTime.now().toString(),
-                            ),
-                          );
-                          print(" Save ${latitude}, ${longitude}");
-                        });
-                        _saveStoreToStorage();
+                            // Update only the policyConsent field using copyWith
+                            _storeData = _storeData?.copyWith(
+                              policyConsent: PolicyConsent(
+                                status: 'Agree',
+                                date: DateTime.now().toString(),
+                              ),
+                            );
+                            print(" Save ${latitude}, ${longitude}");
+                          });
+                          _saveStoreToStorage();
+                        } else {
+                          showCommonAlert(context);
+                        }
                       }
                     : null,
               ),

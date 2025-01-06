@@ -1,8 +1,6 @@
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:path/path.dart';
 
 class ItemSummarize extends StatefulWidget {
   ItemSummarize({
@@ -30,7 +28,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
         //         strokeWidth: 3,
         //         strokeColor: Styles.primaryColor,
         //       );
-        //     }),
+        //     },),
         show: true,
         spots: const [
           FlSpot(1, 3),

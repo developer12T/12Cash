@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> saveToStorage<T>(String key, List<T> items) async {

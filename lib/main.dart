@@ -21,6 +21,7 @@ import 'package:_12sale_app/core/page/route/TossAddToCartScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/service/localNotification.dart';
+import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ void main() async {
   // Ensure the app is always in portrait mode
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await LocationService().initialize();
   // Initialize the notifications
   await initializeNotifications();
   await requestAllPermissions();

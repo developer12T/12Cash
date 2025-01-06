@@ -160,9 +160,9 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         title_2: "dashboard.menu.data_analysis".tr(),
         icon_2: Icons.equalizer,
         onTap2: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const Testgridtable()),
-          );
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(builder: (context) => const Testgridtable()),
+          // );
         },
         title_3: "dashboard.menu.setting".tr(),
         icon_3: Icons.settings,

@@ -32,7 +32,6 @@ class _DetailTableState extends State<DetailTable> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
     _loadStoreDetail();
   }
 

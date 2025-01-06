@@ -11,6 +11,7 @@ import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -51,6 +52,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
     // _pagingController.addPageRequestListener((pageKey) {
     //   _fetchPage(pageKey);
     // });
+    // requestLocation();
   }
 
   @override

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -41,6 +42,28 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
+  Future<String> rotateImage(String imagePath) async {
+    // Read the image file as bytes
+    final imageFile = File(imagePath);
+    final imageBytes = await imageFile.readAsBytes();
+
+    // Decode the image
+    final originalImage = img.decodeImage(imageBytes);
+    if (originalImage == null) {
+      throw Exception("Failed to decode image");
+    }
+
+    // Rotate the image (90 degrees clockwise as an example)
+    final rotatedImage = img.copyRotate(originalImage, angle: 360);
+
+    // Save the rotated image to a new file
+    final rotatedImagePath = '${imagePath}_rotated.png';
+    final rotatedFile = File(rotatedImagePath);
+    await rotatedFile.writeAsBytes(img.encodePng(rotatedImage));
+
+    return rotatedImagePath;
+  }
+
   Future<String> _downloadAndSaveFile(String url, String fileName) async {
     final Directory directory = await getApplicationDocumentsDirectory();
     final String filePath = '${directory.path}/$fileName';
@@ -67,8 +90,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final String bigPicturePath = await _downloadAndSaveFile(
         'http://192.168.44.57:8000/image/stores/BE211/1734681031885-20241220-store.jpg',
         'bigPicture');
+    final rotatedBigPicturePath = await rotateImage(bigPicturePath);
     final BigPictureStyleInformation bigPictureStyleInformation =
-        BigPictureStyleInformation(FilePathAndroidBitmap(bigPicturePath),
+        BigPictureStyleInformation(FilePathAndroidBitmap(rotatedBigPicturePath),
             largeIcon: FilePathAndroidBitmap(largeIconPath),
             contentTitle: 'overridden <b>big</b> content title',
             htmlFormatContentTitle: true,

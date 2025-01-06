@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> requestNotificationPermission() async {
@@ -65,6 +67,19 @@ Future<void> requestLocationPermission() async {
   }
 }
 
+Future<void> requestLocation() async {
+  if (await Permission.location.isDenied) {
+    final status = await Permission.location.request();
+    if (status.isGranted) {
+      print("Notification permission granted!");
+    } else {
+      print("Notification permission denied!");
+    }
+  } else {
+    print("Notification permission already granted.");
+  }
+}
+
 Future<void> requestPhotoPermission() async {
   if (await Permission.photos.isDenied) {
     final status = await Permission.photos.request();
@@ -85,7 +100,7 @@ Future<void> requestAllPermissions() async {
     Permission.bluetoothConnect,
     Permission.camera,
     Permission.nearbyWifiDevices,
-    Permission.location,
+    Permission.locationAlways,
     Permission.photos,
   ];
 

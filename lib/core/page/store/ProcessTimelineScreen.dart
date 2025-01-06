@@ -15,11 +15,13 @@ import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Shoptype.dart';
 import 'package:_12sale_app/data/models/Store.dart';
 import 'package:_12sale_app/data/models/User.dart';
+// import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -71,6 +73,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
   @override
   initState() {
     super.initState();
+    checkRequestLocation();
     _processIndex = 0;
     _clearStore();
     storeNameController = TextEditingController();
@@ -92,6 +95,42 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
     storeAddressController.dispose();
     storePoscodeController.dispose();
     super.dispose();
+  }
+
+  Future<void> checkRequestLocation() async {
+    // final status = await Permission.location.request();
+    if (await Permission.locationWhenInUse.serviceStatus.isEnabled) {
+      print(
+          'requestLocation : ${await Permission.locationWhenInUse.serviceStatus.isEnabled}');
+    } else {
+      Navigator.of(context).pop();
+      print(
+          'requestLocation : ${await Permission.locationWhenInUse.serviceStatus.isEnabled}');
+    }
+  }
+
+  void showCommonAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "แจ้งเตือน",
+            style: Styles.black24(context),
+          ),
+          content: Text(
+            "กรุณาเปิดการใช้งานโลเคชั่นเพื่อทำการเพื่มร้านค้า",
+            style: Styles.black18(context),
+          ),
+          actions: [
+            TextButton(
+              child: Text("ตกลง", style: Styles.black18(context)),
+              onPressed: () {},
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _getBodyContent() {
@@ -143,10 +182,8 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 
   Future<void> _loadStoreFromStorage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     // Get the JSON string list from SharedPreferences
     String? jsonStore = prefs.getString("add_store");
-
     if (jsonStore != null) {
       setState(() {
         _storeData =
