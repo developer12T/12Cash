@@ -99,32 +99,36 @@ class _DetailScreenState extends State<DetailScreen> {
             children: [
               MenuButton(
                 icon: Icons.cancel_rounded,
+
                 label: "route.detail_screen.cancel.title".tr(),
-                color: Colors.red,
+                // color: Colors.red,
+                color: Colors.grey,
                 onPressed: () {
-                  _showBottomSheet(context);
+                  // _showBottomSheet(context);
                 },
               ),
               MenuButton(
                 icon: Icons.add_shopping_cart_rounded,
                 label: "route.detail_screen.order_button".tr(),
-                color: Colors.teal,
+                // color: Colors.teal,
+                color: Colors.grey,
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Orderscreen(
-                          customerNo: widget.customerNo,
-                          customerName: widget.customerName,
-                          status: widget.status),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => Orderscreen(
+                  //         customerNo: widget.customerNo,
+                  //         customerName: widget.customerName,
+                  //         status: widget.status),
+                  //   ),
+                  // );
                 },
               ),
               MenuButton(
                 icon: Icons.add_a_photo,
                 label: "route.detail_screen.camera.title".tr(),
                 color: Colors.blue,
+                // color: Colors.grey,
                 onPressed: () {
                   _showBottomCamera(context);
                 },
@@ -132,17 +136,18 @@ class _DetailScreenState extends State<DetailScreen> {
               MenuButton(
                 icon: Icons.transfer_within_a_station_sharp,
                 label: "route.detail_screen.credit_note_button".tr(),
-                color: const Color.fromARGB(255, 234, 175, 0),
+                // color: const Color.fromARGB(255, 234, 175, 0),
+                color: Colors.grey,
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Orderscreen(
-                          customerNo: widget.customerNo,
-                          customerName: widget.customerName,
-                          status: widget.status),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => Orderscreen(
+                  //         customerNo: widget.customerNo,
+                  //         customerName: widget.customerName,
+                  //         status: widget.status),
+                  //   ),
+                  // );
                 },
               ),
             ],

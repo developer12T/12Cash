@@ -26,7 +26,7 @@ class _BluetoothPrinterScreen4State extends State<BluetoothPrinterScreen4> {
       "address1": "172/1 ต.ศรีมหาโพธิ์",
       "address2": "อ.ปากน้ำ",
       "address3": "จ.สมุทรปราการ",
-      "postcode": "10270",
+      "postCode": "10270",
       "taxno": "1234567890123",
       "salecode": "20359-คุณจาง"
     },

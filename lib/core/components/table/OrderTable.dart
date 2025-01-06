@@ -25,15 +25,15 @@ class _OrderTableState extends State<OrderTable> {
   @override
   void initState() {
     super.initState();
-    _loadJson();
+    // _loadJson();
   }
 
-  Future<void> _loadJson() async {
-    String jsonString = await rootBundle.loadString('lang/main-th.json');
-    setState(() {
-      _jsonString = jsonDecode(jsonString)["order_table"];
-    });
-  }
+  // Future<void> _loadJson() async {
+  //   String jsonString = await rootBundle.loadString('lang/main-th.json');
+  //   setState(() {
+  //     _jsonString = jsonDecode(jsonString)["order_table"];
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {

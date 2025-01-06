@@ -458,7 +458,7 @@ class _DetailSimilarStoreState extends State<DetailSimilarStore> {
                         // SizedBox(height: screenWidth / 37),
                         _buildCustomFormField(
                             'ที่อยู่',
-                            '${widget.store.address} ${widget.store.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.store.subDistrict} ${widget.store.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.store.district} ${widget.store.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.store.province} ${widget.store.postcode}',
+                            '${widget.store.address} ${widget.store.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.store.subDistrict} ${widget.store.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.store.district} ${widget.store.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.store.province} ${widget.store.postCode}',
                             Icons.location_on_rounded,
                             storeAddressController),
                         Row(

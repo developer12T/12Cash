@@ -11,7 +11,7 @@ class Store {
   final String subDistrict;
   final String province;
   final String provinceCode;
-  final String postcode;
+  final String postCode;
   final String zone;
   final String area;
   final String latitude;
@@ -39,7 +39,7 @@ class Store {
     required this.subDistrict,
     required this.province,
     required this.provinceCode,
-    required this.postcode,
+    required this.postCode,
     required this.zone,
     required this.area,
     required this.latitude,
@@ -69,7 +69,7 @@ class Store {
       subDistrict: json['subDistrict'] ?? '',
       province: json['province'] ?? '',
       provinceCode: json['provinceCode'] ?? '',
-      postcode: json['postcode'] ?? '',
+      postCode: json['postCode'] ?? '',
       zone: json['zone'] ?? '',
       area: json['area'] ?? '',
       latitude: json['latitude'] ?? '',
@@ -112,7 +112,7 @@ class Store {
       'subDistrict': subDistrict,
       'province': province,
       'provinceCode': provinceCode,
-      'postcode': postcode,
+      'postCode': postCode,
       'zone': zone,
       'area': area,
       'latitude': latitude,
@@ -129,6 +129,10 @@ class Store {
     };
   }
 
+  static List<Store> fromJsonList(List list) {
+    return list.map((item) => Store.fromJson(item)).toList();
+  }
+
   Store copyWith({
     String? storeId,
     String? name,
@@ -142,7 +146,7 @@ class Store {
     String? subDistrict,
     String? province,
     String? provinceCode,
-    String? postcode,
+    String? postCode,
     String? zone,
     String? area,
     String? latitude,
@@ -170,7 +174,7 @@ class Store {
       subDistrict: subDistrict ?? this.subDistrict,
       province: province ?? this.province,
       provinceCode: provinceCode ?? this.provinceCode,
-      postcode: postcode ?? this.postcode,
+      postCode: postCode ?? this.postCode,
       zone: zone ?? this.zone,
       area: area ?? this.area,
       latitude: latitude ?? this.latitude,
@@ -214,8 +218,8 @@ class Store {
         return copyWith(province: value);
       case 'provinceCode':
         return copyWith(provinceCode: value);
-      case 'postcode':
-        return copyWith(postcode: value);
+      case 'postCode':
+        return copyWith(postCode: value);
       case 'zone':
         return copyWith(zone: value);
       case 'area':
@@ -240,6 +244,23 @@ class Store {
       default:
         return this; // If the field does not match, return the current instance unchanged
     }
+  }
+
+  //  Set Strig to Show in Search Dropdown
+  @override
+  String toString() =>
+      '$name $route $address $district $subDistrict $province $postCode';
+
+  ///this method will prevent the override of toString
+  ///when the object is passed as a parameter to a function Filtter
+  bool userFilterByCreationDate(String filter) {
+    return this.name.toString().contains(filter) ||
+        this.route.toString().contains(filter) ||
+        this.address.toString().contains(filter) ||
+        this.district.toString().contains(filter) ||
+        this.subDistrict.toString().contains(filter) ||
+        this.province.toString().contains(filter) ||
+        this.province.toString().contains(filter);
   }
 }
 
@@ -329,7 +350,7 @@ class ShippingAddress {
   final String subDistrict;
   final String province;
   final String provinceCode;
-  final String postcode;
+  final String postCode;
   final String isDefault;
   final String id;
 
@@ -339,7 +360,7 @@ class ShippingAddress {
     required this.subDistrict,
     required this.province,
     required this.provinceCode,
-    required this.postcode,
+    required this.postCode,
     required this.isDefault,
     required this.id,
   });
@@ -351,7 +372,7 @@ class ShippingAddress {
       subDistrict: json['subDistrict'] ?? '',
       province: json['province'] ?? '',
       provinceCode: json['provinceCode'] ?? '',
-      postcode: json['postcode'] ?? '',
+      postCode: json['postCode'] ?? '',
       isDefault: json['default'] ?? '',
       id: json['_id'] ?? '',
     );
@@ -364,7 +385,7 @@ class ShippingAddress {
       'subDistrict': subDistrict,
       'province': province,
       'provinceCode': provinceCode,
-      'postcode': postcode,
+      'postCode': postCode,
       'default': isDefault,
       '_id': id,
     };

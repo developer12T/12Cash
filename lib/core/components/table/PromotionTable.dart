@@ -17,15 +17,15 @@ class _PromotiontableState extends State<Promotiontable> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _loadJson();
+    // _loadJson();
   }
 
-  Future<void> _loadJson() async {
-    String jsonString = await rootBundle.loadString('lang/main-th.json');
-    setState(() {
-      _jsonString = jsonDecode(jsonString)["promotion_table"];
-    });
-  }
+  // Future<void> _loadJson() async {
+  //   String jsonString = await rootBundle.loadString('lang/main-th.json');
+  //   setState(() {
+  //     _jsonString = jsonDecode(jsonString)["promotion_table"];
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {

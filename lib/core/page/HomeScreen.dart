@@ -47,46 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Store> storeItem = [];
 
   List<Store> allStores = [];
-  late User userData;
 
   List<String> filteredItems = [];
   TextEditingController searchController = TextEditingController();
-
-  // Future<void> _loadStoreData() async {
-  //   // Load JSON data from a file or a string
-  //   final String response = await rootBundle.loadString('data/all_store.json');
-  //   final List<dynamic> data = json.decode(response);
-
-  //   setState(() {
-  //     allStores = data.map((json) => Store.fromJson(json)).toList();
-  //   });
-  // }
-
-  Future<void> _loadUserData() async {
-    try {
-      // Load JSON data from the file
-      final String response = await rootBundle.loadString('data/user.json');
-      final Map<String, dynamic> data = json.decode(response);
-      setState(() {
-        userData = User.fromJson(data);
-      });
-      // await prefs.setString("user", data);
-    } catch (e) {
-      print("Error loading user data: $e");
-    }
-  }
-
-  Future<void> _saveStoreToStorage() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      // Convert Store object to JSON string
-      String jsonStoreString = json.encode(userData.toJson());
-      await prefs.setString('user', jsonStoreString);
-      print("Data saved to storage successfully.");
-    } catch (e) {
-      print("Error saving to storage: $e");
-    }
-  }
 
   static const List<Widget> _widgetOptionsHeader = <Widget>[
     DashboardHeader(),
@@ -154,11 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // _loadStoreData();
-    _loadUserData();
     _selectedIndex = widget.index; //_selectedIndex
     _clearOrders();
-    _saveStoreToStorage();
     searchController.addListener(() {
       _filterItems(searchController.text);
     });
@@ -190,9 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProcessTimelinePage(
-                userData: userData,
-              ),
+              builder: (context) => ProcessTimelinePage(),
             ),
           );
         }();

@@ -467,124 +467,51 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                           // SizedBox(height: screenWidth / 37),
                           _buildCustomFormField(
                               'ที่อยู่',
-                              '${widget.store.address} ${widget.store.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.store.subDistrict} ${widget.store.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.store.district} ${widget.store.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.store.province} ${widget.store.postcode}',
+                              '${widget.store.address} ${widget.store.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.store.subDistrict} ${widget.store.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.store.district} ${widget.store.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.store.province} ${widget.store.postCode}',
                               Icons.location_on_rounded,
                               storeAddressController),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              onEdit
-                                  ? ShowPhotoButton(
-                                      checkNetwork: true,
-                                      label: "ร้านค้า",
-                                      icon: Icons.image_not_supported_outlined,
-                                      imagePath: widget
-                                              .store.imageList.isNotEmpty
-                                          ? (widget.store.imageList
-                                                  .where((image) =>
-                                                      image.type == "store")
-                                                  .isNotEmpty
-                                              ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "store").last.name}"
-                                              : null)
-                                          : null,
-                                    )
-                                  : IconButtonWithLabel(
-                                      label: "ร้านค้า",
-                                      checkNetwork: true,
-                                      icon: Icons.photo_camera,
-                                      imagePath: widget
-                                              .store.imageList.isNotEmpty
-                                          ? (widget.store.imageList
-                                                  .where((image) =>
-                                                      image.type == "store")
-                                                  .isNotEmpty
-                                              ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "store").last.name}"
-                                              : null)
-                                          : null,
-                                      onImageSelected:
-                                          (String imagePath) async {
-                                        final newImage = ImageItem(
-                                            name: imagePath,
-                                            path: imagePath,
-                                            type: "store");
-                                        widget.store.imageList.add(newImage);
-                                      },
-                                    ),
-                              onEdit
-                                  ? ShowPhotoButton(
-                                      checkNetwork: true,
-                                      label: "ภ.พ.20",
-                                      icon: Icons.image_not_supported_outlined,
-                                      imagePath: widget
-                                              .store.imageList.isNotEmpty
-                                          ? (widget.store.imageList
-                                                  .where((image) =>
-                                                      image.type == "document")
-                                                  .isNotEmpty
-                                              ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "document").last.name}"
-                                              : null)
-                                          : null,
-                                    )
-                                  : IconButtonWithLabel(
-                                      label: "ภ.พ.20",
-                                      checkNetwork: true,
-                                      icon: Icons.photo_camera,
-                                      imagePath: widget
-                                              .store.imageList.isNotEmpty
-                                          ? (widget.store.imageList
-                                                  .where((image) =>
-                                                      image.type == "document")
-                                                  .isNotEmpty
-                                              ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "document").last.name}"
-                                              : null)
-                                          : null,
-                                      onImageSelected:
-                                          (String imagePath) async {
-                                        final newImage = ImageItem(
-                                            name: imagePath,
-                                            path: imagePath,
-                                            type: "document");
-
-                                        widget.store.imageList.add(newImage);
-                                      },
-                                    ),
-                              onEdit
-                                  ? ShowPhotoButton(
-                                      checkNetwork: true,
-                                      label: "สำเนาบัตรปปช.",
-                                      icon: Icons.image_not_supported_outlined,
-                                      imagePath: widget
-                                              .store.imageList.isNotEmpty
-                                          ? (widget.store.imageList
-                                                  .where((image) =>
-                                                      image.type == "idCard")
-                                                  .isNotEmpty
-                                              ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
-                                              : null)
-                                          : null,
-                                    )
-                                  : IconButtonWithLabel(
-                                      label: "สำเนาบัตรปปช.",
-                                      checkNetwork: true,
-                                      icon: Icons.photo_camera,
-                                      imagePath: widget
-                                              .store.imageList.isNotEmpty
-                                          ? (widget.store.imageList
-                                                  .where((image) =>
-                                                      image.type == "idCard")
-                                                  .isNotEmpty
-                                              ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
-                                              : null)
-                                          : null,
-                                      onImageSelected:
-                                          (String imagePath) async {
-                                        final newImage = ImageItem(
-                                            name: imagePath,
-                                            path: imagePath,
-                                            type: "idCard");
-                                        widget.store.imageList.add(newImage);
-                                      },
-                                    ),
+                              ShowPhotoButton(
+                                checkNetwork: true,
+                                label: "ร้านค้า",
+                                icon: Icons.image_not_supported_outlined,
+                                imagePath: widget.store.imageList.isNotEmpty
+                                    ? (widget.store.imageList
+                                            .where((image) =>
+                                                image.type == "store")
+                                            .isNotEmpty
+                                        ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "store").last.name}"
+                                        : null)
+                                    : null,
+                              ),
+                              ShowPhotoButton(
+                                checkNetwork: true,
+                                label: "ภ.พ.20",
+                                icon: Icons.image_not_supported_outlined,
+                                imagePath: widget.store.imageList.isNotEmpty
+                                    ? (widget.store.imageList
+                                            .where((image) =>
+                                                image.type == "document")
+                                            .isNotEmpty
+                                        ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "document").last.name}"
+                                        : null)
+                                    : null,
+                              ),
+                              ShowPhotoButton(
+                                checkNetwork: true,
+                                label: "สำเนาบัตรปปช.",
+                                icon: Icons.image_not_supported_outlined,
+                                imagePath: widget.store.imageList.isNotEmpty
+                                    ? (widget.store.imageList
+                                            .where((image) =>
+                                                image.type == "idCard")
+                                            .isNotEmpty
+                                        ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
+                                        : null)
+                                    : null,
+                              ),
                             ],
                           )
                         ],

@@ -163,7 +163,9 @@ class _PolylineWithLabelsState extends State<PolylineWithLabels> {
             // ),
           ),
         );
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
 
       // Calculate the midpoint

@@ -37,8 +37,7 @@ const inProgressColor = Styles.primaryColor;
 const todoColor = Color(0xffd1d2d7);
 
 class ProcessTimelinePage extends StatefulWidget {
-  User? userData;
-  ProcessTimelinePage({required this.userData, super.key});
+  ProcessTimelinePage({super.key});
 
   @override
   State<ProcessTimelinePage> createState() => _ProcessTimelinePageState();
@@ -272,8 +271,8 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       "district": "${_storeData.district}",
       "subDistrict": "${_storeData.subDistrict}",
       "province": "${_storeData.province}",
-      "provinceCode": "${_storeData.postcode.substring(0, 2)}",
-      "postCode": "${_storeData.postcode}",
+      "provinceCode": "${_storeData.postCode.substring(0, 2)}",
+      "postCode": "${_storeData.postCode}",
       "note":"${_storeData.note}",
       "shippingAddress": [
         {
@@ -282,14 +281,14 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           "district": "${_storeData.district}",
           "subDistrict": "${_storeData.subDistrict}",
           "province": "${_storeData.province}",
-          "provinceCode": "${_storeData.postcode.substring(0, 2)}",
-          "postCode": "${_storeData.postcode}",
+          "provinceCode": "${_storeData.postCode.substring(0, 2)}",
+          "postCode": "${_storeData.postCode}",
           "latitude": "${_storeData.latitude}",
           "longtitude": "${_storeData.longitude}"
         }
       ],
-      "zone": "${widget.userData?.zone}",
-      "area": "${widget.userData?.area}",
+      "zone": "${User.zone}",
+      "area": "${User.area}",
       "latitude": "${_storeData.latitude}",
       "longtitude": "${_storeData.longitude}",
       "lineId": "${_storeData.lineId}",
@@ -417,11 +416,11 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       "district": _storeData.district,
       "subDistrict": _storeData.subDistrict,
       "province": _storeData.province,
-      "provinceCode": _storeData.postcode.substring(0, 2),
-      "postCode": _storeData.postcode,
+      "provinceCode": _storeData.postCode.substring(0, 2),
+      "postCode": _storeData.postCode,
       "note": _storeData.note,
-      "zone": widget.userData?.zone,
-      "area": "BE214",
+      "zone": User.zone,
+      "area": User.area,
       "latitude": _storeData.latitude,
       "longtitude": _storeData.longitude,
       "lineId": _storeData.lineId,
@@ -761,8 +760,8 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
                                               province: _storeData.province,
                                               amphoe: _storeData.district,
                                               districtCode: '',
-                                              zipcode: _storeData.postcode,
-                                              provinceCode: _storeData.postcode
+                                              zipcode: _storeData.postCode,
+                                              provinceCode: _storeData.postCode
                                                   .substring(1, 3),
                                               id: '',
                                               amphoeCode: '',

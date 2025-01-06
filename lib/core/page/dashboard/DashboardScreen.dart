@@ -325,44 +325,8 @@ class DashboardHeader extends StatefulWidget {
 }
 
 class _DashboardHeaderState extends State<DashboardHeader> {
-  late User _userData = User(
-      saleCode: "",
-      salePayer: "",
-      userName: "",
-      firstName: "",
-      surName: "",
-      passWord: "",
-      tel: "",
-      zone: "",
-      area: "",
-      warehouse: "",
-      role: "",
-      status: "");
-
-  @override
-  void initState() {
-    super.initState();
-    _loadStoreFromStorage();
-  }
-
-  Future<void> _loadStoreFromStorage() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? jsonStore = prefs.getString("user");
-
-      if (jsonStore != null) {
-        setState(() {
-          _userData = (jsonStore == null
-              ? null
-              : User.fromJson(jsonDecode(jsonStore)))!;
-        });
-        // province = _storeData.province!;
-      }
-    } catch (e) {
-      print("Error loading from storage: $e");
-    }
-  }
-  // Function to load JSON using the reusable global function
+  // final SharedPreferences prefs = await SharedPreferences.getInstance();
+  late SharedPreferences sharedPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -405,7 +369,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                             Row(
                               children: [
                                 Text(
-                                  '${_userData.firstName} ${_userData.surName}',
+                                  '${User.fullName}',
                                   style: Styles.headerWhite24(context),
                                   textAlign: TextAlign.start,
                                 ),
@@ -448,7 +412,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
 
                                     child: Center(
                                       child: Text(
-                                        '${_userData.role.toUpperCase()}',
+                                        '${User.role}',
                                         style: Styles.headerBlack24(context),
                                       ),
                                     ),
@@ -464,7 +428,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                             left: Radius.circular(50))),
                                     child: Center(
                                       child: Text(
-                                        '${_userData.area}',
+                                        '${User.area}',
                                         style: Styles.headerBlack24(context),
                                       ),
                                     ),

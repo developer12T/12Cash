@@ -245,7 +245,7 @@ class _StoreAddressScreenState extends State<StoreAddressScreen> {
           setState(() {
             widget.storePoscodeController.text = poscode.first.zipcode!;
             _storeData = _storeData?.copyWithDynamicField(
-                'postcode', poscode.first.zipcode!);
+                'postCode', poscode.first.zipcode!);
           });
 
           print(widget.storePoscodeController.text);
@@ -386,7 +386,7 @@ class _StoreAddressScreenState extends State<StoreAddressScreen> {
                         _storeData =
                             _storeData?.copyWithDynamicField('subDistrict', '');
                         _storeData =
-                            _storeData?.copyWithDynamicField('postcode', '');
+                            _storeData?.copyWithDynamicField('postCode', '');
                       });
                       _saveStoreToStorage();
                     }
@@ -452,7 +452,7 @@ class _StoreAddressScreenState extends State<StoreAddressScreen> {
                         _storeData =
                             _storeData?.copyWithDynamicField('subDistrict', '');
                         _storeData =
-                            _storeData?.copyWithDynamicField('postcode', '');
+                            _storeData?.copyWithDynamicField('postCode', '');
                       });
 
                       _saveStoreToStorage();
@@ -516,7 +516,7 @@ class _StoreAddressScreenState extends State<StoreAddressScreen> {
                         _storeData = _storeData?.copyWithDynamicField(
                             'subDistrict', selected.district);
                         _storeData = _storeData?.copyWithDynamicField(
-                            'postcode', widget.storePoscodeController.text);
+                            'postCode', widget.storePoscodeController.text);
                       });
                       _loadPoscodeFromJson(
                           widget.initialSelectedLocation.province,
@@ -533,9 +533,9 @@ class _StoreAddressScreenState extends State<StoreAddressScreen> {
                 SizedBox(height: screenWidth / 37),
                 Customtextinput(
                   readonly: true,
-                  key: ValueKey('Postcode-$province'),
+                  key: ValueKey('postCode-$province'),
                   context,
-                  onChanged: (value) => _onTextChanged(value, 'postcode'),
+                  onChanged: (value) => _onTextChanged(value, 'postCode'),
                   // readonly: true,
                   controller:
                       widget.storePoscodeController, // Pass the controller here

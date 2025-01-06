@@ -5,11 +5,14 @@ import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/StoreCardAll.dart';
 import 'package:_12sale_app/core/components/card/StoreCardNew.dart';
 import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
+import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
+import 'package:_12sale_app/core/components/search/StoreSearch.dart';
 import 'package:_12sale_app/core/components/table/ShopTableAll.dart';
 import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/data/models/Route.dart';
+import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:_12sale_app/main.dart';
@@ -23,6 +26,12 @@ import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
 
+Store? _selectedStore;
+List<Store> storeAll = [];
+List<Store> storeAllFilter = [];
+List<Store> storeNew = [];
+RouteStore selectedRoute = RouteStore(route: '');
+
 class StoreScreen extends StatefulWidget {
   StoreScreen({super.key});
 
@@ -34,8 +43,6 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
   bool _loadingAllStore = true;
   bool _loadingNewStore = true;
   bool _isSelected = false;
-  List<Store> storeAll = [];
-  List<Store> storeNew = [];
 
   static const _pageSize = 3;
   final PagingController<int, Store> _pagingController =
@@ -153,7 +160,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/store/getStore?area=BE211&type=new', // You only need to pass the endpoint, the base URL is handled
+            'api/cash/store/getStore?area=${User.area}&type=new', // You only need to pass the endpoint, the base URL is handled
         method: 'GET',
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -176,28 +183,12 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
   }
 
   Future<void> _getStoreDataAll() async {
-    // Initialize Dio
-    // Dio dio = Dio();
-
-    // // Replace with your API endpoint
-    // const String apiUrl =
-    //     "http://192.168.44.57:8005/api/cash/store/getStore?area=BE214&type=all";
-
     try {
-      // final response = await dio.get(
-      //   apiUrl,
-      //   options: Options(
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   ),
-      // );
-
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/store/getStore?area=BE211&type=all', // You only need to pass the endpoint, the base URL is handled
+            'api/cash/store/getStore?area=${User.area}&type=all', // You only need to pass the endpoint, the base URL is handled
         method: 'GET',
       );
 
@@ -206,6 +197,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
         print(response.data['data']);
         setState(() {
           storeAll = data.map((item) => Store.fromJson(item)).toList();
+          storeAllFilter = data.map((item) => Store.fromJson(item)).toList();
         });
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
@@ -369,6 +361,38 @@ class StoreHeader extends StatefulWidget {
 }
 
 class _StoreHeaderState extends State<StoreHeader> {
+  void _onStoreSelected(Store? store) {
+    setState(() {
+      _selectedStore = store;
+
+      storeAll = [
+        ...storeAllFilter
+            .where((store) => store.storeId == _selectedStore?.storeId)
+      ];
+    });
+    print('Selected Store in StoreScreen: ${store?.name}');
+    print(
+        'Selected Store in StoreScreen: ${storeAll.where((store) => store.storeId == _selectedStore?.storeId)}');
+  }
+
+  Future<List<RouteStore>> getRoutes(String filter) async {
+    try {
+      // Load the JSON file for districts
+      final String response = await rootBundle.loadString('data/route.json');
+      final data = json.decode(response);
+
+      // Filter and map JSON data to District model based on selected province and filter
+      final List<RouteStore> route =
+          (data as List).map((json) => RouteStore.fromJson(json)).toList();
+
+      // Group districts by amphoe
+      return route;
+    } catch (e) {
+      print("Error occurred: $e");
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -385,7 +409,6 @@ class _StoreHeaderState extends State<StoreHeader> {
                 fit: FlexFit.tight,
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-
                   // color: Colors.red,
                   child: Container(
                     decoration: const BoxDecoration(
@@ -438,11 +461,84 @@ class _StoreHeaderState extends State<StoreHeader> {
             ],
           ),
         ),
-        const Flexible(
+        Flexible(
           fit: FlexFit.tight,
           child: Padding(
             padding: EdgeInsets.all(8.0),
-            child: CustomerDropdownSearch(),
+            child: Row(
+              children: [
+                Expanded(
+                    flex: 2,
+                    child: Container(
+                        // margin: EdgeInsets.all(2),
+                        child: StoreSearch(onStoreSelected: _onStoreSelected))),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3.5),
+                    child: Container(
+                      // padding: EdgeInsets.all(8.0), // Add padding.
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white,
+                      ),
+                      child: DropdownSearchCustom<RouteStore>(
+                        key: ValueKey('RouteSearch-${selectedRoute.route}'),
+                        initialSelectedValue:
+                            selectedRoute.route == '' ? null : selectedRoute,
+                        label:
+                            "${"store.store_data_screen.input_route.name".tr()} *",
+                        titleText:
+                            "${"store.store_data_screen.input_route.name".tr()}",
+                        fetchItems: (filter) => getRoutes(filter),
+                        onChanged: (RouteStore? selected) async {
+                          if (selected != null) {
+                            setState(() {
+                              selectedRoute = RouteStore(route: selected.route);
+                            });
+
+                            storeAll = [
+                              ...storeAllFilter.where(
+                                  (store) => store.route == selected.route)
+                            ];
+
+                            // setState(() {
+                            //   _storeData = _storeData?.copyWithDynamicField(
+                            //       'route', selected.route);
+                            //   selectedRoute = RouteStore(route: selected.route);
+                            //   widget.initialSelectedRoute = selectedRoute;
+                            // });
+                            // _saveStoreToStorage();
+                          }
+                        },
+                        itemAsString: (RouteStore data) => data.route,
+                        itemBuilder: (context, item, isSelected) {
+                          return Column(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  " ${item.route}",
+                                  style: Styles.black18(context),
+                                ),
+                                selected: isSelected,
+                              ),
+                              Divider(
+                                color: Colors
+                                    .grey[200], // Color of the divider line
+                                thickness: 1, // Thickness of the line
+                                indent: 16, // Left padding for the divider line
+                                endIndent:
+                                    16, // Right padding for the divider line
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // child: StoreSearch(),
           ),
         ),
       ],

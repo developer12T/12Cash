@@ -187,7 +187,7 @@ class _VerifyStoreScreenState extends State<VerifyStoreScreen> {
               children: <TextSpan>[
                 TextSpan(
                   text:
-                      ' : ${widget.storeData.address} ${widget.storeData.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.storeData.subDistrict} ${widget.storeData.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.storeData.district} ${widget.storeData.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.storeData.province} ${widget.storeData.postcode}', // Inline bold text
+                      ' : ${widget.storeData.address} ${widget.storeData.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${widget.storeData.subDistrict} ${widget.storeData.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${widget.storeData.district} ${widget.storeData.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${widget.storeData.province} ${widget.storeData.postCode}', // Inline bold text
                   style: Styles.black18(context),
                 ),
               ],

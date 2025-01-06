@@ -296,7 +296,7 @@ class _PolicyScreenState extends State<PolicyScreen> {
                               subDistrict: "",
                               province: "",
                               provinceCode: "",
-                              postcode: "",
+                              postCode: "",
                               zone: "",
                               area: "",
                               latitude: latitude,

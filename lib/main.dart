@@ -291,9 +291,10 @@ class _MyAppState extends State<MyApp> {
       builder: (context, child) {
         return MaterialApp(
           routes: {
-            '/': (context) => const HomeScreen(
-                  index: 0,
-                ),
+            // '/': (context) => const HomeScreen(
+            //       index: 0,
+            //     ),
+            '/': (context) => LoginScreen(),
             '/route': (context) => const HomeScreen(
                   index: 1,
                 ),

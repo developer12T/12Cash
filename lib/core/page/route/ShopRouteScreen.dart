@@ -124,10 +124,10 @@ class _ShopRouteScreenState extends State<ShopRouteScreen> {
                 ],
               ),
             ),
-            SizedBox(
-              height: screenWidth / 30,
-            ),
-            Expanded(child: BoxShadowCustom(child: PolylineWithLabels())),
+            // SizedBox(
+            //   height: screenWidth / 30,
+            // ),
+            // Expanded(child: BoxShadowCustom(child: PolylineWithLabels())),
             SizedBox(
               height: screenWidth / 30,
             ),
