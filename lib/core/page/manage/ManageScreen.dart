@@ -23,69 +23,69 @@ class _ManageScreenState extends State<ManageScreen> {
           Container(
             child: Row(
               children: [
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSelected = !_isSelected;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 16, // Add elevation for shadow
-                        shadowColor: Colors.black
-                            .withOpacity(0.5), // Shadow color with opacity
+                // Expanded(
+                //   child: Container(
+                //     margin: const EdgeInsets.symmetric(horizontal: 16),
+                //     child: ElevatedButton(
+                //       onPressed: () {
+                //         setState(() {
+                //           _isSelected = !_isSelected;
+                //         });
+                //       },
+                //       style: ElevatedButton.styleFrom(
+                //         elevation: 16, // Add elevation for shadow
+                //         shadowColor: Colors.black
+                //             .withOpacity(0.5), // Shadow color with opacity
 
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 10),
-                        backgroundColor:
-                            _isSelected ? Colors.white : Colors.grey[300],
+                //         padding: const EdgeInsets.symmetric(
+                //             vertical: 16, horizontal: 10),
+                //         backgroundColor:
+                //             _isSelected ? Colors.white : Colors.grey[300],
 
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'รายการขาย',
-                        style: Styles.black18(context),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSelected = !_isSelected;
-                        });
-                      },
-                      child: Text(
-                        'รายการคืน',
-                        style: Styles.black18(context),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        elevation: 16, // Add elevation for shadow
-                        shadowColor: Colors.black
-                            .withOpacity(0.5), // Shadow color with opacity
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 10),
-                        backgroundColor:
-                            _isSelected ? Colors.grey[300] : Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
+                //         shape: RoundedRectangleBorder(
+                //           borderRadius: BorderRadius.circular(8),
+                //         ),
+                //       ),
+                //       child: Text(
+                //         'รายการขาย',
+                //         style: Styles.black18(context),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // Expanded(
+                //   child: Container(
+                //     margin: const EdgeInsets.symmetric(horizontal: 16),
+                //     child: ElevatedButton(
+                //       onPressed: () {
+                //         setState(() {
+                //           _isSelected = !_isSelected;
+                //         });
+                //       },
+                //       child: Text(
+                //         'รายการคืน',
+                //         style: Styles.black18(context),
+                //       ),
+                //       style: ElevatedButton.styleFrom(
+                //         elevation: 16, // Add elevation for shadow
+                //         shadowColor: Colors.black
+                //             .withOpacity(0.5), // Shadow color with opacity
+                //         padding: const EdgeInsets.symmetric(
+                //             vertical: 16, horizontal: 10),
+                //         backgroundColor:
+                //             _isSelected ? Colors.grey[300] : Colors.white,
+                //         shape: RoundedRectangleBorder(
+                //           borderRadius: BorderRadius.circular(8),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // )
               ],
             ),
           ),
-          _isSelected ? ShopTableNew() : Reportsaletable(),
-          Spacer(),
+          // _isSelected ? ShopTableNew() : Reportsaletable(),
+          // Spacer(),
         ],
       ),
     );

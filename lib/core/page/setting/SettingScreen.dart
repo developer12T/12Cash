@@ -5,12 +5,14 @@ import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/dropdown/DropDownStandarad.dart';
 import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/LoginScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -286,17 +288,30 @@ class _SettingScreenState extends State<SettingScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      color: Colors.white,
-                      child: Row(
-                        children: [
-                          SizedBox(width: screenWidth / 10),
-                          Text(
-                            "ออกจากระบบ",
-                            style: Styles.black18(context),
+                    child: GestureDetector(
+                      onTap: () async {
+                        SharedPreferences preferences =
+                            await SharedPreferences.getInstance();
+                        await preferences.clear();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
                           ),
-                        ],
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        color: Colors.white,
+                        child: Row(
+                          children: [
+                            SizedBox(width: screenWidth / 10),
+                            Text(
+                              "ออกจากระบบ",
+                              style: Styles.black18(context),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

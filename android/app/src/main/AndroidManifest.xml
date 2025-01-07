@@ -26,7 +26,7 @@
     <!-- foregroundServiceType: remoteMessaging -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <application
-        android:label="12Cash"
+        android:label="12Cash Testing"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
@@ -62,7 +62,7 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
-            android:theme="@style/LaunchTheme"
+            android:theme="@style/Theme.App.Transparent"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:screenOrientation="portrait"

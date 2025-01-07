@@ -26,69 +26,69 @@ class _ReportScreenState extends State<ReportScreen> {
           Container(
             child: Row(
               children: [
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSelected = !_isSelected;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 16, // Add elevation for shadow
-                        shadowColor: Colors.black
-                            .withOpacity(0.5), // Shadow color with opacity
+                // Expanded(
+                //   child: Container(
+                //     margin: const EdgeInsets.symmetric(horizontal: 16),
+                //     child: ElevatedButton(
+                //       onPressed: () {
+                //         setState(() {
+                //           _isSelected = !_isSelected;
+                //         });
+                //       },
+                //       style: ElevatedButton.styleFrom(
+                //         elevation: 16, // Add elevation for shadow
+                //         shadowColor: Colors.black
+                //             .withOpacity(0.5), // Shadow color with opacity
 
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 10),
-                        backgroundColor:
-                            _isSelected ? Colors.white : Colors.grey[300],
+                //         padding: const EdgeInsets.symmetric(
+                //             vertical: 16, horizontal: 10),
+                //         backgroundColor:
+                //             _isSelected ? Colors.white : Colors.grey[300],
 
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'รายการขาย',
-                        style: Styles.headerBlack24(context),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSelected = !_isSelected;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 16, // Add elevation for shadow
-                        shadowColor: Colors.black
-                            .withOpacity(0.5), // Shadow color with opacity
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 10),
-                        backgroundColor:
-                            _isSelected ? Colors.grey[300] : Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'รายการคืน',
-                        style: Styles.headerBlack24(context),
-                      ),
-                    ),
-                  ),
-                )
+                //         shape: RoundedRectangleBorder(
+                //           borderRadius: BorderRadius.circular(8),
+                //         ),
+                //       ),
+                //       child: Text(
+                //         'รายการขาย',
+                //         style: Styles.headerBlack24(context),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // Expanded(
+                //   child: Container(
+                //     margin: const EdgeInsets.symmetric(horizontal: 16),
+                //     child: ElevatedButton(
+                //       onPressed: () {
+                //         setState(() {
+                //           _isSelected = !_isSelected;
+                //         });
+                //       },
+                //       style: ElevatedButton.styleFrom(
+                //         elevation: 16, // Add elevation for shadow
+                //         shadowColor: Colors.black
+                //             .withOpacity(0.5), // Shadow color with opacity
+                //         padding: const EdgeInsets.symmetric(
+                //             vertical: 16, horizontal: 10),
+                //         backgroundColor:
+                //             _isSelected ? Colors.grey[300] : Colors.white,
+                //         shape: RoundedRectangleBorder(
+                //           borderRadius: BorderRadius.circular(8),
+                //         ),
+                //       ),
+                //       child: Text(
+                //         'รายการคืน',
+                //         style: Styles.headerBlack24(context),
+                //       ),
+                //     ),
+                //   ),
+                // )
               ],
             ),
           ),
-          _isSelected ? const ShopTableNew() : const Reportsaletable(),
-          const Spacer(),
+          // _isSelected ? const ShopTableNew() : const Reportsaletable(),
+          // const Spacer(),
         ],
       ),
     );

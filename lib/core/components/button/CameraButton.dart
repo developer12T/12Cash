@@ -41,7 +41,7 @@ class _CameraButtonWidgetState extends State<CameraButtonWidget> {
 
     _cameraController = CameraController(
       firstCamera,
-      ResolutionPreset.high,
+      ResolutionPreset.max,
     );
 
     _initializeControllerFuture = _cameraController.initialize();

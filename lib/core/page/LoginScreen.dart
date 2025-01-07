@@ -68,6 +68,31 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> saveUserData(Map<String, dynamic> resBody) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    // Set the current timestamp and expiry duration in seconds
+    int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+    // int expiryDuration = 60 * 60 * 1000; // 1 hour in milliseconds
+    int expiryDuration = 24 * 60 * 60 * 1000; // 1 hour in milliseconds
+
+    sharedPreferences.setString('username', resBody['username']);
+    sharedPreferences.setString('firstName', resBody['firstName']);
+    sharedPreferences.setString('surName', resBody['surName']);
+    sharedPreferences.setString('fullName', resBody['fullName']);
+    sharedPreferences.setString('saleCode', resBody['saleCode']);
+    sharedPreferences.setString('salePayer', resBody['salePayer']);
+    sharedPreferences.setString('tel', resBody['tel']);
+    sharedPreferences.setString('area', resBody['area']);
+    sharedPreferences.setString('zone', resBody['zone']);
+    sharedPreferences.setString('warehouse', resBody['warehouse']);
+    sharedPreferences.setString('role', resBody['role']);
+    sharedPreferences.setString('token', resBody['token']);
+
+    // Save the expiry timestamp
+    sharedPreferences.setInt('dataExpiry', currentTimestamp + expiryDuration);
+  }
+
   @override
   void dispose() {
     _userNameController.dispose();
@@ -188,33 +213,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                 // }
                                 print(resBody['username']);
+                                await saveUserData(resBody);
 
                                 sharedPreferences =
                                     await SharedPreferences.getInstance();
-                                sharedPreferences.setString(
-                                    'username', resBody['username']);
-                                sharedPreferences.setString(
-                                    'firstName', resBody['firstName']);
-                                sharedPreferences.setString(
-                                    'surName', resBody['surName']);
-                                sharedPreferences.setString(
-                                    'fullName', resBody['fullName']);
-                                sharedPreferences.setString(
-                                    'saleCode', resBody['saleCode']);
-                                sharedPreferences.setString(
-                                    'salePayer', resBody['salePayer']);
-                                sharedPreferences.setString(
-                                    'tel', resBody['tel']);
-                                sharedPreferences.setString(
-                                    'area', resBody['area']);
-                                sharedPreferences.setString(
-                                    'zone', resBody['zone']);
-                                sharedPreferences.setString(
-                                    'warehouse', resBody['warehouse']);
-                                sharedPreferences.setString(
-                                    'role', resBody['role']);
-                                sharedPreferences.setString(
-                                    'token', resBody['token']);
+                                // sharedPreferences.setString(
+                                //     'username', resBody['username']);
+                                // sharedPreferences.setString(
+                                //     'firstName', resBody['firstName']);
+                                // sharedPreferences.setString(
+                                //     'surName', resBody['surName']);
+                                // sharedPreferences.setString(
+                                //     'fullName', resBody['fullName']);
+                                // sharedPreferences.setString(
+                                //     'saleCode', resBody['saleCode']);
+                                // sharedPreferences.setString(
+                                //     'salePayer', resBody['salePayer']);
+                                // sharedPreferences.setString(
+                                //     'tel', resBody['tel']);
+                                // sharedPreferences.setString(
+                                //     'area', resBody['area']);
+                                // sharedPreferences.setString(
+                                //     'zone', resBody['zone']);
+                                // sharedPreferences.setString(
+                                //     'warehouse', resBody['warehouse']);
+                                // sharedPreferences.setString(
+                                //     'role', resBody['role']);
+                                // sharedPreferences.setString(
+                                //     'token', resBody['token']);
 
                                 setState(() {
                                   User.username =

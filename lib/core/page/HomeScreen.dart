@@ -307,8 +307,8 @@ class _HomeScreenState extends State<HomeScreen> {
       Routescreen(),
       StoreScreen(),
       ReportScreen(),
-      ManageScreen(),
-      SettingScreen(),
+      // ManageScreen(),
+      // SettingScreen(),
     ];
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(

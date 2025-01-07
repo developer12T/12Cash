@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:_12sale_app/core/components/Gird.dart';
@@ -20,6 +21,7 @@ import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
 import 'package:_12sale_app/core/page/route/TossAddToCartScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/localNotification.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
@@ -35,14 +37,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+late List<CameraDescription> _cameras;
 
 void main() async {
   // Initialize the locale data for Thai language
   // Ensure the app is always in portrait mode
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  await LocationService().initialize();
+
   // Initialize the notifications
   await initializeNotifications();
   await requestAllPermissions();
@@ -61,16 +66,9 @@ void main() async {
   // if (!hasPermissions) {
   //   print("Background permissions not granted");
   // }
-
-  // _cameras = await availableCameras();
-  // final cameras = await availableCameras();
-
-  // Get the first camera from the list
-  // final firstCamera = cameras.first;
-
   // Initialize port for communication between TaskHandler and UI.
   FlutterForegroundTask.initCommunicationPort();
-
+  await LocationService().initialize();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -97,7 +95,6 @@ void startCallback() {
 
 class MyTaskHandler extends TaskHandler {
   static const String incrementCountCommand = 'incrementCount';
-
   int _count = 0;
 
   void _incrementCount() {
@@ -171,6 +168,20 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
+  late CameraController _cameraController;
+  Future<void>? _initializeControllerFuture;
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
+
+    _cameraController = CameraController(
+      firstCamera,
+      ResolutionPreset.max,
+    );
+
+    _initializeControllerFuture = _cameraController.initialize();
+  }
 
   Future<void> _requestPermissions() async {
     // Android 13+, you need to allow notification permission to display foreground service notification.
@@ -263,9 +274,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    // Initialize the camera
+    _initializeCamera();
     // Add a callback to receive data sent from the TaskHandler.
     FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Request permissions and initialize the service.
       _requestPermissions();
@@ -279,6 +291,8 @@ class _MyAppState extends State<MyApp> {
     // Remove a callback to receive data sent from the TaskHandler.
     FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     _taskDataListenable.dispose();
+    _cameraController
+        .dispose(); // Dispose of the camera controller to free resources
     super.dispose();
   }
 
@@ -294,7 +308,7 @@ class _MyAppState extends State<MyApp> {
             // '/': (context) => const HomeScreen(
             //       index: 0,
             //     ),
-            '/': (context) => LoginScreen(),
+            '/': (context) => const AuthCheck(),
             '/route': (context) => const HomeScreen(
                   index: 1,
                 ),
@@ -312,13 +326,22 @@ class _MyAppState extends State<MyApp> {
           locale: context.locale,
           navigatorObservers: [routeObserver], // Register RouteObserver here
           debugShowCheckedModeBanner: false,
+
           theme: ThemeData(
+            // splashColor: Colors.transparent,
+            // highlightColor: Colors.transparent,
+            // hoverColor: Colors.transparent,
+            // iconTheme: IconThemeData(
+            //   color: Colors.transparent,
+            //   opacity: 0.0,
+            // ),
             primarySwatch: Colors.blue,
             extensions: const [
               SkeletonizerConfigData.dark(),
             ],
             textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
           ),
+
           // home: PolylineWithLabels(),
           // home: SettingsScreen(),
           // home: const LoginScreen(),
@@ -375,6 +398,109 @@ class _MyAppState extends State<MyApp> {
           buttonBuilder('stop service', onPressed: _stopService),
           buttonBuilder('increment count', onPressed: _incrementCount),
         ],
+      ),
+    );
+  }
+}
+
+class AuthCheck extends StatefulWidget {
+  const AuthCheck({super.key});
+
+  @override
+  State<AuthCheck> createState() => _AuthCheckState();
+}
+
+class _AuthCheckState extends State<AuthCheck> {
+  bool userAvailable = false;
+  late SharedPreferences sharedPreferences;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
+  Future<void> getUserData() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    // Check expiry
+    int? expiryTimestamp = sharedPreferences.getInt('dataExpiry');
+    if (expiryTimestamp != null) {
+      int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+      if (currentTimestamp > expiryTimestamp) {
+        // Data has expired, clear it
+        sharedPreferences.clear();
+        print('User data has expired');
+        return null;
+      } else {
+        setState(() {
+          User.username = sharedPreferences.getString('username')!;
+          User.firstName = sharedPreferences.getString('firstName')!;
+          User.surName = sharedPreferences.getString('surName')!;
+          User.fullName = sharedPreferences.getString('fullName')!;
+          User.salePayer = sharedPreferences.getString('salePayer')!;
+          User.tel = sharedPreferences.getString('tel')!;
+          User.area = sharedPreferences.getString('area')!;
+          User.zone = sharedPreferences.getString('zone')!;
+          User.warehouse = sharedPreferences.getString('warehouse')!;
+          User.role = sharedPreferences.getString('role')!;
+          User.token = sharedPreferences.getString('token')!;
+          userAvailable = true;
+        });
+        Timer(
+          Duration(seconds: 3),
+          () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(
+                index: 0,
+              ),
+            ),
+          ),
+        );
+      }
+    } else {
+      Timer(
+        Duration(seconds: 3),
+        () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginScreen(),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: screenWidth / 3,
+              height: screenWidth / 3,
+              // color: Colors.red,
+              child: Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/12CashLogo.png'),
+                  ),
+                ),
+              ),
+            ),
+            // CircularProgressIndicator(
+            //   color: Styles.primaryColor,
+            // ),
+            // Text(
+            //   '12Cash ยินดีต้อนรับ...',
+            //   style: Styles.black18(context),
+            // )
+          ],
+        ),
       ),
     );
   }

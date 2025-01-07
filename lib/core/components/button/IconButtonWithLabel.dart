@@ -51,7 +51,7 @@ class _IconButtonWithLabelState extends State<IconButtonWithLabel> {
         final firstCamera = cameras.first;
         _cameraController = CameraController(
           firstCamera,
-          ResolutionPreset.high,
+          ResolutionPreset.max,
         );
         _initializeControllerFuture = _cameraController.initialize();
         await _initializeControllerFuture;

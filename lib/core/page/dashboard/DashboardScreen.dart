@@ -245,23 +245,23 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             const WeightCudeCard(),
             // SizedBox(height: screenWidth / 25),
             // SizedBox(height: 500, width: 400, child: LineChartSample()),
-            SizedBox(height: screenWidth / 25),
-            CalendarPicker(
-              label: "Select Date",
-              initialDate: DateTime.now(),
-              firstDate: DateTime(2000),
-              lastDate: DateTime(2100),
-              onDateSelected: (selectedDate) {
-                // Perform any action with the selected date
-                debugPrint("Selected Date: $selectedDate");
-              },
-            ),
-            SizedBox(height: screenWidth / 25),
+            // SizedBox(height: screenWidth / 25),
+            // CalendarPicker(
+            //   label: "Select Date",
+            //   initialDate: DateTime.now(),
+            //   firstDate: DateTime(2000),
+            //   lastDate: DateTime(2100),
+            //   onDateSelected: (selectedDate) {
+            //     // Perform any action with the selected date
+            //     debugPrint("Selected Date: $selectedDate");
+            //   },
+            // ),
+            // SizedBox(height: screenWidth / 25),
 
             // Container(height: 500, width: 400, child: LineChartSample()),
-            Expanded(
-                child: Container(
-                    height: 500, width: 500, child: TrendingMusicChart())),
+            // Expanded(
+            //     child: Container(
+            //         height: 500, width: 500, child: TrendingMusicChart())),
             // Container(height: 500, width: 300, child: LineChartSample())
             // CameraButtonWidget()
             // ShippingDropdownSearch(),
