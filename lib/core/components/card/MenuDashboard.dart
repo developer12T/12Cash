@@ -175,25 +175,25 @@ class _MenuDashboardState extends State<MenuDashboard> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Positioned(
-                        right: 10,
-                        top: 10,
-                        child: Container(
-                          height: screenWidth / 18,
-                          width: screenWidth / 18,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(360)),
-                          ),
-                          child: Center(
-                            child: Text(
-                              "1",
-                              style: Styles.white18(context),
-                            ),
-                          ),
-                        ),
-                      ),
+                      // Positioned(
+                      //   right: 10,
+                      //   top: 10,
+                      //   child: Container(
+                      //     height: screenWidth / 18,
+                      //     width: screenWidth / 18,
+                      //     decoration: const BoxDecoration(
+                      //       color: Colors.red,
+                      //       borderRadius:
+                      //           BorderRadius.all(Radius.circular(360)),
+                      //     ),
+                      //     child: Center(
+                      //       child: Text(
+                      //         "1",
+                      //         style: Styles.white18(context),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

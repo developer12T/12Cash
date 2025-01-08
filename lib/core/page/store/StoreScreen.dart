@@ -468,10 +468,12 @@ class _StoreHeaderState extends State<StoreHeader> {
             child: Row(
               children: [
                 Expanded(
-                    flex: 2,
-                    child: Container(
-                        // margin: EdgeInsets.all(2),
-                        child: StoreSearch(onStoreSelected: _onStoreSelected))),
+                  flex: 2,
+                  child: Container(
+                    // margin: EdgeInsets.all(2),
+                    child: StoreSearch(onStoreSelected: _onStoreSelected),
+                  ),
+                ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 3.5),
@@ -486,7 +488,7 @@ class _StoreHeaderState extends State<StoreHeader> {
                         initialSelectedValue:
                             selectedRoute.route == '' ? null : selectedRoute,
                         label:
-                            "${"store.store_data_screen.input_route.name".tr()} *",
+                            "${"store.store_data_screen.input_route.name".tr()}",
                         titleText:
                             "${"store.store_data_screen.input_route.name".tr()}",
                         fetchItems: (filter) => getRoutes(filter),

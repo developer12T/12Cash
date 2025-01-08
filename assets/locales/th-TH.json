@@ -10,6 +10,13 @@
             "appbar": "ตัวอย่างการถ่ายรูป"
         }
     },
+    "chart": {
+        "item_chart": {
+            "title": "สรุปจำนวนการขายสินค้า",
+            "count": "จำนวน",
+            "month": "เดือน"
+        }
+    },
     "menu": {
         "home": "หน้าหลัก",
         "shop": "ร้านค้า",
@@ -34,6 +41,15 @@
             "credit_limit": "เครดิต",
             "warehouse": "คลัง",
             "more": "อื่นๆ"
+        },
+        "weightcude_card": {
+            "title": "น้ําหนักสินค้า",
+            "net_weight": "น้ําหนักสุทธิ",
+            "gross_weight": "น้ําหนักรวม",
+            "utilized_weight": "น้ําหนักที่ใช้",
+            "unit": "หน่วย",
+            "ton_unit": "ต.",
+            "gilo_unit": "กก."
         }
     },
     "route": {

@@ -12,6 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
@@ -360,7 +361,6 @@ class _RouteHeaderState extends State<RouteHeader> {
                 fit: FlexFit.tight,
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-
                   // color: Colors.red,
                   child: Container(
                     decoration: const BoxDecoration(
@@ -390,8 +390,12 @@ class _RouteHeaderState extends State<RouteHeader> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.event,
-                                      size: 25, color: Colors.white),
+                                  FaIcon(
+                                    FontAwesomeIcons.route,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                  SizedBox(width: 8),
                                   Text(
                                     "route.title".tr(),
                                     style: Styles.headerWhite24(context),

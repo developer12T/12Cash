@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }();
       case 3:
         return () {
-          _showSearchModal();
+          // _showSearchModal();
         }();
       default:
         return () {}();

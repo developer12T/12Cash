@@ -10,6 +10,13 @@
             "appbar": "Example Camera"
         }
     },
+    "chart": {
+        "item_chart": {
+            "title": "Item Summarize",
+            "count": "Count",
+            "month": "Month"
+        }
+    },
     "menu": {
         "home": "Home",
         "shop": "Store",
@@ -34,6 +41,15 @@
             "credit_limit": "Credit",
             "warehouse": "Warehouse",
             "more": "More"
+        },
+        "weightcude_card": {
+            "title": "Weight Cude",
+            "net_weight": "Net Weight",
+            "gross_weight": "Gross Weight",
+            "utilized_weight": "Utilized Weight",
+            "unit": "Unit",
+            "ton_unit": "t.",
+            "gilo_unit": "kg."
         }
     },
     "route": {

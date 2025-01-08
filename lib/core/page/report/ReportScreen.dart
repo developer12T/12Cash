@@ -1,9 +1,17 @@
+import 'dart:async';
+
+import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/Loading.dart';
+import 'package:_12sale_app/core/components/card/InvoiceCard.dart';
 import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
 import 'package:_12sale_app/core/components/table/ReportSaleTable.dart';
 import 'package:_12sale_app/core/components/table/ShopTableAll.dart';
 import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/Store.dart';
+import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:flutter/material.dart';
 
 class ReportScreen extends StatefulWidget {
@@ -15,81 +23,83 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   bool _isSelected = false;
+  List<Store> storeAll = [];
+  bool _loadingAllStore = true;
+
+  Future<void> _getStoreDataAll() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/store/getStore?area=${User.area}&type=all', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+        print(response.data['data']);
+        setState(() {
+          storeAll = data.map((item) => Store.fromJson(item)).toList();
+        });
+        Timer(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() {
+              _loadingAllStore = false;
+            });
+          }
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // _loadStoreData();
+    _getStoreDataAll();
+    // _pagingController.addPageRequestListener((pageKey) {
+    //   _fetchPage(pageKey);
+    // });
+    // requestLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      margin: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Container(
-            child: Row(
-              children: [
-                // Expanded(
-                //   child: Container(
-                //     margin: const EdgeInsets.symmetric(horizontal: 16),
-                //     child: ElevatedButton(
-                //       onPressed: () {
-                //         setState(() {
-                //           _isSelected = !_isSelected;
-                //         });
-                //       },
-                //       style: ElevatedButton.styleFrom(
-                //         elevation: 16, // Add elevation for shadow
-                //         shadowColor: Colors.black
-                //             .withOpacity(0.5), // Shadow color with opacity
-
-                //         padding: const EdgeInsets.symmetric(
-                //             vertical: 16, horizontal: 10),
-                //         backgroundColor:
-                //             _isSelected ? Colors.white : Colors.grey[300],
-
-                //         shape: RoundedRectangleBorder(
-                //           borderRadius: BorderRadius.circular(8),
-                //         ),
-                //       ),
-                //       child: Text(
-                //         'รายการขาย',
-                //         style: Styles.headerBlack24(context),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // Expanded(
-                //   child: Container(
-                //     margin: const EdgeInsets.symmetric(horizontal: 16),
-                //     child: ElevatedButton(
-                //       onPressed: () {
-                //         setState(() {
-                //           _isSelected = !_isSelected;
-                //         });
-                //       },
-                //       style: ElevatedButton.styleFrom(
-                //         elevation: 16, // Add elevation for shadow
-                //         shadowColor: Colors.black
-                //             .withOpacity(0.5), // Shadow color with opacity
-                //         padding: const EdgeInsets.symmetric(
-                //             vertical: 16, horizontal: 10),
-                //         backgroundColor:
-                //             _isSelected ? Colors.grey[300] : Colors.white,
-                //         shape: RoundedRectangleBorder(
-                //           borderRadius: BorderRadius.circular(8),
-                //         ),
-                //       ),
-                //       child: Text(
-                //         'รายการคืน',
-                //         style: Styles.headerBlack24(context),
-                //       ),
-                //     ),
-                //   ),
-                // )
-              ],
-            ),
+    return Scaffold(
+      backgroundColor:
+          Colors.transparent, // set scaffold background color to transparent
+      body: Container(
+        margin: EdgeInsets.only(top: 20),
+        child: LoadingSkeletonizer(
+          loading: _loadingAllStore,
+          child: ListView.builder(
+            itemCount: storeAll.length,
+            itemBuilder: (context, index) {
+              return InvoiceCard(
+                item: storeAll[index],
+                onDetailsPressed: () {
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => DetailStoreScreen(
+                  //         initialSelectedRoute:
+                  //             RouteStore(route: storeAll[index].route),
+                  //         store: storeAll[index],
+                  //         customerNo: storeAll[index].storeId,
+                  //         customerName: storeAll[index].name),
+                  //   ),
+                  // );
+                  // print(
+                  //     'imageList for ${storeAll[index].imageList[0].path}');
+                },
+              );
+            },
           ),
-          // _isSelected ? const ShopTableNew() : const Reportsaletable(),
-          // const Spacer(),
-        ],
+        ),
       ),
     );
   }
@@ -119,7 +129,6 @@ class _ReportHeaderState extends State<ReportHeader> {
                 fit: FlexFit.tight,
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-
                   // color: Colors.red,
                   child: Container(
                     decoration: const BoxDecoration(

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/convertJwtToken.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -74,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Set the current timestamp and expiry duration in seconds
     int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
     // int expiryDuration = 60 * 60 * 1000; // 1 hour in milliseconds
-    int expiryDuration = 24 * 60 * 60 * 1000; // 1 hour in milliseconds
+    int expiryDuration = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
     sharedPreferences.setString('username', resBody['username']);
     sharedPreferences.setString('firstName', resBody['firstName']);
@@ -212,35 +213,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                 // if (resBody['success'] == true) {
 
                                 // }
+                                String token = resBody['token'];
+                                decodeJwt(token);
+                                // print(parseJwtPayLoad(token));
+                                // print(resBody['username']);
+
+                                //  DateTime expirationDate = JwtDecoder.getExpirationDate(token);
                                 print(resBody['username']);
                                 await saveUserData(resBody);
 
                                 sharedPreferences =
                                     await SharedPreferences.getInstance();
-                                // sharedPreferences.setString(
-                                //     'username', resBody['username']);
-                                // sharedPreferences.setString(
-                                //     'firstName', resBody['firstName']);
-                                // sharedPreferences.setString(
-                                //     'surName', resBody['surName']);
-                                // sharedPreferences.setString(
-                                //     'fullName', resBody['fullName']);
-                                // sharedPreferences.setString(
-                                //     'saleCode', resBody['saleCode']);
-                                // sharedPreferences.setString(
-                                //     'salePayer', resBody['salePayer']);
-                                // sharedPreferences.setString(
-                                //     'tel', resBody['tel']);
-                                // sharedPreferences.setString(
-                                //     'area', resBody['area']);
-                                // sharedPreferences.setString(
-                                //     'zone', resBody['zone']);
-                                // sharedPreferences.setString(
-                                //     'warehouse', resBody['warehouse']);
-                                // sharedPreferences.setString(
-                                //     'role', resBody['role']);
-                                // sharedPreferences.setString(
-                                //     'token', resBody['token']);
 
                                 setState(() {
                                   User.username =

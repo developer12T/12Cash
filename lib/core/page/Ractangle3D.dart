@@ -264,7 +264,7 @@ class RectanglePainter extends CustomPainter {
       // final percentageText2 = "${(fillStockPercentage + 0.4 * 100).toInt()}%";
       final textPainter = TextPainter(
         text: TextSpan(
-          text: "Stock: $percentageText",
+          text: "คลัง: $percentageText",
           style: fillStockPercentage > 0.39
               ? Styles.black24(context)
               : Styles.black24(context),
@@ -274,7 +274,7 @@ class RectanglePainter extends CustomPainter {
 
       final textPainter2 = TextPainter(
         text: TextSpan(
-          text: "Withdraw + Stock: 80%",
+          text: "เบิก + คลัง: 80%",
           style: fillStockPercentage > 0.39
               ? Styles.black24(context)
               : Styles.black24(context),
@@ -342,7 +342,7 @@ class RectanglePainter extends CustomPainter {
       // final percentageText2 = "${(fillStockPercentage + 0.4 * 100).toInt()}%";
       final textPainter = TextPainter(
         text: TextSpan(
-          text: "Stock: $percentageText",
+          text: "คลัง: $percentageText",
           style: fillStockPercentage > 0.39
               ? Styles.black24(context)
               : Styles.black24(context),

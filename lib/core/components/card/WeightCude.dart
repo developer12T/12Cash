@@ -5,6 +5,7 @@ import 'package:_12sale_app/core/components/BuildTextRowDetailShop.dart';
 import 'package:_12sale_app/core/page/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/report/UtilzeDetail.dart';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class WeightCudeCard extends StatefulWidget {
@@ -33,7 +34,7 @@ class _WeightCudeCardState extends State<WeightCudeCard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Weight Cude",
+                    "dashboard.weightcude_card.title".tr(),
                     style: Styles.black24(context),
                   ),
                 ],
@@ -71,16 +72,16 @@ class _WeightCudeCardState extends State<WeightCudeCard> {
               //   ],
               // )
               BuildTextRowBetween(
-                  text: "Net Weight",
-                  text2: "0.94 kg",
+                  text: "dashboard.weightcude_card.net_weight".tr(),
+                  text2: "0.94 ${"dashboard.weightcude_card.gilo_unit".tr()}",
                   style: Styles.black24(context)),
               BuildTextRowBetween(
-                  text: "Gross Weight",
-                  text2: "0.94 kg",
+                  text: "dashboard.weightcude_card.gross_weight".tr(),
+                  text2: "0.94 ${"dashboard.weightcude_card.gilo_unit".tr()}",
                   style: Styles.black24(context)),
               BuildTextRowBetween(
-                  text: "Utilized Weight",
-                  text2: "0.94 t",
+                  text: "dashboard.weightcude_card.utilized_weight".tr(),
+                  text2: "0.94 ${"dashboard.weightcude_card.ton_unit".tr()}",
                   style: Styles.black24(context)),
               // SizedBox(
               //   height: screenWidth / 15,

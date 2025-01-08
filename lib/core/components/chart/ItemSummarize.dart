@@ -1,4 +1,6 @@
+import 'package:_12sale_app/core/components/button/Button.dart';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -69,7 +71,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Item Summarize By Store ",
+                "chart.item_chart.title".tr(),
                 style: Styles.black18(context),
               )
             ],
@@ -91,7 +93,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
                   leftTitles: AxisTitles(
                     axisNameSize: 25,
                     axisNameWidget: Text(
-                      "Count",
+                      "chart.item_chart.count".tr(),
                       style: Styles.black18(context),
                     ),
                     sideTitles: SideTitles(
@@ -105,7 +107,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
                   bottomTitles: AxisTitles(
                     axisNameSize: 25,
                     axisNameWidget: Text(
-                      "Month",
+                      "chart.item_chart.month".tr(),
                       style: Styles.black18(context),
                     ),
                     sideTitles: SideTitles(

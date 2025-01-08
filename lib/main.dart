@@ -36,11 +36,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-
-late List<CameraDescription> _cameras;
 
 void main() async {
   // Initialize the locale data for Thai language
@@ -101,9 +100,9 @@ class MyTaskHandler extends TaskHandler {
     _count++;
 
     // Update notification content.
-    FlutterForegroundTask.updateService(
-        notificationTitle: 'Hello MyTaskHandler :)',
-        notificationText: 'count: $_count');
+    // FlutterForegroundTask.updateService(
+    //     notificationTitle: 'Hello MyTaskHandler :)',
+    //     notificationText: 'count: $_count');
 
     // Send data to main isolate.
     FlutterForegroundTask.sendDataToMain(_count);
@@ -170,6 +169,10 @@ class _MyAppState extends State<MyApp> {
   final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
   late CameraController _cameraController;
   Future<void>? _initializeControllerFuture;
+
+  final LocationService locationService = LocationService();
+  double latitude = 00.00;
+  double longitude = 00.00;
 
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
@@ -262,8 +265,35 @@ class _MyAppState extends State<MyApp> {
     return FlutterForegroundTask.stopService();
   }
 
+  Future<void> fetchLocation() async {
+    try {
+      // Initialize the location service
+      await locationService.initialize();
+
+      // Get latitude and longitude
+      double? lat = await locationService.getLatitude();
+      double? lon = await locationService.getLongitude();
+
+      setState(() {
+        latitude = lat ?? 00.00;
+        longitude = lon ?? 00.00;
+      });
+      print("${latitude}, ${longitude}");
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          latitude = 00.00;
+          longitude = 00.00;
+        });
+      }
+      print("Error: $e");
+    }
+  }
+
   void _onReceiveTaskData(Object data) {
     print('onReceiveTaskData: $data');
+    fetchLocation();
+    print("latitude: ${latitude} longitude: ${longitude}");
     _taskDataListenable.value = data;
   }
 
@@ -280,9 +310,9 @@ class _MyAppState extends State<MyApp> {
     FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Request permissions and initialize the service.
-      _requestPermissions();
+      // _requestPermissions();
       _initService();
-      _startService();
+      // _startService();
     });
   }
 
@@ -326,7 +356,6 @@ class _MyAppState extends State<MyApp> {
           locale: context.locale,
           navigatorObservers: [routeObserver], // Register RouteObserver here
           debugShowCheckedModeBanner: false,
-
           theme: ThemeData(
             // splashColor: Colors.transparent,
             // highlightColor: Colors.transparent,
@@ -398,6 +427,51 @@ class _MyAppState extends State<MyApp> {
           buttonBuilder('stop service', onPressed: _stopService),
           buttonBuilder('increment count', onPressed: _incrementCount),
         ],
+      ),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    tranformScreen();
+  }
+
+  Future<void> tranformScreen() async {
+    Timer(
+      Duration(seconds: 5),
+      () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AuthCheck(),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset(
+              'assets/animation/loading2.json',
+              // Use the device frame rate (up to 120FPS)
+              frameRate: FrameRate.max,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -475,19 +549,20 @@ class _AuthCheckState extends State<AuthCheck> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: Styles.primaryColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: screenWidth / 3,
-              height: screenWidth / 3,
+              width: screenWidth / 2,
+              height: screenWidth / 2,
               // color: Colors.red,
               child: Container(
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/images/12CashLogo.png'),
+                    image: AssetImage('assets/images/logo12.png'),
                   ),
                 ),
               ),
@@ -499,6 +574,15 @@ class _AuthCheckState extends State<AuthCheck> {
             //   '12Cash ยินดีต้อนรับ...',
             //   style: Styles.black18(context),
             // )
+            // SizedBox(
+            //   height: 15,
+            // ),
+            // Lottie.asset(
+            //   width: screenWidth / 5,
+            //   height: screenWidth / 5,
+            //   'assets/animation/loading2.json',
+            //   frameRate: FrameRate.max,
+            // ),
           ],
         ),
       ),

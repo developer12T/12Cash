@@ -153,9 +153,9 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         title_1: "dashboard.menu.sale_report".tr(),
         icon_1: Icons.description,
         onTap1: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => NotificationScreen()),
-          );
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(builder: (context) => NotificationScreen()),
+          // );
         },
         title_2: "dashboard.menu.data_analysis".tr(),
         icon_2: Icons.equalizer,
@@ -412,7 +412,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
 
                                     child: Center(
                                       child: Text(
-                                        '${User.role}',
+                                        '${User.role.toUpperCase()}',
                                         style: Styles.headerBlack24(context),
                                       ),
                                     ),
@@ -428,7 +428,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                             left: Radius.circular(50))),
                                     child: Center(
                                       child: Text(
-                                        '${User.area}',
+                                        '${User.area.toUpperCase()}',
                                         style: Styles.headerBlack24(context),
                                       ),
                                     ),

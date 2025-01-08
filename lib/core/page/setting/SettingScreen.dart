@@ -8,6 +8,7 @@ import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/LoginScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/User.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +66,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 decoration: const BoxDecoration(
                   // color: Colors.red,
                   image: DecorationImage(
-                    image: AssetImage('assets/images/12TradingLogo.png'),
+                    image: AssetImage('assets/images/12CashLogo.png'),
                     // fit: BoxFit.fitWidth,
                   ),
                 ),
@@ -75,6 +76,16 @@ class _SettingScreenState extends State<SettingScreen> {
                 children: [
                   Text(
                     "12 Cash App",
+                    style: Styles.black24(context),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "${User.fullName}",
                     style: Styles.black24(context),
                     textAlign: TextAlign.center,
                   ),
