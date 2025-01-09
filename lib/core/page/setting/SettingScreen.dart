@@ -14,6 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+// import 'package:dart_config/default_server.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -26,11 +29,28 @@ class _SettingScreenState extends State<SettingScreen> {
   late Map<String, String> languages = {};
   bool light = true;
 
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
+
   String? selectedLanguageCode;
   @override
   void initState() {
     super.initState();
     _loadData();
+    _initPackageInfo();
+  }
+
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
   }
 
   Future<void> _loadData() async {
@@ -286,7 +306,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         children: [
                           SizedBox(width: screenWidth / 10),
                           Text(
-                            "เวอร์ชั่นปัจจุบัน : 1.0.0",
+                            "เวอร์ชั่นปัจจุบัน : ${_packageInfo.version} ",
                             style: Styles.black18(context),
                           ),
                         ],

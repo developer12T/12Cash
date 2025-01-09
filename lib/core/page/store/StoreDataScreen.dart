@@ -351,7 +351,7 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
                               children: [
                                 ListTile(
                                   title: Text(
-                                    " ${item.name}",
+                                    "${item.name}",
                                     style: Styles.black18(context),
                                   ),
                                   selected: isSelected,

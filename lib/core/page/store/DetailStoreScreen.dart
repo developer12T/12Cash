@@ -5,6 +5,7 @@ import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/IconButtonWithLabel.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
+import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
@@ -12,8 +13,10 @@ import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Store.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
 
 class DetailStoreScreen extends StatefulWidget {
@@ -72,6 +75,72 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
     });
   }
 
+  Future<void> _checkin() async {
+    await fetchLocation();
+    Dio dio = Dio();
+    final String apiUrl =
+        "https://be10-171-103-242-50.ngrok-free.app/api/cash/store/checkIn/${widget.store.storeId}";
+    Map<String, dynamic> jsonData = {
+      "latitude": latitude,
+      "longtitude": longitude
+    };
+    print("API latitude ${latitude} longtitude ${longitude}");
+    try {
+      final response = await dio.post(
+        apiUrl,
+        data: jsonData,
+        options: Options(
+          headers: {
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        // print(response.data['message']);
+        // print(response.data);
+        toastification.show(
+          autoCloseDuration: Duration(seconds: 3),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "เช็คอินสําเร็จ",
+            style: Styles.black18(context),
+          ),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen(index: 2)),
+        );
+      } else {
+        toastification.show(
+          autoCloseDuration: Duration(seconds: 3),
+          context: context,
+          primaryColor: Colors.red,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "เกิดข้อผิดพลาด",
+            style: Styles.black18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      toastification.show(
+        autoCloseDuration: Duration(seconds: 3),
+        context: context,
+        primaryColor: Colors.red,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: Text(
+          "เกิดข้อผิดพลาด",
+          style: Styles.black18(context),
+        ),
+      );
+    }
+  }
+
   Future<void> _editStore() async {
     Dio dio = Dio();
     // final String apiUrl = Uri.https(
@@ -128,9 +197,6 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
             style: Styles.black18(context),
           ),
         );
-        // setState(() {
-        //   widget.store.name = storeNameController.text;
-        // });
       } else {
         toastification.show(
           autoCloseDuration: Duration(seconds: 3),
@@ -293,6 +359,58 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       fetchLocation();
+                                      Alert(
+                                        context: context,
+                                        type: AlertType.info,
+                                        title:
+                                            "store.processtimeline_screen.alert.title"
+                                                .tr(),
+                                        style: AlertStyle(
+                                          animationType: AnimationType.grow,
+                                          isCloseButton: false,
+                                          isOverlayTapDismiss: false,
+                                          descStyle: Styles.black18(context),
+                                          descTextAlign: TextAlign.start,
+                                          animationDuration:
+                                              const Duration(milliseconds: 400),
+                                          alertBorder: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(22.0),
+                                            side: const BorderSide(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          titleStyle:
+                                              Styles.headerBlack32(context),
+                                          alertAlignment: Alignment.center,
+                                        ),
+                                        desc:
+                                            "store.processtimeline_screen.alert.desc"
+                                                .tr(),
+                                        buttons: [
+                                          DialogButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            color: Styles.failTextColor,
+                                            child: Text(
+                                              "store.processtimeline_screen.alert.cancel"
+                                                  .tr(),
+                                              style: Styles.white18(context),
+                                            ),
+                                          ),
+                                          DialogButton(
+                                            onPressed: () {
+                                              _checkin();
+                                            },
+                                            color: Styles.successButtonColor,
+                                            child: Text(
+                                              "store.processtimeline_screen.alert.submit"
+                                                  .tr(),
+                                              style: Styles.white18(context),
+                                            ),
+                                          )
+                                        ],
+                                      ).show();
                                     },
                                     child: BoxShadowCustom(
                                       child: Container(
@@ -392,11 +510,10 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(bottom: 16.0),
                                   child: Container(
-                                    color: onEdit
-                                        ? Colors.grey[200]
-                                        : Colors.white,
+                                    color:
+                                        true ? Colors.grey[200] : Colors.white,
                                     child: DropdownSearchCustom<RouteStore>(
-                                      enabled: onEdit,
+                                      enabled: true,
                                       initialSelectedValue:
                                           widget.initialSelectedRoute.route ==
                                                   ''

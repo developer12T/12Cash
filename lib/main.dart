@@ -40,12 +40,14 @@ import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 void main() async {
   // Initialize the locale data for Thai language
   // Ensure the app is always in portrait mode
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await PackageInfo.fromPlatform();
 
   // Initialize the notifications
   await initializeNotifications();

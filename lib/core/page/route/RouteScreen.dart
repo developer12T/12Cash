@@ -174,7 +174,9 @@ class _RoutescreenState extends State<Routescreen> {
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       ),
     );
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   final Completer<GoogleMapController> _controller =
@@ -324,9 +326,20 @@ class _RoutescreenState extends State<Routescreen> {
         // ),
         Expanded(
           child: Container(
-              padding: const EdgeInsets.all(8),
-              margin: EdgeInsets.all(screenWidth / 45),
-              child: const RouteTable()),
+            padding: const EdgeInsets.all(8),
+            margin: EdgeInsets.all(screenWidth / 45),
+            width: screenWidth,
+            // color: Colors.red,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "ยังไม่เปิดให้บริการ ",
+                  style: Styles.black32(context),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );

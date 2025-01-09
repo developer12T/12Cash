@@ -30,7 +30,8 @@ Store? _selectedStore;
 List<Store> storeAll = [];
 List<Store> storeAllFilter = [];
 List<Store> storeNew = [];
-RouteStore selectedRoute = RouteStore(route: '');
+RouteStore selectedRoute = RouteStore(route: 'R01');
+String filterRoute = 'R01';
 
 class StoreScreen extends StatefulWidget {
   StoreScreen({super.key});
@@ -199,6 +200,12 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
           storeAll = data.map((item) => Store.fromJson(item)).toList();
           storeAllFilter = data.map((item) => Store.fromJson(item)).toList();
         });
+        setState(() {
+          storeAll = [
+            ...storeAllFilter
+                .where((store) => store.route == selectedRoute.route)
+          ];
+        });
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
@@ -320,28 +327,34 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                     child: LoadingSkeletonizer(
                       loading: _loadingAllStore,
                       child: BoxShadowCustom(
-                        child: ListView.builder(
-                          itemCount: storeAll.length,
-                          itemBuilder: (context, index) {
-                            return StoreCartAll(
-                              item: storeAll[index],
-                              onDetailsPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailStoreScreen(
-                                        initialSelectedRoute: RouteStore(
-                                            route: storeAll[index].route),
-                                        store: storeAll[index],
-                                        customerNo: storeAll[index].storeId,
-                                        customerName: storeAll[index].name),
-                                  ),
-                                );
-                                // print(
-                                //     'imageList for ${storeAll[index].imageList[0].path}');
-                              },
-                            );
-                          },
+                        child: RefreshIndicator(
+                          onRefresh: _getStoreDataAll,
+                          edgeOffset: 0,
+                          color: Colors.white,
+                          backgroundColor: Styles.primaryColor,
+                          child: ListView.builder(
+                            itemCount: storeAll.length,
+                            itemBuilder: (context, index) {
+                              return StoreCartAll(
+                                item: storeAll[index],
+                                onDetailsPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailStoreScreen(
+                                          initialSelectedRoute: RouteStore(
+                                              route: storeAll[index].route),
+                                          store: storeAll[index],
+                                          customerNo: storeAll[index].storeId,
+                                          customerName: storeAll[index].name),
+                                    ),
+                                  );
+                                  // print(
+                                  //     'imageList for ${storeAll[index].imageList[0].path}');
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -387,6 +400,28 @@ class _StoreHeaderState extends State<StoreHeader> {
 
       // Group districts by amphoe
       return route;
+    } catch (e) {
+      print("Error occurred: $e");
+      return [];
+    }
+  }
+
+  Future<List<Store>> getStores(String filter) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/store/getStore?area=${User.area}&type=all', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
+      );
+      // print("ApiService: $response}");
+
+      // // Checking if data is not null and returning the list of CustomerModel
+      if (response != null) {
+        return Store.fromJsonList(response.data['data']);
+      }
+      return [];
     } catch (e) {
       print("Error occurred: $e");
       return [];
@@ -467,11 +502,101 @@ class _StoreHeaderState extends State<StoreHeader> {
             padding: EdgeInsets.all(8.0),
             child: Row(
               children: [
+                // Expanded(
+                //   flex: 3,
+                //   child: Container(
+                //     // margin: EdgeInsets.all(2),
+                //     child: StoreSearch(onStoreSelected: _onStoreSelected),
+                //   ),
+                // ),
                 Expanded(
-                  flex: 2,
-                  child: Container(
-                    // margin: EdgeInsets.all(2),
-                    child: StoreSearch(onStoreSelected: _onStoreSelected),
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3.5),
+                    child: Container(
+                      // padding: EdgeInsets.all(8.0), // Add padding.
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white,
+                      ),
+                      child: DropdownSearchCustom<Store>(
+                        key: ValueKey('${filterRoute}'),
+                        label: "เลือกร้านค้า",
+                        // hint: "เลือกร้านค้า",
+                        titleText: "เลือกร้านค้า",
+                        fetchItems: (filter) => getStores(filter),
+                        onChanged: (Store? selected) async {
+                          if (selected != null) {
+                            setState(() {
+                              selectedRoute = RouteStore(route: selected.route);
+                            });
+                            storeAll = [
+                              ...storeAllFilter.where((store) =>
+                                  store.storeId == selected.storeId &&
+                                  store.route == selected.route)
+                            ];
+                          }
+                        },
+                        itemAsString: (Store data) =>
+                            "${data.name} ${data.route}",
+                        itemBuilder: (context, item, isSelected) {
+                          return Column(
+                            children: [
+                              ListTile(
+                                selected: isSelected,
+                                title: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${item.name} \n',
+                                        style: Styles.kanit(context).copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Styles.primaryColor,
+                                            fontSize: 24),
+                                      ),
+                                      TextSpan(
+                                          text: 'รหัสร้าน : ',
+                                          style: Styles.black18(context)),
+                                      TextSpan(
+                                          text: '${item.storeId} \n',
+                                          style: Styles.black18(context)),
+                                      TextSpan(
+                                          text: 'เส้นทาง : ',
+                                          style: Styles.black18(context)),
+                                      TextSpan(
+                                          text: '${item.route} \n',
+                                          style: Styles.black18(context)),
+                                      TextSpan(
+                                          text: 'ที่อยู่ : ',
+                                          style: Styles.black18(context)),
+                                      TextSpan(
+                                          text: '${item.address}',
+                                          style: Styles.black18(context)),
+                                      TextSpan(
+                                          text: ' ',
+                                          style: Styles.black18(context)),
+                                      TextSpan(
+                                        text:
+                                            '${item.subDistrict} ${item.district} ${item.province} ${item.postCode}',
+                                        style: Styles.black18(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Divider(
+                                color: Colors
+                                    .grey[200], // Color of the divider line
+                                thickness: 1, // Thickness of the line
+                                indent: 16, // Left padding for the divider line
+                                endIndent:
+                                    16, // Right padding for the divider line
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
                 Expanded(
@@ -487,14 +612,14 @@ class _StoreHeaderState extends State<StoreHeader> {
                         key: ValueKey('RouteSearch-${selectedRoute.route}'),
                         initialSelectedValue:
                             selectedRoute.route == '' ? null : selectedRoute,
-                        label:
-                            "${"store.store_data_screen.input_route.name".tr()}",
+                        label: "",
                         titleText:
                             "${"store.store_data_screen.input_route.name".tr()}",
                         fetchItems: (filter) => getRoutes(filter),
                         onChanged: (RouteStore? selected) async {
                           if (selected != null) {
                             setState(() {
+                              filterRoute = selected.route;
                               selectedRoute = RouteStore(route: selected.route);
                             });
 
@@ -502,14 +627,6 @@ class _StoreHeaderState extends State<StoreHeader> {
                               ...storeAllFilter.where(
                                   (store) => store.route == selected.route)
                             ];
-
-                            // setState(() {
-                            //   _storeData = _storeData?.copyWithDynamicField(
-                            //       'route', selected.route);
-                            //   selectedRoute = RouteStore(route: selected.route);
-                            //   widget.initialSelectedRoute = selectedRoute;
-                            // });
-                            // _saveStoreToStorage();
                           }
                         },
                         itemAsString: (RouteStore data) => data.route,
@@ -540,7 +657,6 @@ class _StoreHeaderState extends State<StoreHeader> {
                 ),
               ],
             ),
-            // child: StoreSearch(),
           ),
         ),
       ],

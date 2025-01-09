@@ -74,32 +74,49 @@ class _ReportScreenState extends State<ReportScreen> {
           Colors.transparent, // set scaffold background color to transparent
       body: Container(
         margin: EdgeInsets.only(top: 20),
-        child: LoadingSkeletonizer(
-          loading: _loadingAllStore,
-          child: ListView.builder(
-            itemCount: storeAll.length,
-            itemBuilder: (context, index) {
-              return InvoiceCard(
-                item: storeAll[index],
-                onDetailsPressed: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => DetailStoreScreen(
-                  //         initialSelectedRoute:
-                  //             RouteStore(route: storeAll[index].route),
-                  //         store: storeAll[index],
-                  //         customerNo: storeAll[index].storeId,
-                  //         customerName: storeAll[index].name),
-                  //   ),
-                  // );
-                  // print(
-                  //     'imageList for ${storeAll[index].imageList[0].path}');
-                },
-              );
-            },
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          margin: EdgeInsets.all(screenWidth / 45),
+          width: screenWidth,
+          // color: Colors.red,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "ยังไม่เปิดให้บริการ ",
+                style: Styles.black32(context),
+              ),
+            ],
           ),
         ),
+
+        // child: LoadingSkeletonizer(
+        //   loading: _loadingAllStore,
+        //   child: ListView.builder(
+        //     itemCount: storeAll.length,
+        //     itemBuilder: (context, index) {
+
+        //       return InvoiceCard(
+        //         item: storeAll[index],
+        //         onDetailsPressed: () {
+        //           // Navigator.push(
+        //           //   context,
+        //           //   MaterialPageRoute(
+        //           //     builder: (context) => DetailStoreScreen(
+        //           //         initialSelectedRoute:
+        //           //             RouteStore(route: storeAll[index].route),
+        //           //         store: storeAll[index],
+        //           //         customerNo: storeAll[index].storeId,
+        //           //         customerName: storeAll[index].name),
+        //           //   ),
+        //           // );
+        //           // print(
+        //           //     'imageList for ${storeAll[index].imageList[0].path}');
+        //         },
+        //       );
+        //     },
+        //   ),
+        // ),
       ),
     );
   }

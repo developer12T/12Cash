@@ -64,9 +64,13 @@ class _DropdownSearchCustomState<T> extends State<DropdownSearchCustom<T>> {
       dropdownDecoratorProps: DropDownDecoratorProps(
         baseStyle: Styles.black18(context),
         dropdownSearchDecoration: InputDecoration(
+          // isCollapsed: true,
+          // isDense: true,
           prefixIcon: widget.icon,
           // fillColor: widget.enabled ? Colors.grey[200] : Colors.white,
           labelText: widget.label,
+          // hintTextDirection: ,
+          // helperText: 'dawd',
           labelStyle: Styles.grey18(context),
           hintText: widget.hint,
           hintStyle: Styles.grey18(context),
@@ -108,7 +112,10 @@ class _DropdownSearchCustomState<T> extends State<DropdownSearchCustom<T>> {
         ),
         showSearchBox: widget.showSearchBox,
         itemBuilder: widget.itemBuilder,
-        searchFieldProps: TextFieldProps(style: Styles.black18(context)),
+        searchFieldProps: TextFieldProps(
+          style: Styles.black18(context),
+          autofocus: true,
+        ),
       ),
     );
   }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:_12sale_app/core/components/card/StoreCardAll.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
@@ -42,13 +41,29 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedIndex = widget.index; //_selectedIndex
+    _clearOrders();
+    searchController.addListener(() {
+      _filterItems(searchController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
   int _selectedIndex = 0;
   bool _loading = true;
   List<Store> storeItem = [];
-
   List<Store> allStores = [];
-
   List<String> filteredItems = [];
+  final List<Order> _orders = <Order>[];
   TextEditingController searchController = TextEditingController();
 
   static const List<Widget> _widgetOptionsHeader = <Widget>[
@@ -57,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
     StoreHeader(),
     ReportHeader(),
     ManageHeader(),
-    // SettingHeader(),
   ];
 
   void _onItemTapped(int index) {
@@ -65,8 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
   }
-
-  final List<Order> _orders = <Order>[];
 
   Future<void> _clearOrders() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -111,17 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       print(e);
     }
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _selectedIndex = widget.index; //_selectedIndex
-    _clearOrders();
-    searchController.addListener(() {
-      _filterItems(searchController.text);
-    });
   }
 
   void _filterItems(String query) {
@@ -295,20 +296,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
       Dashboardscreen(),
       Routescreen(),
       StoreScreen(),
       ReportScreen(),
-      // ManageScreen(),
-      // SettingScreen(),
     ];
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
