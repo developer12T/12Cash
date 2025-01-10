@@ -11,6 +11,7 @@ import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Store.dart';
+import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -79,7 +80,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
     await fetchLocation();
     Dio dio = Dio();
     final String apiUrl =
-        "https://be10-171-103-242-50.ngrok-free.app/api/cash/store/checkIn/${widget.store.storeId}";
+        "http://192.168.44.57:8005/api/cash/store/checkIn/${widget.store.storeId}";
     Map<String, dynamic> jsonData = {
       "latitude": latitude,
       "longtitude": longitude
@@ -361,13 +362,15 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                       fetchLocation();
                                       Alert(
                                         context: context,
-                                        type: AlertType.info,
+                                        // type: AlertType.info,
+
+                                        // closeIcon: const Icon(Icons.close),
                                         title:
                                             "store.processtimeline_screen.alert.title"
                                                 .tr(),
                                         style: AlertStyle(
                                           animationType: AnimationType.grow,
-                                          isCloseButton: false,
+                                          isCloseButton: true,
                                           isOverlayTapDismiss: false,
                                           descStyle: Styles.black18(context),
                                           descTextAlign: TextAlign.start,
@@ -385,8 +388,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                           alertAlignment: Alignment.center,
                                         ),
                                         desc:
-                                            "store.processtimeline_screen.alert.desc"
-                                                .tr(),
+                                            "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
                                         buttons: [
                                           DialogButton(
                                             onPressed: () =>
@@ -599,7 +601,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                             .where((image) =>
                                                 image.type == "store")
                                             .isNotEmpty
-                                        ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "store").last.name}"
+                                        ? "http://192.168.44.57:8000/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "store").last.name}"
                                         : null)
                                     : null,
                               ),
@@ -612,7 +614,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                             .where((image) =>
                                                 image.type == "document")
                                             .isNotEmpty
-                                        ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "document").last.name}"
+                                        ? "http://192.168.44.57:8000/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "document").last.name}"
                                         : null)
                                     : null,
                               ),
@@ -625,7 +627,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                             .where((image) =>
                                                 image.type == "idCard")
                                             .isNotEmpty
-                                        ? "http://192.168.44.57:8000/image/stores/BE211/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
+                                        ? "http://192.168.44.57:8000/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
                                         : null)
                                     : null,
                               ),

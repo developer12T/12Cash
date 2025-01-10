@@ -12,6 +12,7 @@ import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/data/models/Route.dart';
+import 'package:_12sale_app/data/models/StoreDataScreen.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
@@ -30,8 +31,12 @@ Store? _selectedStore;
 List<Store> storeAll = [];
 List<Store> storeAllFilter = [];
 List<Store> storeNew = [];
+List<Store> storeNewFilter = [];
 RouteStore selectedRoute = RouteStore(route: 'R01');
 String filterRoute = 'R01';
+bool _isSelected = false;
+bool _loadingAllStore = true;
+bool _loadingNewStore = true;
 
 class StoreScreen extends StatefulWidget {
   StoreScreen({super.key});
@@ -41,10 +46,6 @@ class StoreScreen extends StatefulWidget {
 }
 
 class _StoreScreenState extends State<StoreScreen> with RouteAware {
-  bool _loadingAllStore = true;
-  bool _loadingNewStore = true;
-  bool _isSelected = false;
-
   static const _pageSize = 3;
   final PagingController<int, Store> _pagingController =
       PagingController(firstPageKey: 0);
@@ -140,36 +141,25 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
   //   }
   // }
   Future<void> _getStoreDataNew() async {
-    // Initialize Dio
-    // Dio dio = Dio();
-
-    // // Replace with your API endpoint
-    // const String apiUrl =
-    //     "http://192.168.44.57:8005/api/cash/store/getStore?area=BE214&type=new";
-
     try {
-      // final response = await dio.get(
-      //   apiUrl,
-      //   options: Options(
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   ),
-      // );
-
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-        endpoint:
-            'api/cash/store/getStore?area=${User.area}&type=new', // You only need to pass the endpoint, the base URL is handled
+        endpoint: 'api/cash/store/getStore?area=${User.area}&type=new',
         method: 'GET',
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
-        // print(response.data['data']);
         setState(() {
           storeNew = data.map((item) => Store.fromJson(item)).toList();
+          // storeNewFilter = data.map((item) => Store.fromJson(item)).toList();
         });
+        // setState(() {
+        //   storeNew = [
+        //     ...storeNewFilter
+        //         .where((store) => store.route == selectedRoute.route)
+        //   ];
+        // });
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
@@ -188,14 +178,17 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-        endpoint:
-            'api/cash/store/getStore?area=${User.area}&type=all', // You only need to pass the endpoint, the base URL is handled
+        endpoint: 'api/cash/store/getStore?area=${User.area}&type=all',
         method: 'GET',
       );
+      // print(response);
+      // print(selectedRoute.route);
+      // print(User.area);
+      // print(response.statusCode);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
-        print(response.data['data']);
+        // print(response.data['data']);
         setState(() {
           storeAll = data.map((item) => Store.fromJson(item)).toList();
           storeAllFilter = data.map((item) => Store.fromJson(item)).toList();
@@ -374,20 +367,6 @@ class StoreHeader extends StatefulWidget {
 }
 
 class _StoreHeaderState extends State<StoreHeader> {
-  void _onStoreSelected(Store? store) {
-    setState(() {
-      _selectedStore = store;
-
-      storeAll = [
-        ...storeAllFilter
-            .where((store) => store.storeId == _selectedStore?.storeId)
-      ];
-    });
-    print('Selected Store in StoreScreen: ${store?.name}');
-    print(
-        'Selected Store in StoreScreen: ${storeAll.where((store) => store.storeId == _selectedStore?.storeId)}');
-  }
-
   Future<List<RouteStore>> getRoutes(String filter) async {
     try {
       // Load the JSON file for districts
@@ -530,11 +509,20 @@ class _StoreHeaderState extends State<StoreHeader> {
                             setState(() {
                               selectedRoute = RouteStore(route: selected.route);
                             });
-                            storeAll = [
-                              ...storeAllFilter.where((store) =>
-                                  store.storeId == selected.storeId &&
-                                  store.route == selected.route)
-                            ];
+
+                            if (_isSelected) {
+                              // storeNew = [
+                              //   ...storeNewFilter.where((store) =>
+                              //       store.storeId == selected.storeId &&
+                              //       store.route == selected.route)
+                              // ];
+                            } else {
+                              storeAll = [
+                                ...storeAllFilter.where((store) =>
+                                    store.storeId == selected.storeId &&
+                                    store.route == selected.route)
+                              ];
+                            }
                           }
                         },
                         itemAsString: (Store data) =>
@@ -622,11 +610,18 @@ class _StoreHeaderState extends State<StoreHeader> {
                               filterRoute = selected.route;
                               selectedRoute = RouteStore(route: selected.route);
                             });
-
-                            storeAll = [
-                              ...storeAllFilter.where(
-                                  (store) => store.route == selected.route)
-                            ];
+                            print("_isSelected ${_isSelected}");
+                            if (_isSelected) {
+                              // storeAll = [
+                              //   ...storeAllFilter.where(
+                              //       (store) => store.route == selected.route)
+                              // ];
+                            } else {
+                              storeAll = [
+                                ...storeAllFilter.where(
+                                    (store) => store.route == selected.route)
+                              ];
+                            }
                           }
                         },
                         itemAsString: (RouteStore data) => data.route,

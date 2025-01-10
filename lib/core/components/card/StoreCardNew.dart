@@ -45,7 +45,7 @@ class StoreCartNew extends StatelessWidget {
                     // height: screenWidth / ,
                     decoration: BoxDecoration(
                       color: item.policyConsent.status == 'Agree'
-                          ? Styles.successTextColor
+                          ? Styles.warningTextColor
                           : item.policyConsent.status == 'Reject'
                               ? Styles.failTextColor
                               : Styles.warningTextColor,
@@ -53,7 +53,7 @@ class StoreCartNew extends StatelessWidget {
                     ),
                     child: Text(
                       item.policyConsent.status == 'Agree'
-                          ? 'store.store_card_new.agree'.tr()
+                          ? 'store.store_card_new.pendding'.tr()
                           : item.policyConsent.status == 'Reject'
                               ? 'store.store_card_new.reject'.tr()
                               : 'store.store_card_new.pendding'.tr(),
@@ -106,7 +106,7 @@ class StoreCartNew extends StatelessWidget {
                                     item.district.length +
                                     item.province.length) >
                                 25
-                            ? '${item.address} ${item.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${item.subDistrict} ${item.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${item.district}...' // Limit to 22 characters + ellipsis
+                            ? '${item.address}...' // Limit to 22 characters + ellipsis
                             : "${item.address} ${item.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${item.subDistrict} ${item.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${item.district}  ${item.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${item.province} ${item.postCode}",
                         style: Styles.black18(context),
                       ),

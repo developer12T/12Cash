@@ -309,7 +309,7 @@ class _MyAppState extends State<MyApp> {
     // Initialize the camera
     _initializeCamera();
     // Add a callback to receive data sent from the TaskHandler.
-    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+    // FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Request permissions and initialize the service.
       // _requestPermissions();

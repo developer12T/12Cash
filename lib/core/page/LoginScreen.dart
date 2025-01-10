@@ -261,6 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             } catch (e) {
                               showCommonAlert(context, "เกิดข้อผิดพลาด",
                                   "โปรดเช็คข้อมูลอีกครั้ง");
+                              print("Error: ${e}");
                             }
                           }
                         },

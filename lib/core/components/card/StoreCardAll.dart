@@ -19,6 +19,8 @@ class StoreCartAll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // print(
+    //     "Count of Address: ${(item.address.length + item.subDistrict.length + item.district.length + item.province.length) > 25}");
     return GestureDetector(
       onTap: onDetailsPressed,
       child: Container(
@@ -77,7 +79,7 @@ class StoreCartAll extends StatelessWidget {
                                     item.district.length +
                                     item.province.length) >
                                 25
-                            ? '${item.address} ${item.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${item.subDistrict}...' // Limit to 22 characters + ellipsis
+                            ? '${item.address}...' // Limit to 22 characters + ellipsis
                             : "${item.address} ${item.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${item.subDistrict} ${item.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${item.district}  ${item.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${item.province} ${item.postCode}",
                         style: Styles.black18(context),
                       ),

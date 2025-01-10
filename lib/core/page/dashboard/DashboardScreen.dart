@@ -203,7 +203,29 @@ class _DashboardscreenState extends State<Dashboardscreen> {
           children: [
             // SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
             SizedBox(height: 335, width: screenWidth, child: ItemSummarize()),
-
+            // CustomPaint(
+            //   size: Size(200, 200),
+            //   painter: CircularChartPainter(),
+            //   child: Center(
+            //     child: Column(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         Text(
+            //           "Share Holder",
+            //           style: Styles.black24(context),
+            //         ),
+            //         Text(
+            //           "50%",
+            //           style: Styles.black32(context),
+            //         ),
+            //         Text(
+            //           "Promoter",
+            //           style: Styles.black18(context),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             CarouselSlider(
               items: menuList.map((item) => item).toList(),
               carouselController: _controller,
@@ -448,5 +470,80 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
       ],
     );
+  }
+}
+
+class CircularChartPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    double strokeWidth = 12.0;
+    double radius = size.width / 1.5;
+
+    // Define the paints for each section
+    Paint backgroundCircle = Paint()
+      ..color = Colors.grey[800]!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    Paint section1 = Paint()
+      ..color = Colors.purple
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    Paint section2 = Paint()
+      ..color = Colors.orange
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    Paint section3 = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    // Draw the background circle
+    canvas.drawCircle(
+        Offset(size.width / 2, size.height / 2), radius, backgroundCircle);
+
+    // Draw the colored segments
+    double startAngle =
+        -90 * (3.14159265359 / 180); // Convert degrees to radians
+    double sweepAngle1 = 120 * (3.14159265359 / 180);
+    double sweepAngle2 = 90 * (3.14159265359 / 180);
+    double sweepAngle3 = 150 * (3.14159265359 / 180);
+
+    canvas.drawArc(
+      Rect.fromCircle(
+          center: Offset(size.width / 2, size.height / 2), radius: radius),
+      startAngle,
+      sweepAngle1,
+      false,
+      section1,
+    );
+
+    canvas.drawArc(
+      Rect.fromCircle(
+          center: Offset(size.width / 2, size.height / 2), radius: radius),
+      startAngle + sweepAngle1,
+      sweepAngle2,
+      false,
+      section2,
+    );
+
+    canvas.drawArc(
+      Rect.fromCircle(
+          center: Offset(size.width / 2, size.height / 2), radius: radius),
+      startAngle + sweepAngle1 + sweepAngle2,
+      sweepAngle3,
+      false,
+      section3,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
