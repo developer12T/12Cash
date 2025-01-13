@@ -21,6 +21,7 @@ import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
 import 'package:_12sale_app/core/page/route/TossAddToCartScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/localNotification.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
@@ -41,6 +42,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   // Initialize the locale data for Thai language
@@ -77,12 +79,16 @@ void main() async {
     runApp(
       KeyboardVisibilityProvider(
         child: EasyLocalization(
-            startLocale: Locale("th", "TH"), // When need to set default
-            path: 'assets/locales',
-            fallbackLocale: Locale('th', 'TH'),
-            supportedLocales: [Locale('en', 'US'), Locale('th', 'TH')],
-            saveLocale: true,
-            child: MyApp()),
+          startLocale: Locale("th", "TH"), // When need to set default
+          path: 'assets/locales',
+          fallbackLocale: Locale('th', 'TH'),
+          supportedLocales: [Locale('en', 'US'), Locale('th', 'TH')],
+          saveLocale: true,
+          child: ChangeNotifierProvider(
+            create: (_) => StoreLocal(),
+            child: MyApp(),
+          ),
+        ),
       ),
     );
   });

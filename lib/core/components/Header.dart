@@ -60,30 +60,6 @@ class _HeaderState extends State<Header> {
                       );
                     });
                   }
-                  //  Container(
-                  //             height: screenWidth / 20,
-                  //             width: screenWidth / 20,
-                  //             decoration: BoxDecoration(
-                  //               color:
-                  //                   isConnected ? Colors.green : Colors.red,
-                  //               border: Border.all(
-                  //                 width: screenWidth / 200,
-                  //                 color: isConnected
-                  //                     ? Styles.successButtonColor
-                  //                     : Styles.failTextColor,
-                  //               ),
-                  //               borderRadius: const BorderRadius.all(
-                  //                   Radius.circular(360)),
-                  //               boxShadow: const [
-                  //                 BoxShadow(
-                  //                   color: Colors.black26,
-                  //                   blurRadius: 10,
-                  //                   spreadRadius: 2,
-                  //                   offset: Offset(0, -3),
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //           ),
                   return Container(
                     color: Styles.primaryColor,
                     child: Padding(

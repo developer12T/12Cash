@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/alert/Alert.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
 import 'package:_12sale_app/core/page/store/PolicyScreen.dart';
@@ -257,7 +258,6 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 
   Future<void> postData2() async {
     // Initialize Dio
-
     Dio dio = Dio();
     String jsonData = '''
 {
@@ -331,7 +331,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       print(imageList);
 
       var response = await dio.post(
-        'http://192.168.44.57:8005/api/cash/store/addStore',
+        '${ApiService.apiHost}/api/cash/store/addStore',
         data: formData,
         options: Options(
           headers: {
@@ -369,101 +369,6 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             autoCloseDuration: const Duration(seconds: 5),
             context: context,
             primaryColor: Colors.green,
-            type: ToastificationType.success,
-            style: ToastificationStyle.flatColored,
-            title: Text(
-              "store.processtimeline_screen.toasting_success".tr(),
-              style: Styles.black18(context),
-            ),
-          );
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen(index: 2)),
-          );
-        }
-      }
-    } catch (e) {
-      toastification.show(
-        autoCloseDuration: const Duration(seconds: 5),
-        context: context,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flatColored,
-        title: Text(
-          "store.processtimeline_screen.toasting_error".tr(),
-          style: Styles.black18(context),
-        ),
-      );
-      print("Error: ${e}");
-    }
-  }
-
-  Future<void> postData() async {
-    // Initialize Dio
-    Dio dio = Dio();
-
-    // Replace with your API endpoint
-    const String apiUrl = "http://192.168.44.57:8000/api/cash/store/addStore";
-
-    // JSON data
-    Map<String, dynamic> jsonData = {
-      "name": _storeData.name,
-      "taxId": _storeData.taxId,
-      "tel": _storeData.tel,
-      "route": _storeData.route,
-      "type": _storeData.type,
-      "typeName": _storeData.typeName,
-      "address": _storeData.address,
-      "district": _storeData.district,
-      "subDistrict": _storeData.subDistrict,
-      "province": _storeData.province,
-      "provinceCode": _storeData.postCode.substring(0, 2),
-      "postCode": _storeData.postCode,
-      "note": _storeData.note,
-      "zone": User.zone,
-      "area": User.area,
-      "latitude": _storeData.latitude,
-      "longtitude": _storeData.longitude,
-      "lineId": _storeData.lineId,
-      "policyConsent": {"status": _storeData.policyConsent.status},
-      "imageList": _storeData.imageList,
-    };
-
-    try {
-      // Send POST request
-      final response = await dio.post(
-        apiUrl,
-        data: jsonData,
-        options: Options(
-          headers: {
-            "Content-Type": "application/json",
-          },
-        ),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data['message'] == 'similar store') {
-          final List<dynamic> data = response.data['data'];
-          setState(() {
-            duplicateStores = data
-                .map((item) =>
-                    Store.fromJson(item['store'] as Map<String, dynamic>))
-                .toList();
-          });
-          showToastDuplicateMenu(
-            stores: duplicateStores,
-            context: context,
-            icon: const Icon(Icons.info_outline),
-            type: ToastificationType.error,
-            primaryColor: Colors.red,
-            titleStyle: Styles.headerRed24(context),
-            descriptionStyle: Styles.red12(context),
-            message: "store.processtimeline_screen.toasting_similar".tr(),
-            description:
-                "store.processtimeline_screen.toasting_similar_des".tr(),
-          );
-        } else if (response.data['message'] == 'Success') {
-          toastification.show(
-            autoCloseDuration: const Duration(seconds: 5),
-            context: context,
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
@@ -814,55 +719,82 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
                                   "store.processtimeline_screen.alert.title"
                                       .tr(),
                                 );
-                                Alert(
+                                CustomAlertDialog.show(
                                   context: context,
-                                  type: AlertType.info,
+                                  alertType: AlertType.info,
                                   title:
                                       "store.processtimeline_screen.alert.title"
                                           .tr(),
-                                  style: AlertStyle(
-                                    animationType: AnimationType.grow,
-                                    isCloseButton: false,
-                                    isOverlayTapDismiss: false,
-                                    descStyle: Styles.black18(context),
-                                    descTextAlign: TextAlign.start,
-                                    animationDuration:
-                                        const Duration(milliseconds: 400),
-                                    alertBorder: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(22.0),
-                                      side: const BorderSide(
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    titleStyle: Styles.headerBlack32(context),
-                                    alertAlignment: Alignment.center,
-                                  ),
-                                  desc:
+                                  description:
                                       "store.processtimeline_screen.alert.desc"
                                           .tr(),
-                                  buttons: [
-                                    DialogButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      color: Styles.failTextColor,
-                                      child: Text(
-                                        "store.processtimeline_screen.alert.cancel"
-                                            .tr(),
-                                        style: Styles.white18(context),
-                                      ),
-                                    ),
-                                    DialogButton(
-                                      onPressed: () {
-                                        postData2();
-                                      },
-                                      color: Styles.successButtonColor,
-                                      child: Text(
-                                        "store.processtimeline_screen.alert.submit"
-                                            .tr(),
-                                        style: Styles.white18(context),
-                                      ),
-                                    )
-                                  ],
-                                ).show();
+                                  onCancel: () {
+                                    Navigator.pop(
+                                        context); // Handle cancel logic
+                                  },
+                                  onSubmit: () {
+                                    postData2(); // Handle submit logic
+                                  },
+                                  cancelText:
+                                      "store.processtimeline_screen.alert.cancel"
+                                          .tr(),
+                                  submitText:
+                                      "store.processtimeline_screen.alert.submit"
+                                          .tr(),
+                                  style: AlertStyle(
+                                    descStyle: Styles.black18(context),
+                                    titleStyle: Styles.headerBlack32(context),
+                                  ),
+                                );
+                                // Alert(
+                                //   context: context,
+                                //   type: AlertType.info,
+                                //   title:
+                                //       "store.processtimeline_screen.alert.title"
+                                //           .tr(),
+                                //   style: AlertStyle(
+                                //     animationType: AnimationType.grow,
+                                //     isCloseButton: false,
+                                //     isOverlayTapDismiss: false,
+                                //     descStyle: Styles.black18(context),
+                                //     descTextAlign: TextAlign.start,
+                                //     animationDuration:
+                                //         const Duration(milliseconds: 400),
+                                //     alertBorder: RoundedRectangleBorder(
+                                //       borderRadius: BorderRadius.circular(22.0),
+                                //       side: const BorderSide(
+                                //         color: Colors.grey,
+                                //       ),
+                                //     ),
+                                //     titleStyle: Styles.headerBlack32(context),
+                                //     alertAlignment: Alignment.center,
+                                //   ),
+                                //   desc:
+                                //       "store.processtimeline_screen.alert.desc"
+                                //           .tr(),
+                                //   buttons: [
+                                //     DialogButton(
+                                //       onPressed: () => Navigator.pop(context),
+                                //       color: Styles.failTextColor,
+                                //       child: Text(
+                                //         "store.processtimeline_screen.alert.cancel"
+                                //             .tr(),
+                                //         style: Styles.white18(context),
+                                //       ),
+                                //     ),
+                                //     DialogButton(
+                                //       onPressed: () {
+                                //         postData2();
+                                //       },
+                                //       color: Styles.successButtonColor,
+                                //       child: Text(
+                                //         "store.processtimeline_screen.alert.submit"
+                                //             .tr(),
+                                //         style: Styles.white18(context),
+                                //       ),
+                                //     )
+                                //   ],
+                                // ).show();
                               } else {}
 
                               switch (_processIndex) {

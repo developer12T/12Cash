@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:_12sale_app/core/components/alert/Alert.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/PrivacyPolicy.dart';
 import 'package:_12sale_app/data/models/Store.dart';
@@ -56,37 +57,38 @@ class _PolicyScreenState extends State<PolicyScreen> {
       Navigator.of(context).pop();
       print(
           'requestLocation : ${await Permission.locationWhenInUse.serviceStatus.isEnabled}');
-      showCommonAlert(context);
+      CustomAlertDialog.showCommonAlert(context, "แจ้งเตือน !",
+          "กรุณาเปิดการใช้งานโลเคชั่นเพื่อทำการเพื่มร้านค้า");
     }
   }
 
-  void showCommonAlert(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            "แจ้งเตือน !",
-            style: Styles.headerBlack24(context),
-          ),
-          content: Text(
-            "กรุณาเปิดการใช้งานโลเคชั่นเพื่อทำการเพื่มร้านค้า",
-            style: Styles.black18(context),
-          ),
-          actions: [
-            TextButton(
-              child: Text("ตกลง", style: Styles.black18(context)),
-              onPressed: () async {
-                Location location = Location();
-                await location.requestService();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void showCommonAlert(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text(
+  //           "แจ้งเตือน !",
+  //           style: Styles.headerBlack24(context),
+  //         ),
+  //         content: Text(
+  //           "กรุณาเปิดการใช้งานโลเคชั่นเพื่อทำการเพื่มร้านค้า",
+  //           style: Styles.black18(context),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             child: Text("ตกลง", style: Styles.black18(context)),
+  //             onPressed: () async {
+  //               Location location = Location();
+  //               await location.requestService();
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> _loadPrivacyPolicy() async {
     try {
@@ -328,7 +330,10 @@ class _PolicyScreenState extends State<PolicyScreen> {
                           });
                           _saveStoreToStorage();
                         } else {
-                          showCommonAlert(context);
+                          CustomAlertDialog.showCommonAlert(
+                              context,
+                              "แจ้งเตือน !",
+                              "กรุณาเปิดการใช้งานโลเคชั่นเพื่อทำการเพื่มร้านค้า");
                         }
                       }
                     : null,

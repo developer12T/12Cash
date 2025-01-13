@@ -1,13 +1,16 @@
-import 'dart:convert';
-import 'dart:io';
-
+// ignore_for_file: deprecated_member_use
+import 'package:_12sale_app/core/components/alert/Alert.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/core/utils/tost_util.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/connectivityService.dart';
 import 'package:_12sale_app/data/service/convertJwtToken.dart';
-import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toastification/toastification.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,57 +20,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool? lastConnectedState; // Tracks the last connectivity state
   late SharedPreferences sharedPreferences;
 
   final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  vaildateUserEmail() async {
-    try {
-      var dio = Dio();
-      var response = await dio.post(
-        "http://192.168.44.64:8003/erp/customer/",
-        data: jsonEncode(
-          {
-            "username": _userNameController.text.trim(),
-          },
-        ),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-    } catch (e) {
-      // showSnackBar('Error orred');
-    }
-  }
-
-  void showCommonAlert(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            title,
-            style: Styles.headerRed24(context),
-          ),
-          content: Text(
-            content,
-            style: Styles.red18(context),
-          ),
-          actions: [
-            TextButton(
-              child: Text("ตกลง", style: Styles.black18(context)),
-              onPressed: () async {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> saveUserData(Map<String, dynamic> resBody) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -105,178 +62,216 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Center(
-        child: Card(
-          elevation: 8,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
+      body: StreamBuilder<bool>(
+        stream: ConnectivityService().connectivityStream,
+        builder: (context, snapshot) {
+          bool isConnected = snapshot.data ?? true;
+          // Trigger toast only when the `isConnected` state changes
+          if (lastConnectedState != isConnected) {
+            lastConnectedState = isConnected;
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showToast(
+                context: context,
+                message: isConnected
+                    ? 'gobal.header.online_status'.tr()
+                    : 'gobal.header.offline_status'.tr(),
+                type: isConnected
+                    ? ToastificationType.success
+                    : ToastificationType.error,
+                primaryColor: isConnected ? Colors.green : Colors.red,
+              );
+            });
+          }
+          return Center(
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 500),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: screenWidth / 2,
-                      height: screenWidth / 4,
-                      // color: Colors.red,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image:
-                                AssetImage('assets/images/12TradingLogo.png'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: screenWidth / 2,
+                          height: screenWidth / 4,
+                          // color: Colors.red,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/images/12TradingLogo.png'),
+                              ),
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(height: screenWidth / 25),
+                          TextField(
+                            controller: _userNameController,
+                            style: Styles.black18(context),
+                            decoration: InputDecoration(
+                              labelText: 'ชื่อผู้ใช้งาน',
+                              labelStyle: Styles.black24(context),
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person),
+                            ),
+                          ),
+                          SizedBox(height: screenWidth / 25),
+                          TextField(
+                            controller: _passwordController,
+                            style: Styles.black18(context),
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: 'รหัสผ่าน',
+                              labelStyle: Styles.black24(context),
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.lock),
+                            ),
+                          ),
+                          SizedBox(height: screenWidth / 25),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              backgroundColor: Styles.primaryColor,
+                            ),
+                            onPressed: () async {
+                              FocusScope.of(context).unfocus();
+                              String username = _userNameController.text.trim();
+                              String password = _passwordController.text.trim();
+                              if (username.isEmpty) {
+                                CustomAlertDialog.showCommonAlert(context,
+                                    "แจ้งเตือน", "กรุณากรอกชื่อผู้ใช้งาน");
+                              } else if (password.isEmpty) {
+                                CustomAlertDialog.showCommonAlert(
+                                    context, "แจ้งเตือน", "กรุณากรอกรหัสผ่าน");
+                              } else {
+                                print(_userNameController.text);
+                                print(_passwordController.text);
+                                try {
+                                  ApiService apiService = ApiService();
+                                  await apiService.init();
+                                  var response = await apiService.request(
+                                    endpoint: 'api/cash/login',
+                                    method: 'POST',
+                                    body: {
+                                      "username":
+                                          _userNameController.text.trim(),
+                                      "password":
+                                          _passwordController.text.trim(),
+                                    },
+                                  );
+                                  print("Respanse: $response}");
+                                  if (isConnected) {
+                                    if (response.statusCode == 200) {
+                                      // print(
+                                      //     'Username ${response.data['data'][0]['username']}');
+                                      var resBody = response.data['data'][0];
+                                      // if (resBody['success'] == true) {
+
+                                      // }
+                                      String token = resBody['token'];
+                                      decodeJwt(token);
+                                      // print(parseJwtPayLoad(token));
+                                      // print(resBody['username']);
+
+                                      //  DateTime expirationDate = JwtDecoder.getExpirationDate(token);
+                                      print(resBody['username']);
+                                      await saveUserData(resBody);
+
+                                      sharedPreferences =
+                                          await SharedPreferences.getInstance();
+
+                                      setState(() {
+                                        User.username = sharedPreferences
+                                            .getString('username')!;
+                                        User.firstName = sharedPreferences
+                                            .getString('firstName')!;
+                                        User.surName = sharedPreferences
+                                            .getString('surName')!;
+                                        User.fullName = sharedPreferences
+                                            .getString('fullName')!;
+                                        User.salePayer = sharedPreferences
+                                            .getString('salePayer')!;
+                                        User.tel =
+                                            sharedPreferences.getString('tel')!;
+                                        User.area = sharedPreferences
+                                            .getString('area')!;
+                                        User.zone = sharedPreferences
+                                            .getString('zone')!;
+                                        User.warehouse = sharedPreferences
+                                            .getString('warehouse')!;
+                                        User.role = sharedPreferences
+                                            .getString('role')!;
+                                        User.token = sharedPreferences
+                                            .getString('token')!;
+                                      });
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const HomeScreen(
+                                            index: 0,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    CustomAlertDialog.showCommonAlert(
+                                        context,
+                                        "เกิดข้อผิดพลาด",
+                                        "กรุณาเชื่อมต่ออินเทอร์เน็ต");
+                                  }
+                                } on ApiException catch (e) {
+                                  print('Error: ${e.message}');
+                                  CustomAlertDialog.showCommonAlert(
+                                      context,
+                                      "เกิดข้อผิดพลาด",
+                                      "${e.message} Status Code: ${e.statusCode}");
+                                } catch (e) {
+                                  CustomAlertDialog.showCommonAlert(
+                                      context, "เกิดข้อผิดพลาด", "${e}");
+                                }
+                              }
+                            },
+                            child: Text(
+                              'เข้าสู่ระบบ',
+                              style: Styles.white24(context),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(height: screenWidth / 25),
-                      TextField(
-                        controller: _userNameController,
-                        style: Styles.black18(context),
-                        decoration: InputDecoration(
-                          labelText: 'ชื่อผู้ใช้งาน',
-                          labelStyle: Styles.black24(context),
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.person),
-                        ),
-                      ),
-                      SizedBox(height: screenWidth / 25),
-                      TextField(
-                        controller: _passwordController,
-                        style: Styles.black18(context),
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: 'รหัสผ่าน',
-                          labelStyle: Styles.black24(context),
-                          border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(Icons.lock),
-                        ),
-                      ),
-                      SizedBox(height: screenWidth / 25),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          backgroundColor: Styles.primaryColor,
-                        ),
-                        onPressed: () async {
-                          FocusScope.of(context).unfocus();
-                          String username = _userNameController.text.trim();
-                          String password = _passwordController.text.trim();
-                          if (username.isEmpty) {
-                            showCommonAlert(
-                                context, "แจ้งเตือน", "กรุณากรอกชื่อผู้ใช้งาน");
-                          } else if (password.isEmpty) {
-                            showCommonAlert(
-                                context, "แจ้งเตือน", "กรุณากรอกรหัสผ่าน");
-                          } else {
-                            print(_userNameController.text);
-                            print(_passwordController.text);
-                            try {
-                              var dio = Dio();
-                              var response = await dio.post(
-                                "http://192.168.44.57:8005/api/cash/login",
-                                data: jsonEncode(
-                                  {
-                                    "username": _userNameController.text.trim(),
-                                    "password": _passwordController.text.trim(),
-                                  },
-                                ),
-                              );
-                              print('Status Code: ${response.statusCode}');
-                              if (response.statusCode == 200) {
-                                // print(
-                                //     'Username ${response.data['data'][0]['username']}');
-                                var resBody = response.data['data'][0];
-                                // if (resBody['success'] == true) {
-
-                                // }
-                                String token = resBody['token'];
-                                decodeJwt(token);
-                                // print(parseJwtPayLoad(token));
-                                // print(resBody['username']);
-
-                                //  DateTime expirationDate = JwtDecoder.getExpirationDate(token);
-                                print(resBody['username']);
-                                await saveUserData(resBody);
-
-                                sharedPreferences =
-                                    await SharedPreferences.getInstance();
-
-                                setState(() {
-                                  User.username =
-                                      sharedPreferences.getString('username')!;
-                                  User.firstName =
-                                      sharedPreferences.getString('firstName')!;
-                                  User.surName =
-                                      sharedPreferences.getString('surName')!;
-                                  User.fullName =
-                                      sharedPreferences.getString('fullName')!;
-                                  User.salePayer =
-                                      sharedPreferences.getString('salePayer')!;
-                                  User.tel =
-                                      sharedPreferences.getString('tel')!;
-                                  User.area =
-                                      sharedPreferences.getString('area')!;
-                                  User.zone =
-                                      sharedPreferences.getString('zone')!;
-                                  User.warehouse =
-                                      sharedPreferences.getString('warehouse')!;
-                                  User.role =
-                                      sharedPreferences.getString('role')!;
-                                  User.token =
-                                      sharedPreferences.getString('token')!;
-                                });
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HomeScreen(
-                                      index: 0,
-                                    ),
-                                  ),
-                                );
-                              }
-                            } catch (e) {
-                              showCommonAlert(context, "เกิดข้อผิดพลาด",
-                                  "โปรดเช็คข้อมูลอีกครั้ง");
-                              print("Error: ${e}");
-                            }
-                          }
-                        },
-                        child: Text(
-                          'เข้าสู่ระบบ',
-                          style: Styles.white24(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

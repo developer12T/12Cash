@@ -12,12 +12,13 @@ import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/data/models/Route.dart';
-import 'package:_12sale_app/data/models/StoreDataScreen.dart';
+import 'package:_12sale_app/data/models/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Store.dart';
@@ -29,9 +30,7 @@ import 'package:intl/intl.dart';
 
 Store? _selectedStore;
 List<Store> storeAll = [];
-List<Store> storeAllFilter = [];
 List<Store> storeNew = [];
-List<Store> storeNewFilter = [];
 RouteStore selectedRoute = RouteStore(route: 'R01');
 String filterRoute = 'R01';
 bool _isSelected = false;
@@ -93,53 +92,6 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
     super.dispose();
   }
 
-  // Future<void> _fetchPage(int pageKey) async {
-  //   try {
-  //     final newItems = await getBeerList(pageKey, _pageSize);
-
-  //     final isLastPage = newItems.length < _pageSize;
-
-  //     if (isLastPage) {
-  //       _pagingController.appendLastPage(newItems);
-  //     } else {
-  //       final nextPageKey = pageKey + newItems.length;
-  //       _pagingController.appendPage(newItems, nextPageKey);
-  //     }
-  //   } catch (error) {
-  //     _pagingController.error = error;
-  //   }
-  // }
-
-  // Future<List<Store>> getBeerList(int pageKey, int pageSize) async {
-  //   Dio dio = Dio();
-  //   String apiUrl =
-  //       "https://f8c3-171-103-242-50.ngrok-free.app/api/cash/store/addStore?pageKey=$pageKey&pageSize=$pageSize";
-
-  //   try {
-  //     final response = await dio.get(
-  //       apiUrl,
-  //       options: Options(
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       ),
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final List<dynamic> data = response.data['data'];
-  //       setState(() {
-  //         storeAll = data
-  //             .map((item) =>
-  //                 Store.fromJson(item['store'] as Map<String, dynamic>))
-  //             .toList();
-  //       });
-  //       return storeAll;
-  //     } else {
-  //       throw [];
-  //     }
-  //   } catch (e) {
-  //     return [];
-  //   }
-  // }
   Future<void> _getStoreDataNew() async {
     try {
       ApiService apiService = ApiService();
@@ -178,27 +130,24 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-        endpoint: 'api/cash/store/getStore?area=${User.area}&type=all',
+        endpoint:
+            'api/cash/store/getStore?area=${User.area}&type=all&route=${selectedRoute.route}',
         method: 'GET',
       );
-      // print(response);
-      // print(selectedRoute.route);
-      // print(User.area);
-      // print(response.statusCode);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
+
         // print(response.data['data']);
         setState(() {
           storeAll = data.map((item) => Store.fromJson(item)).toList();
-          storeAllFilter = data.map((item) => Store.fromJson(item)).toList();
+          // storeAllFilter = data.map((item) => Store.fromJson(item)).toList();
         });
-        setState(() {
-          storeAll = [
-            ...storeAllFilter
-                .where((store) => store.route == selectedRoute.route)
-          ];
-        });
+        // setState(() {
+        //   storeAll = [
+        //     ...storeAllFilter
+        //         .where((store) => store.route == selectedRoute.route)
+        //   ];
+        // });
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
@@ -214,6 +163,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final storeState = Provider.of<StoreLocal>(context);
     return Scaffold(
       backgroundColor:
           Colors.transparent, // set scaffold background color to transparent
@@ -321,15 +271,35 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                       loading: _loadingAllStore,
                       child: BoxShadowCustom(
                         child: RefreshIndicator(
-                          onRefresh: _getStoreDataAll,
+                          onRefresh: () async {
+                            ApiService apiService = ApiService();
+                            await apiService.init();
+                            var response = await apiService.request(
+                              endpoint:
+                                  'api/cash/store/getStore?area=${User.area}&type=all&route=${selectedRoute.route}',
+                              method: 'GET',
+                            );
+                            if (response.statusCode == 200 ||
+                                response.statusCode == 201) {
+                              final List<dynamic> data = response.data['data'];
+
+                              storeState.updateValue(data
+                                  .map((item) => Store.fromJson(item))
+                                  .toList());
+                            }
+                          },
                           edgeOffset: 0,
                           color: Colors.white,
                           backgroundColor: Styles.primaryColor,
                           child: ListView.builder(
-                            itemCount: storeAll.length,
+                            itemCount: storeState.storeList.length > 0
+                                ? storeState.storeList.length
+                                : storeAll.length,
                             itemBuilder: (context, index) {
                               return StoreCartAll(
-                                item: storeAll[index],
+                                item: storeState.storeList.length > 0
+                                    ? storeState.storeList[index]
+                                    : storeAll[index],
                                 onDetailsPressed: () {
                                   Navigator.push(
                                     context,
@@ -409,6 +379,7 @@ class _StoreHeaderState extends State<StoreHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final storeState = Provider.of<StoreLocal>(context);
     double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -509,7 +480,8 @@ class _StoreHeaderState extends State<StoreHeader> {
                             setState(() {
                               selectedRoute = RouteStore(route: selected.route);
                             });
-
+                            // storeState = StoreLocal(store: selected);
+                            storeState.updateValue([selected]);
                             if (_isSelected) {
                               // storeNew = [
                               //   ...storeNewFilter.where((store) =>
@@ -517,11 +489,11 @@ class _StoreHeaderState extends State<StoreHeader> {
                               //       store.route == selected.route)
                               // ];
                             } else {
-                              storeAll = [
-                                ...storeAllFilter.where((store) =>
-                                    store.storeId == selected.storeId &&
-                                    store.route == selected.route)
-                              ];
+                              // storeAll = [
+                              //   ...storeAllFilter.where((store) =>
+                              //       store.storeId == selected.storeId &&
+                              //       store.route == selected.route)
+                              // ];
                             }
                           }
                         },
@@ -617,10 +589,25 @@ class _StoreHeaderState extends State<StoreHeader> {
                               //       (store) => store.route == selected.route)
                               // ];
                             } else {
-                              storeAll = [
-                                ...storeAllFilter.where(
-                                    (store) => store.route == selected.route)
-                              ];
+                              ApiService apiService = ApiService();
+                              await apiService.init();
+                              var response = await apiService.request(
+                                endpoint:
+                                    'api/cash/store/getStore?area=${User.area}&type=all&route=${selected.route}',
+                                method: 'GET',
+                              );
+                              if (response.statusCode == 200 ||
+                                  response.statusCode == 201) {
+                                final List<dynamic> data =
+                                    response.data['data'];
+                                storeState.updateValue(data
+                                    .map((item) => Store.fromJson(item))
+                                    .toList());
+                              }
+                              // storeAll = [
+                              //   ...storeAllFilter.where(
+                              //       (store) => store.route == selected.route)
+                              // ];
                             }
                           }
                         },

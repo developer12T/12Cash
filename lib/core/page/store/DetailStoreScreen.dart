@@ -12,6 +12,7 @@ import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Store.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -53,6 +54,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
   final LocationService locationService = LocationService();
   String latitude = '';
   String longitude = '';
+  String api_url = '${ApiService.apiHost}/api/cash/store/checkIn/';
 
   @override
   initState() {
@@ -80,7 +82,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
     await fetchLocation();
     Dio dio = Dio();
     final String apiUrl =
-        "http://192.168.44.57:8005/api/cash/store/checkIn/${widget.store.storeId}";
+        "${ApiService.apiHost}/api/cash/store/checkIn/${widget.store.storeId}";
     Map<String, dynamic> jsonData = {
       "latitude": latitude,
       "longtitude": longitude
@@ -144,13 +146,9 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
 
   Future<void> _editStore() async {
     Dio dio = Dio();
-    // final String apiUrl = Uri.https(
-    //   '192.168.44.57:8005',
-    //   '/api/cash/store/editStore/${widget.store.storeId}',
-    // ).toString();
 
     final String apiUrl2 =
-        "http://192.168.44.57:8005/api/cash/store/editStore/${widget.store.storeId}";
+        "${ApiService.apiHost}/api/cash/store/editStore/${widget.store.storeId}";
 
     Map<String, dynamic> jsonData = {
       "name": "${storeNameController.text}",
@@ -601,7 +599,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                             .where((image) =>
                                                 image.type == "store")
                                             .isNotEmpty
-                                        ? "http://192.168.44.57:8000/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "store").last.name}"
+                                        ? "${ApiService.apiHost}/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "store").last.name}"
                                         : null)
                                     : null,
                               ),
@@ -614,7 +612,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                             .where((image) =>
                                                 image.type == "document")
                                             .isNotEmpty
-                                        ? "http://192.168.44.57:8000/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "document").last.name}"
+                                        ? "${ApiService.apiHost}/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "document").last.name}"
                                         : null)
                                     : null,
                               ),
@@ -627,7 +625,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                             .where((image) =>
                                                 image.type == "idCard")
                                             .isNotEmpty
-                                        ? "http://192.168.44.57:8000/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
+                                        ? "${ApiService.apiHost}/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
                                         : null)
                                     : null,
                               ),
