@@ -272,6 +272,9 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                       child: BoxShadowCustom(
                         child: RefreshIndicator(
                           onRefresh: () async {
+                            setState(() {
+                              filterRoute = '';
+                            });
                             ApiService apiService = ApiService();
                             await apiService.init();
                             var response = await apiService.request(
@@ -282,7 +285,6 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                             if (response.statusCode == 200 ||
                                 response.statusCode == 201) {
                               final List<dynamic> data = response.data['data'];
-
                               storeState.updateValue(data
                                   .map((item) => Store.fromJson(item))
                                   .toList());

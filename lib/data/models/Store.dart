@@ -261,7 +261,6 @@ class Store with ChangeNotifier {
         this.address.toString().contains(filter) ||
         this.district.toString().contains(filter) ||
         this.subDistrict.toString().contains(filter) ||
-        this.province.toString().contains(filter) ||
         this.province.toString().contains(filter);
   }
 }
