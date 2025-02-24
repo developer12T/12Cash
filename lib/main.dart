@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:_12sale_app/core/components/Gird.dart';
 import 'package:_12sale_app/core/page/CustomBottomBar.dart';
 import 'package:_12sale_app/core/page/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/Square3D.dart';
 import 'package:_12sale_app/core/page/announce/Announce.dart';
+import 'package:_12sale_app/core/page/order/CheckOutScreen.dart';
+import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
+import 'package:_12sale_app/core/page/order/ExamplePrint.dart';
+import 'package:_12sale_app/core/page/order/TestScroll.dart';
 import 'package:_12sale_app/core/page/printer/BluetoothPrinterScreen.dart';
-import 'package:_12sale_app/core/page/printer/PrinterBluetoothScreen.dart';
+import 'package:_12sale_app/core/page/printer/PrinterBixolon.dart';
+import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
 import 'package:_12sale_app/core/page/printer/TestPrint.dart';
 import 'package:_12sale_app/core/page/printer/TestPrinterScreen.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
@@ -16,19 +20,24 @@ import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/LoginScreen.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
-import 'package:_12sale_app/core/page/route/OrderScreen.dart';
+import 'package:_12sale_app/core/page/order/OrderScreen.dart';
 import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
 import 'package:_12sale_app/core/page/route/TossAddToCartScreen.dart';
+import 'package:_12sale_app/core/page/withdraw/ShowAllSwitch.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
-import 'package:_12sale_app/data/models/StoreFilterLocal.dart';
+import 'package:_12sale_app/data/models/search/RouteVisitFilterLocal.dart';
+import 'package:_12sale_app/data/models/search/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/AndroidAPIChecker.dart';
 import 'package:_12sale_app/data/service/localNotification.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:http/io_client.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart'; // For date localization
 import 'package:flutter/services.dart';
@@ -36,42 +45,85 @@ import 'package:camera/camera.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
+import 'dart:io';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
+import 'package:month_year_picker/month_year_picker.dart';
+
+// import 'package:timezone/standalone.dart' as tz;
+// import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
-  // Initialize the locale data for Thai language
-  // Ensure the app is always in portrait mode
-  WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
-  await PackageInfo.fromPlatform();
+  try {
+    // tz.initializeTimeZones();
+    // // Configure the HTTP client to use a proxy
+    // final client = HttpClient()
+    //   ..findProxy = (url) {
+    //     return "PROXY proxy.example.com:8080"; // Replace with your proxy server
+    //   }
+    //   ..badCertificateCallback =
+    //       (X509Certificate cert, String host, int port) =>
+    //           true; // Allow bad certificates (optional).
 
-  // Initialize the notifications
-  await initializeNotifications();
-  await requestAllPermissions();
-  await initializeDateFormatting('th', null);
-  await dotenv.load(fileName: ".env");
-  await ScreenUtil.ensureScreenSize();
-  // Initialize the background service
-  // final hasPermissions = await FlutterBackground.initialize(
-  //   androidConfig: const FlutterBackgroundAndroidConfig(
-  //     notificationTitle: "Background Service",
-  //     notificationText: "This app is running in the background.",
-  //     notificationImportance: AndroidNotificationImportance.high,
-  //     enableWifiLock: true,
-  //   ),
-  // );
-  // if (!hasPermissions) {
-  //   print("Background permissions not granted");
-  // }
-  // Initialize port for communication between TaskHandler and UI.
-  FlutterForegroundTask.initCommunicationPort();
-  await LocationService().initialize();
+    // // Use the client with the http package
+    // final ioClient = http.IOClient(client);
+    // final response = await ioClient.get(Uri.parse('https://api.example.com'));
+
+    // print('Response: ${response.body}');
+    // Initialize the locale data for Thai lanqguage
+    // Ensure the app is always in portrait mode
+    WidgetsFlutterBinding.ensureInitialized();
+
+    bool isSupported = await AndroidAPILevelChecker.isCamera2APISupported();
+    if (isSupported) {
+      print("Camera2 API is supported");
+      // Use Camera2 API features
+    } else {
+      print("Legacy Camera API will be used");
+      // Use Legacy Camera API features
+    }
+
+    // await availableCameras();
+    await EasyLocalization.ensureInitialized();
+    await PackageInfo.fromPlatform();
+    // Initialize the notifications
+    // await initializeNotifications();
+    await requestAllPermissions();
+
+    await initializeDateFormatting('th', null);
+    await dotenv.load(fileName: ".env");
+    await ScreenUtil.ensureScreenSize();
+
+    // await _initializeControllerFuture;
+    // Initialize the background service
+    // final hasPermissions = await FlutterBackground.initialize(
+    //   androidConfig: const FlutterBackgroundAndroidConfig(
+    //     notificationTitle: "Background Service",
+    //     notificationText: "This app is running in the background.",
+    //     notificationImportance: AndroidNotificationImportance.high,
+    //     enableWifiLock: true,
+    //   ),
+    // );
+    // if (!hasPermissions) {
+    //   print("Background permissions not granted");
+    // }
+    // Initialize port for communication between TaskHandler and UI.
+    // FlutterForegroundTask.initCommunicationPort();
+    await LocationService().initialize();
+  } on CameraException catch (e) {
+    _logError(e.code, e.description);
+  }
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -84,14 +136,22 @@ void main() async {
           fallbackLocale: Locale('th', 'TH'),
           supportedLocales: [Locale('en', 'US'), Locale('th', 'TH')],
           saveLocale: true,
-          child: ChangeNotifierProvider(
-            create: (_) => StoreLocal(),
+          child: MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => RouteVisitFilterLocal()),
+              ChangeNotifierProvider(create: (_) => StoreLocal()),
+            ],
             child: MyApp(),
           ),
         ),
       ),
     );
   });
+}
+
+void _logError(String code, String? message) {
+  // ignore: avoid_print
+  print('Error: $code${message == null ? '' : '\nError Message: $message'}');
 }
 
 // The callback function should always be a top-level or static function.
@@ -175,24 +235,12 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
-  late CameraController _cameraController;
+  // late CameraController _cameraController;
   Future<void>? _initializeControllerFuture;
 
   final LocationService locationService = LocationService();
   double latitude = 00.00;
   double longitude = 00.00;
-
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final firstCamera = cameras.first;
-
-    _cameraController = CameraController(
-      firstCamera,
-      ResolutionPreset.max,
-    );
-
-    _initializeControllerFuture = _cameraController.initialize();
-  }
 
   Future<void> _requestPermissions() async {
     // Android 13+, you need to allow notification permission to display foreground service notification.
@@ -313,24 +361,25 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     // Initialize the camera
-    _initializeCamera();
+    // _initializeCamera();
     // Add a callback to receive data sent from the TaskHandler.
     // FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Request permissions and initialize the service.
-      // _requestPermissions();
-      _initService();
-      // _startService();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   // Request permissions and initialize the service.
+    //   // _requestPermissions();
+    //   // _initService();
+    //   // _startService();
+    // });
   }
 
   @override
   void dispose() {
     // Remove a callback to receive data sent from the TaskHandler.
-    FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+    // FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+    // videoPlayerController.dispose(); // Dispose of VideoPlayerController
     _taskDataListenable.dispose();
-    _cameraController
-        .dispose(); // Dispose of the camera controller to free resources
+    // _cameraController
+    //     .dispose(); // Dispose of the camera controller to free resources
     super.dispose();
   }
 
@@ -341,61 +390,70 @@ class _MyAppState extends State<MyApp> {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return MaterialApp(
-          routes: {
-            // '/': (context) => const HomeScreen(
-            //       index: 0,
-            //     ),
-            '/': (context) => const AuthCheck(),
-            '/route': (context) => const HomeScreen(
-                  index: 1,
-                ),
-            '/store': (context) => const HomeScreen(
-                  index: 2,
-                ),
-            '/manage': (context) => const HomeScreen(
-                  index: 3,
-                ),
-            '/announce': (context) => const Announce(),
-          },
-          initialRoute: '/',
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
-          navigatorObservers: [routeObserver], // Register RouteObserver here
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            // splashColor: Colors.transparent,
-            // highlightColor: Colors.transparent,
-            // hoverColor: Colors.transparent,
-            // iconTheme: IconThemeData(
-            //   color: Colors.transparent,
-            //   opacity: 0.0,
-            // ),
-            primarySwatch: Colors.blue,
-            extensions: const [
-              SkeletonizerConfigData.dark(),
-            ],
-            textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
-          ),
+        return GlobalLoaderOverlay(
+          child: MaterialApp(
+            routes: {
+              '/': (context) => AuthCheck(),
+              // '/': (context) => CreateOrderScreen(
+              //       storeId: "V10160027",
+              //       storeName: "ร้านเพชรไทยคำ",
+              //       storeAddress: "ตลาดคลองขวาง เขตบางแค จ.กรุงเทพฯ",
+              //     ),
+              '/route': (context) => const HomeScreen(
+                    index: 1,
+                  ),
+              '/store': (context) => const HomeScreen(
+                    index: 2,
+                  ),
+              '/manage': (context) => const HomeScreen(
+                    index: 3,
+                  ),
+              '/announce': (context) => const Announce(),
+            },
+            initialRoute: '/',
+            // localizationsDelegates: [
+            //   GlobalWidgetsLocalizations.delegate,
+            //   GlobalMaterialLocalizations.delegate,
+            //   MonthYearPickerLocalizations.delegate,
+            // ],
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+            navigatorObservers: [routeObserver], // Register RouteObserver here
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              // splashColor: Colors.transparent,
+              // highlightColor: Colors.transparent,
+              // hoverColor: Colors.transparent,
+              // iconTheme: IconThemeData(
+              //   color: Colors.transparent,
+              //   opacity: 0.0,
+              // ),
+              primarySwatch: Colors.blue,
+              extensions: const [
+                SkeletonizerConfigData.dark(),
+              ],
+              textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
+            ),
 
-          // home: PolylineWithLabels(),
-          // home: SettingsScreen(),
-          // home: const LoginScreen(),
-          // home: const HomeScreen(
-          //   index: 0,
-          // ),
-          // home: NotificationScreen(),
-          // home: HomeScreen2(),
-          // home: CustomBottomNavBar(),
-          // home: BluetoothPrinterScreen4(),
-          // home: AddToCartAnimationPage(),
-          // home: Column(
-          //   children: [
-          //     Expanded(child: _buildCommunicationDataText()),
-          //     _buildServiceControlButtons(),
-          //   ],
-          // ),
+            // home: PolylineWithLabels(),
+            // home: SettingsScreen(),
+            // home: const LoginScreen(),
+            // home: const HomeScreen(
+            //   index: 0,
+            // ),
+            // home: NotificationScreen(),
+            // home: HomeScreen2(),
+            // home: CustomBottomNavBar(),
+            // home: BluetoothPrinterScreen4(),
+            // home: AddToCartAnimationPage(),
+            // home: Column(
+            //   children: [
+            //     Expanded(child: _buildCommunicationDataText()),
+            //     _buildServiceControlButtons(),
+            //   ],
+            // ),
+          ),
         );
       },
     );

@@ -4,7 +4,7 @@ import 'package:_12sale_app/core/page/route/DetailScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Order.dart';
-import 'package:_12sale_app/data/models/SaleRoute.dart';
+import 'package:_12sale_app/data/models/search/SaleRoute.dart';
 import 'package:_12sale_app/function/SavetoStorage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,25 +32,25 @@ class _DetailTableState extends State<DetailTable> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _loadStoreDetail();
+    // _loadStoreDetail();
   }
 
-  Future<void> _loadStoreDetail() async {
-    List<SaleRoute> routes =
-        await loadFromStorage('saleRoutes', (json) => SaleRoute.fromJson(json));
-    List<Store> filteredStores = routes
-        .where((route) => route.day == widget.day.split(" ")[1])
-        .expand((route) => route.listStore)
-        .toList();
-    List<ListOrder> filteredOrders = filteredStores
-        .where((store) => store.storeInfo.storeId == widget.customerNo)
-        .expand((store) => store.listOrder)
-        .toList();
+  // Future<void> _loadStoreDetail() async {
+  //   List<SaleRoute> routes =
+  //       await loadFromStorage('saleRoutes', (json) => SaleRoute.fromJson(json));
+  //   List<Store> filteredStores = routes
+  //       .where((route) => route.day == widget.day.split(" ")[1])
+  //       .expand((route) => route.listStore)
+  //       .toList();
+  //   List<ListOrder> filteredOrders = filteredStores
+  //       .where((store) => store.storeInfo.storeId == widget.customerNo)
+  //       .expand((store) => store.listOrder)
+  //       .toList();
 
-    setState(() {
-      orders = filteredOrders;
-    });
-  }
+  //   setState(() {
+  //     orders = filteredOrders;
+  //   });
+  // }
 
   String formatDate(String dateStr) {
     DateTime date = DateTime.parse(dateStr); // Parse the original date string
@@ -133,17 +133,18 @@ class _DetailTableState extends State<DetailTable> {
 
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailScreen(
-                day: widget.day,
-                customerNo: customerNo,
-                customerName: customerName,
-                address: address,
-                status: status),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => DetailScreen(
+        //         route:,
+        //         route: widget.day,
+        //         customerNo: customerNo,
+        //         customerName: customerName,
+        //         address: address,
+        //         status: status),
+        //   ),
+        // );
       },
       child: Container(
         decoration: BoxDecoration(

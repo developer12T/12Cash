@@ -5,7 +5,11 @@ import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
 import 'package:_12sale_app/core/page/manage/ManageScreen.dart';
 import 'package:_12sale_app/core/page/report/ReportScreen.dart';
-import 'package:_12sale_app/core/page/route/OrderScreen.dart';
+import 'package:_12sale_app/core/page/route/AjustRoute.dart';
+import 'package:_12sale_app/core/page/route/AjustRoute2.dart';
+import 'package:_12sale_app/core/page/route/AjustRoute3.dart';
+import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
+import 'package:_12sale_app/core/page/order/OrderScreen.dart';
 import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
@@ -145,7 +149,14 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return () {}();
       case 1:
-        return () {}();
+        return () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AjustRoute3(),
+            ),
+          );
+        }();
       case 2:
         return () {
           Navigator.push(
@@ -157,7 +168,12 @@ class _HomeScreenState extends State<HomeScreen> {
         }();
       case 3:
         return () {
-          // _showSearchModal();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderOutRouteScreen(),
+            ),
+          );
         }();
       default:
         return () {}();
@@ -304,107 +320,112 @@ class _HomeScreenState extends State<HomeScreen> {
       ReportScreen(),
     ];
     double screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: Header(
-        leading: _widgetOptions.elementAt(_selectedIndex),
-        leading2: _widgetOptionsHeader.elementAt(_selectedIndex),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      resizeToAvoidBottomInset: false,
-      floatingActionButton: Container(
-        width: screenWidth / 9,
-        height: screenWidth / 9,
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Styles.secondaryColor,
-          borderRadius: BorderRadius.circular(360),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black
-                  .withOpacity(0.2), // Shadow color with transparency
-              spreadRadius: 2, // Spread of the shadow
-              blurRadius: 8, // Blur radius of the shadow
-              offset: const Offset(
-                  0, 4), // Offset of the shadow (horizontal, vertical)
-            ),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        body: Header(
+          leading: _widgetOptions.elementAt(_selectedIndex),
+          leading2: _widgetOptionsHeader.elementAt(_selectedIndex),
         ),
-        child: FloatingActionButton(
-          heroTag: 'homeTag1', // Unique tag for this FloatingActionButton
-          shape: const CircleBorder(),
-          onPressed: () {
-            _getFuction();
-            // setState(() {
-            //   _selectedIndex = 2; // Update to the cart index
-            // });
-          },
-          backgroundColor: Colors.white,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [_getIcon()],
-          ),
-        ),
-      ),
-      // body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Styles.primaryColor, // Primary color of the navigation bar
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26, // Shadow color
-              blurRadius: 10, // Soft blur effect
-              spreadRadius: 2, // Spread of the shadow
-              offset: Offset(0, -3), // Shadow positioned upwards
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
-          ),
-          child: BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: FaIcon(
-                  FontAwesomeIcons.house,
-                ),
-                label: "menu".tr(gender: "home"),
-              ),
-              BottomNavigationBarItem(
-                icon: FaIcon(
-                  FontAwesomeIcons.route,
-                ),
-                label: "menu".tr(gender: "route"),
-              ),
-              BottomNavigationBarItem(
-                icon: FaIcon(
-                  FontAwesomeIcons.shop,
-                ),
-                label: "menu".tr(gender: "shop"),
-              ),
-              BottomNavigationBarItem(
-                icon: FaIcon(
-                  FontAwesomeIcons.clipboardList,
-                ),
-                label: "menu".tr(
-                  gender: "manage",
-                ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        resizeToAvoidBottomInset: false,
+        floatingActionButton: Container(
+          width: screenWidth / 9,
+          height: screenWidth / 9,
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Styles.secondaryColor,
+            borderRadius: BorderRadius.circular(360),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black
+                    .withOpacity(0.2), // Shadow color with transparency
+                spreadRadius: 2, // Spread of the shadow
+                blurRadius: 8, // Blur radius of the shadow
+                offset: const Offset(
+                    0, 4), // Offset of the shadow (horizontal, vertical)
               ),
             ],
-            selectedLabelStyle: Styles.white18(context),
-            iconSize: screenWidth / 20,
-            currentIndex: _selectedIndex,
-            selectedItemColor: Styles.white,
-            backgroundColor: Styles.primaryColor,
-            unselectedItemColor: Styles.grey,
-            unselectedLabelStyle: Styles.grey12(context),
-            onTap: _onItemTapped,
-            type: BottomNavigationBarType.fixed,
+          ),
+          child: FloatingActionButton(
+            heroTag: 'homeTag1', // Unique tag for this FloatingActionButton
+            shape: const CircleBorder(),
+            onPressed: () {
+              _getFuction();
+              // setState(() {
+              //   _selectedIndex = 2; // Update to the cart index
+              // });
+            },
+            backgroundColor: Colors.white,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [_getIcon()],
+            ),
+          ),
+        ),
+        // body: _widgetOptions.elementAt(_selectedIndex),
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            color: Styles.primaryColor, // Primary color of the navigation bar
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26, // Shadow color
+                blurRadius: 10, // Soft blur effect
+                spreadRadius: 2, // Spread of the shadow
+                offset: Offset(0, -3), // Shadow positioned upwards
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+            child: BottomNavigationBar(
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: FaIcon(
+                    FontAwesomeIcons.house,
+                  ),
+                  label: "menu".tr(gender: "home"),
+                ),
+                BottomNavigationBarItem(
+                  icon: FaIcon(
+                    FontAwesomeIcons.route,
+                  ),
+                  label: "menu".tr(gender: "route"),
+                ),
+                BottomNavigationBarItem(
+                  icon: FaIcon(
+                    FontAwesomeIcons.shop,
+                  ),
+                  label: "menu".tr(gender: "shop"),
+                ),
+                BottomNavigationBarItem(
+                  icon: FaIcon(
+                    FontAwesomeIcons.clipboardList,
+                  ),
+                  label: "menu".tr(
+                    gender: "manage",
+                  ),
+                ),
+              ],
+              selectedLabelStyle: Styles.white18(context),
+              iconSize: screenWidth / 20,
+              currentIndex: _selectedIndex,
+              selectedItemColor: Styles.white,
+              backgroundColor: Styles.primaryColor,
+              unselectedItemColor: Styles.grey,
+              unselectedLabelStyle: Styles.grey12(context),
+              onTap: _onItemTapped,
+              type: BottomNavigationBarType.fixed,
+            ),
           ),
         ),
       ),

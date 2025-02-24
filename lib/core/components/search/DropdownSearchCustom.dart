@@ -16,8 +16,9 @@ class DropdownSearchCustom<T> extends StatefulWidget {
   final bool showSearchBox;
   final bool enabled;
   final Icon? icon;
+  bool Function(T, String)? filterFn;
 
-  const DropdownSearchCustom({
+  DropdownSearchCustom({
     Key? key,
     required this.label,
     this.hint,
@@ -30,6 +31,7 @@ class DropdownSearchCustom<T> extends StatefulWidget {
     this.showSearchBox = true,
     this.enabled = false,
     this.icon,
+    this.filterFn,
   }) : super(key: key);
 
   @override
@@ -52,25 +54,20 @@ class _DropdownSearchCustomState<T> extends State<DropdownSearchCustom<T>> {
     return DropdownSearch<T>(
       enabled: !widget.enabled,
       dropdownButtonProps: DropdownButtonProps(
-        icon: Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Icon(
-            Icons.arrow_drop_down,
-            size: screenWidth / 20,
-            color: Colors.black54,
-          ),
+        color: Colors.white,
+        icon: Icon(
+          Icons.arrow_drop_down,
+          size: screenWidth / 20,
+          color: Colors.black54,
         ),
       ),
+      filterFn: widget.filterFn,
       dropdownDecoratorProps: DropDownDecoratorProps(
         baseStyle: Styles.black18(context),
         dropdownSearchDecoration: InputDecoration(
-          // isCollapsed: true,
-          // isDense: true,
+          // fillColor: Colors.white,
           prefixIcon: widget.icon,
-          // fillColor: widget.enabled ? Colors.grey[200] : Colors.white,
           labelText: widget.label,
-          // hintTextDirection: ,
-          // helperText: 'dawd',
           labelStyle: Styles.grey18(context),
           hintText: widget.hint,
           hintStyle: Styles.grey18(context),

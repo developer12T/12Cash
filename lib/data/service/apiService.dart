@@ -49,8 +49,11 @@ class ApiService {
       if (method == 'GET') {
         response =
             await dio.get(url, queryParameters: queryParams, options: options);
-      } else {
+      } else if (method == 'POST') {
         response = await dio.post(url,
+            data: body, queryParameters: queryParams, options: options);
+      } else {
+        response = await dio.patch(url,
             data: body, queryParameters: queryParams, options: options);
       }
 

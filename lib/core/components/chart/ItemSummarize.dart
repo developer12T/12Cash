@@ -71,7 +71,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "chart.item_chart.title".tr(),
+                "ข้อมูลตัวอย่าง ${"chart.item_chart.title".tr()}",
                 style: Styles.black18(context),
               )
             ],

@@ -68,20 +68,20 @@ class StoreCartAll extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text.rich(
-                  TextSpan(
-                    text: '${"store.store_card_all.address".tr()} : ',
-                    style: Styles.headerBlack18(context),
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: (item.address.length +
-                                    item.subDistrict.length +
-                                    item.district.length +
-                                    item.province.length) >
-                                25
-                            ? '${item.address}...' // Limit to 22 characters + ellipsis
-                            : "${item.address} ${item.province != 'กรุงเทพมหานคร' ? 'ต.' : 'แขวง'}${item.subDistrict} ${item.province != 'กรุงเทพมหานคร' ? 'อ.' : 'เขต'}${item.district}  ${item.province != 'กรุงเทพมหานคร' ? 'จ.' : ''}${item.province} ${item.postCode}",
-                        style: Styles.black18(context),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Text(
+                        '${"store.store_card_all.address".tr()} : ',
+                        style: Styles.headerBlack18(context),
+                      ),
+                      Expanded(
+                        child: Text(
+                          item.address,
+                          style: Styles.black18(context),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),

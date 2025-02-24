@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 
 class AppbarCustom extends StatefulWidget {
   final String title;
-  final IconData icon;
+  final IconData? icon;
 
-  const AppbarCustom({
+  AppbarCustom({
     Key? key,
     required this.title,
-    required this.icon,
+    this.icon,
   }) : super(key: key);
 
   @override
@@ -69,7 +69,6 @@ class _AppbarCustomState extends State<AppbarCustom> {
                 widget.icon,
                 size: screenWidth / 15,
               ),
-              // const SizedBox(width: 8),
               Text(widget.title),
             ],
           ),

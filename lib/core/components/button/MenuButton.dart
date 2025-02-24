@@ -1,3 +1,4 @@
+import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:flutter/material.dart';
 
@@ -21,36 +22,33 @@ class MenuButton extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
-      child: Container(
-        width: screenWidth / 6, // Fixed width for the button
-        height: screenWidth / 6, // Fixed height for the button
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: Offset(0, 4),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: BoxShadowCustom(
+          child: Container(
+            width: screenWidth / 6.5, // Fixed width for the button
+            height: screenWidth / 6.5, // Fixed height for the button
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: screenWidth / 40),
-            Icon(
-              icon,
-              color: Colors.white,
-              size: screenWidth / 12,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: screenWidth / 40),
+                Icon(
+                  icon,
+                  color: Colors.white,
+                  size: screenWidth / 12,
+                ),
+                Text(
+                  label,
+                  style: Styles.white18(context),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            Text(
-              label,
-              style: Styles.white18(context),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          ),
         ),
       ),
     );

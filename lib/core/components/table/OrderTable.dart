@@ -160,19 +160,19 @@ class _OrderTableState extends State<OrderTable> {
     //         : Styles.failTextColor;
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OrderDetail(
-              itemCode: itemCode,
-              itemName: itemName,
-              price: qty,
-              customerNo: widget.customerNo,
-              customerName: widget.customerName,
-              status: widget.status,
-            ),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => OrderDetail(
+        //       itemCode: itemCode,
+        //       itemName: itemName,
+        //       price: qty,
+        //       customerNo: widget.customerNo,
+        //       customerName: widget.customerName,
+        //       status: widget.status,
+        //     ),
+        //   ),
+        // );
       },
       child: Container(
         decoration: BoxDecoration(

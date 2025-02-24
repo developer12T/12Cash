@@ -9,16 +9,18 @@ import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
 import 'package:_12sale_app/core/components/table/ShopTableAll.dart';
 import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
+import 'package:_12sale_app/core/page/store/DetailNewStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/data/models/Route.dart';
-import 'package:_12sale_app/data/models/StoreFilterLocal.dart';
+import 'package:_12sale_app/data/models/search/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Store.dart';
@@ -28,7 +30,6 @@ import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
 
-Store? _selectedStore;
 List<Store> storeAll = [];
 List<Store> storeNew = [];
 RouteStore selectedRoute = RouteStore(route: 'R01');
@@ -250,7 +251,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DetailStoreScreen(
+                                    builder: (context) => DetailNewStoreScreen(
                                         initialSelectedRoute: RouteStore(
                                             route: storeNew[index].route),
                                         store: storeNew[index],
@@ -273,7 +274,8 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                         child: RefreshIndicator(
                           onRefresh: () async {
                             setState(() {
-                              filterRoute = '';
+                              filterRoute = 'R01';
+                              selectedRoute = RouteStore(route: 'R01');
                             });
                             ApiService apiService = ApiService();
                             await apiService.init();
@@ -303,17 +305,34 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                                     ? storeState.storeList[index]
                                     : storeAll[index],
                                 onDetailsPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DetailStoreScreen(
-                                          initialSelectedRoute: RouteStore(
-                                              route: storeAll[index].route),
-                                          store: storeAll[index],
-                                          customerNo: storeAll[index].storeId,
-                                          customerName: storeAll[index].name),
-                                    ),
-                                  );
+                                  if (storeState.storeList.length > 0) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetailStoreScreen(
+                                            initialSelectedRoute: RouteStore(
+                                                route: storeState
+                                                    .storeList[index].route),
+                                            store: storeState.storeList[index],
+                                            customerNo: storeState
+                                                .storeList[index].storeId,
+                                            customerName: storeState
+                                                .storeList[index].name),
+                                      ),
+                                    );
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetailStoreScreen(
+                                            initialSelectedRoute: RouteStore(
+                                                route: storeAll[index].route),
+                                            store: storeAll[index],
+                                            customerNo: storeAll[index].storeId,
+                                            customerName: storeAll[index].name),
+                                      ),
+                                    );
+                                  }
                                   // print(
                                   //     'imageList for ${storeAll[index].imageList[0].path}');
                                 },
@@ -339,16 +358,26 @@ class StoreHeader extends StatefulWidget {
 }
 
 class _StoreHeaderState extends State<StoreHeader> {
+  List<StoreFavoriteLocal> _storeFavoriteLocal = [];
+  Future<void> _saveStoreFavoriteStorage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Convert the list of Order objects to a list of maps (JSON)
+    List<String> jsonOrders =
+        _storeFavoriteLocal.map((store) => jsonEncode(store.toJson())).toList();
+
+    // Save the JSON string list to SharedPreferences
+    await prefs.setStringList('StoreFavoriteLocal', jsonOrders);
+  }
+
   Future<List<RouteStore>> getRoutes(String filter) async {
     try {
       // Load the JSON file for districts
       final String response = await rootBundle.loadString('data/route.json');
       final data = json.decode(response);
-
       // Filter and map JSON data to District model based on selected province and filter
       final List<RouteStore> route =
           (data as List).map((json) => RouteStore.fromJson(json)).toList();
-
       // Group districts by amphoe
       return route;
     } catch (e) {
@@ -454,188 +483,109 @@ class _StoreHeaderState extends State<StoreHeader> {
             padding: EdgeInsets.all(8.0),
             child: Row(
               children: [
-                // Expanded(
-                //   flex: 3,
-                //   child: Container(
-                //     // margin: EdgeInsets.all(2),
-                //     child: StoreSearch(onStoreSelected: _onStoreSelected),
-                //   ),
-                // ),
                 Expanded(
                   flex: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3.5),
-                    child: Container(
-                      // padding: EdgeInsets.all(8.0), // Add padding.
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.white,
-                      ),
-                      child: DropdownSearchCustom<Store>(
-                        key: ValueKey('${filterRoute}'),
-                        label: "เลือกร้านค้า",
-                        // hint: "เลือกร้านค้า",
-                        titleText: "เลือกร้านค้า",
-                        fetchItems: (filter) => getStores(filter),
-                        onChanged: (Store? selected) async {
-                          if (selected != null) {
-                            setState(() {
-                              selectedRoute = RouteStore(route: selected.route);
-                            });
-                            // storeState = StoreLocal(store: selected);
-                            storeState.updateValue([selected]);
-                            if (_isSelected) {
-                              // storeNew = [
-                              //   ...storeNewFilter.where((store) =>
-                              //       store.storeId == selected.storeId &&
-                              //       store.route == selected.route)
-                              // ];
-                            } else {
-                              // storeAll = [
-                              //   ...storeAllFilter.where((store) =>
-                              //       store.storeId == selected.storeId &&
-                              //       store.route == selected.route)
-                              // ];
-                            }
-                          }
-                        },
-                        itemAsString: (Store data) =>
-                            "${data.name} ${data.route}",
-                        itemBuilder: (context, item, isSelected) {
-                          return Column(
-                            children: [
-                              ListTile(
-                                selected: isSelected,
-                                title: Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '${item.name} \n',
-                                        style: Styles.kanit(context).copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Styles.primaryColor,
-                                            fontSize: 24),
-                                      ),
-                                      TextSpan(
-                                          text: 'รหัสร้าน : ',
-                                          style: Styles.black18(context)),
-                                      TextSpan(
-                                          text: '${item.storeId} \n',
-                                          style: Styles.black18(context)),
-                                      TextSpan(
-                                          text: 'เส้นทาง : ',
-                                          style: Styles.black18(context)),
-                                      TextSpan(
-                                          text: '${item.route} \n',
-                                          style: Styles.black18(context)),
-                                      TextSpan(
-                                          text: 'ที่อยู่ : ',
-                                          style: Styles.black18(context)),
-                                      TextSpan(
-                                          text: '${item.address}',
-                                          style: Styles.black18(context)),
-                                      TextSpan(
-                                          text: ' ',
-                                          style: Styles.black18(context)),
-                                      TextSpan(
-                                        text:
-                                            '${item.subDistrict} ${item.district} ${item.province} ${item.postCode}',
-                                        style: Styles.black18(context),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Divider(
-                                color: Colors
-                                    .grey[200], // Color of the divider line
-                                thickness: 1, // Thickness of the line
-                                indent: 16, // Left padding for the divider line
-                                endIndent:
-                                    16, // Right padding for the divider line
-                              ),
-                            ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.white,
+                    ),
+                    child: StoreSearch(
+                      key: ValueKey(filterRoute),
+                      onStoreSelected: (data) {
+                        if (data != null) {
+                          storeState.updateValue([data]);
+                          print(
+                              "storeState.storeList :${storeState.storeList}");
+                          setState(
+                            () {
+                              selectedRoute = RouteStore(route: data.route);
+                              _storeFavoriteLocal =
+                                  storeState.storesFavoriteList;
+                            },
                           );
-                        },
-                      ),
+                        }
+                      },
                     ),
                   ),
                 ),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3.5),
-                    child: Container(
-                      // padding: EdgeInsets.all(8.0), // Add padding.
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.white,
-                      ),
-                      child: DropdownSearchCustom<RouteStore>(
-                        key: ValueKey('RouteSearch-${selectedRoute.route}'),
-                        initialSelectedValue:
-                            selectedRoute.route == '' ? null : selectedRoute,
-                        label: "",
-                        titleText:
-                            "${"store.store_data_screen.input_route.name".tr()}",
-                        fetchItems: (filter) => getRoutes(filter),
-                        onChanged: (RouteStore? selected) async {
-                          if (selected != null) {
-                            setState(() {
-                              filterRoute = selected.route;
-                              selectedRoute = RouteStore(route: selected.route);
-                            });
-                            print("_isSelected ${_isSelected}");
-                            if (_isSelected) {
-                              // storeAll = [
-                              //   ...storeAllFilter.where(
-                              //       (store) => store.route == selected.route)
-                              // ];
-                            } else {
-                              ApiService apiService = ApiService();
-                              await apiService.init();
-                              var response = await apiService.request(
-                                endpoint:
-                                    'api/cash/store/getStore?area=${User.area}&type=all&route=${selected.route}',
-                                method: 'GET',
-                              );
-                              if (response.statusCode == 200 ||
-                                  response.statusCode == 201) {
-                                final List<dynamic> data =
-                                    response.data['data'];
-                                storeState.updateValue(data
-                                    .map((item) => Store.fromJson(item))
-                                    .toList());
-                              }
-                              // storeAll = [
-                              //   ...storeAllFilter.where(
-                              //       (store) => store.route == selected.route)
-                              // ];
+                  child: Container(
+                    // padding: EdgeInsets.all(8.0), // Add padding.
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.white,
+                    ),
+                    child: DropdownSearchCustom<RouteStore>(
+                      key: ValueKey('RouteSearch-${selectedRoute.route}'),
+                      initialSelectedValue:
+                          selectedRoute.route == '' ? null : selectedRoute,
+                      label: "",
+                      titleText:
+                          "${"store.store_data_screen.input_route.name".tr()}",
+                      fetchItems: (filter) => getRoutes(filter),
+                      filterFn: (RouteStore product, String filter) {
+                        return product.route != "R" &&
+                            product.route
+                                .toLowerCase()
+                                .contains(filter.toLowerCase());
+                      },
+                      onChanged: (RouteStore? selected) async {
+                        if (selected != null) {
+                          setState(() {
+                            filterRoute = selected.route;
+                            selectedRoute = RouteStore(route: selected.route);
+                          });
+                          print("_isSelected ${_isSelected}");
+                          if (_isSelected) {
+                            // storeAll = [
+                            //   ...storeAllFilter.where(
+                            //       (store) => store.route == selected.route)
+                            // ];
+                          } else {
+                            ApiService apiService = ApiService();
+                            await apiService.init();
+                            var response = await apiService.request(
+                              endpoint:
+                                  'api/cash/store/getStore?area=${User.area}&type=all&route=${selected.route}',
+                              method: 'GET',
+                            );
+                            if (response.statusCode == 200 ||
+                                response.statusCode == 201) {
+                              final List<dynamic> data = response.data['data'];
+                              storeState.updateValue(data
+                                  .map((item) => Store.fromJson(item))
+                                  .toList());
                             }
+                            // storeAll = [
+                            //   ...storeAllFilter.where(
+                            //       (store) => store.route == selected.route)
+                            // ];
                           }
-                        },
-                        itemAsString: (RouteStore data) => data.route,
-                        itemBuilder: (context, item, isSelected) {
-                          return Column(
-                            children: [
-                              ListTile(
-                                title: Text(
-                                  " ${item.route}",
-                                  style: Styles.black18(context),
-                                ),
-                                selected: isSelected,
+                        }
+                      },
+                      itemAsString: (RouteStore data) => data.route,
+                      itemBuilder: (context, item, isSelected) {
+                        return Column(
+                          children: [
+                            ListTile(
+                              title: Text(
+                                " ${item.route}",
+                                style: Styles.black18(context),
                               ),
-                              Divider(
-                                color: Colors
-                                    .grey[200], // Color of the divider line
-                                thickness: 1, // Thickness of the line
-                                indent: 16, // Left padding for the divider line
-                                endIndent:
-                                    16, // Right padding for the divider line
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                              selected: isSelected,
+                            ),
+                            Divider(
+                              color:
+                                  Colors.grey[200], // Color of the divider line
+                              thickness: 1, // Thickness of the line
+                              indent: 16, // Left padding for the divider line
+                              endIndent:
+                                  16, // Right padding for the divider line
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),

@@ -335,12 +335,6 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
                                     'typeName', selected.name);
                                 _storeData = _storeData?.copyWithDynamicField(
                                     'type', selected.id);
-                                // widget.storeData = widget.storeData
-                                //     .copyWithDynamicField(
-                                //         'typeName', selected.name);
-                                // widget.storeData = widget.storeData
-                                //     .copyWithDynamicField(
-                                //         'type', selected.id);
                               });
                               _saveStoreToStorage();
                             }
@@ -395,6 +389,12 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
                               });
                               _saveStoreToStorage();
                             }
+                          },
+                          filterFn: (RouteStore product, String filter) {
+                            return product.route != "R" &&
+                                product.route
+                                    .toLowerCase()
+                                    .contains(filter.toLowerCase());
                           },
                           itemAsString: (RouteStore data) => data.route,
                           itemBuilder: (context, item, isSelected) {

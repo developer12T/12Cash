@@ -36,7 +36,7 @@ class _CheckStoreDuplicateScreenState extends State<CheckStoreDuplicateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const PreferredSize(
+      appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(
             title: " ร้านค้าที่คล้ายกัน",

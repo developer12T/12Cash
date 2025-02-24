@@ -67,7 +67,7 @@ class _SettingScreenState extends State<SettingScreen> {
     selectedLanguageCode = context.locale.toString().split("_")[0];
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: const PreferredSize(
+      appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(title: " การตั้งค่า", icon: Icons.settings_sharp),
       ),

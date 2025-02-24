@@ -16,8 +16,8 @@ class _LoadingSkeletonizerState extends State<LoadingSkeletonizer> {
     return Skeletonizer(
         effect: const PulseEffect(
             from: Colors.grey,
-            to: Color.fromARGB(255, 211, 211, 211),
-            duration: Duration(seconds: 1)),
+            to: Color.fromARGB(255, 241, 241, 241),
+            duration: Duration(seconds: 3)),
         enabled: widget.loading,
         enableSwitchAnimation: true,
         child: widget.child);

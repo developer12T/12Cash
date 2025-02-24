@@ -1,12 +1,31 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
+import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/Loading.dart';
+import 'package:_12sale_app/core/components/card/InvoiceCard.dart';
+import 'package:_12sale_app/core/components/card/RouteVisitCard.dart';
+import 'package:_12sale_app/core/components/card/RouteVisitCard.dart';
+import 'package:_12sale_app/core/components/card/RouteVisitCard.dart';
 import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
+import 'package:_12sale_app/core/components/search/StoreSearch.dart';
 import 'package:_12sale_app/core/components/table/RouteTable.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/route/DetailScreen.dart';
+import 'package:_12sale_app/core/page/route/ShopRouteScreen.dart';
+import 'package:_12sale_app/core/page/route/ShopRouteScreen.dart';
+import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
+import 'package:_12sale_app/core/page/store/StoreScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
-import 'package:_12sale_app/data/models/SaleRoute.dart';
+import 'package:_12sale_app/data/models/Route.dart';
+import 'package:_12sale_app/data/models/search/RouteVisitFilterLocal.dart';
+import 'package:_12sale_app/data/models/search/SaleRoute.dart';
+// import 'package:_12sale_app/data/models/StoreFilterLocal.dart';
+import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/models/route/RouteVisit.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/function/SavetoStorage.dart';
+import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -14,8 +33,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
+
+List<RouteVisit> routeVisits = [];
+
+String period =
+    "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
 class Routescreen extends StatefulWidget {
   const Routescreen({super.key});
@@ -24,7 +49,8 @@ class Routescreen extends StatefulWidget {
   State<Routescreen> createState() => _RoutescreenState();
 }
 
-class _RoutescreenState extends State<Routescreen> {
+class _RoutescreenState extends State<Routescreen> with RouteAware {
+  bool _loadingRouteVisit = true;
   static const LatLng origin = LatLng(37.7749, -122.4194); // San Francisco, CA
   static const LatLng waypoint1 = LatLng(36.7783, -119.4179); // Fresno, CA
   static const LatLng waypoint2 = LatLng(34.0522, -118.2437); // Los Angeles, CA
@@ -191,15 +217,6 @@ class _RoutescreenState extends State<Routescreen> {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
-  @override
-  initState() {
-    super.initState();
-    // _maker.addAll(_list);
-    _loadSaleRoute();
-    _initializePolylines();
-    _initializeMarkers();
-  }
-
   void _initializePolylines() {
     setState(() {
       _polylines.add(
@@ -276,78 +293,291 @@ class _RoutescreenState extends State<Routescreen> {
     await saveToStorage('saleRoutes', _routes);
   }
 
+  Future<void> _getRouteVisit() async {
+    ApiService apiService = ApiService();
+    await apiService.init();
+
+    var response = await apiService.request(
+      endpoint: 'api/cash/route/getRoute?area=${User.area}&period=${period}',
+      method: 'GET',
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data['data'];
+      // print("getRoute: ${response.data['data']}");
+      if (mounted) {
+        setState(() {
+          routeVisits = data.map((item) => RouteVisit.fromJson(item)).toList();
+          _loadingRouteVisit = false;
+        });
+      }
+      print("getRoute: $routeVisits");
+    }
+  }
+
+  @override
+  initState() {
+    super.initState();
+    // _maker.addAll(_list);
+    _loadSaleRoute();
+    _initializePolylines();
+    _initializeMarkers();
+
+    _getRouteVisit();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Register this screen as a route-aware widget
+    final ModalRoute? route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      // Only subscribe if the route is a P ageRoute
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    setState(() {
+      _loadingRouteVisit = true;
+    });
+    // Called when the screen is popped back to
+    _getRouteVisit();
+  }
+
   @override
   void dispose() {
+    // Unsubscribe when the widget is disposed
+    routeObserver.unsubscribe(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Column(
-      children: [
-        // Expanded(
-        //   child: Container(
-        //     padding: const EdgeInsets.all(8),
-        //     margin: EdgeInsets.all(screenWidth / 45),
-        //     child: Stack(
-        //       children: [
-        //         GoogleMap(
-        //           initialCameraPosition: const CameraPosition(
-        //             target: origin,
-        //             zoom: 5.0,
-        //           ),
-        //           markers: _markers,
-        //           // polylines: Set<Polyline>.of(polylines.values),
-        //           polylines: _polylines,
-        //           mapType: MapType.normal,
-        //           myLocationButtonEnabled: true,
-        //           myLocationEnabled: true,
-        //           // initialCameraPosition: _kGooglePlex,
-        //           onMapCreated: (controller) {
-        //             setState(() {
-        //               _mapController = controller;
-        //             });
-        //             _generateDistanceLabels();
-        //           },
-        //         ),
-        //         ...distanceLabels,
-        //       ],
-        //     ),
-        //   ),
-        // ),
-        // TextButton(
-        //   onPressed: () {
-        //     print("test");
-        //     // fetchPolylineDataWithDio(
-        //     //     origin, destination, 'AIzaSyAQ9F4z5GhkeW5n8z03OK7H5CcMpzUAZr0');
-        //   },
-        //   child: const Text('add'),
-        // ),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            margin: EdgeInsets.all(screenWidth / 45),
-            width: screenWidth,
-            // color: Colors.red,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "ยังไม่เปิดให้บริการ ",
-                  style: Styles.black32(context),
-                ),
-              ],
+    final routeState = Provider.of<RouteVisitFilterLocal>(context);
+
+    return Scaffold(
+      backgroundColor:
+          Colors.transparent, // set scaffold background color to transparent
+      body: RefreshIndicator(
+        edgeOffset: 0,
+        color: Colors.white,
+        backgroundColor: Styles.primaryColor,
+        onRefresh: () async {
+          _getRouteVisit();
+          routeState.routeVisitList.clear();
+        },
+        child: Container(
+          margin: EdgeInsets.only(top: 20),
+          child: LoadingSkeletonizer(
+            loading: _loadingRouteVisit,
+            child: ListView.builder(
+              itemCount: routeState.routeVisitList.length > 0
+                  ? (routeState.routeVisitList.length / 2).ceil()
+                  : (routeVisits.length / 2).ceil(), // Number of rows needed
+              itemBuilder: (context, index) {
+                final firstIndex = index * 2;
+                final secondIndex = firstIndex + 1;
+                return routeState.routeVisitList.length > 0
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: RouteVisitCard(
+                              item: routeState.routeVisitList[firstIndex],
+                              onDetailsPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DetailScreen(
+                                      routeId: routeState
+                                          .routeVisitList[firstIndex].id,
+                                      route: routeState
+                                          .routeVisitList[firstIndex].day,
+                                      customerNo: routeState
+                                          .routeVisitList[firstIndex]
+                                          .listStore![0]
+                                          .storeInfo
+                                          .storeId,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          if (secondIndex <
+                              routeState.routeVisitList
+                                  .length) // Check if the second card exists
+                            Expanded(
+                              child: RouteVisitCard(
+                                item: routeState.routeVisitList[secondIndex],
+                                onDetailsPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailScreen(
+                                        routeId: routeState
+                                            .routeVisitList[secondIndex].id,
+                                        route: routeState
+                                            .routeVisitList[secondIndex].day,
+                                        customerNo: routeState
+                                            .routeVisitList[secondIndex]
+                                            .listStore![0]
+                                            .storeInfo
+                                            .storeId,
+                                      ),
+                                    ),
+                                  );
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => ShopRouteScreen(
+                                  //       day: routeState
+                                  //           .routeVisitList[secondIndex].day,
+                                  //       route: routeState
+                                  //           .routeVisitList[secondIndex].day,
+                                  //       status: routeState
+                                  //           .routeVisitList[secondIndex].day,
+                                  //       listStore: routeState
+                                  //           .routeVisitList[secondIndex]
+                                  //           .listStore,
+                                  //     ),
+                                  //   ),
+                                  // );
+                                },
+                              ),
+                            )
+                          else
+                            Expanded(
+                              child:
+                                  SizedBox(), // Placeholder for spacing if no second card
+                            ),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: RouteVisitCard(
+                              item: routeVisits[firstIndex],
+                              onDetailsPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ShopRouteScreen(
+                                      routeId: routeVisits[firstIndex].id,
+                                      route: routeVisits[firstIndex].day,
+                                      // status: routeVisits[firstIndex].day,
+                                      // listStore:
+                                      //     routeVisits[firstIndex].listStore,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          if (secondIndex <
+                              routeVisits
+                                  .length) // Check if the second card exists
+                            Expanded(
+                              child: RouteVisitCard(
+                                item: routeVisits[secondIndex],
+                                onDetailsPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShopRouteScreen(
+                                        routeId: routeVisits[secondIndex].id,
+                                        route: routeVisits[secondIndex].day,
+                                        // status: routeVisits[secondIndex].day,
+                                        // listStore:
+                                        //     routeVisits[secondIndex].listStore,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          else
+                            Expanded(
+                              child:
+                                  SizedBox(), // Placeholder for spacing if no second card
+                            ),
+                        ],
+                      );
+              },
             ),
           ),
         ),
-        // Expanded(
-        //   child: Container(
-        //     child: RouteTable(),
-        //   ),
-        // ),
-      ],
+      ),
     );
+    // return Column(
+    //   children: [
+    //     // Expanded(
+    //     //   child: Container(
+    //     //     padding: const EdgeInsets.all(8),
+    //     //     margin: EdgeInsets.all(screenWidth / 45),
+    //     //     child: Stack(
+    //     //       children: [
+    //     //         GoogleMap(
+    //     //           initialCameraPosition: const CameraPosition(
+    //     //             target: origin,
+    //     //             zoom: 5.0,
+    //     //           ),
+    //     //           markers: _markers,
+    //     //           // polylines: Set<Polyline>.of(polylines.values),
+    //     //           polylines: _polylines,
+    //     //           mapType: MapType.normal,
+    //     //           myLocationButtonEnabled: true,
+    //     //           myLocationEnabled: true,
+    //     //           // initialCameraPosition: _kGooglePlex,
+    //     //           onMapCreated: (controller) {
+    //     //             setState(() {
+    //     //               _mapController = controller;
+    //     //             });
+    //     //             _generateDistanceLabels();
+    //     //           },
+    //     //         ),
+    //     //         ...distanceLabels,
+    //     //       ],
+    //     //     ),
+    //     //   ),
+    //     // ),
+    //     // TextButton(
+    //     //   onPressed: () {
+    //     //     print("test");
+    //     //     // fetchPolylineDataWithDio(
+    //     //     //     origin, destination, 'AIzaSyAQ9F4z5GhkeW5n8z03OK7H5CcMpzUAZr0');
+    //     //   },
+    //     //   child: const Text('add'),
+    //     // ),
+    //     // Expanded(
+    //     //   child: Container(
+    //     //     padding: const EdgeInsets.all(8),
+    //     //     margin: EdgeInsets.all(screenWidth / 45),
+    //     //     width: screenWidth,
+    //     //     // color: Colors.red,
+    //     //     child: Column(
+    //     //       mainAxisAlignment: MainAxisAlignment.center,
+    //     //       children: [
+    //     //         Text(
+    //     //           "ยังไม่เปิดให้บริการ ",
+    //     //           style: Styles.black32(context),
+    //     //         ),
+    //     //       ],
+    //     //     ),
+    //     //   ),
+    //     // ),
+    // Expanded(
+    //   child: Padding(
+    //     padding: const EdgeInsets.only(top: 20),
+    //     child: RouteTable(),
+    //   ),
+    // ),
+
+    //   ],
+    // );
   }
 }
 
@@ -359,13 +589,38 @@ class RouteHeader extends StatefulWidget {
 }
 
 class _RouteHeaderState extends State<RouteHeader> {
+  String changeSearch = '';
   @override
   void initState() {
     super.initState();
   }
 
+  // Future<void> _getRouteVisit() async {
+  //   ApiService apiService = ApiService();
+  //   await apiService.init();
+
+  //   var response = await apiService.request(
+  //     endpoint: 'api/cash/route/getRoute?area=${User.area}&period=${period}',
+  //     method: 'GET',
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     final List<dynamic> data = response.data['data'];
+  //     // print("getRoute: ${response.data['data']}");
+  //     if (mounted) {
+  //       setState(() {
+  //         routeVisits = data.map((item) => RouteVisit.fromJson(item)).toList();
+  //       });
+  //     }
+  //     print("getRoute: $routeVisits");
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
+    final routeState = Provider.of<RouteVisitFilterLocal>(context);
+    List<StoreFavoriteLocal> _storeFavoriteLocal = [];
+    double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -446,11 +701,169 @@ class _RouteHeaderState extends State<RouteHeader> {
             ],
           ),
         ),
-        const Flexible(
+        // const Flexible(
+        //   fit: FlexFit.tight,
+        //   child: Padding(
+        //     padding: EdgeInsets.all(8.0),
+        //     child: CustomerDropdownSearch(),
+        //   ),
+        // ),
+        Flexible(
           fit: FlexFit.tight,
           child: Padding(
             padding: EdgeInsets.all(8.0),
-            child: CustomerDropdownSearch(),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                // color: Colors.white,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          // padding: EdgeInsets.symmetric(vertical: 8.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.0),
+                            color: Colors.white,
+                          ),
+                          child: StoreSearch(
+                            key: ValueKey("Search-${changeSearch}"),
+                            onStoreSelected: (data) async {
+                              if (data != null) {
+                                ApiService apiService = ApiService();
+                                await apiService.init();
+                                var response = await apiService.request(
+                                  endpoint:
+                                      'api/cash/route/getRoute?period=${period}&storeId=${data.storeId}',
+                                  method: 'GET',
+                                );
+
+                                if (response.statusCode == 200) {
+                                  final List<dynamic> data =
+                                      response.data['data'];
+                                  // print("getRoute: ${response.data['data']}");
+                                  if (mounted) {
+                                    setState(() {
+                                      routeVisits = data
+                                          .map((item) =>
+                                              RouteVisit.fromJson(item))
+                                          .toList();
+                                      // _loadingRouteVisit = false;
+                                    });
+                                  }
+                                  routeState.updateValue(routeVisits);
+                                  print("getRoute: $routeVisits");
+                                }
+                                setState(
+                                  () {
+                                    _storeFavoriteLocal =
+                                        routeState.storesFavoriteList;
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            routeState.routeVisitList.clear();
+                            try {
+                              ApiService apiService = ApiService();
+                              await apiService.init();
+
+                              var response = await apiService.request(
+                                endpoint:
+                                    'api/cash/route/getRoute?area=${User.area}&period=${period}',
+                                method: 'GET',
+                              );
+
+                              if (response.statusCode == 200) {
+                                final List<dynamic> data =
+                                    response.data['data'];
+                                // print("getRoute: ${response.data['data']}");
+                                if (mounted) {
+                                  setState(() {
+                                    routeVisits = data
+                                        .map(
+                                            (item) => RouteVisit.fromJson(item))
+                                        .toList();
+                                  });
+                                }
+                                if (changeSearch == '') {
+                                  setState(() {
+                                    changeSearch = '1';
+                                  });
+                                } else {
+                                  setState(() {
+                                    changeSearch = '';
+                                  });
+                                }
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HomeScreen(
+                                      index: 1,
+                                    ),
+                                  ),
+                                );
+
+                                // print(
+                                //     "routeState.routeVisitList ${routeState.routeVisitList.length} ");
+                              }
+                            } catch (e) {}
+                          },
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                color: Colors.grey,
+                              ),
+                              child: BoxShadowCustom(
+                                // color: Styles.success,
+                                borderColor: Colors.grey[200]!,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.grey[200]!,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(height: 40),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.search_off_outlined,
+                                            color: Colors.grey[600],
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "ล้างการค้นหา",
+                                            style: Styles.black18(context),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],

@@ -14,7 +14,7 @@ class _UtilzedDetailState extends State<UtilzedDetail> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: const PreferredSize(
+      appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(
             title: " รายละเอียดน้ำหนักสุทธิ", icon: Icons.local_shipping),

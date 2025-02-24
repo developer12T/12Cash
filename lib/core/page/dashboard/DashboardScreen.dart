@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/CalendarPicker.dart';
-import 'package:_12sale_app/core/components/button/CameraButton.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
 import 'package:_12sale_app/core/components/card/MenuDashboard.dart';
 import 'package:_12sale_app/core/components/card/WeightCude.dart';
@@ -14,8 +13,10 @@ import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/Ractangle3D.dart';
+import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
+import 'package:_12sale_app/core/page/withdraw/WithDrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Customer.dart';
 import 'package:_12sale_app/data/models/Shipping.dart';
@@ -34,6 +35,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 import '../../components/table/TestGridTable.dart';
+import 'package:timezone/standalone.dart' as tz;
 
 class Dashboardscreen extends StatefulWidget {
   const Dashboardscreen({super.key});
@@ -150,19 +152,24 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   Widget build(BuildContext context) {
     List<Widget> menuList = [
       MenuDashboard(
-        title_1: "dashboard.menu.sale_report".tr(),
-        icon_1: Icons.description,
+        title_1: "เบิกสินค้า",
+        icon_1: Icons.local_shipping,
         onTap1: () {
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(builder: (context) => NotificationScreen()),
-          // );
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WithDrawScreen(),
+            ),
+          );
         },
-        title_2: "dashboard.menu.data_analysis".tr(),
-        icon_2: Icons.equalizer,
+        title_2: "ตั้งค่าเครื่องปริ้น",
+        icon_2: Icons.print_rounded,
         onTap2: () {
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(builder: (context) => const Testgridtable()),
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ManagePrinterScreen(),
+            ),
+          );
         },
         title_3: "dashboard.menu.setting".tr(),
         icon_3: Icons.settings,
@@ -203,6 +210,19 @@ class _DashboardscreenState extends State<Dashboardscreen> {
           children: [
             // SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
             SizedBox(height: 335, width: screenWidth, child: ItemSummarize()),
+            // SizedBox(
+            //   height: 50,
+            //   width: screenWidth,
+            //   child: CalendarPicker(
+            //     label: 'dashboard.menu.calendar'.tr(),
+            //     firstDate: DateTime(2025),
+            //     onDateSelected: (p0) {
+            //       print(p0);
+            //     },
+            //     lastDate: DateTime.now(),
+            //     initialDate: DateTime(2025, 1, 14),
+            //   ),
+            // ),
             // CustomPaint(
             //   size: Size(200, 200),
             //   painter: CircularChartPainter(),
@@ -226,6 +246,27 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             //     ),
             //   ),
             // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: menuList.asMap().entries.map((entry) {
+                return GestureDetector(
+                  onTap: () => _controller.animateToPage(entry.key),
+                  child: Container(
+                    width: 12.0,
+                    height: 12.0,
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: (Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black)
+                          .withOpacity(_current == entry.key ? 0.9 : 0.4),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: screenWidth / 37),
             CarouselSlider(
               items: menuList.map((item) => item).toList(),
               carouselController: _controller,
@@ -243,28 +284,8 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                 viewportFraction: 1.0, // Show one row fully at a time
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: menuList.asMap().entries.map((entry) {
-                return GestureDetector(
-                  onTap: () => _controller.animateToPage(entry.key),
-                  child: Container(
-                    width: 12.0,
-                    height: 12.0,
-                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black)
-                            .withOpacity(_current == entry.key ? 0.9 : 0.4)),
-                  ),
-                );
-              }).toList(),
-            ),
 
-            SizedBox(height: screenWidth / 25),
-            const WeightCudeCard(),
+            // const WeightCudeCard(),
             // SizedBox(height: screenWidth / 25),
             // SizedBox(height: 500, width: 400, child: LineChartSample()),
             // SizedBox(height: screenWidth / 25),
@@ -349,6 +370,22 @@ class DashboardHeader extends StatefulWidget {
 class _DashboardHeaderState extends State<DashboardHeader> {
   // final SharedPreferences prefs = await SharedPreferences.getInstance();
   late SharedPreferences sharedPreferences;
+  DateTime now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    // setup();
+  }
+
+  Future<void> setup() async {
+    await tz.initializeTimeZone();
+    var detroit = tz.getLocation('Asia/Bangkok');
+    setState(() {
+      now = tz.TZDateTime.now(detroit);
+    });
+    // var now = tz.TZDateTime.now(detroit);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -365,13 +402,9 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                 flex: 1,
                 fit: FlexFit.loose,
                 child: Container(
-                  // margin: const EdgeInsets.symmetric(horizontal: 4),
-                  // color: Colors.red,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/12TradingLogo.png'),
-                      ),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/12TradingLogo.png'),
                     ),
                   ),
                 ),
@@ -402,14 +435,16 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                               child: Row(
                                 children: [
                                   Text(
-                                      DateFormat('d MMMM yyyy',
-                                              'dashboard.lange'.tr())
-                                          .format(DateTime
-                                              .now()), // Current date and time
-                                      style: Styles.headerWhite24(context)),
+                                    DateFormat('d MMMM yyyy',
+                                            'dashboard.lange'.tr())
+                                        .format(DateTime
+                                            .now()), // Current date and time
+                                    style: Styles.headerWhite24(context),
+                                  ),
                                   StreamBuilder(
                                     stream: Stream.periodic(
-                                        const Duration(seconds: 1)),
+                                      const Duration(seconds: 1),
+                                    ),
                                     builder: (context, snapshot) {
                                       return Text(
                                           ' ${'dashboard.time'.tr()}:${DateFormat('HH:mm:ss').format(DateTime.now())}',
@@ -470,80 +505,5 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
       ],
     );
-  }
-}
-
-class CircularChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    double strokeWidth = 12.0;
-    double radius = size.width / 1.5;
-
-    // Define the paints for each section
-    Paint backgroundCircle = Paint()
-      ..color = Colors.grey[800]!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-
-    Paint section1 = Paint()
-      ..color = Colors.purple
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    Paint section2 = Paint()
-      ..color = Colors.orange
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    Paint section3 = Paint()
-      ..color = Colors.blue
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    // Draw the background circle
-    canvas.drawCircle(
-        Offset(size.width / 2, size.height / 2), radius, backgroundCircle);
-
-    // Draw the colored segments
-    double startAngle =
-        -90 * (3.14159265359 / 180); // Convert degrees to radians
-    double sweepAngle1 = 120 * (3.14159265359 / 180);
-    double sweepAngle2 = 90 * (3.14159265359 / 180);
-    double sweepAngle3 = 150 * (3.14159265359 / 180);
-
-    canvas.drawArc(
-      Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2), radius: radius),
-      startAngle,
-      sweepAngle1,
-      false,
-      section1,
-    );
-
-    canvas.drawArc(
-      Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2), radius: radius),
-      startAngle + sweepAngle1,
-      sweepAngle2,
-      false,
-      section2,
-    );
-
-    canvas.drawArc(
-      Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2), radius: radius),
-      startAngle + sweepAngle1 + sweepAngle2,
-      sweepAngle3,
-      false,
-      section3,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }

@@ -32,26 +32,28 @@ class _CalendarPickerState extends State<CalendarPicker> {
 
   void _showDatePicker(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
-      // locale: Locale('th', 'TH'),
+      locale: Locale('th', 'TH'),
       context: context,
       initialDate: _selectedDate ?? widget.initialDate,
       firstDate: widget.firstDate,
       lastDate: widget.lastDate,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              surface: Styles.primaryColor,
-              primary: Styles.white, // Header background color
-              onPrimary: Styles.primaryColor, // Header text color
-              onSurface: Styles.white, // Body text color
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Styles.white, // Button text color
+              // colorScheme: const ColorScheme.light(
+              //   surface: Styles.primaryColor,
+
+              //   primary: Styles.white, // Header background color
+              //   onPrimary: Styles.primaryColor, // Header text color
+              //   onSurface: Styles.white, // Body text color
+              // ),
+              // textButtonTheme: TextButtonThemeData(
+              //   style: TextButton.styleFrom(
+              //     foregroundColor: Styles.white, // Button text color
+              //   ),
+              // ),
               ),
-            ),
-          ),
           child: child ?? const SizedBox.shrink(),
         );
       },
