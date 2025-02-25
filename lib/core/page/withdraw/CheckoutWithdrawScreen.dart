@@ -246,9 +246,12 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
         missingFields.add("หมายเหตุ");
       }
       if (missingFields.isNotEmpty) {
-        showToast(
+        toastification.show(
           context: context,
-          message: 'กรุณาใส่ ${missingFields.join(', ')}',
+          title: Text(
+            'กรุณาใส่ ${missingFields.join(', ')}',
+            style: Styles.red18(context),
+          ),
           type: ToastificationType.error,
           primaryColor: Colors.red,
         );

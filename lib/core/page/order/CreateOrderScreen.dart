@@ -6,6 +6,7 @@ import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelFixed.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 import 'package:_12sale_app/core/page/route/OrderDetailScreen.dart';
 import 'package:_12sale_app/data/models/order/Promotion.dart';
@@ -55,6 +56,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   final ScrollController _promotionScrollController = ScrollController();
 
   String isSelectCheckout = '';
+  String qrImagePath = "";
 
   bool _loading = true;
 
@@ -1425,24 +1427,27 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                         imagePath:
                                             "https://img.freepik.com/free-vector/scan-me-qr-code_78370-2915.jpg?t=st=1740457548~exp=1740461148~hmac=aa16676f93bae39be23387cb5ef9b0d5bc64de27dd25558ab5c70463ea81523f&w=900",
                                       ),
-                                      IconButtonWithLabelFixed(
+                                      IconButtonWithLabelOld(
                                         icon: Icons.photo_camera,
-                                        // imagePath: storeImagePath != ""
-                                        //     ? storeImagePath
-                                        //     : null,
+                                        imagePath: qrImagePath != ""
+                                            ? qrImagePath
+                                            : null,
                                         label: "ถ่ายภาพการโอน",
                                         onImageSelected:
                                             (String imagePath) async {
+                                          setState(() {
+                                            qrImagePath = imagePath;
+                                          });
                                           // await uploadFormDataWithDio(
                                           //     imagePath, 'store', context);
                                         },
                                       ),
-                                      MenuButton(
-                                        color: Styles.success!,
-                                        icon: Icons.upload,
-                                        label: "อัพโหลด",
-                                        onPressed: () {},
-                                      )
+                                      // MenuButton(
+                                      //   color: Styles.success!,
+                                      //   icon: Icons.upload,
+                                      //   label: "อัพโหลด",
+                                      //   onPressed: () {},
+                                      // )
                                       // IconButtonWithLabelFixed(
                                       //   icon: Icons.photo_camera,
                                       //   // imagePath: storeImagePath != ""

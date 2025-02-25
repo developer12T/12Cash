@@ -14,6 +14,7 @@ import 'package:_12sale_app/core/components/chart/ItemSummarize.dart';
 import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 // import 'package:_12sale_app/core/components/table/ShopRouteTable.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 import 'package:_12sale_app/core/page/order/OrderINRouteScreen.dart';
 import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
 import 'package:_12sale_app/core/page/route/ShopRouteScreen.dart';
@@ -21,6 +22,7 @@ import 'package:_12sale_app/core/page/route/ShopRouteScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Store.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/models/order/Orders.dart';
 import 'package:_12sale_app/data/models/route/Cause.dart';
 import 'package:_12sale_app/data/models/route/DetailStoreVisit.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
@@ -66,8 +68,10 @@ class _DetailScreenState extends State<DetailScreen> {
   String status = "0";
   int statusCheck = 0;
   List<Cause> causes = [];
-  List<Store> storeAll = [];
-  bool _loadingAllStore = true;
+  List<Orders> orders = [];
+  bool _loading = true;
+
+  final ScrollController _scrollController = ScrollController();
 
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
@@ -79,16 +83,22 @@ class _DetailScreenState extends State<DetailScreen> {
     super.initState();
     _getDetailStore();
     _getCauses();
-    _getStoreDataAll();
+    _getOrder();
   }
 
-  Future<void> _getStoreDataAll() async {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _getOrder() async {
     try {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/store/getStore?area=${User.area}&type=all', // You only need to pass the endpoint, the base URL is handled
+            'api/cash/order/all?type=sale&area=${User.area}&period=${period}&store=${widget.customerNo}', // You only need to pass the endpoint, the base URL is handled
         method: 'GET',
       );
 
@@ -96,12 +106,12 @@ class _DetailScreenState extends State<DetailScreen> {
         final List<dynamic> data = response.data['data'];
         print(response.data['data']);
         setState(() {
-          storeAll = data.map((item) => Store.fromJson(item)).toList();
+          orders = data.map((item) => Orders.fromJson(item)).toList();
         });
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
-              _loadingAllStore = false;
+              _loading = false;
             });
           }
         });
@@ -331,156 +341,165 @@ class _DetailScreenState extends State<DetailScreen> {
           _getDetailStore();
         },
         child: SingleChildScrollView(
-          child: LoadingSkeletonizer(
-            loading: _loadingDetailStore,
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              margin: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  BoxShadowCustom(
-                    // color: Styles.primaryColor,
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                BoxShadowCustom(
+                  // color: Styles.primaryColor,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      "${storeDetail?.listStore[0].storeInfo.name}",
+                                      style: Styles.black24(context)),
+                                  Text('รูท : R${storeDetail?.day}',
+                                      style: Styles.black18(context)),
+                                  Text(
+                                      '${'route.detail_screen.store_id'.tr()} : ${widget.customerNo}',
+                                      style: Styles.black18(context)),
+                                  Text(
+                                      'เบอร์โทร : ${storeDetail?.listStore[0].storeInfo.tel}',
+                                      style: Styles.black18(context)),
+                                  Text(
+                                      'เลขผู้เสียภาษี : ${storeDetail?.listStore[0].storeInfo.taxId}',
+                                      style: Styles.black18(context)),
+                                  Text(
+                                      'ประเภทร้านค้า : ${storeDetail?.listStore[0].storeInfo.typeName}',
+                                      style: Styles.black18(context)),
+                                  Text(
+                                      'สถานะ : ${storeDetail?.listStore[0].status == '2' ? 'เช็คอินแล้ว' : 'ยังไม่ได้เช็คอิน'}',
+                                      style: Styles.black18(context)),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "${'route.detail_screen.store_address'.tr()} : ${storeDetail?.listStore[0].storeInfo.address}",
+                                style: Styles.black18(context),
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Column(
+                              children: [
+                                MenuButton(
+                                  icon: Icons.store_rounded,
+                                  label: "เช็คอิน",
+                                  // color: Styles.success!,
+                                  color: statusCheck > 0
+                                      ? Colors.grey
+                                      : Styles.secondaryColor,
+                                  onPressed: () {
+                                    if (statusCheck <= 0) {
+                                      _showCheckInSheet(context);
+                                      setState(() {
+                                        selectedCause = "เลือกเหตุผล";
+                                      });
+                                    }
+                                  },
+                                ),
+                                Text(
+                                  '',
+                                  style: Styles.black12(context),
+                                )
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                MenuButton(
+                                  icon: Icons.add_shopping_cart_rounded,
+                                  label: "ขาย",
+                                  color: Styles.success!,
+                                  // color: Colors.grey,
+                                  // color:
+                                  //     statusCheck > 0 ? Colors.grey : Colors.teal,
+                                  onPressed: () {
+                                    if (statusCheck <= 0) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              OrderINRouteScreen(
+                                                  storeDetail: storeDetail),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                                Text(
+                                  'ทดสอบระบบ',
+                                  style: Styles.black12(context),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: screenWidth / 37),
+                BoxShadowCustom(
+                  child: SizedBox(
+                      height: 325, width: screenWidth, child: ItemSummarize()),
+                ),
+                SizedBox(height: screenWidth / 37),
+                Text('ตัวอย่างรายการสั่งซื้อ', style: Styles.black24(context)),
+                Container(
+                  height: 300,
+                  child: BoxShadowCustom(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                        "${storeDetail?.listStore[0].storeInfo.name}",
-                                        style: Styles.black24(context)),
-                                    Text('รูท : R${storeDetail?.day}',
-                                        style: Styles.black18(context)),
-                                    Text(
-                                        '${'route.detail_screen.store_id'.tr()} : ${widget.customerNo}',
-                                        style: Styles.black18(context)),
-                                    Text(
-                                        'เบอร์โทร : ${storeDetail?.listStore[0].storeInfo.tel}',
-                                        style: Styles.black18(context)),
-                                    Text(
-                                        'เลขผู้เสียภาษี : ${storeDetail?.listStore[0].storeInfo.taxId}',
-                                        style: Styles.black18(context)),
-                                    Text(
-                                        'ประเภทร้านค้า : ${storeDetail?.listStore[0].storeInfo.typeName}',
-                                        style: Styles.black18(context)),
-                                    Text(
-                                        'สถานะ : ${storeDetail?.listStore[0].status == '2' ? 'เช็คอินแล้ว' : 'ยังไม่ได้เช็คอิน'}',
-                                        style: Styles.black18(context)),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  "${'route.detail_screen.store_address'.tr()} : ${storeDetail?.listStore[0].storeInfo.address}",
-                                  style: Styles.black18(context),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                            ],
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Scrollbar(
+                        controller: _scrollController,
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        thickness: 10,
+                        radius: Radius.circular(16),
+                        child: LoadingSkeletonizer(
+                          loading: _loading,
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: orders.length,
+                            itemBuilder: (context, index) {
+                              return InvoiceCard(
+                                item: orders[index],
+                                onDetailsPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => OrderDetailScreen(
+                                          orderId: orders[index].orderId),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Column(
-                                children: [
-                                  MenuButton(
-                                    icon: Icons.store_rounded,
-                                    label: "เช็คอิน",
-                                    // color: Styles.success!,
-                                    color: statusCheck > 0
-                                        ? Colors.grey
-                                        : Styles.secondaryColor,
-                                    onPressed: () {
-                                      if (statusCheck <= 0) {
-                                        _showCheckInSheet(context);
-                                        setState(() {
-                                          selectedCause = "เลือกเหตุผล";
-                                        });
-                                      }
-                                    },
-                                  ),
-                                  Text(
-                                    '',
-                                    style: Styles.black12(context),
-                                  )
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  MenuButton(
-                                    icon: Icons.add_shopping_cart_rounded,
-                                    label: "ขาย",
-                                    color: Styles.success!,
-                                    // color: Colors.grey,
-                                    // color:
-                                    //     statusCheck > 0 ? Colors.grey : Colors.teal,
-                                    onPressed: () {
-                                      if (statusCheck <= 0) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                OrderINRouteScreen(
-                                                    storeDetail: storeDetail),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  Text(
-                                    'ทดสอบระบบ',
-                                    style: Styles.black12(context),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: screenWidth / 37),
-                  BoxShadowCustom(
-                    child: SizedBox(
-                        height: 325,
-                        width: screenWidth,
-                        child: ItemSummarize()),
-                  ),
-                  SizedBox(height: screenWidth / 37),
-                  Text('ตัวอย่างรายการสั่งซื้อ',
-                      style: Styles.black24(context)),
-                  // Container(
-                  //   height: 300,
-                  //   child: LoadingSkeletonizer(
-                  //     loading: _loadingAllStore,
-                  //     child: BoxShadowCustom(
-                  //       child: Padding(
-                  //         padding: const EdgeInsets.symmetric(vertical: 16),
-                  //         child: ListView.builder(
-                  //           itemCount: storeAll.length,
-                  //           itemBuilder: (context, index) {
-                  //             return InvoiceCard(
-                  //               item: storeAll[index],
-                  //               onDetailsPressed: () {},
-                  //             );
-                  //           },
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  SizedBox(height: screenWidth / 37),
-                ],
-              ),
+                ),
+                SizedBox(height: screenWidth / 37),
+              ],
             ),
           ),
         ),

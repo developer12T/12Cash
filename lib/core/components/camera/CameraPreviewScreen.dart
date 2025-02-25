@@ -61,7 +61,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
           if (snapshot.connectionState == ConnectionState.done) {
             return Stack(
               children: [
-                CameraPreview(widget.cameraController),
+                Center(child: CameraPreview(widget.cameraController)),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(

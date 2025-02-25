@@ -838,19 +838,31 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 
                                       // If there are missing fields, show the toast
                                       if (missingFields.isNotEmpty) {
-                                        showToast(
+                                        toastification.show(
+                                          autoCloseDuration:
+                                              const Duration(seconds: 5),
+                                          style:
+                                              ToastificationStyle.flatColored,
                                           context: context,
-                                          message:
-                                              '${"store.processtimeline_screen.toasting.message".tr()} ${missingFields.join(', ')}',
+                                          title: Text(
+                                            " '${"store.processtimeline_screen.toasting.message".tr()} ${missingFields.join(', ')}'",
+                                            style: Styles.red18(context),
+                                          ),
                                           type: ToastificationType.error,
                                           primaryColor: Colors.red,
                                         );
                                       }
                                       if (_storeData.imageList.isEmpty) {
-                                        showToast(
+                                        toastification.show(
+                                          autoCloseDuration:
+                                              const Duration(seconds: 5),
+                                          style:
+                                              ToastificationStyle.flatColored,
                                           context: context,
-                                          message:
-                                              "${"store.processtimeline_screen.toasting.image".tr()}",
+                                          title: Text(
+                                            "${"store.processtimeline_screen.toasting.image".tr()}",
+                                            style: Styles.red18(context),
+                                          ),
                                           type: ToastificationType.error,
                                           primaryColor: Colors.red,
                                         );
@@ -908,10 +920,16 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 
                                       // If there are missing fields, show the toast
                                       if (missingFields.isNotEmpty) {
-                                        showToast(
+                                        toastification.show(
+                                          autoCloseDuration:
+                                              const Duration(seconds: 5),
+                                          style:
+                                              ToastificationStyle.flatColored,
                                           context: context,
-                                          message:
-                                              '${"store.processtimeline_screen.toasting.message_selected".tr()} ${missingFields.join(', ')}',
+                                          title: Text(
+                                            '${"store.processtimeline_screen.toasting.message_selected".tr()} ${missingFields.join(', ')}',
+                                            style: Styles.red18(context),
+                                          ),
                                           type: ToastificationType.error,
                                           primaryColor: Colors.red,
                                         );

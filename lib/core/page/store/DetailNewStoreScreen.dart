@@ -456,7 +456,7 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
                                                     "store.processtimeline_screen.alert.cancel"
                                                         .tr(),
                                                     style:
-                                                        Styles.black18(context),
+                                                        Styles.white18(context),
                                                   ),
                                                 ),
                                                 DialogButton(
@@ -469,7 +469,7 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
                                                     "store.processtimeline_screen.alert.submit"
                                                         .tr(),
                                                     style:
-                                                        Styles.black18(context),
+                                                        Styles.white18(context),
                                                   ),
                                                 )
                                               ],
@@ -484,31 +484,31 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
                                     ),
                                     Column(
                                       children: [
-                                        MenuButton(
-                                          icon: Icons.add_shopping_cart_rounded,
-                                          label: "ขาย",
-                                          // color: Colors.teal,
-                                          color: Styles.grey,
-                                          onPressed: () {
-                                            // Navigator.push(
-                                            //   context,
-                                            //   MaterialPageRoute(
-                                            //     builder: (context) =>
-                                            //         Orderscreen(
-                                            //             customerNo:
-                                            //                 widget.customerNo,
-                                            //             customerName:
-                                            //                 widget.customerName,
-                                            //             status: widget
-                                            //                 .store.status),
-                                            //   ),
-                                            // );
-                                          },
-                                        ),
-                                        Text(
-                                          'ยังไม่เปิดให้บริการ',
-                                          style: Styles.black12(context),
-                                        ),
+                                        // MenuButton(
+                                        //   icon: Icons.add_shopping_cart_rounded,
+                                        //   label: "ขาย",
+                                        //   // color: Colors.teal,
+                                        //   color: Styles.grey,
+                                        //   onPressed: () {
+                                        //     // Navigator.push(
+                                        //     //   context,
+                                        //     //   MaterialPageRoute(
+                                        //     //     builder: (context) =>
+                                        //     //         Orderscreen(
+                                        //     //             customerNo:
+                                        //     //                 widget.customerNo,
+                                        //     //             customerName:
+                                        //     //                 widget.customerName,
+                                        //     //             status: widget
+                                        //     //                 .store.status),
+                                        //     //   ),
+                                        //     // );
+                                        //   },
+                                        // ),
+                                        // Text(
+                                        //   'ยังไม่เปิดให้บริการ',
+                                        //   style: Styles.black12(context),
+                                        // ),
                                       ],
                                     ),
                                   ],

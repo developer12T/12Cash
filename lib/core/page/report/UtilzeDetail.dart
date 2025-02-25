@@ -1,5 +1,5 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/page/Ractangle3D.dart';
+import 'package:_12sale_app/core/page/3D_canvas/Ractangle3D.dart';
 import 'package:flutter/material.dart';
 
 class UtilzedDetail extends StatefulWidget {

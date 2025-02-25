@@ -22,11 +22,11 @@ class _ReportScreenState extends State<ReportScreen> {
   bool _isSelected = false;
   final ScrollController _scrollController = ScrollController();
   List<Orders> orders = [];
-  bool _loadingAllStore = true;
+  bool _loadingStore = true;
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
-  Future<void> _getStoreDataAll() async {
+  Future<void> _getOrder() async {
     try {
       ApiService apiService = ApiService();
       await apiService.init();
@@ -45,7 +45,7 @@ class _ReportScreenState extends State<ReportScreen> {
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
-              _loadingAllStore = false;
+              _loadingStore = false;
             });
           }
         });
@@ -59,7 +59,7 @@ class _ReportScreenState extends State<ReportScreen> {
   void initState() {
     super.initState();
     // _loadStoreData();
-    _getStoreDataAll();
+    _getOrder();
 
     // _pagingController.addPageRequestListener((pageKey) {
     //   _fetchPage(pageKey);
@@ -106,7 +106,7 @@ class _ReportScreenState extends State<ReportScreen> {
             thickness: 10,
             radius: Radius.circular(16),
             child: LoadingSkeletonizer(
-              loading: _loadingAllStore,
+              loading: _loadingStore,
               child: ListView.builder(
                 controller: _scrollController,
                 itemCount: orders.length,

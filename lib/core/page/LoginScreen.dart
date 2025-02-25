@@ -84,11 +84,17 @@ class _LoginScreenState extends State<LoginScreen> with RouteAware {
             lastConnectedState = isConnected;
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              showToast(
+              toastification.show(
                 context: context,
-                message: isConnected
-                    ? 'gobal.header.online_status'.tr()
-                    : 'gobal.header.offline_status'.tr(),
+                title: isConnected
+                    ? Text(
+                        'gobal.header.online_status'.tr(),
+                        style: Styles.green18(context),
+                      )
+                    : Text(
+                        'gobal.header.online_status'.tr(),
+                        style: Styles.red18(context),
+                      ),
                 type: isConnected
                     ? ToastificationType.success
                     : ToastificationType.error,
