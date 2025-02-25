@@ -162,9 +162,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 "name": item.name,
                 "qty": item.qty.toString(),
                 "unit": item.unitName,
-                "price": "00.00",
-                "discount": "00.00",
-                "discountProduct": "00.00"
+                "price": "0.00",
+                "discount": "0.00",
+                "discountProduct": "0.00"
               });
             }
           }
@@ -207,12 +207,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     "CUOR": "",
     "OAORDT": "",
     "items": [],
-    "totaltext": "00.00",
-    "ex_vat": "00.00",
-    "vat": "00.00",
+    "totaltext": "0.00",
+    "ex_vat": "0.00",
+    "vat": "0.00",
     "discount": "0.00",
     "discountProduct": "0.00",
-    "total": "00.00",
+    "total": "0.00",
     "OBSMCD": ""
   };
 
@@ -502,20 +502,31 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   String centerText(String text, int width) {
-    int leftPadding = (width - text.length) ~/ 2;
+    int leftPadding =
+        (width - text.length + _getNoOfUpperLowerChars(text)) ~/ 2;
     return ' ' * leftPadding + text;
   }
 
   Future<void> printHeaderBill(String typeBill) async {
     String header = '''
-${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', paperWidthHeader)}
-${centerText('58/3 หมู่ที่ 6 ถ.พระประโทน-บ้านแพ้ว', paperWidthHeader)}
-${centerText('ต.ตลาดจินดา อ.สามพราน จ.นครปฐม 73110', paperWidthHeader)}
-${centerText('โทร.(034) 981-555', paperWidthHeader)}
-${centerText('เลขประจำตัวผู้เสียภาษี 0105563063410', paperWidthHeader)}
-${centerText('ออกใบกำกับภาษีโดยสำนักงานใหญ่', paperWidthHeader)}
-${centerText('($typeBill)', paperWidthHeader)}
-${centerText('เอกสารออกเป็นชุด', paperWidthHeader)}''';
+${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', 69)}
+${centerText('58/3 หมู่ที่ 6 ถ.พระประโทน-บ้านแพ้ว', 69)}
+${centerText('ต.ตลาดจินดา อ.สามพราน จ.นครปฐม 73110', 69)}
+${centerText('โทร.(034) 981-555', 69)}
+${centerText('เลขประจำตัวผู้เสียภาษี 0105563063410', 69)}
+${centerText('ออกใบกำกับภาษีโดยสำนักงานใหญ่', 69)}
+${centerText('($typeBill)', 69)}
+${centerText('เอกสารออกเป็นชุด', 69)}
+''';
+//     String header = '''
+// ${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', paperWidthHeader)}
+// ${centerText('58/3 หมู่ที่ 6 ถ.พระประโทน-บ้านแพ้ว', paperWidthHeader)}
+// ${centerText('ต.ตลาดจินดา อ.สามพราน จ.นครปฐม 73110', paperWidthHeader)}
+// ${centerText('โทร.(034) 981-555', paperWidthHeader)}
+// ${centerText('เลขประจำตัวผู้เสียภาษี 0105563063410', paperWidthHeader)}
+// ${centerText('ออกใบกำกับภาษีโดยสำนักงานใหญ่', paperWidthHeader)}
+// ${centerText('($typeBill)', paperWidthHeader)}
+// ${centerText('เอกสารออกเป็นชุด', paperWidthHeader)}''';
     Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
@@ -660,7 +671,7 @@ ${centerText('เอกสารออกเป็นชุด', paperWidthHeade
     if (connectionStatus) {
       // await printHeaderSeparator();
       await printHeaderBill('บิลเงินสด/ใบกำกับภาษี');
-      // await printBodyBill(receiptData);
+      await printBodyBill(receiptData);
       // await printHeaderSeparator();
       // await printHeaderBill('ใบลดหนี้');
       // await printBodyBill(receiptData);
