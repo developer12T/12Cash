@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/components/button/IconButtonWithLabel.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabelFirst.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabelFixed.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabel.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/input/CustomTextInput.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
@@ -488,7 +491,7 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButtonWithLabel(
+              IconButtonWithLabelOld(
                 icon: Icons.photo_camera,
                 imagePath: storeImagePath != "" ? storeImagePath : null,
                 label: "store.store_data_screen.image_store".tr(),
@@ -496,7 +499,7 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
                   await uploadFormDataWithDio(imagePath, 'store', context);
                 },
               ),
-              IconButtonWithLabel(
+              IconButtonWithLabelOld(
                 icon: Icons.photo_camera,
                 imagePath: taxIdImagePath != "" ? taxIdImagePath : null,
                 label: "store.store_data_screen.image_taxId".tr(),
@@ -504,7 +507,7 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
                   await uploadFormDataWithDio(imagePath, 'tax', context);
                 },
               ),
-              IconButtonWithLabel(
+              IconButtonWithLabelOld(
                 icon: Icons.photo_camera,
                 imagePath: personalImagePath != "" ? personalImagePath : null,
                 label: "store.store_data_screen.image_identify".tr(),

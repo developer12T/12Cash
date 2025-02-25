@@ -1,5 +1,4 @@
 import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
-import 'package:_12sale_app/core/components/table/ReportSaleTable.dart';
 import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:flutter/material.dart';

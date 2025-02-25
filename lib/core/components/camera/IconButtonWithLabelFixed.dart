@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CameraExpand extends StatefulWidget {
+class IconButtonWithLabelFixed extends StatefulWidget {
   String? imagePath;
   final IconData icon;
   final String label;
@@ -20,7 +20,7 @@ class CameraExpand extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final Function(String imagePath)? onImageSelected; // Callback for image path
   bool checkNetwork;
-  CameraExpand({
+  IconButtonWithLabelFixed({
     super.key,
     required this.icon,
     this.imagePath,
@@ -34,11 +34,14 @@ class CameraExpand extends StatefulWidget {
   });
 
   @override
-  _CameraExpandState createState() => _CameraExpandState();
+  _IconButtonWithLabelFixedState createState() =>
+      _IconButtonWithLabelFixedState();
 }
 
-class _CameraExpandState extends State<CameraExpand>
+class _IconButtonWithLabelFixedState extends State<IconButtonWithLabelFixed>
     with WidgetsBindingObserver, TickerProviderStateMixin {
+  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  Map<String, dynamic> _deviceData = <String, dynamic>{};
   CameraController? controller;
   // late CameraController _cameraController;
   // String? imagePath;
@@ -47,8 +50,59 @@ class _CameraExpandState extends State<CameraExpand>
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
 
-  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-  Map<String, dynamic> _deviceData = <String, dynamic>{};
+  @override
+  void initState() {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    super.initState();
+    initPlatformState();
+    // _initializeCamera();
+  }
+
+  Future<void> initPlatformState() async {
+    var deviceData = <String, dynamic>{};
+
+    try {
+      if (kIsWeb) {
+        // deviceData = _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
+      } else {
+        deviceData = switch (defaultTargetPlatform) {
+          TargetPlatform.android =>
+            _readAndroidBuildData(await deviceInfoPlugin.androidInfo),
+          TargetPlatform.iOS =>
+            _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
+          // TargetPlatform.linux =>
+          //   _readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
+          // TargetPlatform.windows =>
+          //   _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
+          // TargetPlatform.macOS =>
+          //   _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
+          // TargetPlatform.fuchsia => <String, dynamic>{
+          //     'Error:': 'Fuchsia platform isn\'t supported'
+          //   },
+          // TODO: Handle this case.
+          TargetPlatform.fuchsia => throw UnimplementedError(),
+          // TODO: Handle this case.
+          TargetPlatform.linux => throw UnimplementedError(),
+          // TODO: Handle this case.
+          TargetPlatform.macOS => throw UnimplementedError(),
+          // TODO: Handle this case.
+          TargetPlatform.windows => throw UnimplementedError(),
+        };
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'Error:': 'Failed to get platform version.'
+      };
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _deviceData = deviceData;
+    });
+    print("Device Mobile :${deviceData['brand']}");
+  }
 
   Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
     return <String, dynamic>{
@@ -102,13 +156,27 @@ class _CameraExpandState extends State<CameraExpand>
     };
   }
 
-  @override
-  void initState() {
-    WidgetsFlutterBinding.ensureInitialized();
-    super.initState();
-    initPlatformState();
-    // _initializeCamera();
-  }
+  // Future<void> _initializeCamera() async {
+  //   try {
+  //     final cameras = await availableCameras();
+  //     if (cameras.isNotEmpty) {
+  //       final firstCamera = cameras.first;
+  //       _cameraController = CameraController(
+  //         firstCamera,
+  //         ResolutionPreset.max,
+  //         fps: 30,
+  //         enableAudio: false,
+  //         imageFormatGroup: ImageFormatGroup.jpeg,
+  //       );
+  //       _initializeControllerFuture = _cameraController.initialize();
+  //       await _initializeControllerFuture;
+  //     } else {
+  //       print("No cameras available");
+  //     }
+  //   } catch (e) {
+  //     print("Error initializing camera: $e");
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -116,50 +184,21 @@ class _CameraExpandState extends State<CameraExpand>
     super.dispose();
   }
 
-  Future<void> initPlatformState() async {
-    var deviceData = <String, dynamic>{};
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   final CameraController? cameraController = controller;
 
-    try {
-      if (kIsWeb) {
-        // deviceData = _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
-      } else {
-        deviceData = switch (defaultTargetPlatform) {
-          TargetPlatform.android =>
-            _readAndroidBuildData(await deviceInfoPlugin.androidInfo),
-          TargetPlatform.iOS =>
-            _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
-          // TargetPlatform.linux =>
-          //   _readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
-          // TargetPlatform.windows =>
-          //   _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
-          // TargetPlatform.macOS =>
-          //   _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
-          // TargetPlatform.fuchsia => <String, dynamic>{
-          //     'Error:': 'Fuchsia platform isn\'t supported'
-          //   },
-          // TODO: Handle this case.
-          TargetPlatform.fuchsia => throw UnimplementedError(),
-          // TODO: Handle this case.
-          TargetPlatform.linux => throw UnimplementedError(),
-          // TODO: Handle this case.
-          TargetPlatform.macOS => throw UnimplementedError(),
-          // TODO: Handle this case.
-          TargetPlatform.windows => throw UnimplementedError(),
-        };
-      }
-    } on PlatformException {
-      deviceData = <String, dynamic>{
-        'Error:': 'Failed to get platform version.'
-      };
-    }
+  //   // App state changed before we got the chance to initialize.
+  //   if (cameraController == null || !cameraController.value.isInitialized) {
+  //     return;
+  //   }
 
-    if (!mounted) return;
-
-    setState(() {
-      _deviceData = deviceData;
-    });
-    print("Device Mobile :${deviceData['brand']}");
-  }
+  //   if (state == AppLifecycleState.inactive) {
+  //     cameraController.dispose();
+  //   } else if (state == AppLifecycleState.resumed) {
+  //     _initializeCameraController(cameraController.description);
+  //   }
+  // }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -180,11 +219,12 @@ class _CameraExpandState extends State<CameraExpand>
     final CameraController cameraController = CameraController(
       cameraDescription,
       ResolutionPreset.max,
-      enableAudio: false,
-      imageFormatGroup: ImageFormatGroup.jpeg,
+      // enableAudio: false,
+      // imageFormatGroup: ImageFormatGroup.yuv420,
       fps: 30,
     );
     controller = cameraController;
+    // controller.s
     // If the controller is updated then update the UI.
     cameraController.addListener(() {
       if (mounted) {
@@ -198,24 +238,34 @@ class _CameraExpandState extends State<CameraExpand>
 
     try {
       await cameraController.initialize();
-      await Future.wait(<Future<Object?>>[
-        // The exposure mode is currently not supported on the web.
-        ...!kIsWeb
-            ? <Future<Object?>>[
-                cameraController.getMinExposureOffset().then(
-                    (double value) => _minAvailableExposureOffset = value),
-                cameraController
-                    .getMaxExposureOffset()
-                    .then((double value) => _maxAvailableExposureOffset = value)
-              ]
-            : <Future<Object?>>[],
-        cameraController
-            .getMaxZoomLevel()
-            .then((double value) => _maxAvailableZoom = value),
-        cameraController
-            .getMinZoomLevel()
-            .then((double value) => _minAvailableZoom = value),
-      ]);
+
+      // await cameraController
+      //     .lockCaptureOrientation(DeviceOrientation.portraitUp);
+      // Lock the camera orientation to portrait
+      // await cameraController
+      //     .lockCaptureOrientation(DeviceOrientation.portraitUp);
+      // await cameraController.lockCaptureOrientation(DeviceOrientation.)
+      // Ensure portrait orientation
+      // await cameraController
+      //     .lockCaptureOrientation(DeviceOrientation.landscapeRight);
+      // await Future.wait(<Future<Object?>>[
+      //   // The exposure mode is currently not supported on the web.
+      //   ...!kIsWeb
+      //       ? <Future<Object?>>[
+      //           cameraController.getMinExposureOffset().then(
+      //               (double value) => _minAvailableExposureOffset = value),
+      //           cameraController
+      //               .getMaxExposureOffset()
+      //               .then((double value) => _maxAvailableExposureOffset = value)
+      //         ]
+      //       : <Future<Object?>>[],
+      //   cameraController
+      //       .getMaxZoomLevel()
+      //       .then((double value) => _maxAvailableZoom = value),
+      //   cameraController
+      //       .getMinZoomLevel()
+      //       .then((double value) => _minAvailableZoom = value),
+      // ]);
     } on CameraException catch (e) {
       switch (e.code) {
         case 'CameraAccessDenied':
@@ -266,6 +316,29 @@ class _CameraExpandState extends State<CameraExpand>
     }
   }
 
+  // Future<void> openCamera(BuildContext context) async {
+  //   final cameras = await availableCameras();
+  //   await onNewCameraSelected(cameras.first);
+  //   Navigator.of(context).push(
+  //     MaterialPageRoute(
+  //       builder: (context) => CameraPreviewScreen(
+  //         cameraController: controller!,
+  //         onImageCaptured: (
+  //           String imagePath,
+  //         ) {
+  //           setState(() {
+  //             widget.imagePath = imagePath;
+  //           });
+  //           // Notify parent widget via callback
+  //           if (widget.onImageSelected != null) {
+  //             widget.onImageSelected!(imagePath);
+  //           }
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Future<void> openCamera(BuildContext context) async {
     try {
       // Dispose of the existing controller if it's already initialized
@@ -274,14 +347,23 @@ class _CameraExpandState extends State<CameraExpand>
       }
 
       // Get the available cameras
-      final cameras = await availableCameras();
+      var cameras = await availableCameras();
+      // cameras.first.sensorOrientation = 270;
+
+      final camera = cameras.first;
+      print('Camera sensor orientation: ${camera.sensorOrientation}');
+      print('Lens facing: ${camera.lensDirection}');
       if (cameras.isEmpty) {
         showInSnackBar('No cameras available');
         return;
       }
 
       // Initialize the camera with the first available camera
+      // Lower FPS range
       final firstCamera = cameras.first;
+
+      cameras.clear();
+
       await _initializeCameraController(firstCamera);
 
       // Navigate to the camera preview screen
@@ -310,42 +392,64 @@ class _CameraExpandState extends State<CameraExpand>
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    return GestureDetector(
-      onTap: () => openCamera(context),
-      child: Column(
-        children: [
-          // Display image if available, otherwise show the camera icon placeholder
-          Container(
-            // margin: EdgeInsets.all(20),
-            height: screenWidth / 2,
-            width: double.infinity,
-            color:
-                Colors.grey[300], // Background color before image is captured
+    return Column(
+      children: [
+        SizedBox(
+          width: screenWidth / 4,
+          height: screenWidth / 4,
+          child: ElevatedButton(
+            onPressed: () => openCamera(context),
+            style: ElevatedButton.styleFrom(
+              padding: widget.padding,
+              backgroundColor: widget.imagePath == null
+                  ? Colors.grey[400]
+                  : Styles.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(widget.borderRadius),
+              ),
+            ),
             child: widget.imagePath == null
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.camera_alt_outlined,
-                        size: 50,
-                        color: Colors.black54,
-                      ),
+                      Icon(widget.icon, color: Colors.white, size: 50),
                       Text(
                         "gobal.camera_button.button".tr(),
-                        style: Styles.black24(context),
+                        style: Styles.white18(context),
                       )
                     ],
                   )
-                : Image.file(
-                    height: 200,
-                    width: 200,
-                    File(widget.imagePath!), // Display the captured image here
-                    fit: BoxFit.contain,
+                : ClipRRect(
+                    child: widget.checkNetwork == false
+                        ? Image.file(
+                            File(widget.imagePath!),
+                            width: screenWidth / 4,
+                            height: screenWidth / 4,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            widget.imagePath!,
+                            width: screenWidth / 4,
+                            height: screenWidth / 4,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                  size: 50,
+                                ),
+                              );
+                            },
+                          ),
                   ),
           ),
-          const SizedBox(height: 8),
-        ],
-      ),
+        ),
+        Text(
+          widget.label,
+          style: Styles.black18(context),
+        ),
+      ],
     );
   }
 }

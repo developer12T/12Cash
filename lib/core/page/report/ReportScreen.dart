@@ -4,9 +4,6 @@ import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/InvoiceCard.dart';
 import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
-import 'package:_12sale_app/core/components/table/ReportSaleTable.dart';
-import 'package:_12sale_app/core/components/table/ShopTableAll.dart';
-import 'package:_12sale_app/core/components/table/ShopTableNew.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';

@@ -31,7 +31,7 @@ class _ManagePrinterScreenState extends State<ManagePrinterScreen> {
           await PrintBluetoothThermal.pairedBluetooths;
       // print(User.devicePrinter.macAdress);
       // print(User.devicePrinter.name);
-      print("pairedDevices" + pairedDevices.toString());
+      // print(User.connectPrinter);
       if (pairedDevices.isNotEmpty) {
         setState(() {
           _devices = pairedDevices;

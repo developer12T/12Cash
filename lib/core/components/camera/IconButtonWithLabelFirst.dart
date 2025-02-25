@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:_12sale_app/core/components/camera/CameraFirst.dart';
 import 'package:_12sale_app/core/components/camera/CameraPreviewScreen.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
@@ -6,7 +7,7 @@ import 'package:camera/camera.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-class IconButtonWithLabel extends StatefulWidget {
+class IconButtonWithLabelFirst extends StatefulWidget {
   String? imagePath;
   final IconData icon;
   final String label;
@@ -16,7 +17,7 @@ class IconButtonWithLabel extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final Function(String imagePath)? onImageSelected; // Callback for image path
   bool checkNetwork;
-  IconButtonWithLabel({
+  IconButtonWithLabelFirst({
     super.key,
     required this.icon,
     this.imagePath,
@@ -30,14 +31,15 @@ class IconButtonWithLabel extends StatefulWidget {
   });
 
   @override
-  _IconButtonWithLabelState createState() => _IconButtonWithLabelState();
+  _IconButtonWithLabelFirstState createState() =>
+      _IconButtonWithLabelFirstState();
 }
 
-class _IconButtonWithLabelState extends State<IconButtonWithLabel>
+class _IconButtonWithLabelFirstState extends State<IconButtonWithLabelFirst>
     with WidgetsBindingObserver {
   late CameraController _cameraController;
   Future<void>? _initializeControllerFuture;
-  // String? imagePath;
+  String? imagePath;
 
   @override
   void initState() {
@@ -47,65 +49,32 @@ class _IconButtonWithLabelState extends State<IconButtonWithLabel>
   }
 
   Future<void> _initializeCamera() async {
-    try {
-      final cameras = await availableCameras();
-      if (cameras.isNotEmpty) {
-        final firstCamera = cameras.first;
-        _cameraController = CameraController(
-          firstCamera,
-          ResolutionPreset.max,
-          fps: 30,
-          enableAudio: false,
-          imageFormatGroup: ImageFormatGroup.jpeg,
-        );
-        _initializeControllerFuture = _cameraController.initialize();
-        await _initializeControllerFuture;
-      } else {
-        print("No cameras available");
-      }
-    } catch (e) {
-      print("Error initializing camera: $e");
-    }
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
+
+    _cameraController = CameraController(firstCamera, ResolutionPreset.max,
+        imageFormatGroup: ImageFormatGroup.jpeg);
+
+    _initializeControllerFuture = _cameraController.initialize();
   }
 
   @override
   void dispose() {
-    _cameraController.dispose();
+    _cameraController
+        .dispose(); // Dispose of the camera controller to free resources
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = _cameraController;
-
-    // App state changed before we got the chance to initialize.
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
-
-    if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      _initializeCamera();
-    }
-  }
-
   Future<void> openCamera(BuildContext context) async {
-    await _initializeControllerFuture;
+    await _initializeControllerFuture; // Wait for the camera to initialize
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => CameraPreviewScreen(
+        builder: (context) => CameraPreviewScreenFirst(
           cameraController: _cameraController,
-          onImageCaptured: (
-            String imagePath,
-          ) {
+          onImageCaptured: (String imagePath) {
             setState(() {
-              widget.imagePath = imagePath;
+              this.imagePath = imagePath; // Store the image path when captured
             });
-            // Notify parent widget via callback
-            if (widget.onImageSelected != null) {
-              widget.onImageSelected!(imagePath);
-            }
           },
         ),
       ),

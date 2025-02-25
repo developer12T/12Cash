@@ -75,11 +75,11 @@ class WithdrawDetail {
       sendAddress: json["sendAddress"] ?? "",
       sendDate: DateTime.parse(json["sendDate"]),
       remark: json["remark"],
-      listProductWithdraw: (json['listUnit'] as List<dynamic>?)
+      listProductWithdraw: (json['listProductWithdraw'] as List<dynamic>?)
               ?.map((unit) => Product.fromJson(unit))
               .toList() ??
           [], // ✅ Default to empty list if null
-      listProductReceive: (json['listUnit'] as List<dynamic>?)
+      listProductReceive: (json['listProductReceive'] as List<dynamic>?)
               ?.map((unit) => Product.fromJson(unit))
               .toList() ??
           [], // ✅ Default to empty list if null

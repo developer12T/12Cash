@@ -481,11 +481,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return left + ' ' * space + right;
   }
 
-  String centerText(String text, int width) {
-    int leftPadding = (width - text.length) ~/ 2;
-    return ' ' * leftPadding + text;
-  }
-
   String leftText(String text, int width) {
     return text.padRight(width);
   }
@@ -504,6 +499,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     int leftPadding = totalPadding ~/ 2;
     int rightPadding = totalPadding - leftPadding;
     return '-' * leftPadding + text + '-' * rightPadding;
+  }
+
+  String centerText(String text, int width) {
+    int leftPadding = (width - text.length) ~/ 2;
+    return ' ' * leftPadding + text;
   }
 
   Future<void> printHeaderBill(String typeBill) async {
@@ -660,7 +660,7 @@ ${centerText('เอกสารออกเป็นชุด', paperWidthHeade
     if (connectionStatus) {
       // await printHeaderSeparator();
       await printHeaderBill('บิลเงินสด/ใบกำกับภาษี');
-      await printBodyBill(receiptData);
+      // await printBodyBill(receiptData);
       // await printHeaderSeparator();
       // await printHeaderBill('ใบลดหนี้');
       // await printBodyBill(receiptData);

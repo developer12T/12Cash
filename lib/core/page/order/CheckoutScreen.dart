@@ -35,28 +35,32 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: BoxShadowCustom(
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Container(
-                            // color: Colors.amber,
-                            height: viewportConstraints.maxHeight * 0.95,
-                            child: Column(
-                              children: [
-                                checkOutSelect(context, "QR Payment",
-                                    "https://www.designil.com/wp-content/uploads/2022/02/prompt-pay-logo.jpg"),
-                                checkOutIconSelect(context, "เงินสด"),
-                              ],
-                            ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Container(
+                                // color: Colors.amber,
+                                height: viewportConstraints.maxHeight * 0.95,
+                                child: Column(
+                                  children: [
+                                    checkOutSelect(context, "QR Payment",
+                                        "https://www.designil.com/wp-content/uploads/2022/02/prompt-pay-logo.jpg"),
+                                    checkOutIconSelect(context, "เงินสด"),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  )
+                        ),
+                      )
+                    ],
+                  ),
                 ],
               ),
             ),

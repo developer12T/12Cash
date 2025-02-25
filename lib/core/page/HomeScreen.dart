@@ -6,10 +6,7 @@ import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
 import 'package:_12sale_app/core/page/manage/ManageScreen.dart';
 import 'package:_12sale_app/core/page/report/ReportScreen.dart';
 import 'package:_12sale_app/core/page/route/AjustRoute.dart';
-import 'package:_12sale_app/core/page/route/AjustRoute2.dart';
-import 'package:_12sale_app/core/page/route/AjustRoute3.dart';
 import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
-import 'package:_12sale_app/core/page/order/OrderScreen.dart';
 import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
@@ -153,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AjustRoute3(),
+              builder: (context) => AjustRoute(),
             ),
           );
         }();
@@ -209,106 +206,6 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return const Icon(Icons.shopping_basket, size: 30);
     }
-  }
-
-  void _showSearchModal() {
-    _getStoreAll();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Make modal take full screen if needed
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return Container(
-          color: Colors.transparent,
-          child: Column(
-            children: [
-              // Container(
-              //   color: Styles.primaryColor,
-              //   height: 100,
-              // ),
-              Container(
-                height: MediaQuery.of(context).size.height / 7,
-                decoration: const BoxDecoration(
-                  color: Styles.primaryColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child:
-                    Text("เลือกร้านค้า ", style: Styles.headerWhite32(context)),
-              ),
-              Padding(
-                padding:
-                    MediaQuery.of(context).viewInsets, // Adjust for keyboard
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: searchController,
-                        style: Styles.black18(context),
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          hintStyle: Styles.black18(context),
-                          hintText: 'ค้นหา...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          prefixIcon: const Icon(Icons.search),
-                        ),
-                        onChanged: (query) {
-                          print(query);
-                          _filterItems(
-                              query); // Filter items on every keystroke
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: Skeletonizer(
-                          effect: const PulseEffect(
-                              from: Colors.grey,
-                              to: Color.fromARGB(255, 211, 211, 211),
-                              duration: Duration(seconds: 1)),
-                          enabled: _loading,
-                          enableSwitchAnimation: true,
-                          child: ListView.builder(
-                            itemCount: storeItem.length,
-                            itemBuilder: (context, index) {
-                              return StoreCartAll(
-                                textDetail: 'ขายสินค้า',
-                                item: storeItem[index],
-                                onDetailsPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => Orderscreen(
-                                          customerNo: storeItem[index].storeId,
-                                          customerName: storeItem[index].name,
-                                          status: storeItem[index].status),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override

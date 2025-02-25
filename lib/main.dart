@@ -1,30 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:_12sale_app/core/components/Gird.dart';
-import 'package:_12sale_app/core/page/CustomBottomBar.dart';
-import 'package:_12sale_app/core/page/NotificationScreen.dart';
-import 'package:_12sale_app/core/page/Ractangle3D.dart';
-import 'package:_12sale_app/core/page/Square3D.dart';
 import 'package:_12sale_app/core/page/announce/Announce.dart';
-import 'package:_12sale_app/core/page/order/CheckOutScreen.dart';
-import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
-import 'package:_12sale_app/core/page/order/ExamplePrint.dart';
-import 'package:_12sale_app/core/page/order/TestScroll.dart';
-import 'package:_12sale_app/core/page/printer/BluetoothPrinterScreen.dart';
-import 'package:_12sale_app/core/page/printer/PrinterBixolon.dart';
-import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
-import 'package:_12sale_app/core/page/printer/TestPrint.dart';
-import 'package:_12sale_app/core/page/printer/TestPrinterScreen.dart';
-import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/LoginScreen.dart';
-import 'package:_12sale_app/core/page/HomeScreen.dart';
-import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
-import 'package:_12sale_app/core/page/order/OrderScreen.dart';
-import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
-import 'package:_12sale_app/core/page/route/TossAddToCartScreen.dart';
-import 'package:_12sale_app/core/page/withdraw/ShowAllSwitch.dart';
-
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/search/RouteVisitFilterLocal.dart';
 import 'package:_12sale_app/data/models/search/StoreFilterLocal.dart';
@@ -37,8 +15,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:http/io_client.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart'; // For date localization
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -48,20 +24,10 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:lottie/lottie.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart';
-import 'dart:io';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
-import 'package:month_year_picker/month_year_picker.dart';
-
-// import 'package:timezone/standalone.dart' as tz;
-// import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   try {
@@ -97,15 +63,13 @@ void main() async {
     await EasyLocalization.ensureInitialized();
     await PackageInfo.fromPlatform();
     // Initialize the notifications
-    // await initializeNotifications();
+    await initializeNotifications();
     await requestAllPermissions();
 
     await initializeDateFormatting('th', null);
     await dotenv.load(fileName: ".env");
     await ScreenUtil.ensureScreenSize();
-
-    // await _initializeControllerFuture;
-    // Initialize the background service
+    await availableCameras();
     // final hasPermissions = await FlutterBackground.initialize(
     //   androidConfig: const FlutterBackgroundAndroidConfig(
     //     notificationTitle: "Background Service",
@@ -117,6 +81,7 @@ void main() async {
     // if (!hasPermissions) {
     //   print("Background permissions not granted");
     // }
+
     // Initialize port for communication between TaskHandler and UI.
     // FlutterForegroundTask.initCommunicationPort();
     await LocationService().initialize();
@@ -168,9 +133,9 @@ class MyTaskHandler extends TaskHandler {
     _count++;
 
     // Update notification content.
-    // FlutterForegroundTask.updateService(
-    //     notificationTitle: 'Hello MyTaskHandler :)',
-    //     notificationText: 'count: $_count');
+    FlutterForegroundTask.updateService(
+        notificationTitle: 'Hello MyTaskHandler :)',
+        notificationText: 'count: $_count');
 
     // Send data to main isolate.
     FlutterForegroundTask.sendDataToMain(_count);
@@ -242,37 +207,37 @@ class _MyAppState extends State<MyApp> {
   double latitude = 00.00;
   double longitude = 00.00;
 
-  Future<void> _requestPermissions() async {
-    // Android 13+, you need to allow notification permission to display foreground service notification.
-    //
-    // iOS: If you need notification, ask for permission.
-    final NotificationPermission notificationPermission =
-        await FlutterForegroundTask.checkNotificationPermission();
-    if (notificationPermission != NotificationPermission.granted) {
-      await FlutterForegroundTask.requestNotificationPermission();
-    }
+  // Future<void> _requestPermissions() async {
+  //   // Android 13+, you need to allow notification permission to display foreground service notification.
+  //   //
+  //   // iOS: If you need notification, ask for permission.
+  //   final NotificationPermission notificationPermission =
+  //       await FlutterForegroundTask.checkNotificationPermission();
+  //   if (notificationPermission != NotificationPermission.granted) {
+  //     await FlutterForegroundTask.requestNotificationPermission();
+  //   }
 
-    if (Platform.isAndroid) {
-      // Android 12+, there are restrictions on starting a foreground service.
-      //
-      // To restart the service on device reboot or unexpected problem, you need to allow below permission.
-      if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-        // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
-        await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-      }
+  //   if (Platform.isAndroid) {
+  //     // Android 12+, there are restrictions on starting a foreground service.
+  //     //
+  //     // To restart the service on device reboot or unexpected problem, you need to allow below permission.
+  //     if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+  //       // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
+  //       await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+  //     }
 
-      // Use this utility only if you provide services that require long-term survival,
-      // such as exact alarm service, healthcare service, or Bluetooth communication.
-      //
-      // This utility requires the "android.permission.SCHEDULE_EXACT_ALARM" permission.
-      // Using this permission may make app distribution difficult due to Google policy.
-      if (!await FlutterForegroundTask.canScheduleExactAlarms) {
-        // When you call this function, will be gone to the settings page.
-        // So you need to explain to the user why set it.
-        await FlutterForegroundTask.openAlarmsAndRemindersSettings();
-      }
-    }
-  }
+  //     // Use this utility only if you provide services that require long-term survival,
+  //     // such as exact alarm service, healthcare service, or Bluetooth communication.
+  //     //
+  //     // This utility requires the "android.permission.SCHEDULE_EXACT_ALARM" permission.
+  //     // Using this permission may make app distribution difficult due to Google policy.
+  //     if (!await FlutterForegroundTask.canScheduleExactAlarms) {
+  //       // When you call this function, will be gone to the settings page.
+  //       // So you need to explain to the user why set it.
+  //       await FlutterForegroundTask.openAlarmsAndRemindersSettings();
+  //     }
+  //   }
+  // }
 
   void _initService() {
     FlutterForegroundTask.init(
@@ -366,9 +331,9 @@ class _MyAppState extends State<MyApp> {
     // FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   // Request permissions and initialize the service.
-    //   // _requestPermissions();
-    //   // _initService();
-    //   // _startService();
+
+    //   _initService();
+    //   _startService();
     // });
   }
 
@@ -377,7 +342,7 @@ class _MyAppState extends State<MyApp> {
     // Remove a callback to receive data sent from the TaskHandler.
     // FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     // videoPlayerController.dispose(); // Dispose of VideoPlayerController
-    _taskDataListenable.dispose();
+    // _taskDataListenable.dispose();
     // _cameraController
     //     .dispose(); // Dispose of the camera controller to free resources
     super.dispose();

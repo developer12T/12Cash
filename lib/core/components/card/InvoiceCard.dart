@@ -36,16 +36,27 @@ class InvoiceCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FaIcon(
-                        FontAwesomeIcons.solidFileLines,
-                        color: Styles.primaryColor,
-                        size: 35,
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.blue[50],
+                          ),
+                          padding: EdgeInsets.all(8),
+                          margin: EdgeInsets.symmetric(horizontal: 4),
+                          child: FaIcon(
+                            FontAwesomeIcons.solidFileLines,
+                            color: Styles.primaryColor,
+                            size: 35,
+                          ),
+                        ),
                       ),
                       SizedBox(
                         width: 10,

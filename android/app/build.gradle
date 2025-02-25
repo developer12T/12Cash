@@ -9,27 +9,28 @@ plugins {
 android {
     namespace = "com.example.u_12sale_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "25.1.8937393"
-    // compileSdkVersion 33 // Use at least 31, preferably 33 or higher
+    ndkVersion = flutter.ndkVersion
+    compileSdkVersion = 34 // Use at least 31, preferably 33 or higher
 
 
     compileOptions {
-        // coreLibraryDesugaringEnabled true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled = true  // ✅ Enable desugaring
+        sourceCompatibility =  JavaVersion.VERSION_11  // ✅ Use Java 11
+        targetCompatibility = JavaVersion.VERSION_11 
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "11"
     }
 
     defaultConfig {
         // multiDexEnabled true
         applicationId = "com.example.u_12sale_app"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = 21  // Ensure minSdk is at least 21
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+        multiDexEnabled = true  // ✅ Enable MultiDex if not already enabled
     }
 
     buildTypes {
@@ -44,5 +45,8 @@ flutter {
 }
 
 dependencies {
+    implementation 'androidx.window:window:1.0.0'
+    implementation 'androidx.window:window-java:1.0.0'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
     implementation 'androidx.appcompat:appcompat:1.4.0'
 }

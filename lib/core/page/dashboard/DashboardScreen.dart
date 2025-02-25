@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/CalendarPicker.dart';
+import 'package:_12sale_app/core/components/camera/CameraPreviewScreen.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
 import 'package:_12sale_app/core/components/card/MenuDashboard.dart';
 import 'package:_12sale_app/core/components/card/WeightCude.dart';
@@ -180,6 +181,11 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         },
         title_4: "dashboard.menu.campaign".tr(),
         icon_4: Icons.campaign_rounded,
+        onTap4: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => NotificationScreen()),
+          );
+        },
         title_5: "dashboard.menu.history".tr(),
         icon_5: Icons.history,
         title_6: "dashboard.menu.schedule".tr(),

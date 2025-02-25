@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'package:_12sale_app/core/components/camera/CameraPreviewScreen.dart';
+import 'package:_12sale_app/core/components/camera/CameraButton.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:camera/camera.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-class IconButtonWithLabel extends StatefulWidget {
+class IconButtonWithLabelOld extends StatefulWidget {
   String? imagePath;
   final IconData icon;
   final String label;
@@ -16,7 +16,7 @@ class IconButtonWithLabel extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final Function(String imagePath)? onImageSelected; // Callback for image path
   bool checkNetwork;
-  IconButtonWithLabel({
+  IconButtonWithLabelOld({
     super.key,
     required this.icon,
     this.imagePath,
@@ -30,18 +30,16 @@ class IconButtonWithLabel extends StatefulWidget {
   });
 
   @override
-  _IconButtonWithLabelState createState() => _IconButtonWithLabelState();
+  _IconButtonWithLabelOldState createState() => _IconButtonWithLabelOldState();
 }
 
-class _IconButtonWithLabelState extends State<IconButtonWithLabel>
-    with WidgetsBindingObserver {
+class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
   late CameraController _cameraController;
   Future<void>? _initializeControllerFuture;
   // String? imagePath;
 
   @override
   void initState() {
-    WidgetsFlutterBinding.ensureInitialized();
     super.initState();
     _initializeCamera();
   }
@@ -49,14 +47,12 @@ class _IconButtonWithLabelState extends State<IconButtonWithLabel>
   Future<void> _initializeCamera() async {
     try {
       final cameras = await availableCameras();
+      // print("cameras.length:${cameras.length}");
       if (cameras.isNotEmpty) {
         final firstCamera = cameras.first;
         _cameraController = CameraController(
           firstCamera,
           ResolutionPreset.max,
-          fps: 30,
-          enableAudio: false,
-          imageFormatGroup: ImageFormatGroup.jpeg,
         );
         _initializeControllerFuture = _cameraController.initialize();
         await _initializeControllerFuture;
@@ -72,22 +68,6 @@ class _IconButtonWithLabelState extends State<IconButtonWithLabel>
   void dispose() {
     _cameraController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = _cameraController;
-
-    // App state changed before we got the chance to initialize.
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
-
-    if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      _initializeCamera();
-    }
   }
 
   Future<void> openCamera(BuildContext context) async {
