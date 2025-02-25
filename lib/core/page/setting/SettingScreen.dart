@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/components/dropdown/DropDownStandarad.dart';
 import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/LoginScreen.dart';

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Loading.dart';
-import 'package:_12sale_app/core/components/card/StoreVisitCard.dart';
+import 'package:_12sale_app/core/components/card/route/StoreVisitCard.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/route/DetailScreen.dart';
 import 'package:_12sale_app/core/page/route/RouteScreen.dart';

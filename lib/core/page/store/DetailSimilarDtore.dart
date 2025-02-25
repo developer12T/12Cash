@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/components/camera/IconButtonWithLabel.dart';
-import 'package:_12sale_app/core/components/camera/ShowPhotoButton.dart';
+import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 
@@ -488,7 +488,7 @@ class _DetailSimilarStoreState extends State<DetailSimilarStore> {
                                                   : null)
                                               : null,
                                     )
-                                  : IconButtonWithLabel(
+                                  : IconButtonWithLabelOld(
                                       label: "ร้านค้า",
                                       icon: Icons.photo_camera,
                                       imagePath:
@@ -532,7 +532,7 @@ class _DetailSimilarStoreState extends State<DetailSimilarStore> {
                                                   : null)
                                               : null,
                                     )
-                                  : IconButtonWithLabel(
+                                  : IconButtonWithLabelOld(
                                       label: "ภ.พ.20",
                                       icon: Icons.photo_camera,
                                       imagePath:
@@ -577,7 +577,7 @@ class _DetailSimilarStoreState extends State<DetailSimilarStore> {
                                               : null)
                                           : null,
                                     )
-                                  : IconButtonWithLabel(
+                                  : IconButtonWithLabelOld(
                                       label: "สำเนาบัตรปปช.",
                                       icon: Icons.photo_camera,
                                       imagePath: widget

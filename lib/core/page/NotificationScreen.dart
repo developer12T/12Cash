@@ -123,7 +123,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     final NotificationDetails platformDetails =
         NotificationDetails(android: androidDetails);
-    await requestNotificationPermission();
 
     await flutterLocalNotificationsPlugin.show(
       0, // Notification ID

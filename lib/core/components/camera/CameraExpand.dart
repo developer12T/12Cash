@@ -1,6 +1,5 @@
 import 'dart:io';
-import 'package:_12sale_app/core/components/camera/CameraButton%20copy.dart';
-import 'package:_12sale_app/core/components/camera/CameraPreviewScreen.dart';
+import 'package:_12sale_app/core/components/camera/CameraButton.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:camera/camera.dart';
@@ -288,7 +287,7 @@ class _CameraExpandState extends State<CameraExpand>
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => CameraPreviewScreen(
-            deviceData: _deviceData,
+            // deviceData: _deviceData,
             cameraController: controller!,
             onImageCaptured: (String imagePath) {
               setState(() {

@@ -1,4 +1,3 @@
-import 'package:_12sale_app/core/components/button/Button.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

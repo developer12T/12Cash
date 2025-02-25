@@ -59,7 +59,7 @@ void main() async {
       // Use Legacy Camera API features
     }
 
-    // await availableCameras();
+    await availableCameras();
     await EasyLocalization.ensureInitialized();
     await PackageInfo.fromPlatform();
     // Initialize the notifications

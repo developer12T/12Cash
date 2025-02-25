@@ -1,7 +1,5 @@
 import 'dart:convert';
-
-import 'package:_12sale_app/core/components/camera/IconButtonWithLabel.dart';
-import 'package:_12sale_app/core/components/camera/ShowPhotoButton.dart';
+import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Store.dart';
 import 'package:easy_localization/easy_localization.dart';

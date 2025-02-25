@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:_12sale_app/core/components/card/StoreCardAll.dart';
+import 'package:_12sale_app/core/components/card/store/StoreCardAll.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
-import 'package:_12sale_app/core/page/manage/ManageScreen.dart';
 import 'package:_12sale_app/core/page/report/ReportScreen.dart';
 import 'package:_12sale_app/core/page/route/AjustRoute.dart';
 import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
@@ -72,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
     RouteHeader(),
     StoreHeader(),
     ReportHeader(),
-    ManageHeader(),
   ];
 
   void _onItemTapped(int index) {
