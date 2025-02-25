@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';

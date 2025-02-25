@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/order/Product.dart';
 import 'package:flutter/material.dart';

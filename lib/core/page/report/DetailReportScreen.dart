@@ -1,5 +1,5 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BuildTextRowDetailShop.dart';
+import 'package:_12sale_app/core/components/layout/BuildTextRowDetailShop.dart';
 import 'package:_12sale_app/core/components/table/VerifyTable.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 

@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/components/CustomerDropdownSearch.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/badge/CustomBadge.dart';
-import 'package:_12sale_app/core/components/card/RouteShopVisitCard.dart';
-import 'package:_12sale_app/core/components/card/RouteVisitCard.dart';
-import 'package:_12sale_app/core/components/card/StoreVisitCard.dart';
+import 'package:_12sale_app/core/components/card/route/RouteShopVisitCard.dart';
+import 'package:_12sale_app/core/components/card/route/RouteVisitCard.dart';
+import 'package:_12sale_app/core/components/card/route/StoreVisitCard.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
 import 'package:_12sale_app/core/styles/style.dart';

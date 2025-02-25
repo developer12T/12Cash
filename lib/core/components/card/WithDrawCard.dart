@@ -1,4 +1,4 @@
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/models/order/Orders.dart';

@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/components/card/DuplicateCard.dart';
-import 'package:_12sale_app/core/components/card/StoreCardAll.dart';
-import 'package:_12sale_app/core/components/card/StoreCardNew.dart';
+import 'package:_12sale_app/core/components/card/store/DuplicateCard.dart';
+import 'package:_12sale_app/core/components/card/store/StoreCardAll.dart';
+import 'package:_12sale_app/core/components/card/store/StoreCardNew.dart';
 import 'package:_12sale_app/core/page/store/DetailSimilarDtore.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';

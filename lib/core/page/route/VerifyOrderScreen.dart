@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BuildTextRowDetailShop.dart';
+import 'package:_12sale_app/core/components/layout/BuildTextRowDetailShop.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/components/card/CartCard.dart';
+import 'package:_12sale_app/core/components/card/order/CartCard.dart';
 import 'package:_12sale_app/core/components/table/VerifyTable.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 

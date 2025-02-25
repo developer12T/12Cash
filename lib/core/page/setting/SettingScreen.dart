@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/LoginScreen.dart';
-
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:easy_localization/easy_localization.dart';

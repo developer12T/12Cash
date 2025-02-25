@@ -1,10 +1,9 @@
 import 'dart:async';
-
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/WeightCude.dart';
 import 'package:_12sale_app/core/components/card/WithDrawCard.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/switch/example_1.dart';
 import 'package:_12sale_app/core/components/switch/example_10.dart';
 import 'package:_12sale_app/core/components/switch/example_11.dart';

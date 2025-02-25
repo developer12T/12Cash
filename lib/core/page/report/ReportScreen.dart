@@ -1,9 +1,6 @@
 import 'dart:async';
-
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
-import 'package:_12sale_app/core/components/card/InvoiceCard.dart';
-import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
+import 'package:_12sale_app/core/components/card/order/InvoiceCard.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
@@ -203,13 +200,13 @@ class _ReportHeaderState extends State<ReportHeader> {
                           ),
                         ),
                       ),
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: Container(
-                          // width: screenWidth / 3,
-                          child: const CustomerDropdownSearch(),
-                        ),
-                      ),
+                      // Flexible(
+                      //   fit: FlexFit.loose,
+                      //   child: Container(
+                      //     // width: screenWidth / 3,
+                      //     child: const CustomerDropdownSearch(),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/store/StoreCardAll.dart';
 import 'package:_12sale_app/core/components/card/store/StoreCardNew.dart';
-import 'package:_12sale_app/core/components/search/CustomerDropdownSearch.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
 import 'package:_12sale_app/core/page/store/DetailNewStoreScreen.dart';

@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:math';
-
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/CalendarPicker.dart';
 import 'package:_12sale_app/core/components/camera/CameraPreviewScreen.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
@@ -12,14 +10,13 @@ import 'package:_12sale_app/core/components/chart/ItemSummarize.dart';
 import 'package:_12sale_app/core/components/chart/LineChart.dart';
 import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
-import 'package:_12sale_app/core/page/NotificationScreen.dart';
-import 'package:_12sale_app/core/page/Ractangle3D.dart';
+import 'package:_12sale_app/core/page/notification/NotificationScreen.dart';
+import 'package:_12sale_app/core/page/3D_canvas/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
 import 'package:_12sale_app/core/page/withdraw/WithDrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
-import 'package:_12sale_app/data/models/Customer.dart';
 import 'package:_12sale_app/data/models/Shipping.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -147,7 +144,6 @@ class _DashboardscreenState extends State<Dashboardscreen> {
     );
   }
 
-  List<CustomerModel> customerList = [];
   List<ShippingModel> shuppingList = [];
 
   Widget build(BuildContext context) {

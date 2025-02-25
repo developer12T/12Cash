@@ -1,8 +1,7 @@
 import 'dart:ui';
-
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/components/BuildTextRowDetailShop.dart';
-import 'package:_12sale_app/core/page/Ractangle3D.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/layout/BuildTextRowDetailShop.dart';
+import 'package:_12sale_app/core/page/3D_canvas/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/withdraw/UtilzeDetail.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:easy_localization/easy_localization.dart';

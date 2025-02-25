@@ -1,5 +1,5 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/withdraw/WithdrawDetail.dart';
 import 'package:_12sale_app/data/service/apiService.dart';

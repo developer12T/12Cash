@@ -1,5 +1,5 @@
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/page/NotificationScreen.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/page/notification/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';

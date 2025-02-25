@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
-import 'package:_12sale_app/core/components/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/components/card/OrderMenuListCard.dart';
-import 'package:_12sale_app/core/components/card/OrderMenuListVerticalCard.dart';
+import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
+import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
+import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/switch/example_5.dart';
 import 'package:_12sale_app/core/page/withdraw/CheckoutWithdrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
