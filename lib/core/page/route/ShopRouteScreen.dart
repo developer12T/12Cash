@@ -8,7 +8,7 @@ import 'package:_12sale_app/core/components/card/route/RouteShopVisitCard.dart';
 import 'package:_12sale_app/core/components/card/route/RouteVisitCard.dart';
 import 'package:_12sale_app/core/components/card/route/StoreVisitCard.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
-import 'package:_12sale_app/core/page/route/TestGooglemap.dart';
+import 'package:_12sale_app/core/page/google_map/TestGooglemap.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/route/RouteVisit.dart';

@@ -14,3 +14,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+Setting Project
+    - config timeline package extract file and paste the "timelines-0.1.0.rar" in project to C:\Users\[Your User]\AppData\Local\Pub\Cache\hosted\pub.dev
