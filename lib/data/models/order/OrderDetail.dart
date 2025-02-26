@@ -20,6 +20,7 @@ class OrderDetail {
   final Shipping shipping;
   final String paymentMethod;
   final String paymentStatus;
+  final List<ListImage> listImage;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -43,6 +44,7 @@ class OrderDetail {
     required this.shipping,
     required this.paymentMethod,
     required this.paymentStatus,
+    required this.listImage,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -72,6 +74,9 @@ class OrderDetail {
       shipping: Shipping.fromJson(json['shipping']),
       paymentMethod: json['paymentMethod'],
       paymentStatus: json['paymentStatus'],
+      listImage: (json['listImage'] as List)
+          .map((item) => ListImage.fromJson(item))
+          .toList(),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -225,6 +230,36 @@ class Shipping {
       address: json['address'],
       id: json['_id'],
     );
+  }
+}
+
+class ListImage {
+  final String name;
+  final String path;
+  final String type;
+
+  ListImage({
+    required this.name,
+    required this.path,
+    required this.type,
+  });
+
+  // ✅ Convert JSON to Dart Object
+  factory ListImage.fromJson(Map<String, dynamic> json) {
+    return ListImage(
+      name: json['name'] ?? '', //  field name
+      path: json['path'] ?? '', //  field name
+      type: json['type'] ?? '', //  field name
+    );
+  }
+
+  // ✅ Convert Dart Object to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'path': path,
+      'type': type,
+    };
   }
 }
 

@@ -13,6 +13,7 @@ import 'package:_12sale_app/data/models/order/Promotion.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -75,6 +76,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   void initState() {
     super.initState();
     _getCart();
+    _getQRImage();
     _cartScrollController.addListener(_handleInnerScroll);
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
@@ -146,6 +148,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     // });
     // Called when the screen is popped back to
     _getCart();
+    _getQRImage();
   }
 
   @override
@@ -165,12 +168,52 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   List<CartList> cartList = [];
   List<PromotionList> promotionList = [];
   List<PromotionListItem> listPromotions = [];
+  List<ImageModel> imageList = [];
   final Debouncer _debouncer = Debouncer();
   final Throttler _throttler = Throttler();
 
   String latitude = '';
   String longitude = '';
   final LocationService locationService = LocationService();
+
+  Future<void> uploadImageSlip(String orderId) async {
+    try {
+      Dio dio = Dio();
+      MultipartFile? imageFile;
+      imageFile = await MultipartFile.fromFile(qrImagePath);
+      var formData = FormData.fromMap(
+        {
+          'orderId': orderId,
+          'type': 'slip',
+          'image': imageFile,
+        },
+      );
+      var response = await dio.post(
+        'http://192.168.44.57:8006/api/cash/order/addSlip',
+        data: formData,
+        options: Options(
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        ),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "อัพโหลด สลิปสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error $e");
+    }
+  }
 
   Future<void> fetchLocation() async {
     try {
@@ -218,28 +261,52 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         },
       );
       if (response.statusCode == 200) {
-        toastification.show(
-          autoCloseDuration: const Duration(seconds: 5),
-          context: context,
-          primaryColor: Colors.green,
-          type: ToastificationType.success,
-          style: ToastificationStyle.flatColored,
-          title: Text(
-            "สั่งซื้อสำเร็จ",
-            style: Styles.green18(context),
-          ),
-        );
+        if (isSelectCheckout == "QR Payment") {
+          await uploadImageSlip(response.data['data']['orderId']);
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.green,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "สั่งซื้อสำเร็จ",
+              style: Styles.green18(context),
+            ),
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderDetailScreen(
+                orderId: response.data['data']['orderId'],
+              ),
+            ),
+            (route) => route.isFirst, // Keeps only the first route
+          );
+        } else {
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.green,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "สั่งซื้อสำเร็จ",
+              style: Styles.green18(context),
+            ),
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderDetailScreen(
+                orderId: response.data['data']['orderId'],
+              ),
+            ),
+            (route) => route.isFirst, // Keeps only the first route
+          );
+        }
       }
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OrderDetailScreen(
-            orderId: response.data['data']['orderId'],
-          ),
-        ),
-        (route) => route.isFirst, // Keeps only the first route
-      );
       // Navigator.push(
       //   context,
       //   MaterialPageRoute(
@@ -247,6 +314,27 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       //             orderId: response.data['data']['orderId'],
       //           )),
       // );
+    } catch (e) {
+      print("Error $e");
+    }
+  }
+
+  Future<void> _getQRImage() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/user/qrcode?area=${User.area}&type=qrcode',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        print(response.data['data']['image']);
+        final List<dynamic> data = response.data['data']['image'];
+
+        setState(() {
+          imageList = data.map((item) => ImageModel.fromJson(item)).toList();
+        });
+      }
     } catch (e) {
       print("Error $e");
     }
@@ -483,11 +571,33 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                   ),
                   onPressed: () {
                     if (_isCreateOrderEnabled) {
-                      AllAlert.customAlert(
-                          context,
-                          "store.processtimeline_screen.alert.title".tr(),
-                          "คุณต้องการจะสั่งซื้อสินค้าใช่หรือไม่ ?",
-                          _checkOutOrder);
+                      if (isSelectCheckout == "QR Payment") {
+                        if (qrImagePath != "") {
+                          AllAlert.customAlert(
+                              context,
+                              "store.processtimeline_screen.alert.title".tr(),
+                              "คุณต้องการจะสั่งซื้อสินค้าใช่หรือไม่ ?",
+                              _checkOutOrder);
+                        } else {
+                          toastification.show(
+                            autoCloseDuration: const Duration(seconds: 5),
+                            context: context,
+                            primaryColor: Colors.red,
+                            type: ToastificationType.error,
+                            style: ToastificationStyle.flatColored,
+                            title: Text(
+                              "กรุณาอัพโหลดสลิป",
+                              style: Styles.red18(context),
+                            ),
+                          );
+                        }
+                      } else {
+                        AllAlert.customAlert(
+                            context,
+                            "store.processtimeline_screen.alert.title".tr(),
+                            "คุณต้องการจะสั่งซื้อสินค้าใช่หรือไม่ ?",
+                            _checkOutOrder);
+                      }
                     }
                   },
                   child: Padding(
@@ -1424,8 +1534,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                         label: "QR Code",
                                         icon:
                                             Icons.image_not_supported_outlined,
-                                        imagePath:
-                                            "https://img.freepik.com/free-vector/scan-me-qr-code_78370-2915.jpg?t=st=1740457548~exp=1740461148~hmac=aa16676f93bae39be23387cb5ef9b0d5bc64de27dd25558ab5c70463ea81523f&w=900",
+                                        imagePath: imageList.isNotEmpty
+                                            ? imageList
+                                                .firstWhere((element) =>
+                                                    element.type == "qrcode")
+                                                .path
+                                            : '',
                                       ),
                                       IconButtonWithLabelOld(
                                         icon: Icons.photo_camera,

@@ -20,3 +20,27 @@ class User {
       new BluetoothInfo(macAdress: "", name: "");
   static bool connectPrinter = false;
 }
+
+class ImageModel {
+  final String name;
+  final String path;
+  final String type;
+  final String id;
+
+  ImageModel({
+    required this.name,
+    required this.path,
+    required this.type,
+    required this.id,
+  });
+
+  // Convert JSON to ImageModel
+  factory ImageModel.fromJson(Map<String, dynamic> json) {
+    return ImageModel(
+      name: json['name'] ?? '',
+      path: json['path'] ?? '',
+      type: json['type'] ?? '',
+      id: json['_id'] ?? '',
+    );
+  }
+}

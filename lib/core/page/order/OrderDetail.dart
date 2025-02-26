@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
@@ -35,6 +37,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   List<Product> listProduct = [];
   List<Promotion> listPromotions = [];
   List<PromotionListItem> listPromotionItems = [];
+  List<ListImage> listImage = [];
 
   double subtotal = 0;
   double discount = 0;
@@ -98,11 +101,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'][0]['listProduct'];
+        final List<dynamic> images = response.data['data'][0]['listImage'];
         final List<dynamic> prData = response.data['data'][0]['listPromotions'];
         setState(() {
           saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
           storeDetail = Store.fromJson(response.data['data'][0]['store']);
           listProduct = data.map((item) => Product.fromJson(item)).toList();
+          listImage = images.map((item) => ListImage.fromJson(item)).toList();
 
           listPromotions =
               prData.map((item) => Promotion.fromJson(item)).toList();
@@ -765,12 +770,47 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         child: Column(
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   // "${widget.storeId}",
                                   "${storeDetail?.name} ${storeDetail?.storeId}",
                                   style: Styles.black24(context),
+                                ),
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (listImage.isNotEmpty) {
+                                      await showDialog(
+                                        context: context,
+                                        builder: (_) => ImageDialog(
+                                          imagePath: listImage.isNotEmpty
+                                              ? listImage
+                                                  .firstWhere(
+                                                      (i) => i.type == 'slip')
+                                                  .path
+                                              : '',
+                                          checkNetwork: true,
+                                        ),
+                                      );
+                                    } else {
+                                      toastification.show(
+                                        autoCloseDuration:
+                                            const Duration(seconds: 5),
+                                        context: context,
+                                        primaryColor: Colors.red,
+                                        type: ToastificationType.error,
+                                        style: ToastificationStyle.flatColored,
+                                        title: Text(
+                                          "ไม่มีรูปภาพ",
+                                          style: Styles.red18(context),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 30,
+                                  ),
                                 )
                               ],
                             ),
