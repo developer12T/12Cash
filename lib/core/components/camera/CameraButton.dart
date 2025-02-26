@@ -146,6 +146,7 @@ class CameraPreviewScreen extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: FloatingActionButton(
+                      backgroundColor: Colors.white,
                       onPressed: () async {
                         try {
                           // Capture the picture
@@ -161,7 +162,11 @@ class CameraPreviewScreen extends StatelessWidget {
                           print(e);
                         }
                       },
-                      child: const Icon(Icons.camera_alt),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Styles.primaryColorIcons,
+                        size: 40,
+                      ),
                     ),
                   ),
                 ),

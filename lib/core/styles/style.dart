@@ -47,7 +47,7 @@ class Styles {
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 18),
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -57,7 +57,7 @@ class Styles {
           decorationThickness: 2.0,
           fontSize: getResponsiveFontSize(context, 18),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -65,7 +65,7 @@ class Styles {
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 18),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -73,14 +73,14 @@ class Styles {
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 16),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
   static TextStyle black20(BuildContext context) => GoogleFonts.kanit(
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 20),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -88,7 +88,7 @@ class Styles {
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 20),
           fontWeight: FontWeight.bold,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -96,7 +96,7 @@ class Styles {
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 12),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -126,7 +126,7 @@ class Styles {
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 24),
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -183,14 +183,14 @@ class Styles {
           decorationThickness: 2.0,
           fontSize: getResponsiveFontSize(context, 24),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
   static TextStyle black24(BuildContext context) => GoogleFonts.kanit(
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 24),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
 
@@ -198,14 +198,14 @@ class Styles {
   //       textStyle: TextStyle(
   //         fontSize: getResponsiveFontSize(context, 24),
   //         fontWeight: FontWeight.bold,
-  //         color: Colors.black,
+  //         color: Color(0xFF333333),
   //       ),
   //     );
   static TextStyle headerBlack32(BuildContext context) => GoogleFonts.kanit(
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 32),
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
   static TextStyle strikeBlack32(BuildContext context) => GoogleFonts.kanit(
@@ -214,14 +214,14 @@ class Styles {
           decorationThickness: 2.0,
           fontSize: getResponsiveFontSize(context, 32),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
   static TextStyle black32(BuildContext context) => GoogleFonts.kanit(
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 32),
           fontWeight: FontWeight.normal,
-          color: Colors.black,
+          color: Color(0xFF333333),
         ),
       );
   static TextStyle headergrey18(BuildContext context) => GoogleFonts.kanit(
@@ -401,8 +401,14 @@ class Styles {
 
 // --------------------- Primary Color ---------------------------------
   static const Color primaryColor = Color(0xFF00569D);
+  static const Color primaryColorIcons = Color(0xFF00569D);
   static const Color secondaryColor = Color(0xFF8fd7f5);
-  static const Color grey = Colors.grey;
+
+  // static const Color primaryColor = Color(0xFF7554ae);
+  // static const Color primaryColorIcons = Color(0xFFbd98e0);
+  // static const Color secondaryColor = Color(0xFFbd98e0);
+
+  static const Color grey = Color(0xFF999999);
   static const Color white = Colors.white;
 
   // --------------------- Common Color --------------------------------

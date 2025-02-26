@@ -224,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
           leading: _widgetOptions.elementAt(_selectedIndex),
           leading2: _widgetOptionsHeader.elementAt(_selectedIndex),
         ),
+        // backgroundColor: Colors.amber,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         resizeToAvoidBottomInset: false,
         floatingActionButton: Container(
@@ -271,9 +272,10 @@ class _HomeScreenState extends State<HomeScreen> {
             boxShadow: [
               BoxShadow(
                 color: Colors.black26, // Shadow color
-                blurRadius: 10, // Soft blur effect
                 spreadRadius: 2, // Spread of the shadow
-                offset: Offset(0, -3), // Shadow positioned upwards
+                blurRadius: 8, // Blur radius of the shadow
+                offset: Offset(0, 4), //
+                blurStyle: BlurStyle.normal,
               ),
             ],
           ),
@@ -314,8 +316,8 @@ class _HomeScreenState extends State<HomeScreen> {
               selectedLabelStyle: Styles.white18(context),
               iconSize: screenWidth / 20,
               currentIndex: _selectedIndex,
-              selectedItemColor: Styles.white,
-              backgroundColor: Styles.primaryColor,
+              selectedItemColor: Styles.primaryColor,
+              backgroundColor: Styles.white,
               unselectedItemColor: Styles.grey,
               unselectedLabelStyle: Styles.grey12(context),
               onTap: _onItemTapped,

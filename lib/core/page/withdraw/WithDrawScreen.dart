@@ -133,7 +133,7 @@ class _WithDrawScreenState extends State<WithDrawScreen> {
                             Icon(
                               FontAwesomeIcons.clock,
                               color: isSelect == 1
-                                  ? Styles.primaryColor
+                                  ? Styles.primaryColorIcons
                                   : Styles.white,
                             ),
                             SizedBox(width: 8),
@@ -151,7 +151,7 @@ class _WithDrawScreenState extends State<WithDrawScreen> {
                             Icon(
                               Icons.description,
                               color: isSelect == 2
-                                  ? Styles.primaryColor
+                                  ? Styles.primaryColorIcons
                                   : Styles.white,
                             ),
                             SizedBox(width: 8),

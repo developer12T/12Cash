@@ -43,7 +43,7 @@ class WithDrawCard extends StatelessWidget {
                     children: [
                       FaIcon(
                         FontAwesomeIcons.clock,
-                        color: Styles.primaryColor,
+                        color: Styles.primaryColorIcons,
                         size: 35,
                       ),
                       SizedBox(

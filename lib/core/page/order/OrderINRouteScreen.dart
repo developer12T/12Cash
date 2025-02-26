@@ -533,7 +533,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                 const Icon(
                                   Icons.store,
                                   size: 40,
-                                  color: Styles.primaryColor,
+                                  color: Styles.primaryColorIcons,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(

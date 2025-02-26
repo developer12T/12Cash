@@ -1270,7 +1270,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                             children: [
                                               Icon(
                                                 FontAwesomeIcons.moneyBill,
-                                                color: Styles.primaryColor,
+                                                color: Styles.primaryColorIcons,
                                                 size: 40,
                                               ),
                                               SizedBox(width: 8),
@@ -2097,8 +2097,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                       Icon(
                                                         FontAwesomeIcons
                                                             .handHoldingDollar,
-                                                        color:
-                                                            Styles.primaryColor,
+                                                        color: Styles
+                                                            .primaryColorIcons,
                                                         size: 40,
                                                       ),
                                                     ],

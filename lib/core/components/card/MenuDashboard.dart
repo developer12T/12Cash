@@ -80,7 +80,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
                       Icon(
                         widget.icon_1,
                         size: 60,
-                        color: Styles.primaryColor,
+                        color: Styles.primaryColorIcons,
                       ),
                       Text(
                         widget.title_1,
@@ -109,7 +109,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
                       Icon(
                         widget.icon_2,
                         size: 60,
-                        color: Styles.primaryColor,
+                        color: Styles.primaryColorIcons,
                       ),
                       Text(
                         widget.title_2,
@@ -141,7 +141,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
                       Icon(
                         widget.icon_3,
                         size: 60,
-                        color: Styles.primaryColor,
+                        color: Styles.primaryColorIcons,
                       ),
                       Text(
                         widget.title_3,
@@ -200,7 +200,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
                           Icon(
                             widget.icon_4,
                             size: 60,
-                            color: Styles.primaryColor,
+                            color: Styles.primaryColorIcons,
                           ),
                           Text(
                             widget.title_4,
@@ -231,7 +231,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
                       Icon(
                         widget.icon_5,
                         size: 60,
-                        color: Styles.primaryColor,
+                        color: Styles.primaryColorIcons,
                       ),
                       Text(
                         widget.title_5,
@@ -263,7 +263,7 @@ class _MenuDashboardState extends State<MenuDashboard> {
                       Icon(
                         widget.icon_6,
                         size: 60,
-                        color: Styles.primaryColor,
+                        color: Styles.primaryColorIcons,
                       ),
                       Text(
                         widget.title_6,

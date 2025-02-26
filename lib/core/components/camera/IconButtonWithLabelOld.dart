@@ -115,7 +115,8 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(widget.icon, color: Colors.white, size: 50),
+                      Icon(widget.icon,
+                          color: Styles.primaryColorIcons, size: 50),
                       Text(
                         "gobal.camera_button.button".tr(),
                         style: Styles.white18(context),

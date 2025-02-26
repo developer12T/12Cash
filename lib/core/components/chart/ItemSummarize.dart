@@ -17,7 +17,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
   Widget build(BuildContext context) {
     final tooltipsOnBar = LineChartBarData(
         belowBarData: BarAreaData(
-          color: Styles.primaryColor.withOpacity(0.2),
+          color: Styles.primaryColorIcons.withOpacity(0.2),
           show: true,
         ),
         // dotData: FlDotData(
@@ -44,7 +44,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
         dotData: FlDotData(show: true), // Shows dots at data points
         isCurved: true,
         preventCurveOverShooting: true,
-        color: Styles.primaryColor,
+        color: Styles.primaryColorIcons,
         isStrokeJoinRound: true,
         // isStepLineChart: true,
         isStrokeCapRound: true

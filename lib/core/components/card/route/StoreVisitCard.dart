@@ -147,7 +147,7 @@ class StoreCard extends StatelessWidget {
         child: ListTile(
           leading: Icon(
             Icons.store,
-            color: Styles.primaryColor,
+            color: Styles.primaryColorIcons,
             size: 40,
           ),
           minTileHeight: 100,

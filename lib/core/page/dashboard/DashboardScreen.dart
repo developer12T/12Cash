@@ -472,7 +472,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                     child: Center(
                                       child: Text(
                                         '${User.role.toUpperCase()}',
-                                        style: Styles.headerBlack24(context),
+                                        style: Styles.headerWhite24(context),
                                       ),
                                     ),
                                   ),
@@ -488,7 +488,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                     child: Center(
                                       child: Text(
                                         '${User.area.toUpperCase()}',
-                                        style: Styles.headerBlack24(context),
+                                        style: Styles.headerWhite24(context),
                                       ),
                                     ),
                                   ),
