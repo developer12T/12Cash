@@ -177,6 +177,22 @@ class Styles {
           color: Colors.green[600],
         ),
       );
+
+  static TextStyle headerGreen16(BuildContext context) => GoogleFonts.kanit(
+        textStyle: TextStyle(
+          fontSize: getResponsiveFontSize(context, 16),
+          fontWeight: FontWeight.w600,
+          color: Colors.green[600],
+        ),
+      );
+
+  static TextStyle headerGreen18(BuildContext context) => GoogleFonts.kanit(
+        textStyle: TextStyle(
+          fontSize: getResponsiveFontSize(context, 18),
+          fontWeight: FontWeight.w600,
+          color: Colors.green[600],
+        ),
+      );
   static TextStyle strikeBlack24(BuildContext context) => GoogleFonts.kanit(
         textStyle: TextStyle(
           decoration: TextDecoration.lineThrough,

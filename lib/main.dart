@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/page/announce/Announce.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/LoginScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/RefundFilter.dart';
 import 'package:_12sale_app/data/models/search/RouteVisitFilterLocal.dart';
 import 'package:_12sale_app/data/models/search/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
@@ -105,6 +106,7 @@ void main() async {
             providers: [
               ChangeNotifierProvider(create: (_) => RouteVisitFilterLocal()),
               ChangeNotifierProvider(create: (_) => StoreLocal()),
+              ChangeNotifierProvider(create: (_) => RefundfilterLocal()),
             ],
             child: MyApp(),
           ),

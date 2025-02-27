@@ -154,7 +154,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
           ApiService apiService = ApiService();
           await apiService.init();
           var response = await apiService.request(
-            endpoint: 'api/cash/cart/reduce',
+            endpoint: 'api/cash/cart/adjust',
             method: 'PATCH',
             body: {
               "type": "withdraw",

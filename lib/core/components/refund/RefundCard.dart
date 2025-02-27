@@ -2,15 +2,16 @@ import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/models/order/Orders.dart';
+import 'package:_12sale_app/data/models/refund/RefundOrder.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class InvoiceCard extends StatelessWidget {
-  final Orders item;
+class RefundCard extends StatelessWidget {
+  final RefundOrder item;
   final VoidCallback onDetailsPressed;
-  const InvoiceCard({
+  const RefundCard({
     required this.item,
     required this.onDetailsPressed,
     super.key,
@@ -142,12 +143,45 @@ class InvoiceCard extends StatelessWidget {
                                   ),
                                 ),
                                 Expanded(
-                                  child: Container(
-                                    child: Text(
-                                      "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.total)}",
-                                      style: Styles.headerGreen24(context),
-                                      textAlign: TextAlign.center,
-                                    ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.totalRefund)}",
+                                            style:
+                                                Styles.headerGreen16(context),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.totalChange)}",
+                                            style:
+                                                Styles.headerGreen16(context),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.total)}",
+                                            style:
+                                                Styles.headerGreen24(context),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

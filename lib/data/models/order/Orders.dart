@@ -7,7 +7,7 @@ class Orders {
   final String storeAddress;
   final double total;
   final String status;
-  final DateTime createAt;
+  // final DateTime createAt;
   Orders({
     required this.orderId,
     required this.storeId,
@@ -15,7 +15,7 @@ class Orders {
     required this.storeAddress,
     required this.total,
     required this.status,
-    required this.createAt,
+    // required this.createAt,
   });
 
   factory Orders.fromJson(Map<String, dynamic> json) {
@@ -26,7 +26,7 @@ class Orders {
       storeAddress: json['storeAddress'],
       total: json['total'].toDouble(),
       status: json['status'],
-      createAt: DateTime.parse(json['createAt']),
+      // createAt: DateTime.parse(json['createAt']),
     );
   }
 }

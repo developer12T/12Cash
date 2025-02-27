@@ -1,15 +1,22 @@
 import 'dart:async';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/order/InvoiceCard.dart';
+import 'package:_12sale_app/core/components/refund/RefundCard.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
+import 'package:_12sale_app/core/page/refund/RefundDetailScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/RefundFilter.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/models/order/Orders.dart';
+import 'package:_12sale_app/data/models/refund/RefundOrder.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -19,12 +26,35 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  bool _isSelected = false;
   final ScrollController _scrollController = ScrollController();
   List<Orders> orders = [];
+  List<RefundOrder> refundOrders = [];
+
   bool _loadingStore = true;
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+
+  Future<void> _getRefundOrder() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/refund/all?type=refund&area=${User.area}&period=${period}', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
+      );
+      print("Data ${response.data['data']}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+        setState(() {
+          refundOrders =
+              data.map((item) => RefundOrder.fromJson(item)).toList();
+        });
+      }
+    } catch (e) {
+      print("Error $e");
+    }
+  }
 
   Future<void> _getOrder() async {
     try {
@@ -35,6 +65,7 @@ class _ReportScreenState extends State<ReportScreen> {
             'api/cash/order/all?type=sale&area=${User.area}&period=${period}', // You only need to pass the endpoint, the base URL is handled
         method: 'GET',
       );
+      print("Data ${response.data['data']}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
@@ -60,6 +91,7 @@ class _ReportScreenState extends State<ReportScreen> {
     super.initState();
     // _loadStoreData();
     _getOrder();
+    _getRefundOrder();
 
     // _pagingController.addPageRequestListener((pageKey) {
     //   _fetchPage(pageKey);
@@ -76,6 +108,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isSelect = Provider.of<RefundfilterLocal>(context);
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor:
@@ -99,33 +132,51 @@ class _ReportScreenState extends State<ReportScreen> {
           //     ],
           //   ),
           // ),
-          child: Scrollbar(
-            controller: _scrollController,
-            thumbVisibility: true,
-            trackVisibility: true,
-            thickness: 10,
-            radius: Radius.circular(16),
-            child: LoadingSkeletonizer(
-              loading: _loadingStore,
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: orders.length,
-                itemBuilder: (context, index) {
-                  return InvoiceCard(
-                    item: orders[index],
-                    onDetailsPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              OrderDetailScreen(orderId: orders[index].orderId),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
+          child: isSelect.isSelect == 1
+              ? Scrollbar(
+                  controller: _scrollController,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  thickness: 10,
+                  radius: Radius.circular(16),
+                  child: LoadingSkeletonizer(
+                    loading: _loadingStore,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: orders.length,
+                      itemBuilder: (context, index) {
+                        return InvoiceCard(
+                          item: orders[index],
+                          onDetailsPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => OrderDetailScreen(
+                                    orderId: orders[index].orderId),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  // controller: _scrollController,
+                  itemCount: refundOrders.length,
+                  itemBuilder: (context, index) {
+                    return RefundCard(
+                      item: refundOrders[index],
+                      onDetailsPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => RefundDetailScreen(
+                                orderId: refundOrders[index].orderId),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
         ),
       ),
     );
@@ -142,6 +193,7 @@ class ReportHeader extends StatefulWidget {
 class _ReportHeaderState extends State<ReportHeader> {
   @override
   Widget build(BuildContext context) {
+    final isSelect = Provider.of<RefundfilterLocal>(context);
     double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -200,6 +252,7 @@ class _ReportHeaderState extends State<ReportHeader> {
                           ),
                         ),
                       ),
+
                       // Flexible(
                       //   fit: FlexFit.loose,
                       //   child: Container(
@@ -212,6 +265,72 @@ class _ReportHeaderState extends State<ReportHeader> {
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Flexible(
+          child: CustomSlidingSegmentedControl<int>(
+            initialValue: 1,
+            isStretch: true,
+            children: {
+              1: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    FontAwesomeIcons.clock,
+                    color: isSelect.isSelect == 1
+                        ? Styles.primaryColorIcons
+                        : Styles.white,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'รายการขาย',
+                    style: isSelect.isSelect == 1
+                        ? Styles.headerPirmary18(context)
+                        : Styles.headerWhite18(context),
+                  )
+                ],
+              ),
+              2: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.description,
+                    color: isSelect.isSelect == 2
+                        ? Styles.primaryColorIcons
+                        : Styles.white,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'รายการคืน',
+                    style: isSelect.isSelect == 2
+                        ? Styles.headerPirmary18(context)
+                        : Styles.headerWhite18(context),
+                  ),
+                ],
+              )
+            },
+            onValueChanged: (v) async {
+              isSelect.updateValue(v);
+              // setState(() {
+              //   isSelect.updateValue(v);
+              // });
+              print(isSelect.isSelect);
+              if (v == 1) {
+                // await _getDetail(status: "pending");
+              } else {
+                // await _getDetail(status: "history");
+              }
+            },
+            decoration: BoxDecoration(
+              color: Styles.grey,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            thumbDecoration: BoxDecoration(
+              color: Styles.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            duration: const Duration(milliseconds: 300),
           ),
         ),
       ],

@@ -8,8 +8,10 @@ import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelFixed.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
+import 'package:_12sale_app/core/page/refund/RefundDetailScreen.dart';
 import 'package:_12sale_app/core/page/route/OrderDetailScreen.dart';
 import 'package:_12sale_app/data/models/order/Promotion.dart';
+import 'package:_12sale_app/data/models/refund/RefundCart.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
@@ -36,11 +38,11 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal_windows.dart';
 import 'package:toastification/toastification.dart';
 
-class CreateOrderScreen extends StatefulWidget {
+class CreateRefundScreen extends StatefulWidget {
   final String? storeName;
   final String? storeId;
   final String? storeAddress;
-  CreateOrderScreen({
+  CreateRefundScreen({
     super.key,
     required this.storeId,
     required this.storeName,
@@ -48,10 +50,11 @@ class CreateOrderScreen extends StatefulWidget {
   });
 
   @override
-  State<CreateOrderScreen> createState() => _CreateOrderScreenState();
+  State<CreateRefundScreen> createState() => _CreateRefundScreenState();
 }
 
-class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
+class _CreateRefundScreenState extends State<CreateRefundScreen>
+    with RouteAware {
   final ScrollController _outerController = ScrollController();
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _promotionScrollController = ScrollController();
@@ -71,6 +74,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   bool _isInnerAtTop = true;
   bool _isInnerAtBottom = false;
   bool _isCreateOrderEnabled = false;
+
+  List<ListSaleProduct> listProduct = [];
+  List<RefundItem> listRefund = [];
+
+  List<RefundModel> refundList = [];
 
   @override
   void initState() {
@@ -165,9 +173,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     super.dispose();
   }
 
-  List<CartList> cartList = [];
-  List<PromotionList> promotionList = [];
-  List<PromotionListItem> listPromotions = [];
   List<ImageModel> imageList = [];
   final Debouncer _debouncer = Debouncer();
   final Throttler _throttler = Throttler();
@@ -247,10 +252,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-        endpoint: 'api/cash/order/checkout',
+        endpoint: 'api/cash/refund/checkout',
         method: 'POST',
         body: {
-          "type": "sale",
+          "type": "refund",
           "area": "${User.area}",
           "storeId": "${widget.storeId}",
           "note": "test",
@@ -262,7 +267,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       );
       if (response.statusCode == 200) {
         if (isSelectCheckout == "QR Payment") {
-          await uploadImageSlip(response.data['data']['orderId']);
+          await uploadImageSlip(
+              response.data['data']['changeOrder']['orderId']);
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),
             context: context,
@@ -270,15 +276,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "สั่งซื้อสำเร็จ",
+              "ขอคำอนุมัติสำเร็จ",
               style: Styles.green18(context),
             ),
           );
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) => OrderDetailScreen(
-                orderId: response.data['data']['orderId'],
+              builder: (context) => RefundDetailScreen(
+                orderId: response.data['data']['refundOrder']['orderId'],
               ),
             ),
             (route) => route.isFirst, // Keeps only the first route
@@ -291,15 +297,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "สั่งซื้อสำเร็จ",
+              "ขอคำอนุมัติสำเร็จ",
               style: Styles.green18(context),
             ),
           );
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) => OrderDetailScreen(
-                orderId: response.data['data']['orderId'],
+              builder: (context) => RefundDetailScreen(
+                orderId: response.data['data']['refundOrder']['orderId'],
               ),
             ),
             (route) => route.isFirst, // Keeps only the first route
@@ -342,62 +348,80 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   Future<void> _getCart() async {
     try {
+      refundList.clear();
+      listProduct.clear();
+      listRefund.clear();
+      print("Get Cart is Loading");
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/cart/get?type=sale&area=${User.area}&storeId=${widget.storeId}',
+            'api/cash/cart/get?type=refund&area=${User.area}&storeId=${widget.storeId}',
         method: 'GET',
       );
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'][0]['listProduct'];
-        final List<dynamic> data2 = response.data['data'][0]['listPromotion'];
-        setState(() {
-          if (cartList.length == 0) {
-            cartList = data.map((item) => CartList.fromJson(item)).toList();
+        final List<dynamic> data = response.data['data'];
+        for (var element in data) {
+          refundList.add(RefundModel.fromJson(element));
+          for (var itemSale in element['listProduct']) {
+            listProduct.add(ListSaleProduct.fromJson(itemSale));
           }
-          promotionList =
-              data2.map((item) => PromotionList.fromJson(item)).toList();
-          listPromotions.clear();
-          for (var promotion in promotionList) {
-            for (var item in promotion.listPromotion) {
-              listPromotions.add(item);
-            }
+          for (var itemRefund in element['listRefund']) {
+            listRefund.add(RefundItem.fromJson(itemRefund));
           }
-          subtotal = response.data['data'][0]['subtotal'].toDouble();
-          discount = response.data['data'][0]['discount'].toDouble();
-          discountProduct =
-              response.data['data'][0]['discountProduct'].toDouble();
-          vat = response.data['data'][0]['vat'].toDouble();
-          totalExVat = response.data['data'][0]['totalExVat'].toDouble();
-          total = response.data['data'][0]['total'].toDouble();
-        });
-        Timer(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            setState(() {
-              _loading = false;
-            });
-          }
-        });
+        }
+        // setState(() {
+        //   cartListData["items"] = listProduct
+        //       .map((item) => {
+        //             "id": "${item.id}",
+        //             "name": "${item.name}",
+        //             "group": "${item.group}",
+        //             "brand": "${item.brand}",
+        //             "size": "${item.size}",
+        //             "flavour": "${item.flavour}",
+        //             "qty": int.parse(item.qty),
+        //             "unit": "${item.unit}",
+        //             "unitName": "${item.unitName}",
+        //             "price": double.parse(item.price),
+        //             "subtotal": double.parse(item.subtotal),
+        //             "netTotal": double.parse(item.netTotal),
+        //           })
+        //       .toList();
 
-        // Map cartList to receiptData["items"]
+        //   for (var item in listRefund) {
+        //     cartListData["items"].add({
+        //       "id": "${item.id}",
+        //       "name": "${item.name}",
+        //       "group": "${item.group}",
+        //       "brand": "${item.brand}",
+        //       "size": "${item.size}",
+        //       "flavour": "${item.flavour}",
+        //       "qty": int.parse(item.qty),
+        //       "unit": "${item.unit}",
+        //       "unitName": "${item.unitName}",
+        //       "price": double.parse(item.price),
+        //       "condition": "${item.condition}",
+        //       "expireDate": "${item.expireDate}"
+        //     });
+        //   }
+        //   // totalCart = response.data['data'][0]['total'].toDouble();
+        //   // cartList = data.map((item) => CartList.fromJson(item)).toList();
+        // });
+        // print(cartListData["items"]);
+        print(listRefund.length);
+        print(listProduct.length);
       }
     } catch (e) {
       setState(() {
-        cartList = [];
-        promotionList = [];
-        vat = 0;
-        subtotal = 0;
-        discount = 0;
-        discountProduct = 0;
-        totalExVat = 0;
-        total = 0;
+        // totalCart = 00.00;
+        // cartList = [];
       });
       print("Error $e");
     }
   }
 
-  Future<void> _deleteCart(CartList cart) async {
+  Future<void> _deleteChangeCart(
+      Map<String, dynamic> cart, StateSetter setModalState) async {
     try {
       ApiService apiService = ApiService();
       await apiService.init();
@@ -405,16 +429,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         endpoint: 'api/cash/cart/delete',
         method: 'POST',
         body: {
-          "type": "sale",
+          "type": "refund", // sale, withdraw, refund
           "area": "${User.area}",
           "storeId": "${widget.storeId}",
-          "id": "${cart.id}",
-          "unit": "${cart.unit}"
+          "id": "${cart['id']}",
+          "unit": "${cart['unit']}",
+          cart['condition'] != null ? "condition" : "${cart['condition']}":
+              "${cart['condition']}",
+          cart['expireDate'] != null ? "expire" : "${cart['expireDate']}":
+              "${cart['expireDate']}"
         },
       );
-      if (response.statusCode == 200) {
-        await _getCart();
 
+      if (response.statusCode == 200) {
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,
@@ -427,13 +454,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           ),
         );
       }
-      if (cartList.length == 0) {
-        Navigator.pop(context);
-      }
-    } catch (e) {}
+    } catch (e) {
+      Navigator.pop(context);
+    }
   }
 
-  Future<void> _reduceCart(CartList cart) async {
+  Future<void> _reduceCartChange(
+      Map<String, dynamic> cart, StateSetter setModalState) async {
     const duration = Duration(seconds: 1);
     try {
       _debouncer.debounce(
@@ -445,16 +472,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             endpoint: 'api/cash/cart/adjust',
             method: 'PATCH',
             body: {
-              "type": "sale",
+              "type": "refund",
               "area": "${User.area}",
               "storeId": "${widget.storeId}",
-              "id": "${cart.id}",
-              "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "id": "${cart['id']}",
+              "qty": cart['qty'],
+              "unit": "${cart['unit']}",
+              cart['condition'] != null ? "condition" : "${cart['condition']}":
+                  "${cart['condition']}",
+              cart['expireDate'] != null ? "expire" : "${cart['expireDate']}":
+                  "${cart['expireDate']}"
             },
           );
           if (response.statusCode == 200) {
-            await _getCart();
+            await _getTotalCart(setModalState);
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -466,7 +497,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                 style: Styles.green18(context),
               ),
             );
-            // await _getTotalCart(setModalState);
           }
         },
       );
@@ -486,7 +516,43 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     }
   }
 
-  Future<void> _addCartDu(CartList cart) async {
+  Future<void> _deleteChangeRefund(RefundItem cart) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/cart/delete',
+        method: 'POST',
+        body: {
+          "type": "refund",
+          "area": "${User.area}",
+          "storeId": "${widget.storeId}",
+          "id": "${cart.id}",
+          "unit": "${cart.unit}",
+          "condition": "${cart.condition}",
+          "expire": "${cart.expireDate}"
+        },
+      );
+
+      if (response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ลบข้อมูลสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+    }
+  }
+
+  Future<void> _reduceCartRefund(RefundItem cart) async {
     const duration = Duration(seconds: 1);
     try {
       _debouncer.debounce(
@@ -495,20 +561,21 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           ApiService apiService = ApiService();
           await apiService.init();
           var response = await apiService.request(
-            endpoint: 'api/cash/cart/add',
-            method: 'POST',
+            endpoint: 'api/cash/cart/adjust',
+            method: 'PATCH',
             body: {
-              "type": "sale",
+              "type": "refund",
               "area": "${User.area}",
               "storeId": "${widget.storeId}",
               "id": "${cart.id}",
               "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "unit": "${cart.unit}",
+              "condition": "${cart.condition}",
+              "expire": "${cart.expireDate}"
             },
           );
-
           if (response.statusCode == 200) {
-            await _getCart();
+            // await _getTotalCart(setModalState);
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -516,7 +583,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
               type: ToastificationType.success,
               style: ToastificationStyle.flatColored,
               title: Text(
-                "เพิ่มลงในตะกร้าสําเร็จ",
+                "แก้ไขข้อมูลสำเร็จ",
                 style: Styles.green18(context),
               ),
             );
@@ -524,6 +591,52 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         },
       );
     } catch (e) {
+      toastification.show(
+        autoCloseDuration: const Duration(seconds: 5),
+        context: context,
+        primaryColor: Colors.red,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: Text(
+          "เกิดข้อผิดพลาด $e",
+          style: Styles.red18(context),
+        ),
+      );
+      print("Error $e");
+    }
+  }
+
+  Future<void> _getTotalCart(StateSetter setModalState) async {
+    try {
+      refundList.clear();
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/cart/get?type=refund&area=${User.area}&storeId=${widget.storeId}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'];
+        for (var element in data) {
+          refundList.add(RefundModel.fromJson(element));
+          setModalState(
+            () {
+              refundList = refundList;
+            },
+          );
+          // for (var itemSale in element['listProduct']) {
+          //   listProduct.add(ListSaleProduct.fromJson(itemSale));
+          // }
+          // for (var itemRefund in element['listRefund']) {
+          //   listRefund.add(RefundItem.fromJson(itemRefund));
+          // }
+        }
+      }
+    } catch (e) {
+      setState(() {
+        refundList = [];
+      });
       print("Error $e");
     }
   }
@@ -614,20 +727,21 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                   borderRadius: BorderRadius.circular(16),
                                   color: Colors.white),
                               child: Text(
-                                "${cartList.length}",
+                                "${listProduct.length + listRefund.length}",
+                                // "dawd",
                                 style: _isCreateOrderEnabled
                                     ? Styles.headerPirmary18(context)
                                     : Styles.headergrey18(context),
                               ),
                             ),
                             Text(
-                              " สั่งซื้อ",
+                              " ขอคำอนุมัติ",
                               style: Styles.headerWhite18(context),
                             ),
                           ],
                         ),
                         Text(
-                          "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(total)} บาท",
+                          "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalNet : "0"))} บาท",
                           style: Styles.headerWhite18(context),
                         )
                       ],
@@ -657,7 +771,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           children: [
             Container(
               // color: Colors.amber,
-              height: screenHeight * 0.9,
+              height: screenHeight * 0.6,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -751,12 +865,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                       height: 10,
                     ),
                     Expanded(
-                      flex: 3,
                       child: BoxShadowCustom(
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
-                            height: screenHeight * 0.9,
+                            height: screenHeight * 0.4,
                             // color: Colors.red,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -770,11 +883,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        "รายการที่สั่ง",
+                                        "รายการคืน",
                                         style: Styles.black18(context),
                                       ),
                                       Text(
-                                        "จำนวน ${cartList.length} รายการ",
+                                        "จำนวน ${listRefund.length} รายการ",
                                         style: Styles.black18(context),
                                       ),
                                     ],
@@ -790,8 +903,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                       shrinkWrap: true,
                                       physics: ClampingScrollPhysics(),
                                       controller: _cartScrollController,
-                                      itemCount: cartList.length,
+                                      itemCount: listRefund.length,
                                       itemBuilder: (context, index) {
+                                        // int qty =
+                                        //     int.parse(listRefund[index].qty);
                                         return Column(
                                           children: [
                                             Row(
@@ -833,7 +948,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                           children: [
                                                             Expanded(
                                                               child: Text(
-                                                                cartList[index]
+                                                                listRefund[
+                                                                        index]
                                                                     .name,
                                                                 style: Styles
                                                                     .black16(
@@ -844,6 +960,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                     TextOverflow
                                                                         .visible,
                                                               ),
+                                                            ),
+                                                            Text(
+                                                              'คืน${listRefund[index].condition == "good" ? "ดี" : "เสีย"}',
+                                                              style: Styles
+                                                                  .black16(
+                                                                      context),
                                                             ),
                                                           ],
                                                         ),
@@ -860,7 +982,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 Row(
                                                                   children: [
                                                                     Text(
-                                                                      'id : ${cartList[index].id}',
+                                                                      'รหัส : ${listRefund[index].id}',
                                                                       style: Styles
                                                                           .black16(
                                                                               context),
@@ -870,7 +992,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 Row(
                                                                   children: [
                                                                     Text(
-                                                                      'จำนวน : ${cartList[index].qty.toStringAsFixed(0)} ${cartList[index].unit}',
+                                                                      'จำนวน : ${listRefund[index].qty.toStringAsFixed(0)} ${listRefund[index].unitName}',
                                                                       style: Styles
                                                                           .black16(
                                                                               context),
@@ -880,7 +1002,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 Row(
                                                                   children: [
                                                                     Text(
-                                                                      'ราคา : ${cartList[index].price}',
+                                                                      'ราคา : ${listRefund[index].price}',
                                                                       style: Styles
                                                                           .black16(
                                                                               context),
@@ -899,15 +1021,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                       () async {
                                                                     setState(
                                                                         () {
-                                                                      if (cartList[index]
+                                                                      if (listRefund[index]
                                                                               .qty >
                                                                           1) {
-                                                                        cartList[index]
+                                                                        listRefund[index]
                                                                             .qty--;
                                                                       }
                                                                     });
-                                                                    await _reduceCart(
-                                                                        cartList[
+                                                                    await _reduceCartRefund(
+                                                                        listRefund[
                                                                             index]);
                                                                   },
                                                                   style: ElevatedButton
@@ -957,7 +1079,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   ),
                                                                   width: 75,
                                                                   child: Text(
-                                                                    '${cartList[index].qty.toStringAsFixed(0)}',
+                                                                    '${listRefund[index].qty.toStringAsFixed(0)}',
                                                                     textAlign:
                                                                         TextAlign
                                                                             .center,
@@ -970,13 +1092,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 ElevatedButton(
                                                                   onPressed:
                                                                       () async {
-                                                                    await _addCartDu(
-                                                                        cartList[
+                                                                    await _reduceCartRefund(
+                                                                        listRefund[
                                                                             index]);
 
                                                                     setState(
                                                                         () {
-                                                                      cartList[
+                                                                      listRefund[
                                                                               index]
                                                                           .qty++;
                                                                     });
@@ -1010,15 +1132,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 ElevatedButton(
                                                                   onPressed:
                                                                       () async {
-                                                                    await _deleteCart(
-                                                                        cartList[
+                                                                    await _deleteChangeRefund(
+                                                                        listRefund[
                                                                             index]);
 
                                                                     setState(
                                                                       () {
-                                                                        cartList.removeWhere((item) =>
-                                                                            (item.id == cartList[index].id &&
-                                                                                item.unit == cartList[index].unit));
+                                                                        listRefund.removeWhere((item) => (item.id == listRefund[index].id &&
+                                                                            item.unit ==
+                                                                                listRefund[index].unit &&
+                                                                            item.condition == listRefund[index].condition &&
+                                                                            item.expireDate == listRefund[index].expireDate));
                                                                       },
                                                                     );
                                                                     // await _getTotalCart(setModalState);
@@ -1096,7 +1220,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             ),
             Container(
               // color: Colors.amber,
-              height: screenHeight * 0.9,
+              height: screenHeight * 0.7,
               child: Column(
                 children: [
                   Expanded(
@@ -1113,11 +1237,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "รายการโปรโมชั่น",
+                                      "รายการเปลี่ยน",
                                       style: Styles.black18(context),
                                     ),
                                     Text(
-                                      "จำนวน ${promotionList.length} รายการ",
+                                      "จำนวน ${listProduct.length} รายการ",
                                       style: Styles.black18(context),
                                     ),
                                   ],
@@ -1136,7 +1260,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                         shrinkWrap: true,
                                         physics: ClampingScrollPhysics(),
                                         controller: _promotionScrollController,
-                                        itemCount: listPromotions.length,
+                                        itemCount: listProduct.length,
                                         itemBuilder: (context, innerIndex) {
                                           return Column(
                                             children: [
@@ -1180,7 +1304,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             children: [
                                                               Expanded(
                                                                 child: Text(
-                                                                  listPromotions[
+                                                                  listProduct[
                                                                           innerIndex]
                                                                       .name,
                                                                   style: Styles
@@ -1200,7 +1324,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                           //   children: [
                                                           //     Expanded(
                                                           //       child: Text(
-                                                          //         listPromotions[
+                                                          //         listProduct[
                                                           //                 innerIndex]
                                                           //             .proName,
                                                           //         style: Styles
@@ -1228,7 +1352,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   Row(
                                                                     children: [
                                                                       Text(
-                                                                        '${listPromotions[innerIndex].id}',
+                                                                        'รหัส${listProduct[innerIndex].id}',
                                                                         style: Styles.black16(
                                                                             context),
                                                                       ),
@@ -1237,7 +1361,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   Row(
                                                                     children: [
                                                                       Text(
-                                                                        '${listPromotions[innerIndex].group} รส${listPromotions[innerIndex].flavour}',
+                                                                        '${listProduct[innerIndex].group} รส${listProduct[innerIndex].flavour}',
                                                                         style: Styles.black16(
                                                                             context),
                                                                       ),
@@ -1270,7 +1394,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                     ),
                                                                     width: 75,
                                                                     child: Text(
-                                                                      '${listPromotions[innerIndex].qty.toStringAsFixed(0)} ${listPromotions[innerIndex].unit}',
+                                                                      '${listProduct[innerIndex].qty.toStringAsFixed(0)} ${listProduct[innerIndex].unitName}',
                                                                       textAlign:
                                                                           TextAlign
                                                                               .center,
@@ -1438,11 +1562,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "รวมมูลค่าสินค้า",
+                                  "รวมรับคืนสินค้า",
                                   style: Styles.grey18(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(subtotal)} บาท",
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalRefund : "0.00"))} บาท",
                                   style: Styles.grey18(context),
                                 )
                               ],
@@ -1451,11 +1575,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "ภาษีมูลค่าเพิ่ม 7% (VAT)",
+                                  "รวมรับเปลี่ยนสินค้า",
                                   style: Styles.grey18(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(vat)} บาท",
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalChange : "0.00"))} บาท",
                                   style: Styles.grey18(context),
                                 )
                               ],
@@ -1464,11 +1588,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "รวมมูลค่าสินค้าก่อนหักภาษี",
+                                  "รวมมูลค่าส่วนต่าง",
                                   style: Styles.grey18(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalExVat)} บาท",
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalExVat : "0.00"))} บาท",
                                   style: Styles.grey18(context),
                                 )
                               ],
@@ -1477,11 +1601,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "ส่วนลดท้ายบิล",
+                                  "รวมมูลค่าก่อนหัก VAT 7%",
                                   style: Styles.red18(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discount)} บาท",
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalExVat : "0.00"))} บาท",
                                   style: Styles.red18(context),
                                 )
                               ],
@@ -1490,11 +1614,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "ส่วนลดสินค้า",
+                                  "รวมมูลค่า VAT 7%",
                                   style: Styles.red18(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discountProduct)} บาท",
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalVat : "0.00"))} บาท",
                                   style: Styles.red18(context),
                                 )
                               ],
@@ -1507,7 +1631,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                   style: Styles.green24(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(total)} บาท",
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalNet : "0.00"))} บาท",
                                   style: Styles.green24(context),
                                 )
                               ],
@@ -1600,397 +1724,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           ],
         ),
       ),
-    );
-  }
-
-  void _showCartSheet(BuildContext context, List<CartList> cartlist) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 0.9,
-            builder: (context, scrollController) {
-              return Container(
-                width: screenWidth * 0.95,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.shopping_bag_outlined,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                              Text('เปลี่ยนรายการโปรโมชั่น',
-                                  style: Styles.white24(context)),
-                            ],
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _getCart();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: screenHeight * 0.9,
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
-                          child: Column(
-                            children: [
-                              Expanded(
-                                  child: ListView.builder(
-                                itemCount: cartlist.length,
-                                itemBuilder: (context, index) {
-                                  return Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.network(
-                                              'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                              width: screenWidth / 8,
-                                              height: screenWidth / 8,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return const Center(
-                                                  child: Icon(
-                                                    Icons.error,
-                                                    color: Colors.red,
-                                                    size: 50,
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(16.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          cartlist[index].name,
-                                                          style: Styles.black16(
-                                                              context),
-                                                          softWrap: true,
-                                                          maxLines: 2,
-                                                          overflow: TextOverflow
-                                                              .visible,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'id : ${cartlist[index].id}',
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'จำนวน : ${cartlist[index].qty.toStringAsFixed(0)} ${cartlist[index].unit}',
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'ราคา : ${cartlist[index].price}',
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          ElevatedButton(
-                                                            onPressed:
-                                                                () async {
-                                                              // setModalState(() {
-                                                              //   if (cartlist[
-                                                              //               index]
-                                                              //           .qty >
-                                                              //       1) {
-                                                              //     cartlist[
-                                                              //             index]
-                                                              //         .qty--;
-                                                              //   }
-                                                              // });
-                                                              // await _reduceCart(
-                                                              //     cartlist[
-                                                              //         index],
-                                                              //     setModalState);
-                                                            },
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              shape:
-                                                                  const CircleBorder(
-                                                                side: BorderSide(
-                                                                    color: Colors
-                                                                        .grey,
-                                                                    width: 1),
-                                                              ), // ✅ Makes the button circular
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8),
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .white, // Button color
-                                                            ),
-                                                            child: const Icon(
-                                                              Icons.remove,
-                                                              size: 24,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ), // Example
-                                                          ),
-                                                          Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    4),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              border:
-                                                                  Border.all(
-                                                                color:
-                                                                    Colors.grey,
-                                                                width: 1,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          16),
-                                                            ),
-                                                            width: 75,
-                                                            child: Text(
-                                                              '${cartlist[index].qty.toStringAsFixed(0)}',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: Styles
-                                                                  .black18(
-                                                                context,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          ElevatedButton(
-                                                            onPressed:
-                                                                () async {
-                                                              // await _addCartDu(
-                                                              //     cartlist[
-                                                              //         index],
-                                                              //     setModalState);
-
-                                                              // setModalState(() {
-                                                              //   cartlist[index]
-                                                              //       .qty++;
-                                                              // });
-                                                            },
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              shape:
-                                                                  const CircleBorder(
-                                                                side: BorderSide(
-                                                                    color: Colors
-                                                                        .grey,
-                                                                    width: 1),
-                                                              ), // ✅ Makes the button circular
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8),
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .white, // Button color
-                                                            ),
-                                                            child: const Icon(
-                                                              Icons.add,
-                                                              size: 24,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ), // Example
-                                                          ),
-                                                          ElevatedButton(
-                                                            onPressed:
-                                                                () async {
-                                                              // await _deleteCart(
-                                                              //     cartlist[
-                                                              //         index],
-                                                              //     setModalState);
-
-                                                              // setModalState(
-                                                              //   () {
-                                                              //     cartList.removeWhere((item) => (item
-                                                              //                 .id ==
-                                                              //             cartlist[index]
-                                                              //                 .id &&
-                                                              //         item.unit ==
-                                                              //             cartlist[index]
-                                                              //                 .unit));
-                                                              //   },
-                                                              // );
-                                                              // await _getTotalCart(
-                                                              //     setModalState);
-
-                                                              // if (cartList
-                                                              //         .length ==
-                                                              //     0) {
-                                                              //   Navigator.pop(
-                                                              //       context);
-                                                              // }
-                                                            },
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              shape:
-                                                                  const CircleBorder(
-                                                                side: BorderSide(
-                                                                    color: Colors
-                                                                        .red,
-                                                                    width: 1),
-                                                              ),
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8),
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .white, // Button color
-                                                            ),
-                                                            child: const Icon(
-                                                              Icons.delete,
-                                                              size: 24,
-                                                              color: Colors.red,
-                                                            ), // Example
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          // Container(
-                                          //   color: Colors.red,
-                                          //   width: 50,
-                                          //   height: 100,
-                                          //   child: Center(
-                                          //     child: Icon(
-                                          //       Icons.delete,
-                                          //       color: Colors.white,
-                                          //       size: 25,
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                        ],
-                                      ),
-                                      Divider(
-                                        color: Colors.grey[200],
-                                        thickness: 1,
-                                        indent: 16,
-                                        endIndent: 16,
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ))
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      color: Styles.primaryColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("ยอดรวม", style: Styles.white24(context)),
-                            Text(
-                                "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(100)} บาท",
-                                style: Styles.white24(context)),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
     );
   }
 

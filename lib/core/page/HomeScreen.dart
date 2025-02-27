@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:_12sale_app/core/components/card/store/StoreCardAll.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
+import 'package:_12sale_app/core/page/refund/RefundScreen.dart';
 import 'package:_12sale_app/core/page/report/ReportScreen.dart';
 import 'package:_12sale_app/core/page/route/AjustRoute.dart';
 import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
@@ -10,6 +11,7 @@ import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/core/page/store/StoreScreen.dart';
+import 'package:_12sale_app/data/models/RefundFilter.dart';
 // import 'package:_12sale_app/page/TestTabel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:_12sale_app/core/components/Header.dart';
@@ -23,6 +25,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -139,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _getFuction() {
+  void _getFuction(int isSelect) {
     switch (_selectedIndex) {
       case 0:
         return () {}();
@@ -163,19 +166,28 @@ class _HomeScreenState extends State<HomeScreen> {
         }();
       case 3:
         return () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OrderOutRouteScreen(),
-            ),
-          );
+          if (isSelect == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OrderOutRouteScreen(),
+              ),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RefundScreen(),
+              ),
+            );
+          }
         }();
       default:
         return () {}();
     }
   }
 
-  Icon _getIcon() {
+  Icon _getIcon(int isSelect) {
     switch (_selectedIndex) {
       case 0:
         return const Icon(
@@ -196,11 +208,17 @@ class _HomeScreenState extends State<HomeScreen> {
           color: Styles.primaryColor,
         );
       case 3:
-        return const Icon(
-          Icons.add_shopping_cart,
-          size: 40,
-          color: Styles.primaryColor,
-        );
+        return isSelect == 1
+            ? const Icon(
+                Icons.add_shopping_cart,
+                size: 40,
+                color: Styles.primaryColor,
+              )
+            : const Icon(
+                Icons.change_circle_outlined,
+                size: 40,
+                color: Styles.primaryColor,
+              );
       default:
         return const Icon(Icons.shopping_basket, size: 30);
     }
@@ -208,6 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isSelect = Provider.of<RefundfilterLocal>(context);
     List<Widget> _widgetOptions = <Widget>[
       Dashboardscreen(),
       Routescreen(),
@@ -249,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
             heroTag: 'homeTag1', // Unique tag for this FloatingActionButton
             shape: const CircleBorder(),
             onPressed: () {
-              _getFuction();
+              _getFuction(isSelect.isSelect);
               // setState(() {
               //   _selectedIndex = 2; // Update to the cart index
               // });
@@ -257,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.white,
             child: Stack(
               alignment: Alignment.center,
-              children: [_getIcon()],
+              children: [_getIcon(isSelect.isSelect)],
             ),
           ),
         ),
