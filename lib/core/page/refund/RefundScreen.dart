@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
@@ -61,7 +62,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
 
   int isSelect = 1;
 
-  bool _loadingProduct = false;
+  bool _loadingProduct = true;
 
   // Filter Set
   List<String> groupList = [];
@@ -170,7 +171,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           "id": "${product.id}",
           "qty": count,
           "unit": "${selectedUnit}",
-          "condition": _isCheckboxChecked ? "good" : "damaged", //good, damaged
+          "condition": _isCheckboxChecked ? "damaged" : "good", //good, damaged
           "expire": "${DateFormat("yyyymmdd").format(_selectedDate!)}"
         },
       );
@@ -218,12 +219,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       print("Get Product: ${isSelect == 1 ? "refund" : "sale"}");
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        if (mounted) {
-          setState(() {
-            productList = data.map((item) => Product.fromJson(item)).toList();
-          });
-          context.loaderOverlay.hide();
-        }
+
+        setState(() {
+          productList = data.map((item) => Product.fromJson(item)).toList();
+        });
+        context.loaderOverlay.hide();
+
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
@@ -924,7 +925,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                FontAwesomeIcons.clock,
+                                FontAwesomeIcons.peopleCarryBox,
                                 color: isSelect == 1
                                     ? Styles.primaryColorIcons
                                     : Styles.white,
@@ -942,14 +943,14 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.description,
+                                Icons.swap_horizontal_circle_outlined,
                                 color: isSelect == 2
                                     ? Styles.primaryColorIcons
                                     : Styles.white,
                               ),
                               SizedBox(width: 8),
                               Text(
-                                'เปลี่ยนให้',
+                                'เปลี่ยน',
                                 style: isSelect == 2
                                     ? Styles.headerPirmary18(context)
                                     : Styles.headerWhite18(context),
@@ -998,32 +999,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         return Row(
                                           children: [
                                             Expanded(
-                                              child: OrderMenuListVerticalCard(
-                                                item: productList[firstIndex],
-                                                onDetailsPressed: () async {
-                                                  setState(() {
-                                                    selectedUnit = '';
-                                                    selectedSize = '';
-                                                    price = 0.00;
-                                                    count = 1;
-                                                    total = 0.00;
-                                                    _isCheckboxChecked = false;
-                                                    _selectedDate = null;
-                                                  });
-
-                                                  _showProductSheet(context,
-                                                      productList[firstIndex]);
-                                                },
-                                              ),
-                                            ),
-                                            if (secondIndex <
-                                                productList.length)
-                                              Expanded(
+                                              child: LoadingSkeletonizer(
+                                                loading: _loadingProduct,
                                                 child:
                                                     OrderMenuListVerticalCard(
-                                                  item:
-                                                      productList[secondIndex],
-                                                  onDetailsPressed: () {
+                                                  item: productList[firstIndex],
+                                                  onDetailsPressed: () async {
                                                     setState(() {
                                                       selectedUnit = '';
                                                       selectedSize = '';
@@ -1034,11 +1015,41 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                           false;
                                                       _selectedDate = null;
                                                     });
+
                                                     _showProductSheet(
                                                         context,
                                                         productList[
-                                                            secondIndex]);
+                                                            firstIndex]);
                                                   },
+                                                ),
+                                              ),
+                                            ),
+                                            if (secondIndex <
+                                                productList.length)
+                                              Expanded(
+                                                child: LoadingSkeletonizer(
+                                                  loading: _loadingProduct,
+                                                  child:
+                                                      OrderMenuListVerticalCard(
+                                                    item: productList[
+                                                        secondIndex],
+                                                    onDetailsPressed: () {
+                                                      setState(() {
+                                                        selectedUnit = '';
+                                                        selectedSize = '';
+                                                        price = 0.00;
+                                                        count = 1;
+                                                        total = 0.00;
+                                                        _isCheckboxChecked =
+                                                            false;
+                                                        _selectedDate = null;
+                                                      });
+                                                      _showProductSheet(
+                                                          context,
+                                                          productList[
+                                                              secondIndex]);
+                                                    },
+                                                  ),
                                                 ),
                                               )
                                             else
@@ -1078,27 +1089,30 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                       //     _productListScrollController,
                                       itemCount: productList.length,
                                       itemBuilder: (context, index) {
-                                        return OrderMenuListCard(
-                                          product: productList[index],
-                                          onTap: () {
-                                            print(productList[index]);
-                                            setState(() {
-                                              selectedUnit = '';
-                                              selectedSize = '';
-                                              price = 0.00;
-                                              count = 1;
-                                              total = 0.00;
-                                              _isCheckboxChecked = false;
-                                              _selectedDate = null;
-                                            });
-                                            if (isSelect == 1) {
-                                              _showRefundSheet(
-                                                  context, productList[index]);
-                                            } else {
-                                              _showProductSheet(
-                                                  context, productList[index]);
-                                            }
-                                          },
+                                        return LoadingSkeletonizer(
+                                          loading: _loadingProduct,
+                                          child: OrderMenuListCard(
+                                            product: productList[index],
+                                            onTap: () {
+                                              print(productList[index]);
+                                              setState(() {
+                                                selectedUnit = '';
+                                                selectedSize = '';
+                                                price = 0.00;
+                                                count = 1;
+                                                total = 0.00;
+                                                _isCheckboxChecked = false;
+                                                _selectedDate = null;
+                                              });
+                                              if (isSelect == 1) {
+                                                _showRefundSheet(context,
+                                                    productList[index]);
+                                              } else {
+                                                _showProductSheet(context,
+                                                    productList[index]);
+                                              }
+                                            },
+                                          ),
                                         );
                                       },
                                     ),
@@ -1120,7 +1134,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                     _showCartSheet(context, cartListData);
                                   },
                                   child: Icon(
-                                    Icons.shopping_bag_outlined,
+                                    FontAwesomeIcons.arrowsRotate,
                                     color: Colors.white,
                                     size: 35,
                                   ),
@@ -1365,42 +1379,11 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                   ],
                                 ),
 
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.all(8),
+                                // Row(
+                                //   children: [
 
-                                            elevation: 0, // Disable shadow
-                                            shadowColor: Colors
-                                                .transparent, // Ensure no shadow color
-                                            backgroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              side: BorderSide(
-                                                  color: Colors.grey[300]!,
-                                                  width: 1),
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            _showDatePicker(
-                                                context, setModalState);
-                                          },
-                                          child: Text(
-                                            _selectedDate == null
-                                                ? "กรุณาเลือกวันที่หมดอายุ"
-                                                : "${DateFormat("dd-MM-yyyy").format(_selectedDate!)}",
-                                            style: Styles.black18(context),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                //   ],
+                                // ),
                                 // Row(
                                 //   children: [
                                 //     CalendarDatePicker(initialDate: initialDate, firstDate: firstDate, lastDate: lastDate, onDateChanged: onDateChanged)
@@ -1475,26 +1458,65 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: _isCheckboxChecked,
-                                      onChanged: (value) {
-                                        setModalState(
-                                          () {
-                                            _isCheckboxChecked = value!;
+                                    Row(
+                                      children: [
+                                        Checkbox(
+                                          value: _isCheckboxChecked,
+                                          onChanged: (value) {
+                                            setModalState(
+                                              () {
+                                                _isCheckboxChecked = value!;
+                                              },
+                                            );
                                           },
-                                        );
-                                      },
+                                        ),
+                                        Text(
+                                          "สินค้าเสีย",
+                                          style: Styles.black18(context),
+                                        )
+                                      ],
                                     ),
-                                    Text(
-                                      "สินค้าดี",
-                                      style: Styles.black18(context),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.all(8),
+
+                                        elevation: 0, // Disable shadow
+                                        shadowColor: Colors
+                                            .transparent, // Ensure no shadow color
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          side: BorderSide(
+                                              color: Colors.grey[300]!,
+                                              width: 1),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _showDatePicker(context, setModalState);
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_month,
+                                            color: Styles.primaryColor,
+                                            size: 20,
+                                          ),
+                                          Text(
+                                            _selectedDate == null
+                                                ? " วันหมดอายุ"
+                                                : " ${DateFormat("dd-MM-yyyy").format(_selectedDate!)}",
+                                            style: Styles.black18(context),
+                                          ),
+                                        ],
+                                      ),
                                     )
                                   ],
                                 ),
+
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -2121,11 +2143,14 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                           Row(
                             children: [
                               Icon(
-                                Icons.shopping_bag_outlined,
+                                FontAwesomeIcons.arrowsRotate,
                                 color: Colors.white,
                                 size: 30,
                               ),
-                              Text('ตะกร้าสินค้าที่เลือก',
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Text('รายการที่เลือก',
                                   style: Styles.white24(context)),
                             ],
                           ),
@@ -2240,7 +2265,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                             Row(
                                                               children: [
                                                                 Text(
-                                                                  'id : ${cartList["items"][index]["id"]}',
+                                                                  'รหัส : ${cartList["items"][index]["id"]}',
                                                                   style: Styles
                                                                       .black16(
                                                                           context),
@@ -2273,9 +2298,21 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                         "condition"] !=
                                                                     null
                                                                 ? Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceBetween,
                                                                     children: [
                                                                       Text(
-                                                                        'คืน : ${cartList["items"][index]["condition"] == "good" ? "ดี" : "เสีย"}',
+                                                                        'สภาพ : ${cartList["items"][index]["condition"] == "good" ? "ดี" : "เสีย"}',
+                                                                        style: Styles.black16(
+                                                                            context),
+                                                                      ),
+                                                                      // SizedBox(
+                                                                      //   width:
+                                                                      //       10,
+                                                                      // ),
+                                                                      Text(
+                                                                        ' ${DateFormat('dd-MM-yyyy').format(DateTime.parse(cartList["items"][index]["expireDate"]))}',
                                                                         style: Styles.black16(
                                                                             context),
                                                                       ),
@@ -2608,7 +2645,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                             Row(
                               children: [
                                 Icon(
-                                  Icons.shopping_bag_outlined,
+                                  FontAwesomeIcons.arrowsRotate,
                                   color: Colors.white,
                                   size: 30,
                                 ),

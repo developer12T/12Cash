@@ -194,6 +194,7 @@ class _ReportHeaderState extends State<ReportHeader> {
   @override
   Widget build(BuildContext context) {
     final isSelect = Provider.of<RefundfilterLocal>(context);
+    print("isSelect.isSelect :${isSelect.isSelect}");
     double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -270,24 +271,24 @@ class _ReportHeaderState extends State<ReportHeader> {
         const SizedBox(height: 10),
         Flexible(
           child: CustomSlidingSegmentedControl<int>(
-            initialValue: 1,
+            initialValue: isSelect.isSelect,
             isStretch: true,
             children: {
               1: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    FontAwesomeIcons.clock,
+                    FontAwesomeIcons.solidFileLines,
                     color: isSelect.isSelect == 1
                         ? Styles.primaryColorIcons
                         : Styles.white,
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'รายการขาย',
+                    'ขาย',
                     style: isSelect.isSelect == 1
-                        ? Styles.headerPirmary18(context)
-                        : Styles.headerWhite18(context),
+                        ? Styles.headerPirmary24(context)
+                        : Styles.headerWhite24(context),
                   )
                 ],
               ),
@@ -295,17 +296,17 @@ class _ReportHeaderState extends State<ReportHeader> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.description,
+                    Icons.change_circle_outlined,
                     color: isSelect.isSelect == 2
                         ? Styles.primaryColorIcons
                         : Styles.white,
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'รายการคืน',
+                    'คืน',
                     style: isSelect.isSelect == 2
-                        ? Styles.headerPirmary18(context)
-                        : Styles.headerWhite18(context),
+                        ? Styles.headerPirmary24(context)
+                        : Styles.headerWhite24(context),
                   ),
                 ],
               )

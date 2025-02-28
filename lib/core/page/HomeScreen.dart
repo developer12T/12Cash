@@ -247,11 +247,11 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         resizeToAvoidBottomInset: false,
         floatingActionButton: Container(
-          width: screenWidth / 9,
-          height: screenWidth / 9,
+          width: screenWidth / 8,
+          height: screenWidth / 8,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Styles.secondaryColor,
+            color: Styles.primaryColor,
             borderRadius: BorderRadius.circular(360),
             boxShadow: [
               BoxShadow(

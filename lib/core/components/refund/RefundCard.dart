@@ -55,10 +55,10 @@ class RefundCard extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              FaIcon(
-                                FontAwesomeIcons.solidFileLines,
+                              Icon(
+                                Icons.change_circle_outlined,
                                 color: Styles.primaryColorIcons,
-                                size: 35,
+                                size: 30,
                               ),
                             ],
                           ),
@@ -151,8 +151,7 @@ class RefundCard extends StatelessWidget {
                                         children: [
                                           Text(
                                             "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.totalRefund)}",
-                                            style:
-                                                Styles.headerGreen16(context),
+                                            style: Styles.grey16(context),
                                             textAlign: TextAlign.right,
                                           ),
                                         ],
@@ -163,8 +162,7 @@ class RefundCard extends StatelessWidget {
                                         children: [
                                           Text(
                                             "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.totalChange)}",
-                                            style:
-                                                Styles.headerGreen16(context),
+                                            style: Styles.grey16(context),
                                             textAlign: TextAlign.right,
                                           ),
                                         ],

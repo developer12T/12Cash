@@ -43,9 +43,25 @@ class Styles {
         ),
       );
 
+  static TextStyle grey16(BuildContext context) => GoogleFonts.kanit(
+        textStyle: TextStyle(
+          fontSize: getResponsiveFontSize(context, 16),
+          fontWeight: FontWeight.normal,
+          color: const Color(0xFF6B7280),
+        ),
+      );
+
   static TextStyle headerBlack18(BuildContext context) => GoogleFonts.kanit(
         textStyle: TextStyle(
           fontSize: getResponsiveFontSize(context, 18),
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF333333),
+        ),
+      );
+
+  static TextStyle headerBlack16(BuildContext context) => GoogleFonts.kanit(
+        textStyle: TextStyle(
+          fontSize: getResponsiveFontSize(context, 16),
           fontWeight: FontWeight.w600,
           color: Color(0xFF333333),
         ),

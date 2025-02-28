@@ -962,7 +962,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                               ),
                                                             ),
                                                             Text(
-                                                              'คืน${listRefund[index].condition == "good" ? "ดี" : "เสีย"}',
+                                                              ' ${DateFormat("dd-MM-yyyy").format(DateTime.parse(listRefund[index].expireDate))} คืน${listRefund[index].condition == "good" ? "ดี" : "เสีย"}',
                                                               style: Styles
                                                                   .black16(
                                                                       context),
@@ -1009,6 +1009,16 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                                     ),
                                                                   ],
                                                                 ),
+                                                                // Row(
+                                                                //   children: [
+                                                                //     Text(
+                                                                //       'วันที่หมดอายุ :',
+                                                                //       style: Styles
+                                                                //           .black16(
+                                                                //               context),
+                                                                //     ),
+                                                                //   ],
+                                                                // ),
                                                               ],
                                                             ),
                                                             Row(
@@ -1404,36 +1414,6 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                                       ),
                                                                     ),
                                                                   ),
-                                                                  ElevatedButton(
-                                                                    onPressed:
-                                                                        () async {
-                                                                      // _showCartSheet(context, cartList);
-                                                                    },
-                                                                    style: ElevatedButton
-                                                                        .styleFrom(
-                                                                      shape:
-                                                                          CircleBorder(
-                                                                        side: BorderSide(
-                                                                            color:
-                                                                                Styles.warning!,
-                                                                            width: 1),
-                                                                      ),
-                                                                      padding:
-                                                                          const EdgeInsets
-                                                                              .all(
-                                                                              8),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white, // Button color
-                                                                    ),
-                                                                    child: Icon(
-                                                                      FontAwesomeIcons
-                                                                          .penToSquare,
-                                                                      size: 24,
-                                                                      color: Styles
-                                                                          .warning!,
-                                                                    ), // Example
-                                                                  ),
                                                                 ],
                                                               ),
                                                             ],
@@ -1601,12 +1581,12 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "รวมมูลค่าก่อนหัก VAT 7%",
-                                  style: Styles.red18(context),
+                                  "VAT 7%",
+                                  style: Styles.grey18(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalExVat : "0.00"))} บาท",
-                                  style: Styles.red18(context),
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalVat : "0.00"))} บาท",
+                                  style: Styles.grey18(context),
                                 )
                               ],
                             ),
@@ -1614,12 +1594,12 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "รวมมูลค่า VAT 7%",
-                                  style: Styles.red18(context),
+                                  "รวมมูลค่าก่อนหัก VAT 7%",
+                                  style: Styles.grey18(context),
                                 ),
                                 Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalVat : "0.00"))} บาท",
-                                  style: Styles.red18(context),
+                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.parse(refundList.isNotEmpty ? refundList[0].totalExVat : "0.00"))} บาท",
+                                  style: Styles.grey18(context),
                                 )
                               ],
                             ),
@@ -1641,86 +1621,52 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                       ),
                     ),
                   ),
-                  isSelectCheckout == "QR Payment"
-                      ? Padding(
-                          padding: EdgeInsets.all(8),
-                          child: BoxShadowCustom(
-                            child: Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      ShowPhotoButton(
-                                        checkNetwork: true,
-                                        label: "QR Code",
-                                        icon:
-                                            Icons.image_not_supported_outlined,
-                                        imagePath: imageList.isNotEmpty
-                                            ? imageList
-                                                .firstWhere((element) =>
-                                                    element.type == "qrcode")
-                                                .path
-                                            : '',
-                                      ),
-                                      IconButtonWithLabelOld(
-                                        icon: Icons.photo_camera,
-                                        imagePath: qrImagePath != ""
-                                            ? qrImagePath
-                                            : null,
-                                        label: "ถ่ายภาพการโอน",
-                                        onImageSelected:
-                                            (String imagePath) async {
-                                          setState(() {
-                                            qrImagePath = imagePath;
-                                          });
-                                          // await uploadFormDataWithDio(
-                                          //     imagePath, 'store', context);
-                                        },
-                                      ),
-                                      // MenuButton(
-                                      //   color: Styles.success!,
-                                      //   icon: Icons.upload,
-                                      //   label: "อัพโหลด",
-                                      //   onPressed: () {},
-                                      // )
-                                      // IconButtonWithLabelFixed(
-                                      //   icon: Icons.photo_camera,
-                                      //   // imagePath: storeImagePath != ""
-                                      //   //     ? storeImagePath
-                                      //   //     : null,
-                                      //   label: "ถ่ายภาพการโอน",
-                                      //   onImageSelected:
-                                      //       (String imagePath) async {
-                                      //     // await uploadFormDataWithDio(
-                                      //     //     imagePath, 'store', context);
-                                      //   },
-                                      // ),
-                                      // IconButtonWithLabelFixed(
-                                      //   icon: Icons.photo_camera,
-                                      //   // imagePath: storeImagePath != ""
-                                      //   //     ? storeImagePath
-                                      //   //     : null,
-                                      //   label: "ถ่ายภาพการโอน",
-                                      //   onImageSelected:
-                                      //       (String imagePath) async {
-                                      //     // await uploadFormDataWithDio(
-                                      //     //     imagePath, 'store', context);
-                                      //   },
-                                      // ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                      : SizedBox()
                 ],
               ),
             ),
+            isSelectCheckout == "QR Payment"
+                ? Padding(
+                    padding: EdgeInsets.all(8),
+                    child: BoxShadowCustom(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                ShowPhotoButton(
+                                  checkNetwork: true,
+                                  label: "QR Code",
+                                  icon: Icons.image_not_supported_outlined,
+                                  imagePath: imageList.isNotEmpty
+                                      ? imageList
+                                          .firstWhere((element) =>
+                                              element.type == "qrcode")
+                                          .path
+                                      : '',
+                                ),
+                                IconButtonWithLabelOld(
+                                  icon: Icons.photo_camera,
+                                  imagePath:
+                                      qrImagePath != "" ? qrImagePath : null,
+                                  label: "ถ่ายภาพการโอน",
+                                  onImageSelected: (String imagePath) async {
+                                    setState(() {
+                                      qrImagePath = imagePath;
+                                    });
+                                    // await uploadFormDataWithDio(
+                                    //     imagePath, 'store', context);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : SizedBox()
           ],
         ),
       ),

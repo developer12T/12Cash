@@ -794,7 +794,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
           controller: _outerController,
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.9, // Set height
+              height: MediaQuery.of(context).size.height * 0.71, // Set height
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -809,7 +809,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "${refundDetails?.store.name} ${refundDetails?.store.id}",
+                                  "${refundDetails?.store.name} ${refundDetails?.store.storeId}",
                                   style: Styles.black24(context),
                                 ),
                                 GestureDetector(
@@ -955,155 +955,151 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     SizedBox(
                       height: 10,
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: BoxShadowCustom(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            height: screenHeight * 0.9,
-                            // color: Colors.red,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16.0, horizontal: 16.0),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "รายการที่สั่ง",
-                                        style: Styles.black18(context),
-                                      ),
-                                      Text(
-                                        "จำนวน ${refundDetails?.listProductRefund.length} รายการ",
-                                        style: Styles.black18(context),
-                                      ),
-                                    ],
-                                  ),
-                                  Expanded(
-                                      child: Scrollbar(
-                                    controller: _cartScrollController,
-                                    thumbVisibility: true,
-                                    trackVisibility: true,
-                                    radius: Radius.circular(16),
-                                    thickness: 10,
-                                    child: ListView.builder(
-                                      physics: ClampingScrollPhysics(),
-                                      shrinkWrap: true,
-                                      controller: _cartScrollController,
-                                      itemCount: listProductRefund.length,
-                                      itemBuilder: (context, index) {
-                                        return Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                                    width: screenWidth / 8,
-                                                    height: screenWidth / 8,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                        error, stackTrace) {
-                                                      return const Center(
-                                                        child: Icon(
-                                                          Icons.error,
-                                                          color: Colors.red,
-                                                          size: 50,
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  flex: 3,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            16.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Expanded(
-                                                              child: Text(
-                                                                listProductRefund[
-                                                                        index]
-                                                                    .name,
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                                softWrap: true,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .visible,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      'จำนวน : ${listProductRefund[index].qty.toStringAsFixed(0)} ${listProductRefund[index].unit}',
-                                                                      style: Styles
-                                                                          .black16(
-                                                                              context),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      'ราคา : ${listProductRefund[index].price}',
-                                                                      style: Styles
-                                                                          .black16(
-                                                                              context),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Divider(
-                                              color: Colors.grey[200],
-                                              thickness: 1,
-                                              indent: 16,
-                                              endIndent: 16,
-                                            ),
-                                          ],
-                                        );
-                                      },
+                    BoxShadowCustom(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          height: screenHeight * 0.4,
+                          // color: Colors.red,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16.0, horizontal: 16.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "รายการคืน",
+                                      style: Styles.black18(context),
                                     ),
-                                  ))
-                                ],
-                              ),
+                                    Text(
+                                      "จำนวน ${refundDetails?.listProductRefund.length} รายการ",
+                                      style: Styles.black18(context),
+                                    ),
+                                  ],
+                                ),
+                                Expanded(
+                                    child: Scrollbar(
+                                  controller: _cartScrollController,
+                                  thumbVisibility: true,
+                                  trackVisibility: true,
+                                  radius: Radius.circular(16),
+                                  thickness: 10,
+                                  child: ListView.builder(
+                                    physics: ClampingScrollPhysics(),
+                                    shrinkWrap: true,
+                                    controller: _cartScrollController,
+                                    itemCount: listProductRefund.length,
+                                    itemBuilder: (context, index) {
+                                      return Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                  width: screenWidth / 8,
+                                                  height: screenWidth / 8,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return const Center(
+                                                      child: Icon(
+                                                        Icons.error,
+                                                        color: Colors.red,
+                                                        size: 50,
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 3,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: Text(
+                                                              listProductRefund[
+                                                                      index]
+                                                                  .name,
+                                                              style: Styles
+                                                                  .black16(
+                                                                      context),
+                                                              softWrap: true,
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .visible,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    'จำนวน : ${listProductRefund[index].qty.toStringAsFixed(0)} ${listProductRefund[index].unit}',
+                                                                    style: Styles
+                                                                        .black16(
+                                                                            context),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    'ราคา : ${listProductRefund[index].price}',
+                                                                    style: Styles
+                                                                        .black16(
+                                                                            context),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Divider(
+                                            color: Colors.grey[200],
+                                            thickness: 1,
+                                            indent: 16,
+                                            endIndent: 16,
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ))
+                              ],
                             ),
                           ),
                         ),
@@ -1131,7 +1127,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "รายการโปรโมชั่น",
+                                      "รายการเปลี่ยน",
                                       style: Styles.black18(context),
                                     ),
                                     Text(
@@ -1288,7 +1284,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                     ),
                                                                     width: 75,
                                                                     child: Text(
-                                                                      '${listProductChange[innerIndex].qty.toStringAsFixed(0)} ${listProductChange[innerIndex].unit}',
+                                                                      '${listProductChange[innerIndex].qty.toStringAsFixed(0)} ${listProductChange[innerIndex].unitName}',
                                                                       textAlign:
                                                                           TextAlign
                                                                               .center,
@@ -1297,36 +1293,6 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                         context,
                                                                       ),
                                                                     ),
-                                                                  ),
-                                                                  ElevatedButton(
-                                                                    onPressed:
-                                                                        () async {
-                                                                      // _showCartSheet(context, cartList);
-                                                                    },
-                                                                    style: ElevatedButton
-                                                                        .styleFrom(
-                                                                      shape:
-                                                                          CircleBorder(
-                                                                        side: BorderSide(
-                                                                            color:
-                                                                                Styles.warning!,
-                                                                            width: 1),
-                                                                      ),
-                                                                      padding:
-                                                                          const EdgeInsets
-                                                                              .all(
-                                                                              8),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white, // Button color
-                                                                    ),
-                                                                    child: Icon(
-                                                                      FontAwesomeIcons
-                                                                          .penToSquare,
-                                                                      size: 24,
-                                                                      color: Styles
-                                                                          .warning!,
-                                                                    ), // Example
                                                                   ),
                                                                 ],
                                                               ),
@@ -1374,7 +1340,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefund : "0.00")} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefund : 0)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1387,7 +1353,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChange : "0.00")} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChange : 0)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1400,7 +1366,20 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalExVat : "0.00")} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalExVat : 0)} บาท",
+                            style: Styles.grey18(context),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "VAT 7%",
+                            style: Styles.grey18(context),
+                          ),
+                          Text(
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.vat : 0)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1410,24 +1389,11 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         children: [
                           Text(
                             "รวมมูลค่าก่อนหัก VAT 7%",
-                            style: Styles.red18(context),
+                            style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.total : "0.00")} บาท",
-                            style: Styles.red18(context),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "รวมมูลค่า VAT 7%",
-                            style: Styles.red18(context),
-                          ),
-                          Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.total : "0.00")} บาท",
-                            style: Styles.red18(context),
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalExVat : 0)} บาท",
+                            style: Styles.grey18(context),
                           )
                         ],
                       ),
@@ -1439,7 +1405,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                             style: Styles.green24(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.total : "0.00")} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.total : 0)} บาท",
                             style: Styles.green24(context),
                           )
                         ],
@@ -1516,7 +1482,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     await printTest();
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1528,7 +1494,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               size: 25,
                             ),
                             Text(
-                              " พิมพ์ใบสั่งซื้อ",
+                              " พิมพ์ใบคืนสินค้า",
                               style: Styles.headerWhite18(context),
                             ),
                           ],

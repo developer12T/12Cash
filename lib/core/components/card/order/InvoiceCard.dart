@@ -112,6 +112,7 @@ class InvoiceCard extends StatelessWidget {
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Expanded(
                                   child: Column(
@@ -146,7 +147,7 @@ class InvoiceCard extends StatelessWidget {
                                     child: Text(
                                       "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.total)}",
                                       style: Styles.headerGreen24(context),
-                                      textAlign: TextAlign.center,
+                                      textAlign: TextAlign.end,
                                     ),
                                   ),
                                 ),

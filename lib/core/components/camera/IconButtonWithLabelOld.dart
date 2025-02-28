@@ -104,9 +104,8 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
             onPressed: () => openCamera(context),
             style: ElevatedButton.styleFrom(
               padding: widget.padding,
-              backgroundColor: widget.imagePath == null
-                  ? Colors.grey[400]
-                  : Styles.primaryColor,
+              backgroundColor:
+                  widget.imagePath == null ? Colors.grey[400] : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.borderRadius),
               ),
@@ -115,8 +114,7 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(widget.icon,
-                          color: Styles.primaryColorIcons, size: 50),
+                      Icon(widget.icon, color: Colors.white, size: 50),
                       Text(
                         "gobal.camera_button.button".tr(),
                         style: Styles.white18(context),
