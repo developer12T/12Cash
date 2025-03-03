@@ -75,9 +75,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
         print("getStore");
         final List<dynamic> data = response.data['data'];
         // print(response.data['data'][0]);
-        setState(() {
-          storeList = data.map((item) => Store.fromJson(item)).toList();
-        });
+        if (mounted) {
+          setState(() {
+            storeList = data.map((item) => Store.fromJson(item)).toList();
+          });
+        }
         // if (isType == "T04") {
         //   setState(() {
         //     isShippingId = shippingList[0].shippingId;
@@ -86,9 +88,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
       }
     } catch (e) {
       print("Error _getStore $e");
-      setState(() {
-        storeList = [];
-      });
+      if (mounted) {
+        setState(() {
+          storeList = [];
+        });
+      }
       print("Error $e");
     }
   }

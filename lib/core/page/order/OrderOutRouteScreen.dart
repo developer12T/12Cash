@@ -785,7 +785,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                             onTap: () {
                                               _clearFilter();
                                               context.loaderOverlay.show();
-                                              _getProduct();
+                                              _getProduct().then((_) =>
+                                                  context.loaderOverlay.hide());
                                             },
                                             child: badgeFilter(
                                               openIcon: false,

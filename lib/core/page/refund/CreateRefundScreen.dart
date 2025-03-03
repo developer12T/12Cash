@@ -80,6 +80,8 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
 
   List<RefundModel> refundList = [];
 
+  late TextEditingController noteController;
+
   @override
   void initState() {
     super.initState();
@@ -88,6 +90,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
     _cartScrollController.addListener(_handleInnerScroll);
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
+    noteController = TextEditingController();
   }
 
   void _onScroll() {
@@ -162,7 +165,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
   @override
   void dispose() {
     // Unsubscribe when the widget is disposed
-
+    noteController.dispose();
     routeObserver.unsubscribe(this);
     _cartScrollController.dispose();
     _promotionScrollController.dispose();
@@ -258,7 +261,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
           "type": "refund",
           "area": "${User.area}",
           "storeId": "${widget.storeId}",
-          "note": "test",
+          "note": "${noteController.text}",
           "latitude": "$latitude",
           "longitude": "$longitude",
           "shipping": "test",
@@ -852,6 +855,53 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                         ],
                                       ),
                                       onPressed: () {},
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.all(8),
+                                        elevation: 0, // Disable shadow
+                                        shadowColor: Colors
+                                            .transparent, // Ensure no shadow color
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.zero,
+                                            side: BorderSide.none),
+                                      ),
+                                      onPressed: () {
+                                        _showNoteSheet(context);
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            flex: 3,
+                                            child: Text(
+                                              "หมายเหตุ :",
+                                              style: Styles.black18(context),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              noteController.text != ''
+                                                  ? noteController.text
+                                                  : "กรุณาใส่หมายเหตุ...",
+                                              style: Styles.grey18(context),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1670,6 +1720,128 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
           ],
         ),
       ),
+    );
+  }
+
+  void _showNoteSheet(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              Text('หมายเหตุ', style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _getCart();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            autofocus: true,
+                            style: Styles.black18(context),
+                            controller: noteController,
+                            maxLines: 3,
+                            keyboardType: TextInputType.multiline,
+                            decoration: InputDecoration(
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                  width: 1,
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.all(16),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(8),
+                                    elevation: 0, // Disable shadow
+                                    shadowColor: Colors
+                                        .transparent, // Ensure no shadow color
+                                    backgroundColor: Styles.primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        side: BorderSide.none),
+                                  ),
+                                  onPressed: () {
+                                    // _showNoteSheet(context);
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text(
+                                    "ตกลง",
+                                    style: Styles.white18(context),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
     );
   }
 

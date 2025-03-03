@@ -114,7 +114,7 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
           style: ToastificationStyle.flatColored,
           title: Text(
             "เช็คอินสําเร็จ",
-            style: Styles.black18(context),
+            style: Styles.green18(context),
           ),
         );
         Navigator.push(
@@ -130,7 +130,7 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
           style: ToastificationStyle.flatColored,
           title: Text(
             "เกิดข้อผิดพลาด",
-            style: Styles.black18(context),
+            style: Styles.red18(context),
           ),
         );
       }
@@ -143,89 +143,7 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
         style: ToastificationStyle.flatColored,
         title: Text(
           "เกิดข้อผิดพลาด",
-          style: Styles.black18(context),
-        ),
-      );
-    }
-  }
-
-  Future<void> _editStore() async {
-    Dio dio = Dio();
-
-    final String apiUrl2 =
-        "${ApiService.apiHost}/api/cash/store/editStore/${widget.store.storeId}";
-
-    Map<String, dynamic> jsonData = {
-      "name": "${storeNameController.text}",
-      "taxId": "",
-      "tel": "${storePhoneController.text}",
-      "route": "${selectedRoute}",
-      "type": "",
-      "typeName": "",
-      "address": "",
-      "district": "",
-      "subDistrict": "",
-      "province": "",
-      "provinceCode": "",
-      "postCode": "",
-      "note": "${storeNoteController.text}",
-      "zone": "",
-      "area": "",
-      "latitude": "",
-      "longtitude": "",
-      "lineId": "${storeLineIdController.text}"
-    };
-
-    try {
-      final response = await dio.patch(
-        apiUrl2,
-        data: jsonData,
-        options: Options(
-          headers: {
-            "Content-Type": "application/json",
-          },
-        ),
-      );
-      if (response.statusCode == 200) {
-        print(response.data['message']);
-        print(response.data);
-
-        toastification.show(
-          autoCloseDuration: Duration(seconds: 3),
-          context: context,
-          primaryColor: Colors.green,
-          type: ToastificationType.success,
-          style: ToastificationStyle.flatColored,
-          title: Text(
-            "แก้ไขข้อมูลเรียบร้อย",
-            style: Styles.black18(context),
-          ),
-        );
-      } else {
-        toastification.show(
-          autoCloseDuration: Duration(seconds: 3),
-          context: context,
-          primaryColor: Colors.red,
-          type: ToastificationType.error,
-          style: ToastificationStyle.flatColored,
-          title: Text(
-            "เกิดข้อผิดพลาด ",
-            style: Styles.black18(context),
-          ),
-        );
-      }
-      print(response);
-    } catch (e) {
-      print(e);
-      toastification.show(
-        autoCloseDuration: Duration(seconds: 3),
-        context: context,
-        primaryColor: Colors.red,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flatColored,
-        title: Text(
-          "เกิดข้อผิดพลาด",
-          style: Styles.black18(context),
+          style: Styles.red18(context),
         ),
       );
     }

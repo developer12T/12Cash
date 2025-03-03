@@ -240,7 +240,7 @@ class _DetailScreenState extends State<DetailScreen> {
           style: ToastificationStyle.flatColored,
           title: Text(
             "กรุณาเลือกเหตุผลที่เช็คอิน",
-            style: Styles.black18(context),
+            style: Styles.red18(context),
           ),
         );
       } else {
@@ -903,7 +903,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               style: ToastificationStyle.flatColored,
                               title: Text(
                                 "กรุณาเลือกเหตุผลที่เช็คอิน",
-                                style: Styles.black18(context),
+                                style: Styles.red18(context),
                               ),
                             );
                           }

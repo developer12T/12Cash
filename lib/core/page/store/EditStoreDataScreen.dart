@@ -56,12 +56,36 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
   late TextEditingController storeAddressController;
 
   String selectedRoute = "";
-
+  Store editStore = new Store(
+      storeId: "",
+      name: "",
+      taxId: "",
+      tel: "",
+      route: "",
+      type: "",
+      typeName: "",
+      address: "",
+      district: "",
+      subDistrict: "",
+      province: "",
+      provinceCode: "",
+      postCode: "",
+      zone: "",
+      area: "",
+      latitude: "",
+      longitude: "",
+      lineId: "",
+      note: "",
+      status: "",
+      approve: Approve(dateSend: "", dateAction: "", appPerson: ""),
+      policyConsent: PolicyConsent(status: "", date: ""),
+      imageList: [],
+      shippingAddress: [],
+      createdDate: "",
+      updatedDate: "");
   final LocationService locationService = LocationService();
   String latitude = '';
   String longitude = '';
-  String api_url = '${ApiService.apiHost}/api/cash/store/checkIn/';
-
   double completionPercentage = 220;
 
   @override
@@ -124,6 +148,11 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
         ),
       );
       if (response.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            editStore = Store.fromJson(response.data['data']);
+          });
+        }
         toastification.show(
           autoCloseDuration: Duration(seconds: 3),
           context: context,
@@ -150,6 +179,7 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
       }
       print(response);
     } catch (e) {
+      print("Error edit Store $e");
       print(e);
       toastification.show(
         autoCloseDuration: Duration(seconds: 3),
@@ -322,7 +352,7 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
                                                       Alignment.center,
                                                 ),
                                                 desc:
-                                                    "คุณต้องการแก้ไขข้อมูลร้านค้าใช่หรีอไม่ ?",
+                                                    "คุณต้องการแก้ไขข้อมูลร้านค้าใช่หรือไม่ ?",
                                                 buttons: [
                                                   DialogButton(
                                                     onPressed: () =>
@@ -338,22 +368,44 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
                                                   DialogButton(
                                                     onPressed: () async {
                                                       await _editStore(context);
-                                                      Navigator.pushReplacement(
+                                                      Navigator
+                                                          .pushAndRemoveUntil(
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (context) =>
                                                               DetailStoreScreen(
-                                                            customerName: widget
-                                                                .customerName,
+                                                            customerName:
+                                                                storeNameController
+                                                                    .text,
                                                             customerNo: widget
                                                                 .customerNo,
                                                             initialSelectedRoute:
                                                                 widget
                                                                     .initialSelectedRoute,
-                                                            store: widget.store,
+                                                            store: editStore,
                                                           ),
                                                         ),
+                                                        (route) => route
+                                                            .isFirst, // Keeps only the first route
                                                       );
+
+                                                      // Navigator.pushReplacement(
+                                                      //   context,
+                                                      //   MaterialPageRoute(
+                                                      //     builder: (context) =>
+                                                      //         DetailStoreScreen(
+                                                      //       customerName:
+                                                      //           storeNameController
+                                                      //               .text,
+                                                      //       customerNo: widget
+                                                      //           .customerNo,
+                                                      //       initialSelectedRoute:
+                                                      //           widget
+                                                      //               .initialSelectedRoute,
+                                                      //       store: editStore,
+                                                      //     ),
+                                                      //   ),
+                                                      // );
                                                     },
                                                     color: Styles
                                                         .successButtonColor,

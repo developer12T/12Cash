@@ -71,7 +71,7 @@ class AllAlert {
         titleStyle: Styles.headerBlack32(context),
         alertAlignment: Alignment.center,
       ),
-      desc: "คุณต้องการแก้ไขข้อมูลร้านค้าใช่หรีอไม่ ?",
+      desc: "คุณต้องการแก้ไขข้อมูลร้านค้าใช่หรือไม่ ?",
       buttons: [
         DialogButton(
           onPressed: () => Navigator.pop(context),

@@ -73,8 +73,6 @@ class _WithDrawScreenState extends State<WithDrawScreen> {
     }
   }
 
-  Future<void> _checkout() async {}
-
   @override
   void initState() {
     // TODO: implement initState

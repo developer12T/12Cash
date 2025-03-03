@@ -451,7 +451,6 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
     } catch (e) {
       print("Error _getFliterBrand: $e");
     }
-    // _getProduct();
   }
 
   Future<void> _getFliterSize() async {
@@ -728,7 +727,8 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                             onTap: () {
                                               _clearFilter();
                                               context.loaderOverlay.show();
-                                              _getProduct();
+                                              _getProduct().then((_) =>
+                                                  context.loaderOverlay.hide());
                                             },
                                             child: badgeFilter(
                                               openIcon: false,

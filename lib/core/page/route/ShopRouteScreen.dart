@@ -189,14 +189,14 @@ class _ShopRouteScreenState extends State<ShopRouteScreen> with RouteAware {
                               ),
                               alignment: Alignment.center,
                               child: BoxShadowCustom(
-                                shadowColor: storeVisit!.percentEffective < 50
+                                shadowColor: storeVisit!.percentVisit < 50
                                     ? Styles.fail!
-                                    : storeVisit!.percentEffective < 80
+                                    : storeVisit!.percentVisit < 80
                                         ? Styles.warning!
                                         : Styles.success!,
-                                borderColor: storeVisit!.percentEffective < 50
+                                borderColor: storeVisit!.percentVisit < 50
                                     ? Styles.fail!
-                                    : storeVisit!.percentEffective < 80
+                                    : storeVisit!.percentVisit < 80
                                         ? Styles.warning!
                                         : Styles.success!,
                                 child: Column(

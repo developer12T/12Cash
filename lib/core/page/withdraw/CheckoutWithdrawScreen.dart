@@ -254,6 +254,8 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
           ),
           type: ToastificationType.error,
           primaryColor: Colors.red,
+          style: ToastificationStyle.flatColored,
+          autoCloseDuration: Duration(seconds: 5),
         );
       } else {
         context.loaderOverlay.show();
@@ -660,7 +662,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                           ],
                                                         ),
                                                         Text(
-                                                          " แก้ไข้ที่อยู่จัดส่ง",
+                                                          " แก้ไขที่อยู่จัดส่ง",
                                                           style: Styles.grey18(
                                                               context),
                                                         ),

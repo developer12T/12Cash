@@ -15,7 +15,9 @@ import 'package:_12sale_app/core/page/notification/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/3D_canvas/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
+import 'package:_12sale_app/core/page/sendmoney/SendMoneyScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
+import 'package:_12sale_app/core/page/stock/StockScreen.dart';
 import 'package:_12sale_app/core/page/withdraw/WithDrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Shipping.dart';
@@ -25,6 +27,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:geolocator/geolocator.dart';
@@ -159,21 +162,22 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             ),
           );
         },
-        title_2: "ตั้งค่าเครื่องปริ้น",
-        icon_2: Icons.print_rounded,
+        title_2: "ส่งเงิน",
+        icon_2: FontAwesomeIcons.moneyBillTransfer,
         onTap2: () {
-          Navigator.push(
-            context,
+          Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ManagePrinterScreen(),
+              builder: (context) => SendMoneyScreen(),
             ),
           );
         },
-        title_3: "dashboard.menu.setting".tr(),
-        icon_3: Icons.settings,
+        title_3: "สต๊อกสินค้า",
+        icon_3: Icons.warehouse_rounded,
         onTap3: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const SettingScreen()),
+            MaterialPageRoute(
+              builder: (context) => StockScreen(),
+            ),
           );
         },
         title_4: "แจกสินค้า",
@@ -183,19 +187,32 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             MaterialPageRoute(builder: (context) => GiveAwaysScreen()),
           );
         },
-        title_5: "dashboard.menu.history".tr(),
-        icon_5: Icons.history,
+        title_5: "ตั้งค่าเครื่องปริ้น",
+        icon_5: Icons.print_rounded,
         onTap5: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ManagePrinterScreen(),
+            ),
+          );
+        },
+        title_6: "ตั้งค่า",
+        icon_6: Icons.settings,
+        onTap6: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const SettingScreen()),
+          );
+        },
+      ),
+      MenuDashboard(
+        title_1: "ทดสอบ Noti",
+        icon_1: Icons.notifications_active,
+        onTap1: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => NotificationScreen()),
           );
         },
-        title_6: "dashboard.menu.schedule".tr(),
-        icon_6: Icons.schedule,
-      ),
-      MenuDashboard(
-        title_1: "dashboard.menu.logistic".tr(),
-        icon_1: Icons.local_shipping,
         title_2: "dashboard.menu.send_money".tr(),
         icon_2: Icons.payments,
         title_3: "dashboard.menu.mall".tr(),

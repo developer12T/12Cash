@@ -12,6 +12,7 @@ import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/models/order/Orders.dart';
 import 'package:_12sale_app/data/models/refund/RefundOrder.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/main.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +26,14 @@ class ReportScreen extends StatefulWidget {
   State<ReportScreen> createState() => _ReportScreenState();
 }
 
-class _ReportScreenState extends State<ReportScreen> {
+class _ReportScreenState extends State<ReportScreen> with RouteAware {
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
   final ScrollController _scrollController = ScrollController();
   List<Orders> orders = [];
   List<RefundOrder> refundOrders = [];
-  bool _loadingStore = true;
+  bool _loadingOrder = true;
+  bool _loadingRefund = true;
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
   // String period = "202502";
@@ -45,9 +49,10 @@ class _ReportScreenState extends State<ReportScreen> {
       print("Data ${response.data['data']}");
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
-        Timer(Duration(seconds: 5), () {
+        Timer(Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
+              _loadingRefund = false;
               refundOrders =
                   data.map((item) => RefundOrder.fromJson(item)).toList();
             });
@@ -75,7 +80,7 @@ class _ReportScreenState extends State<ReportScreen> {
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
-              _loadingStore = false;
+              _loadingOrder = false;
               orders = data.map((item) => Orders.fromJson(item)).toList();
             });
           }
@@ -100,7 +105,25 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   @override
+  void didPopNext() {
+    _getOrder();
+    _getRefundOrder();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Register this screen as a route-aware widget
+    final ModalRoute? route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      // Only subscribe if the route is a P ageRoute
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _scrollController.dispose();
     // TODO: implement dispose
     super.dispose();
@@ -111,82 +134,73 @@ class _ReportScreenState extends State<ReportScreen> {
     final isSelect = Provider.of<RefundfilterLocal>(context);
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor:
-          Colors.transparent, // set scaffold background color to transparent
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () {
+      //     // Show refresh indicator programmatically on button tap.
+      //     _refreshIndicatorKey.currentState?.show();
+      //   },
+      //   icon: const Icon(Icons.refresh),
+      // ),
+      // floatingActionButton: FloatingActionButton(
+      //   shape: CircleBorder(),
+      //   child: const Icon(Icons.refresh),
+      //   onPressed: () {
+      //     _refreshIndicatorKey.currentState?.show();
+      //   },
+      // ),
+      backgroundColor: Colors.transparent,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
           margin: EdgeInsets.only(top: 20),
-          // child: Container(
-          //   padding: const EdgeInsets.all(8),
-          //   margin: EdgeInsets.all(screenWidth / 45),
-          //   width: screenWidth,
-          //   // color: Colors.red,
-          //   child: Column(
-          //     mainAxisAlignment: MainAxisAlignment.center,
-          //     children: [
-          //       Text(
-          //         "ยังไม่เปิดให้บริการ ",
-          //         style: Styles.black32(context),
-          //       ),
-          //     ],
-          //   ),
-          // ),
           child: isSelect.isSelect == 1
-              ? orders.isNotEmpty
-                  ? Scrollbar(
+              ? Scrollbar(
+                  controller: _scrollController,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  thickness: 10,
+                  radius: Radius.circular(16),
+                  child: LoadingSkeletonizer(
+                    loading: _loadingOrder,
+                    child: ListView.builder(
                       controller: _scrollController,
-                      thumbVisibility: true,
-                      trackVisibility: true,
-                      thickness: 10,
-                      radius: Radius.circular(16),
-                      child: LoadingSkeletonizer(
-                        loading: _loadingStore,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: orders.length,
-                          itemBuilder: (context, index) {
-                            return InvoiceCard(
-                              item: orders[index],
-                              onDetailsPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => OrderDetailScreen(
-                                        orderId: orders[index].orderId),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "ไม่พบข้อมูล",
-                          style: Styles.grey18(context),
-                        ),
-                      ],
-                    )
-              : refundOrders.isNotEmpty
-                  ? ListView.builder(
-                      // controller: _scrollController,
-                      itemCount: refundOrders.length,
+                      itemCount: orders.length,
                       itemBuilder: (context, index) {
-                        return RefundCard(
-                          item: refundOrders[index],
+                        return InvoiceCard(
+                          item: orders[index],
                           onDetailsPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => RefundDetailScreen(
-                                    orderId: refundOrders[index].orderId),
+                                builder: (context) => OrderDetailScreen(
+                                    orderId: orders[index].orderId),
                               ),
                             );
                           },
                         );
                       },
+                    ),
+                  ),
+                )
+              : refundOrders.isNotEmpty
+                  ? LoadingSkeletonizer(
+                      loading: _loadingRefund,
+                      child: ListView.builder(
+                        // controller: _scrollController,
+                        itemCount: refundOrders.length,
+                        itemBuilder: (context, index) {
+                          return RefundCard(
+                            item: refundOrders[index],
+                            onDetailsPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => RefundDetailScreen(
+                                      orderId: refundOrders[index].orderId),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,

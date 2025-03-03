@@ -269,6 +269,9 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                       loading: _loadingAllStore,
                       child: BoxShadowCustom(
                         child: RefreshIndicator(
+                          edgeOffset: 0,
+                          color: Colors.white,
+                          backgroundColor: Styles.primaryColor,
                           onRefresh: () async {
                             setState(() {
                               filterRoute = 'R01';
@@ -289,9 +292,6 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                                   .toList());
                             }
                           },
-                          edgeOffset: 0,
-                          color: Colors.white,
-                          backgroundColor: Styles.primaryColor,
                           child: ListView.builder(
                             itemCount: storeState.storeList.length > 0
                                 ? storeState.storeList.length

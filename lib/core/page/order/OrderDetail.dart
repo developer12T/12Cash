@@ -43,6 +43,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   double vat = 0;
   double totalExVat = 0;
   double total = 0;
+  String note = '';
 //  Map<String, dynamic> itemPr = [];
 
   @override
@@ -54,8 +55,22 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     _fetchPairedDevices();
     _cartScrollController.addListener(_handleInnerScroll);
     _promotionScrollController.addListener(_handleInnerScroll2);
+    _outerController.addListener(_onScroll);
   }
   // Scroll Bar
+
+  void _onScroll() {
+    if (_outerController.offset >= _outerController.position.maxScrollExtent &&
+        !_outerController.position.outOfRange) {
+      setState(() {
+        _isCreateOrderEnabled = true; // Enable the checkbox
+      });
+    } else {
+      setState(() {
+        _isCreateOrderEnabled = false; // Enable the checkbox
+      });
+    }
+  }
 
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _promotionScrollController = ScrollController();
@@ -102,6 +117,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         final List<dynamic> images = response.data['data'][0]['listImage'];
         final List<dynamic> prData = response.data['data'][0]['listPromotions'];
         setState(() {
+          note = response.data['data'][0]['note'];
           saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
           storeDetail = Store.fromJson(response.data['data'][0]['store']);
           listProduct = data.map((item) => Product.fromJson(item)).toList();
@@ -416,6 +432,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     '.'
   ];
 
+  bool _isCreateOrderEnabled = false;
+
   // int _getNoOfUpperLowerChars(String text) {
   //   int counter = 0;
   //   for (var char in vowelAndToneMark) {
@@ -708,29 +726,36 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     super.dispose();
   }
 
+  void _onScrollDown() {
+    _outerController.animateTo(
+      _outerController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+    setState(() {
+      _isCreateOrderEnabled = true; // Enable the checkbox
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      // floatingActionButton: FloatingActionButton(
-      //   heroTag: 'printerScreen',
-      //   shape: CircleBorder(),
-      //   backgroundColor: Styles.primaryColor,
-      //   child: Icon(
-      //     Icons.print_rounded,
-      //     color: Styles.white,
-      //   ),
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (context) => ManagePrinterScreen(),
-      //       ),
-      //     );
-      //   },
-      // ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _isCreateOrderEnabled
+          ? null
+          : FloatingActionButton(
+              shape: const CircleBorder(),
+              backgroundColor: Styles.primaryColor,
+              child: const Icon(
+                Icons.arrow_downward_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                _onScrollDown();
+              },
+            ),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(
@@ -914,6 +939,16 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                 )
                               ],
                             ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  // "${widget.storeId}",
+                                  "หมายเหตุ : ${note}",
+                                  style: Styles.black18(context),
+                                )
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -1030,7 +1065,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                 Row(
                                                                   children: [
                                                                     Text(
-                                                                      'จำนวน : ${listProduct[index].qty.toStringAsFixed(0)} ${listProduct[index].unit}',
+                                                                      'จำนวน : ${listProduct[index].qty.toStringAsFixed(0)} ${listProduct[index].unitName}',
                                                                       style: Styles
                                                                           .black16(
                                                                               context),
@@ -1253,7 +1288,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                     ),
                                                                     width: 75,
                                                                     child: Text(
-                                                                      '${listPromotionItems[innerIndex].qty.toStringAsFixed(0)} ${listPromotionItems[innerIndex].unit}',
+                                                                      '${listPromotionItems[innerIndex].qty.toStringAsFixed(0)} ${listPromotionItems[innerIndex].unitName}',
                                                                       textAlign:
                                                                           TextAlign
                                                                               .center,
@@ -1263,36 +1298,36 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                       ),
                                                                     ),
                                                                   ),
-                                                                  ElevatedButton(
-                                                                    onPressed:
-                                                                        () async {
-                                                                      // _showCartSheet(context, cartList);
-                                                                    },
-                                                                    style: ElevatedButton
-                                                                        .styleFrom(
-                                                                      shape:
-                                                                          CircleBorder(
-                                                                        side: BorderSide(
-                                                                            color:
-                                                                                Styles.warning!,
-                                                                            width: 1),
-                                                                      ),
-                                                                      padding:
-                                                                          const EdgeInsets
-                                                                              .all(
-                                                                              8),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white, // Button color
-                                                                    ),
-                                                                    child: Icon(
-                                                                      FontAwesomeIcons
-                                                                          .penToSquare,
-                                                                      size: 24,
-                                                                      color: Styles
-                                                                          .warning!,
-                                                                    ), // Example
-                                                                  ),
+                                                                  // ElevatedButton(
+                                                                  //   onPressed:
+                                                                  //       () async {
+                                                                  //     // _showCartSheet(context, cartList);
+                                                                  //   },
+                                                                  //   style: ElevatedButton
+                                                                  //       .styleFrom(
+                                                                  //     shape:
+                                                                  //         CircleBorder(
+                                                                  //       side: BorderSide(
+                                                                  //           color:
+                                                                  //               Styles.warning!,
+                                                                  //           width: 1),
+                                                                  //     ),
+                                                                  //     padding:
+                                                                  //         const EdgeInsets
+                                                                  //             .all(
+                                                                  //             8),
+                                                                  //     backgroundColor:
+                                                                  //         Colors
+                                                                  //             .white, // Button color
+                                                                  //   ),
+                                                                  //   child: Icon(
+                                                                  //     FontAwesomeIcons
+                                                                  //         .penToSquare,
+                                                                  //     size: 24,
+                                                                  //     color: Styles
+                                                                  //         .warning!,
+                                                                  //   ), // Example
+                                                                  // ),
                                                                 ],
                                                               ),
                                                             ],

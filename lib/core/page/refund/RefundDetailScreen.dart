@@ -797,7 +797,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
           controller: _outerController,
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.71, // Set height
+              height: MediaQuery.of(context).size.height * 0.735, // Set height
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -819,7 +819,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                     ? GestureDetector(
                                         onTap: () async {
                                           if (listImage.isNotEmpty) {
-                                            context.loaderOverlay.show();
+                                            // context.loaderOverlay.show();
                                             await showDialog(
                                               context: context,
                                               builder: (_) => ImageDialog(
@@ -832,7 +832,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                 checkNetwork: true,
                                               ),
                                             ).then((_) {
-                                              context.loaderOverlay.hide();
+                                              // context.loaderOverlay.hide();
                                             });
                                           } else {
                                             toastification.show(
@@ -957,6 +957,16 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                 )
                               ],
                             ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  // "${widget.storeId}",
+                                  "หมายเหตุ : ${refundDetails?.note}",
+                                  style: Styles.black18(context),
+                                )
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -968,7 +978,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
-                          height: screenHeight * 0.4,
+                          height: screenHeight * 0.395,
                           // color: Colors.red,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(

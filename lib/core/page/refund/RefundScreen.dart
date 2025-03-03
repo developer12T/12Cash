@@ -215,14 +215,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
 
-        setState(() {
-          productList = data.map((item) => Product.fromJson(item)).toList();
-        });
-        context.loaderOverlay.hide();
+        // setState(() {});
 
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
+              productList = data.map((item) => Product.fromJson(item)).toList();
               _loadingProduct = false;
             });
           }
@@ -369,7 +367,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       refundList.clear();
       listProduct.clear();
       listRefund.clear();
-      print("Get Cart is Loading");
+      cartListData["items"].clear();
+
+      print("Get Cart Store$isStoreId is Loading ");
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
@@ -425,14 +425,17 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           // totalCart = response.data['data'][0]['total'].toDouble();
           // cartList = data.map((item) => CartList.fromJson(item)).toList();
         });
-        print(cartListData["items"]);
-        print(listRefund.length);
-        print(listProduct.length);
+        // print(cartListData["items"]);
+        // print(listRefund.length);
+        // print(listProduct.length);
       }
     } catch (e) {
       setState(() {
         // totalCart = 00.00;
-        // cartList = [];
+        refundList.clear();
+        listProduct.clear();
+        listRefund.clear();
+        cartListData["items"].clear();
       });
       print("Error $e");
     }
@@ -446,18 +449,11 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
         endpoint: 'api/cash/store/getStore?area=${User.area}',
         method: 'GET',
       );
-      // print(response.data['data']['listAddress']);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        // print(response.data['data'][0]);
         setState(() {
           storeList = data.map((item) => Store.fromJson(item)).toList();
         });
-        // if (isType == "T04") {
-        //   setState(() {
-        //     isShippingId = shippingList[0].shippingId;
-        //   });
-        // }
       }
     } catch (e) {
       setState(() {
@@ -692,37 +688,38 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                   style: Styles.black18(context)),
                             ),
                             Expanded(
-                                child: Container(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.all(0),
-                                  elevation: 0, // Disable shadow
-                                  shadowColor: Colors
-                                      .transparent, // Ensure no shadow color
-                                  backgroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.zero, // No rounded corners
-                                    side: BorderSide.none, // Remove border
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Icon(
-                                      Icons.keyboard_arrow_right_sharp,
-                                      color: Styles.grey,
-                                      size: 30,
+                              child: Container(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(0),
+                                    elevation: 0, // Disable shadow
+                                    shadowColor: Colors
+                                        .transparent, // Ensure no shadow color
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius
+                                          .zero, // No rounded corners
+                                      side: BorderSide.none, // Remove border
                                     ),
-                                  ],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Icon(
+                                        Icons.keyboard_arrow_right_sharp,
+                                        color: Styles.grey,
+                                        size: 30,
+                                      ),
+                                    ],
+                                  ),
+                                  onPressed: () {
+                                    print("dawd");
+                                    _showAddressSheet(context);
+                                  },
                                 ),
-                                onPressed: () {
-                                  print("dawd");
-                                  _showAddressSheet(context);
-                                },
                               ),
-                            ))
+                            )
                           ],
                         )
                       ],
@@ -841,7 +838,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                   GestureDetector(
                                     onTap: () {
                                       _clearFilter();
-                                      context.loaderOverlay.show();
                                       _getProduct(isSelect);
                                     },
                                     child: badgeFilter(
@@ -1182,6 +1178,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                 blackGroundColor: Styles.primaryColor,
                                 textStyle: Styles.white18(context),
                                 onPressed: () {
+                                  print(cartListData["items"]);
                                   if (cartListData["items"].isNotEmpty &&
                                       listProduct.isNotEmpty) {
                                     Navigator.push(
@@ -2661,7 +2658,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                           ],
                         ),
                       ),
-
                       // Search Bar
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -2753,8 +2749,11 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                     index]
                                                                 .storeId;
                                                       });
-                                                      await _getCart();
                                                       setState(() {
+                                                        isStoreId =
+                                                            filteredStores[
+                                                                    index]
+                                                                .storeId;
                                                         nameStore =
                                                             filteredStores[
                                                                     index]
@@ -2762,6 +2761,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                         addressStore =
                                                             "${filteredStores[index].address} ${filteredStores[index].district} ${filteredStores[index].subDistrict} ${filteredStores[index].province} ${filteredStores[index].postCode}";
                                                       });
+                                                      await _getCart();
                                                     },
                                                     child: Column(
                                                       children: [

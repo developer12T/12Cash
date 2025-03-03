@@ -104,8 +104,9 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
             onPressed: () => openCamera(context),
             style: ElevatedButton.styleFrom(
               padding: widget.padding,
-              backgroundColor:
-                  widget.imagePath == null ? Colors.grey[400] : Colors.white,
+              backgroundColor: widget.imagePath == null
+                  ? Colors.grey[400]
+                  : Styles.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.borderRadius),
               ),

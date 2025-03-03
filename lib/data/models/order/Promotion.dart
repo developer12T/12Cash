@@ -47,6 +47,7 @@ class PromotionListItem {
   final String brand;
   final String size;
   final String unit;
+  final String unitName;
   final int qty;
   PromotionListItem({
     required this.id,
@@ -56,6 +57,7 @@ class PromotionListItem {
     required this.brand,
     required this.size,
     required this.unit,
+    required this.unitName,
     required this.qty,
   });
 
@@ -69,6 +71,7 @@ class PromotionListItem {
       brand: json['brand'], //  field name
       size: json['size'], //  field name
       unit: json['unit'], //  field name
+      unitName: json['unitName'], //  field name
       qty: json['qty'] as int, //  it's int
     );
   }
@@ -83,6 +86,7 @@ class PromotionListItem {
       'brand': brand,
       'size': size,
       'unit': unit,
+      'unitName': unitName,
       'qty': qty,
     };
   }
