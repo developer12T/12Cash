@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
@@ -9,7 +8,6 @@ import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
-
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:charset_converter/charset_converter.dart';
@@ -1110,8 +1108,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                 ),
                                 Expanded(
                                     child: Container(
-                                  height:
-                                      200, // Set a height to avoid rendering errors
+                                  height: 200,
                                   child: Scrollbar(
                                     controller: _promotionScrollController,
                                     thumbVisibility: true,

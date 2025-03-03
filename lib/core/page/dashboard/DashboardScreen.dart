@@ -10,6 +10,7 @@ import 'package:_12sale_app/core/components/chart/ItemSummarize.dart';
 import 'package:_12sale_app/core/components/chart/LineChart.dart';
 import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/giveaways/GiveAwaysScreen.dart';
 import 'package:_12sale_app/core/page/notification/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/3D_canvas/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
@@ -175,15 +176,20 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             MaterialPageRoute(builder: (context) => const SettingScreen()),
           );
         },
-        title_4: "dashboard.menu.campaign".tr(),
+        title_4: "แจกสินค้า",
         icon_4: Icons.campaign_rounded,
         onTap4: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => NotificationScreen()),
+            MaterialPageRoute(builder: (context) => GiveAwaysScreen()),
           );
         },
         title_5: "dashboard.menu.history".tr(),
         icon_5: Icons.history,
+        onTap5: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => NotificationScreen()),
+          );
+        },
         title_6: "dashboard.menu.schedule".tr(),
         icon_6: Icons.schedule,
       ),
@@ -249,7 +255,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             //   ),
             // ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: menuList.asMap().entries.map((entry) {
                 return GestureDetector(
                   onTap: () => _controller.animateToPage(entry.key),

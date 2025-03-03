@@ -98,19 +98,18 @@ class _DetailScreenState extends State<DetailScreen> {
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/order/all?type=sale&area=${User.area}&period=${period}&store=${widget.customerNo}', // You only need to pass the endpoint, the base URL is handled
+            'api/cash/order/all?type=sale&area=${User.area}&period=${period}&store=${widget.customerNo}',
         method: 'GET',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
-        print(response.data['data']);
-        setState(() {
-          orders = data.map((item) => Orders.fromJson(item)).toList();
-        });
+        // print(response.data['data']);
+        // setState(() {});
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
+              orders = data.map((item) => Orders.fromJson(item)).toList();
               _loading = false;
             });
           }
@@ -266,7 +265,8 @@ class _DetailScreenState extends State<DetailScreen> {
             },
           );
           var response = await dio.post(
-            '${ApiService.apiHost}/api/cash/route/checkIn',
+            // '${ApiService.apiHost} /api/cash/route/checkIn',
+            'http://192.168.44.57:8006/api/cash/route/checkIn',
             data: formData,
             options: Options(
               headers: {
@@ -410,9 +410,11 @@ class _DetailScreenState extends State<DetailScreen> {
                                   onPressed: () {
                                     if (statusCheck <= 0) {
                                       _showCheckInSheet(context);
-                                      setState(() {
-                                        selectedCause = "เลือกเหตุผล";
-                                      });
+                                      setState(
+                                        () {
+                                          selectedCause = "เลือกเหตุผล";
+                                        },
+                                      );
                                     }
                                   },
                                 ),
@@ -427,10 +429,11 @@ class _DetailScreenState extends State<DetailScreen> {
                                 MenuButton(
                                   icon: Icons.add_shopping_cart_rounded,
                                   label: "ขาย",
-                                  color: Styles.success!,
+                                  // color: Styles.success!,
                                   // color: Colors.grey,
-                                  // color:
-                                  //     statusCheck > 0 ? Colors.grey : Colors.teal,
+                                  color: statusCheck > 0
+                                      ? Colors.grey
+                                      : Styles.success!,
                                   onPressed: () {
                                     if (statusCheck <= 0) {
                                       Navigator.push(
@@ -459,7 +462,10 @@ class _DetailScreenState extends State<DetailScreen> {
                 SizedBox(height: screenWidth / 37),
                 BoxShadowCustom(
                   child: SizedBox(
-                      height: 325, width: screenWidth, child: ItemSummarize()),
+                    height: 325,
+                    width: screenWidth,
+                    child: ItemSummarize(),
+                  ),
                 ),
                 SizedBox(height: screenWidth / 37),
                 Text('ตัวอย่างรายการสั่งซื้อ', style: Styles.black24(context)),

@@ -17,15 +17,7 @@ class _VerifyTable extends State<VerifyTable> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // _loadJson();
   }
-
-  // Future<void> _loadJson() async {
-  //   String jsonString = await rootBundle.loadString('lang/main-th.json');
-  //   setState(() {
-  //     _jsonString = jsonDecode(jsonString)["verify_table"];
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {

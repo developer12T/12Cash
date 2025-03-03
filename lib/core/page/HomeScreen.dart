@@ -1,14 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:_12sale_app/core/components/card/store/StoreCardAll.dart';
-import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
 import 'package:_12sale_app/core/page/refund/RefundScreen.dart';
 import 'package:_12sale_app/core/page/report/ReportScreen.dart';
 import 'package:_12sale_app/core/page/route/AjustRoute.dart';
 import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
 import 'package:_12sale_app/core/page/route/RouteScreen.dart';
-import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/core/page/store/StoreScreen.dart';
 import 'package:_12sale_app/data/models/RefundFilter.dart';
@@ -17,10 +13,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:_12sale_app/core/components/Header.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Order.dart';
-import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Store.dart';
-import 'package:_12sale_app/data/models/User.dart';
-import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -89,42 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _orders.clear(); // Clear orders in the UI
     });
-  }
-
-  Future<void> _getStoreAll() async {
-    // Initialize Dio
-    Dio dio = Dio();
-
-    // Replace with your API endpoint
-    const String apiUrl =
-        "https://f8c3-171-103-242-50.ngrok-free.app/api/cash/store/getStore?area=BE214&type=all";
-
-    try {
-      final response = await dio.get(
-        apiUrl,
-        options: Options(
-          headers: {
-            "Content-Type": "application/json",
-          },
-        ),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final List<dynamic> data = response.data['data'];
-        // print(response.data['data']);
-        setState(() {
-          storeItem = data.map((item) => Store.fromJson(item)).toList();
-        });
-        Timer(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            setState(() {
-              _loading = false;
-            });
-          }
-        });
-      }
-    } catch (e) {
-      print(e);
-    }
   }
 
   void _filterItems(String query) {
