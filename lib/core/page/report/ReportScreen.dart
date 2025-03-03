@@ -29,11 +29,10 @@ class _ReportScreenState extends State<ReportScreen> {
   final ScrollController _scrollController = ScrollController();
   List<Orders> orders = [];
   List<RefundOrder> refundOrders = [];
-
   bool _loadingStore = true;
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
-
+  // String period = "202502";
   Future<void> _getRefundOrder() async {
     try {
       ApiService apiService = ApiService();
@@ -46,9 +45,13 @@ class _ReportScreenState extends State<ReportScreen> {
       print("Data ${response.data['data']}");
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
-        setState(() {
-          refundOrders =
-              data.map((item) => RefundOrder.fromJson(item)).toList();
+        Timer(Duration(seconds: 5), () {
+          if (mounted) {
+            setState(() {
+              refundOrders =
+                  data.map((item) => RefundOrder.fromJson(item)).toList();
+            });
+          }
         });
       }
     } catch (e) {
@@ -69,14 +72,11 @@ class _ReportScreenState extends State<ReportScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
-        print(response.data['data']);
-        setState(() {
-          orders = data.map((item) => Orders.fromJson(item)).toList();
-        });
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
               _loadingStore = false;
+              orders = data.map((item) => Orders.fromJson(item)).toList();
             });
           }
         });
@@ -133,50 +133,70 @@ class _ReportScreenState extends State<ReportScreen> {
           //   ),
           // ),
           child: isSelect.isSelect == 1
-              ? Scrollbar(
-                  controller: _scrollController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  thickness: 10,
-                  radius: Radius.circular(16),
-                  child: LoadingSkeletonizer(
-                    loading: _loadingStore,
-                    child: ListView.builder(
+              ? orders.isNotEmpty
+                  ? Scrollbar(
                       controller: _scrollController,
-                      itemCount: orders.length,
+                      thumbVisibility: true,
+                      trackVisibility: true,
+                      thickness: 10,
+                      radius: Radius.circular(16),
+                      child: LoadingSkeletonizer(
+                        loading: _loadingStore,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: orders.length,
+                          itemBuilder: (context, index) {
+                            return InvoiceCard(
+                              item: orders[index],
+                              onDetailsPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => OrderDetailScreen(
+                                        orderId: orders[index].orderId),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "ไม่พบข้อมูล",
+                          style: Styles.grey18(context),
+                        ),
+                      ],
+                    )
+              : refundOrders.isNotEmpty
+                  ? ListView.builder(
+                      // controller: _scrollController,
+                      itemCount: refundOrders.length,
                       itemBuilder: (context, index) {
-                        return InvoiceCard(
-                          item: orders[index],
+                        return RefundCard(
+                          item: refundOrders[index],
                           onDetailsPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => OrderDetailScreen(
-                                    orderId: orders[index].orderId),
+                                builder: (context) => RefundDetailScreen(
+                                    orderId: refundOrders[index].orderId),
                               ),
                             );
                           },
                         );
                       },
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "ไม่พบข้อมูล",
+                          style: Styles.grey18(context),
+                        ),
+                      ],
                     ),
-                  ),
-                )
-              : ListView.builder(
-                  // controller: _scrollController,
-                  itemCount: refundOrders.length,
-                  itemBuilder: (context, index) {
-                    return RefundCard(
-                      item: refundOrders[index],
-                      onDetailsPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => RefundDetailScreen(
-                                orderId: refundOrders[index].orderId),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
         ),
       ),
     );

@@ -59,30 +59,35 @@ class _AjustRouteState extends State<AjustRoute> {
   }
 
   Future<void> _getRouteVisit() async {
-    ApiService apiService = ApiService();
-    await apiService.init();
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
 
-    var response = await apiService.request(
-      endpoint: 'api/cash/route/getRoute?area=${User.area}&period=${period}',
-      method: 'GET',
-    );
+      var response = await apiService.request(
+        endpoint: 'api/cash/route/getRoute?area=${User.area}&period=${period}',
+        method: 'GET',
+      );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = response.data['data'];
-      // print("getRoute: ${response.data['data']}");
-      if (mounted) {
-        setState(() {
-          routeVisits = data.map((item) => RouteVisit.fromJson(item)).toList();
-        });
-      }
-      Timer(const Duration(milliseconds: 500), () {
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'];
+        // print("getRoute: ${response.data['data']}");
         if (mounted) {
           setState(() {
-            isLoading = false;
+            routeVisits =
+                data.map((item) => RouteVisit.fromJson(item)).toList();
           });
         }
-      });
-      print("getRoute: $routeVisits");
+        Timer(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+            });
+          }
+        });
+        print("getRoute: $routeVisits");
+      }
+    } catch (e) {
+      print("Error occurred: $e");
     }
   }
 

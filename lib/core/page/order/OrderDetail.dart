@@ -777,41 +777,44 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                   "${storeDetail?.name} ${storeDetail?.storeId}",
                                   style: Styles.black24(context),
                                 ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    if (listImage.isNotEmpty) {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (_) => ImageDialog(
-                                          imagePath: listImage.isNotEmpty
-                                              ? listImage
-                                                  .firstWhere(
-                                                      (i) => i.type == 'slip')
-                                                  .path
-                                              : '',
-                                          checkNetwork: true,
+                                listImage.isNotEmpty
+                                    ? GestureDetector(
+                                        onTap: () async {
+                                          if (listImage.isNotEmpty) {
+                                            await showDialog(
+                                              context: context,
+                                              builder: (_) => ImageDialog(
+                                                imagePath: listImage.isNotEmpty
+                                                    ? listImage
+                                                        .firstWhere((i) =>
+                                                            i.type == 'slip')
+                                                        .path
+                                                    : '',
+                                                checkNetwork: true,
+                                              ),
+                                            );
+                                          } else {
+                                            toastification.show(
+                                              autoCloseDuration:
+                                                  const Duration(seconds: 5),
+                                              context: context,
+                                              primaryColor: Colors.red,
+                                              type: ToastificationType.error,
+                                              style: ToastificationStyle
+                                                  .flatColored,
+                                              title: Text(
+                                                "ไม่มีรูปภาพ",
+                                                style: Styles.red18(context),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Icon(
+                                          Icons.image,
+                                          size: 30,
                                         ),
-                                      );
-                                    } else {
-                                      toastification.show(
-                                        autoCloseDuration:
-                                            const Duration(seconds: 5),
-                                        context: context,
-                                        primaryColor: Colors.red,
-                                        type: ToastificationType.error,
-                                        style: ToastificationStyle.flatColored,
-                                        title: Text(
-                                          "ไม่มีรูปภาพ",
-                                          style: Styles.red18(context),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.image,
-                                    size: 30,
-                                  ),
-                                )
+                                      )
+                                    : SizedBox(),
                               ],
                             ),
                             Row(

@@ -121,6 +121,9 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
       for (var element in refundDetails!.listProductChange) {
         listProductChange.add(element);
       }
+      for (var element in refundDetails!.listImage) {
+        listImage.add(element);
+      }
     }
 
     context.loaderOverlay.hide();
@@ -812,41 +815,47 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                   "${refundDetails?.store.name} ${refundDetails?.store.storeId}",
                                   style: Styles.black24(context),
                                 ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    if (listImage.isNotEmpty) {
-                                      await showDialog(
-                                        context: context,
-                                        builder: (_) => ImageDialog(
-                                          imagePath: listImage.isNotEmpty
-                                              ? listImage
-                                                  .firstWhere(
-                                                      (i) => i.type == 'slip')
-                                                  .path
-                                              : '',
-                                          checkNetwork: true,
+                                listImage.isNotEmpty
+                                    ? GestureDetector(
+                                        onTap: () async {
+                                          if (listImage.isNotEmpty) {
+                                            context.loaderOverlay.show();
+                                            await showDialog(
+                                              context: context,
+                                              builder: (_) => ImageDialog(
+                                                imagePath: listImage.isNotEmpty
+                                                    ? listImage
+                                                        .firstWhere((i) =>
+                                                            i.type == 'slip')
+                                                        .path
+                                                    : '',
+                                                checkNetwork: true,
+                                              ),
+                                            ).then((_) {
+                                              context.loaderOverlay.hide();
+                                            });
+                                          } else {
+                                            toastification.show(
+                                              autoCloseDuration:
+                                                  const Duration(seconds: 5),
+                                              context: context,
+                                              primaryColor: Colors.red,
+                                              type: ToastificationType.error,
+                                              style: ToastificationStyle
+                                                  .flatColored,
+                                              title: Text(
+                                                "ไม่มีรูปภาพ",
+                                                style: Styles.red18(context),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Icon(
+                                          Icons.image,
+                                          size: 30,
                                         ),
-                                      );
-                                    } else {
-                                      toastification.show(
-                                        autoCloseDuration:
-                                            const Duration(seconds: 5),
-                                        context: context,
-                                        primaryColor: Colors.red,
-                                        type: ToastificationType.error,
-                                        style: ToastificationStyle.flatColored,
-                                        title: Text(
-                                          "ไม่มีรูปภาพ",
-                                          style: Styles.red18(context),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.image,
-                                    size: 30,
-                                  ),
-                                )
+                                      )
+                                    : SizedBox()
                               ],
                             ),
                             Row(

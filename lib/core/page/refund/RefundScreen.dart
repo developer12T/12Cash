@@ -143,16 +143,11 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           type: ToastificationType.success,
           style: ToastificationStyle.flatColored,
           title: Text(
-            "เพิ่มลงในตะกร้าสําเร็จ",
+            "เพิ่มลงในรายการสำเร็จ",
             style: Styles.green18(context),
           ),
         );
-
-        final List<dynamic> data = response.data['data'][0]['listProduct'];
-        setState(() {
-          // totalCart = response.data['data'][0]['total'].toDouble();
-          // cartList = data.map((item) => CartList.fromJson(item)).toList();
-        });
+        // final List<dynamic> data = response.data['data'][0]['listProduct'];
       }
     } catch (e) {}
   }
@@ -184,7 +179,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           type: ToastificationType.success,
           style: ToastificationStyle.flatColored,
           title: Text(
-            "เพิ่มลงในตะกร้าสําเร็จ",
+            "เพิ่มลงในรายการสำเร็จ",
             style: Styles.green18(context),
           ),
         );
@@ -1645,7 +1640,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         children: [
                                           Expanded(
                                             child: ButtonFullWidth(
-                                              text: 'ใส่ตะกร้า',
+                                              text: 'ใส่ในรายการ',
                                               blackGroundColor:
                                                   Styles.primaryColor,
                                               textStyle:
@@ -2048,7 +2043,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         children: [
                                           Expanded(
                                             child: ButtonFullWidth(
-                                              text: 'ใส่ตะกร้า',
+                                              text: 'ใส่ในรายการ',
                                               blackGroundColor:
                                                   Styles.primaryColor,
                                               textStyle:
@@ -2170,7 +2165,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                         color: Colors.white,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
+                              vertical: 8.0, horizontal: 10.0),
                           child: Column(
                             children: [
                               Expanded(
@@ -2237,7 +2232,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                         ),
                                                         Expanded(
                                                           child: Text(
-                                                            "ประเภทสินค้า ${cartList["items"][index]["condition"] != null ? "คืน" : "เปลี่ยน"}",
+                                                            "ประเภทรายการ ${cartList["items"][index]["condition"] != null ? "คืน" : "เปลี่ยน"}",
                                                             style:
                                                                 Styles.black16(
                                                                     context),
@@ -2649,9 +2644,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                   color: Colors.white,
                                   size: 30,
                                 ),
-                                Text('เลือกวันที่ต้องการรับของ',
+                                Text('เลือกร้านค้า',
                                     style: Styles.white24(context)),
                               ],
+                            ),
+                            SizedBox(
+                              width: 8,
                             ),
                             IconButton(
                               icon:

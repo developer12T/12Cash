@@ -689,7 +689,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                           AllAlert.customAlert(
                               context,
                               "store.processtimeline_screen.alert.title".tr(),
-                              "คุณต้องการจะสั่งซื้อสินค้าใช่หรือไม่ ?",
+                              "คุณต้องการจะขอคืนสินค้าใช่หรือไม่ ?",
                               _checkOutOrder);
                         } else {
                           toastification.show(
@@ -708,7 +708,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                         AllAlert.customAlert(
                             context,
                             "store.processtimeline_screen.alert.title".tr(),
-                            "คุณต้องการจะสั่งซื้อสินค้าใช่หรือไม่ ?",
+                            "คุณต้องการจะขอคืนสินค้าใช่หรือไม่ ?",
                             _checkOutOrder);
                       }
                     }
