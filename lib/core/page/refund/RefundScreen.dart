@@ -451,14 +451,18 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        setState(() {
-          storeList = data.map((item) => Store.fromJson(item)).toList();
-        });
+        if (mounted) {
+          setState(() {
+            storeList = data.map((item) => Store.fromJson(item)).toList();
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        storeList = [];
-      });
+      if (mounted) {
+        setState(() {
+          storeList = [];
+        });
+      }
       print("Error $e");
     }
   }

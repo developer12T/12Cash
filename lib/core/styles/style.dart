@@ -436,6 +436,8 @@ class Styles {
   static const Color primaryColorIcons = Color(0xFF00569D);
   static const Color secondaryColor = Color(0xFF8fd7f5);
 
+  // static const Color primaryColor = Colors.red;
+  // static const Color secondaryColor = Color(0xFFbd98e0);
   // static const Color primaryColor = Color(0xFF7554ae);
   // static const Color primaryColorIcons = Color(0xFFbd98e0);
   // static const Color secondaryColor = Color(0xFFbd98e0);
