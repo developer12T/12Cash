@@ -52,13 +52,6 @@ class _ItemSummarizeState extends State<ItemSummarize> {
         );
 
     final showingTooltipOnSpots = [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
       7,
     ]; // Valid indices for 'spots'
     return Padding(

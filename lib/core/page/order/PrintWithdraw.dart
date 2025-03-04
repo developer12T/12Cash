@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
@@ -9,8 +8,7 @@ import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
-
-import 'package:_12sale_app/data/models/refund/RefundDetail.dart';
+import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:charset_converter/charset_converter.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -20,34 +18,24 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:toastification/toastification.dart';
 
-class RefundDetailScreen extends StatefulWidget {
+class PrintWithdraw extends StatefulWidget {
   final orderId;
-  const RefundDetailScreen({
+  const PrintWithdraw({
     super.key,
     required this.orderId,
   });
 
   @override
-  State<RefundDetailScreen> createState() => _RefundDetailScreenState();
+  State<PrintWithdraw> createState() => _PrintWithdrawState();
 }
 
-class _RefundDetailScreenState extends State<RefundDetailScreen> {
+class _PrintWithdrawState extends State<PrintWithdraw> {
   Sale? saleDetail;
   Store? storeDetail;
-
-  RefundDetail? refundDetails;
   List<Product> listProduct = [];
-  List<Product> listPromotionItems = [];
-  List<Product> listPromotions = [];
+  List<Promotion> listPromotions = [];
+  List<PromotionListItem> listPromotionItems = [];
   List<ListImage> listImage = [];
-
-  List<Product> listProductRefund = [];
-  List<Product> listProductChange = [];
-
-  // List<Product> listProduct = [];
-  // List<Promotion> listPromotions = [];
-  // List<PromotionListItem> listPromotionItems = [];
-  // List<ListImage> listImage = [];
 
   double subtotal = 0;
   double discount = 0;
@@ -55,7 +43,7 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
   double vat = 0;
   double totalExVat = 0;
   double total = 0;
-  bool _isCreateOrderEnabled = false;
+  String note = '';
 //  Map<String, dynamic> itemPr = [];
 
   @override
@@ -71,12 +59,6 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
   }
   // Scroll Bar
 
-  final ScrollController _cartScrollController = ScrollController();
-  final ScrollController _promotionScrollController = ScrollController();
-  ScrollController _outerController = ScrollController();
-  bool _isInnerAtTop = true;
-  bool _isInnerAtBottom = false;
-
   void _onScroll() {
     if (_outerController.offset >= _outerController.position.maxScrollExtent &&
         !_outerController.position.outOfRange) {
@@ -89,6 +71,12 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
       });
     }
   }
+
+  final ScrollController _cartScrollController = ScrollController();
+  final ScrollController _promotionScrollController = ScrollController();
+  ScrollController _outerController = ScrollController();
+  bool _isInnerAtTop = true;
+  bool _isInnerAtBottom = false;
 
   void _handleInnerScroll() {
     if (_cartScrollController.position.atEdge) {
@@ -115,132 +103,105 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
   }
 
   bool _loadOrderDetail = false;
-
   Future<void> _getOrderDetail() async {
-    ApiService apiService = ApiService();
-    await apiService.init();
-    var response = await apiService.request(
-      endpoint: 'api/cash/refund/detail/${widget.orderId}',
-      method: 'GET',
-    );
+    try {
+      print("Order ID : ${widget.orderId}");
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/order/detail/${widget.orderId}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'][0]['listProduct'];
+        final List<dynamic> images = response.data['data'][0]['listImage'];
+        final List<dynamic> prData = response.data['data'][0]['listPromotions'];
+        setState(() {
+          note = response.data['data'][0]['note'];
+          saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
+          storeDetail = Store.fromJson(response.data['data'][0]['store']);
+          listProduct = data.map((item) => Product.fromJson(item)).toList();
+          listImage = images.map((item) => ListImage.fromJson(item)).toList();
 
-    print(response.data);
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = response.data;
-      setState(() {
-        refundDetails = RefundDetail.fromJson(data);
-      });
-      for (var element in refundDetails!.listProductRefund) {
-        listProductRefund.add(element);
+          listPromotions =
+              prData.map((item) => Promotion.fromJson(item)).toList();
+
+          subtotal = response.data['data'][0]['subtotal'].toDouble();
+          discount = response.data['data'][0]['discount'].toDouble();
+          discountProduct =
+              response.data['data'][0]['discountProduct'].toDouble();
+          vat = response.data['data'][0]['vat'].toDouble();
+          totalExVat = response.data['data'][0]['totalExVat'].toDouble();
+          total = response.data['data'][0]['total'].toDouble();
+          // Map cartList to receiptData["items"]
+          receiptData['customer']['customercode'] = storeDetail?.storeId;
+          receiptData['customer']['customername'] = storeDetail?.name;
+          receiptData['customer']['address1'] = storeDetail?.address;
+          receiptData['customer']['salecode'] = storeDetail?.storeId;
+          receiptData['customer']['customercode'] = storeDetail?.storeId;
+          receiptData['customer']['taxno'] = storeDetail?.taxId;
+          receiptData['CUOR'] = widget.orderId;
+          receiptData['OAORDT'] =
+              DateFormat('dd/MM/yyyy').format(DateTime.now());
+
+          receiptData['totaltext'] =
+              "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
+          receiptData['ex_vat'] =
+              "${response.data['data'][0]['totalExVat'].toStringAsFixed(2)}";
+          receiptData['vat'] =
+              "${response.data['data'][0]['vat'].toStringAsFixed(2)}";
+          receiptData['discountProduct'] =
+              "${response.data['data'][0]['discountProduct'].toStringAsFixed(2)}";
+          receiptData['discount'] =
+              "${response.data['data'][0]['discount'].toStringAsFixed(2)}";
+          receiptData['total'] =
+              "${response.data['data'][0]['total'].toStringAsFixed(2)}";
+          receiptData['OBSMCD'] = "${saleDetail?.name}";
+          receiptData['taxno'] = "${storeDetail?.taxId}";
+
+          receiptData["items"] = listProduct
+              .map((cartItem) => {
+                    "name": cartItem.name,
+                    "qty": cartItem.qty.toString(),
+                    "unit": cartItem.unitName,
+                    "price": cartItem.price.toStringAsFixed(2),
+                    "discount": cartItem.discount.toStringAsFixed(2),
+                    "discountProduct": cartItem.netTotal.toStringAsFixed(2)
+                  })
+              .toList();
+          for (var promotion in listPromotions) {
+            for (var item in promotion.listPromotion) {
+              listPromotionItems.add(item);
+            }
+          }
+
+          for (var promotion in listPromotions) {
+            for (var item in promotion.listPromotion) {
+              receiptData["items"].add({
+                "name": item.name,
+                "qty": item.qty.toString(),
+                "unit": item.unitName,
+                "price": "0.00",
+                "discount": "0.00",
+                "discountProduct": "0.00"
+              });
+            }
+          }
+        });
+        print(receiptData);
+        Timer(const Duration(milliseconds: 500), () {
+          context.loaderOverlay.hide();
+          if (mounted) {
+            setState(() {
+              _loadOrderDetail = false;
+            });
+          }
+        });
       }
-      for (var element in refundDetails!.listProductChange) {
-        listProductChange.add(element);
-      }
-      for (var element in refundDetails!.listImage) {
-        listImage.add(element);
-      }
+    } catch (e) {
+      print("Error $e");
     }
-
-    context.loaderOverlay.hide();
   }
-
-  // Future<void> _getOrderDetail() async {
-  //   try {
-  //     print("Order ID : ${widget.orderId}");
-  //     ApiService apiService = ApiService();
-  //     await apiService.init();
-  //     var response = await apiService.request(
-  //       endpoint: 'api/cash/refund/detail/${widget.orderId}',
-  //       method: 'GET',
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final List<dynamic> data = response.data['data'][0]['listProduct'];
-  //       final List<dynamic> images = response.data['data'][0]['listImage'];
-  //       final List<dynamic> prData = response.data['data'][0]['listPromotions'];
-  //       setState(() {
-  //         saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
-  //         storeDetail = Store.fromJson(response.data['data'][0]['store']);
-  //         listProduct = data.map((item) => Product.fromJson(item)).toList();
-  //         listImage = images.map((item) => ListImage.fromJson(item)).toList();
-  //         listPromotions =
-  //             prData.map((item) => Promotion.fromJson(item)).toList();
-
-  //         subtotal = response.data['data'][0]['subtotal'].toDouble();
-  //         discount = response.data['data'][0]['discount'].toDouble();
-  //         discountProduct =
-  //             response.data['data'][0]['discountProduct'].toDouble();
-  //         vat = response.data['data'][0]['vat'].toDouble();
-  //         totalExVat = response.data['data'][0]['totalExVat'].toDouble();
-  //         total = response.data['data'][0]['total'].toDouble();
-  //         // Map cartList to receiptData["items"]
-  //         receiptData['customer']['customercode'] = storeDetail?.storeId;
-  //         receiptData['customer']['customername'] = storeDetail?.name;
-  //         receiptData['customer']['address1'] = storeDetail?.address;
-  //         receiptData['customer']['salecode'] = storeDetail?.storeId;
-  //         receiptData['customer']['customercode'] = storeDetail?.storeId;
-  //         receiptData['customer']['taxno'] = storeDetail?.taxId;
-  //         receiptData['CUOR'] = widget.orderId;
-  //         receiptData['OAORDT'] =
-  //             DateFormat('dd/MM/yyyy').format(DateTime.now());
-
-  //         receiptData['totaltext'] =
-  //             "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
-  //         receiptData['ex_vat'] =
-  //             "${response.data['data'][0]['totalExVat'].toStringAsFixed(2)}";
-  //         receiptData['vat'] =
-  //             "${response.data['data'][0]['vat'].toStringAsFixed(2)}";
-  //         receiptData['discountProduct'] =
-  //             "${response.data['data'][0]['discountProduct'].toStringAsFixed(2)}";
-  //         receiptData['discount'] =
-  //             "${response.data['data'][0]['discount'].toStringAsFixed(2)}";
-  //         receiptData['total'] =
-  //             "${response.data['data'][0]['total'].toStringAsFixed(2)}";
-  //         receiptData['OBSMCD'] = "${saleDetail?.name}";
-  //         receiptData['taxno'] = "${storeDetail?.taxId}";
-
-  //         receiptData["items"] = listProduct
-  //             .map((cartItem) => {
-  //                   "name": cartItem.name,
-  //                   "qty": cartItem.qty.toString(),
-  //                   "unit": cartItem.unitName,
-  //                   "price": cartItem.price.toStringAsFixed(2),
-  //                   "discount": cartItem.discount.toStringAsFixed(2),
-  //                   "discountProduct": cartItem.netTotal.toStringAsFixed(2)
-  //                 })
-  //             .toList();
-  //         for (var promotion in listPromotions) {
-  //           for (var item in promotion.listPromotion) {
-  //             listPromotionItems.add(item);
-  //           }
-  //         }
-
-  //         for (var promotion in listPromotions) {
-  //           for (var item in promotion.listPromotion) {
-  //             receiptData["items"].add({
-  //               "name": item.name,
-  //               "qty": item.qty.toString(),
-  //               "unit": item.unitName,
-  //               "price": "0.00",
-  //               "discount": "0.00",
-  //               "discountProduct": "0.00"
-  //             });
-  //           }
-  //         }
-  //       });
-  //       print(receiptData);
-  //       Timer(const Duration(milliseconds: 500), () {
-  //         context.loaderOverlay.hide();
-  //         if (mounted) {
-  //           setState(() {
-  //             _loadOrderDetail = false;
-  //           });
-  //         }
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print("Error $e");
-  //   }
-  // }
 
   // Bluetooth Connect
   List<BluetoothInfo> _devices = [];
@@ -390,15 +351,15 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
     await _printText(formattedText, fontSize: fontSize, isBold: isBold);
   }
 
-  String formatFixedWidthRow2(String num, String itemName, String qty,
-      String unit, String price, String discount, String total) {
+  String formatFixedWidthRow2(
+      String num, String itemName, String qty, String unit) {
     const int numWidth = 3;
-    const int nameWidth = 25;
+    const int nameWidth = 50;
     const int qtyWidth = 3;
     const int unitWidth = 5;
-    const int priceWidth = 8;
-    const int discountWidth = 8;
-    const int totalWidth = 9;
+    // const int priceWidth = 8;
+    // const int discountWidth = 8;
+    // const int totalWidth = 9;
 
     List<String> wrapText(String text, int width) {
       List<String> lines = [];
@@ -419,9 +380,9 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
     String formattedQty = qty.padLeft(qtyWidth);
     String formattedUnit =
         unit.padRight(unitWidth + _getNoOfUpperLowerChars(unit));
-    String formattedPrice = price.padLeft(priceWidth);
-    String formattedDiscount = discount.padLeft(discountWidth);
-    String formattedTotal = total.padLeft(totalWidth);
+    // String formattedPrice = price.padLeft(priceWidth);
+    // String formattedDiscount = discount.padLeft(discountWidth);
+    // String formattedTotal = total.padLeft(totalWidth);
 
     StringBuffer rowBuffer = StringBuffer();
     for (int i = 0; i < itemNameLines.length; i++) {
@@ -436,8 +397,7 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
 
       if (i == 0) {
         // First line includes all columns
-        rowBuffer.write(
-            '   $formattedQty $formattedUnit  $formattedPrice $formattedDiscount $formattedTotal\n');
+        rowBuffer.write('   $formattedQty $formattedUnit');
       } else {
         // Subsequent lines only contain the wrapped item name
 
@@ -470,6 +430,8 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
     '์',
     '.'
   ];
+
+  bool _isCreateOrderEnabled = false;
 
   // int _getNoOfUpperLowerChars(String text) {
   //   int counter = 0;
@@ -576,73 +538,35 @@ ${centerText('ออกใบกำกับภาษีโดยสำนัก
 ${centerText('($typeBill)', 69)}
 ${centerText('เอกสารออกเป็นชุด', 69)}
 ''';
-//     String header = '''
-// ${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', paperWidthHeader)}
-// ${centerText('58/3 หมู่ที่ 6 ถ.พระประโทน-บ้านแพ้ว', paperWidthHeader)}
-// ${centerText('ต.ตลาดจินดา อ.สามพราน จ.นครปฐม 73110', paperWidthHeader)}
-// ${centerText('โทร.(034) 981-555', paperWidthHeader)}
-// ${centerText('เลขประจำตัวผู้เสียภาษี 0105563063410', paperWidthHeader)}
-// ${centerText('ออกใบกำกับภาษีโดยสำนักงานใหญ่', paperWidthHeader)}
-// ${centerText('($typeBill)', paperWidthHeader)}
-// ${centerText('เอกสารออกเป็นชุด', paperWidthHeader)}''';
     Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
   Future<void> printBodyBill(Map<String, dynamic> data) async {
-    await printBetween('รหัสลูกค้า ${data['customer']['customercode']}',
-        'เลขที่ ${data['CUOR']}');
-    await printBetween('ชื่อลูกค้า ${data['customer']['customername']}',
-        'วันที่ ${data['OAORDT']}');
-    await printBill(
-        'ที่อยู่ ${data['customer']['address1']} ${data['customer']['address2']} ${data['customer']['address3']}');
-    await printBill('เลขประจำตัวผู้เสียภาษี ${data['customer']['taxno']}');
-    await printBill(
-        "\nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม");
-//     String body = '''
-// \nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม
-// ''';
-//     Uint8List encodedBody = await CharsetConverter.encode('TIS-620', body);
-//     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedBody));
-
+    await printBill("เบิกสินค้าระหว่างทริป", isBold: true);
+    await printBetween('เลขที่ ${data['CUOR']}', 'วันที่ ${data['OAORDT']}');
+    await printBetween('พนักงานขาย ${data['OBSMCD']}', 'เขต กทม.');
+    await printBill('สถานที่ส่ง รับของเอง');
+    await printBill('วันที่ส่ง ${data['OAORDT']}\n');
+    await printBill('สินค้าที่ขอเบิก');
+    printHeaderSeparator2();
+    await printBill("${' ' * (3)}รายการสินค้า${' ' * (44)}จำนวน", isBold: true);
     String items = await data['items'].asMap().entries.map((entry) {
       int index = entry.key;
       var item = entry.value;
       // Safely get a substring only if the length is greater than 36
       String itemName = item['name'];
       return formatFixedWidthRow2(
-        "${(index + 1).toString()}",
-        '$itemName',
-        item['qty'],
-        item['unit'],
-        item['price'],
-        item['discount'],
-        item['discountProduct'],
-      );
+          "${(index + 1).toString()}", '$itemName', item['qty'], item['unit']);
     }).join('\n');
     Uint8List encodedItems = await CharsetConverter.encode('TIS-620', items);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedItems));
 
-    double? totalValue = double.tryParse(data['totaltext'] ?? "00.00");
-    String totalText = thaiNumberToWords(totalValue!);
-    String? totalCurrency =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totaltext'] ?? "00.00"))}";
-    String? discountCurrency =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['discount'] ?? "00.00"))}";
-
-    String? discountProduct =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['discountProduct'] ?? "00.00"))}";
-
-    await printBetween('รวมมูลค่าสินค้า', data['ex_vat'].toString());
-    // await printBetween('ส่วนลด', '0.00');
-    await printBetween('ภาษีมูลค่าเพิ่ม 7%', data['vat'].toString());
-    await printBetween('ส่วนลดท้ายบิล', discountProduct);
-    await printBetween('ส่วนลดสินค้า', discountCurrency);
-    await printBetween('จำนวนเงินรวมสุทธิ', totalCurrency);
-    await printBetween("", "($totalText)");
     String footer = '''
-    ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
-    ${leftRightText('', 'ลายเซ็นลูกค้า\n\n\n', 58)}
+    \n
+    ${leftRightText('', '.........................', 58)}
+    ${leftRightText('', '${data['OBSMCD']}', 55)}
+    ${leftRightText('', 'ผู้ขอเบิก\n\n\n', 53)}
     ''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
@@ -724,22 +648,17 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
-  void _onScrollDown() {
-    _outerController.animateTo(
-      _outerController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-    setState(() {
-      _isCreateOrderEnabled = true; // Enable the checkbox
-    });
+  Future<void> printHeaderSeparator2() async {
+    String header = '${centerTextSeparator('', paperWidth)}';
+    Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
+    await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
   Future<void> printTest() async {
     bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
     if (connectionStatus) {
       // await printHeaderSeparator();
-      await printHeaderBill('บิลเงินสด/ใบกำกับภาษี');
+      await printHeaderBill('สำเนาใบขอเบิกสินค้า');
       await printBodyBill(receiptData);
       // await printHeaderSeparator();
       // await printHeaderBill('ใบลดหนี้');
@@ -774,37 +693,22 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     super.dispose();
   }
 
+  void _onScrollDown() {
+    _outerController.animateTo(
+      _outerController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+    setState(() {
+      _isCreateOrderEnabled = true; // Enable the checkbox
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      // floatingActionButton: FloatingActionButton(
-      //   heroTag: 'printerScreen',
-      //   shape: CircleBorder(),
-      //   backgroundColor: Styles.primaryColor,
-      //   child: Icon(
-      //     Icons.print_rounded,
-      //     color: Styles.white,
-      //   ),
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (context) => ManagePrinterScreen(),
-      //       ),
-      //     );
-      //   },
-      // ),
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(70),
-        child: AppbarCustom(
-          title: " รายละเอียดการคืนสินค้า",
-          icon: FontAwesomeIcons.clipboardList,
-        ),
-      ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: _isCreateOrderEnabled
           ? null
@@ -819,6 +723,13 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                 _onScrollDown();
               },
             ),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(70),
+        child: AppbarCustom(
+          title: " รายละเอียดรายการสินค้า",
+          icon: FontAwesomeIcons.clipboardList,
+        ),
+      ),
       body: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification notification) {
           if (notification is OverscrollNotification) {
@@ -838,7 +749,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
           controller: _outerController,
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.735, // Set height
+              height: MediaQuery.of(context).size.height * 0.9, // Set height
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -853,14 +764,13 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "${refundDetails?.store.name} ${refundDetails?.store.storeId}",
+                                  "${storeDetail?.name} ${storeDetail?.storeId}",
                                   style: Styles.black24(context),
                                 ),
                                 listImage.isNotEmpty
                                     ? GestureDetector(
                                         onTap: () async {
                                           if (listImage.isNotEmpty) {
-                                            // context.loaderOverlay.show();
                                             await showDialog(
                                               context: context,
                                               builder: (_) => ImageDialog(
@@ -872,9 +782,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                     : '',
                                                 checkNetwork: true,
                                               ),
-                                            ).then((_) {
-                                              // context.loaderOverlay.hide();
-                                            });
+                                            );
                                           } else {
                                             toastification.show(
                                               autoCloseDuration:
@@ -896,7 +804,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                           size: 30,
                                         ),
                                       )
-                                    : SizedBox()
+                                    : SizedBox(),
                               ],
                             ),
                             Row(
@@ -904,7 +812,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "เลขที่ผู้เสียภาษี : ${refundDetails?.store.taxId}",
+                                  "เลขที่ผู้เสียภาษี : ${storeDetail?.taxId}",
                                   style: Styles.black18(context),
                                 )
                               ],
@@ -914,7 +822,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "เบอร์โทรศัพท์ : ${refundDetails?.store.tel}",
+                                  "เบอร์โทรศัพท์ : ${storeDetail?.tel}",
                                   style: Styles.black18(context),
                                 )
                               ],
@@ -962,7 +870,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                 Expanded(
                                                   child: Text(
                                                     // " ${widget.storeAddress}",
-                                                    "${refundDetails?.store.address}",
+                                                    "${storeDetail?.address}",
                                                     style:
                                                         Styles.grey18(context),
                                                   ),
@@ -983,7 +891,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "พนักงานขาย : ${refundDetails?.sale.name} เขต ${refundDetails?.sale.warehouse}",
+                                  "พนักงานขาย : ${saleDetail?.name} เขต ${saleDetail?.warehouse}",
                                   style: Styles.black24(context),
                                 )
                               ],
@@ -993,7 +901,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "เบอร์โทรศัพท์ : ${refundDetails?.sale.tel}",
+                                  "เบอร์โทรศัพท์ : ${saleDetail?.tel}",
                                   style: Styles.black18(context),
                                 )
                               ],
@@ -1003,7 +911,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "หมายเหตุ : ${refundDetails?.note}",
+                                  "หมายเหตุ : ${note}",
                                   style: Styles.black18(context),
                                 )
                               ],
@@ -1015,151 +923,155 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     SizedBox(
                       height: 10,
                     ),
-                    BoxShadowCustom(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          height: screenHeight * 0.395,
-                          // color: Colors.red,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16.0, horizontal: 16.0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "รายการคืน",
-                                      style: Styles.black18(context),
-                                    ),
-                                    Text(
-                                      "จำนวน ${refundDetails?.listProductRefund.length} รายการ",
-                                      style: Styles.black18(context),
-                                    ),
-                                  ],
-                                ),
-                                Expanded(
-                                    child: Scrollbar(
-                                  controller: _cartScrollController,
-                                  thumbVisibility: true,
-                                  trackVisibility: true,
-                                  radius: Radius.circular(16),
-                                  thickness: 10,
-                                  child: ListView.builder(
-                                    physics: ClampingScrollPhysics(),
-                                    shrinkWrap: true,
+                    Expanded(
+                      flex: 3,
+                      child: BoxShadowCustom(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: screenHeight * 0.9,
+                            // color: Colors.red,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16.0, horizontal: 16.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "รายการที่สั่ง",
+                                        style: Styles.black18(context),
+                                      ),
+                                      Text(
+                                        "จำนวน ${listProduct.length} รายการ",
+                                        style: Styles.black18(context),
+                                      ),
+                                    ],
+                                  ),
+                                  Expanded(
+                                      child: Scrollbar(
                                     controller: _cartScrollController,
-                                    itemCount: listProductRefund.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                child: Image.network(
-                                                  'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                                  width: screenWidth / 8,
-                                                  height: screenWidth / 8,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error,
-                                                      stackTrace) {
-                                                    return const Center(
-                                                      child: Icon(
-                                                        Icons.error,
-                                                        color: Colors.red,
-                                                        size: 50,
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 3,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Expanded(
-                                                            child: Text(
-                                                              listProductRefund[
-                                                                      index]
-                                                                  .name,
-                                                              style: Styles
-                                                                  .black16(
-                                                                      context),
-                                                              softWrap: true,
-                                                              maxLines: 2,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .visible,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Row(
-                                                                children: [
-                                                                  Text(
-                                                                    'จำนวน : ${listProductRefund[index].qty.toStringAsFixed(0)} ${listProductRefund[index].unit}',
-                                                                    style: Styles
-                                                                        .black16(
-                                                                            context),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                              Row(
-                                                                children: [
-                                                                  Text(
-                                                                    'ราคา : ${listProductRefund[index].price}',
-                                                                    style: Styles
-                                                                        .black16(
-                                                                            context),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
+                                    thumbVisibility: true,
+                                    trackVisibility: true,
+                                    radius: Radius.circular(16),
+                                    thickness: 10,
+                                    child: ListView.builder(
+                                      physics: ClampingScrollPhysics(),
+                                      shrinkWrap: true,
+                                      controller: _cartScrollController,
+                                      itemCount: listProduct.length,
+                                      itemBuilder: (context, index) {
+                                        return Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.network(
+                                                    'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                    width: screenWidth / 8,
+                                                    height: screenWidth / 8,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return const Center(
+                                                        child: Icon(
+                                                          Icons.error,
+                                                          color: Colors.red,
+                                                          size: 50,
+                                                        ),
+                                                      );
+                                                    },
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          Divider(
-                                            color: Colors.grey[200],
-                                            thickness: 1,
-                                            indent: 16,
-                                            endIndent: 16,
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ))
-                              ],
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            16.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child: Text(
+                                                                listProduct[
+                                                                        index]
+                                                                    .name,
+                                                                style: Styles
+                                                                    .black16(
+                                                                        context),
+                                                                softWrap: true,
+                                                                maxLines: 2,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .visible,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      'จำนวน : ${listProduct[index].qty.toStringAsFixed(0)} ${listProduct[index].unitName}',
+                                                                      style: Styles
+                                                                          .black16(
+                                                                              context),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      'ราคา : ${listProduct[index].price}',
+                                                                      style: Styles
+                                                                          .black16(
+                                                                              context),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Divider(
+                                              color: Colors.grey[200],
+                                              thickness: 1,
+                                              indent: 16,
+                                              endIndent: 16,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ))
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -1187,19 +1099,18 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "รายการเปลี่ยน",
+                                      "รายการโปรโมชั่น",
                                       style: Styles.black18(context),
                                     ),
                                     Text(
-                                      "จำนวน ${listProductChange.length} รายการ",
+                                      "จำนวน ${listPromotions.length} รายการ",
                                       style: Styles.black18(context),
                                     ),
                                   ],
                                 ),
                                 Expanded(
                                     child: Container(
-                                  height:
-                                      200, // Set a height to avoid rendering errors
+                                  height: 200,
                                   child: Scrollbar(
                                     controller: _promotionScrollController,
                                     thumbVisibility: true,
@@ -1210,7 +1121,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                         shrinkWrap: true,
                                         physics: ClampingScrollPhysics(),
                                         controller: _promotionScrollController,
-                                        itemCount: listProductChange.length,
+                                        itemCount: listPromotionItems.length,
                                         itemBuilder: (context, innerIndex) {
                                           return Column(
                                             children: [
@@ -1254,7 +1165,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                             children: [
                                                               Expanded(
                                                                 child: Text(
-                                                                  listProductChange[
+                                                                  listPromotionItems[
                                                                           innerIndex]
                                                                       .name,
                                                                   style: Styles
@@ -1302,7 +1213,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                   Row(
                                                                     children: [
                                                                       Text(
-                                                                        '${listProductChange[innerIndex].id}',
+                                                                        '${listPromotionItems[innerIndex].id}',
                                                                         style: Styles.black16(
                                                                             context),
                                                                       ),
@@ -1311,7 +1222,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                   Row(
                                                                     children: [
                                                                       Text(
-                                                                        '${listProductChange[innerIndex].group} รส${listProductChange[innerIndex].flavour}',
+                                                                        '${listPromotionItems[innerIndex].group} รส${listPromotionItems[innerIndex].flavour}',
                                                                         style: Styles.black16(
                                                                             context),
                                                                       ),
@@ -1344,7 +1255,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                     ),
                                                                     width: 75,
                                                                     child: Text(
-                                                                      '${listProductChange[innerIndex].qty.toStringAsFixed(0)} ${listProductChange[innerIndex].unitName}',
+                                                                      '${listPromotionItems[innerIndex].qty.toStringAsFixed(0)} ${listPromotionItems[innerIndex].unitName}',
                                                                       textAlign:
                                                                           TextAlign
                                                                               .center,
@@ -1354,6 +1265,36 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                       ),
                                                                     ),
                                                                   ),
+                                                                  // ElevatedButton(
+                                                                  //   onPressed:
+                                                                  //       () async {
+                                                                  //     // _showCartSheet(context, cartList);
+                                                                  //   },
+                                                                  //   style: ElevatedButton
+                                                                  //       .styleFrom(
+                                                                  //     shape:
+                                                                  //         CircleBorder(
+                                                                  //       side: BorderSide(
+                                                                  //           color:
+                                                                  //               Styles.warning!,
+                                                                  //           width: 1),
+                                                                  //     ),
+                                                                  //     padding:
+                                                                  //         const EdgeInsets
+                                                                  //             .all(
+                                                                  //             8),
+                                                                  //     backgroundColor:
+                                                                  //         Colors
+                                                                  //             .white, // Button color
+                                                                  //   ),
+                                                                  //   child: Icon(
+                                                                  //     FontAwesomeIcons
+                                                                  //         .penToSquare,
+                                                                  //     size: 24,
+                                                                  //     color: Styles
+                                                                  //         .warning!,
+                                                                  //   ), // Example
+                                                                  // ),
                                                                 ],
                                                               ),
                                                             ],
@@ -1396,11 +1337,11 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "รวมรับคืนสินค้า",
+                            "รวมมูลค่าสินค้า",
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefund : 0)} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(subtotal)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1409,11 +1350,11 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "รวมรับเปลี่ยนสินค้า",
+                            "ภาษีมูลค่าเพิ่ม 7% (VAT)",
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChange : 0)} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(vat)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1422,11 +1363,11 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "รวมมูลค่าส่วนต่าง",
+                            "รวมมูลค่าสินค้าก่อนหักภาษี",
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalExVat : 0)} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalExVat)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1435,12 +1376,12 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "VAT 7%",
-                            style: Styles.grey18(context),
+                            "ส่วนลดท้ายบิล",
+                            style: Styles.red18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.vat : 0)} บาท",
-                            style: Styles.grey18(context),
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discount)} บาท",
+                            style: Styles.red18(context),
                           )
                         ],
                       ),
@@ -1448,12 +1389,12 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "รวมมูลค่าก่อนหัก VAT 7%",
-                            style: Styles.grey18(context),
+                            "ส่วนลดสินค้า",
+                            style: Styles.red18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalExVat : 0)} บาท",
-                            style: Styles.grey18(context),
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discountProduct)} บาท",
+                            style: Styles.red18(context),
                           )
                         ],
                       ),
@@ -1465,7 +1406,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                             style: Styles.green24(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.total : 0)} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(total)} บาท",
                             style: Styles.green24(context),
                           )
                         ],
@@ -1542,7 +1483,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     await printTest();
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1554,7 +1495,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               size: 25,
                             ),
                             Text(
-                              " พิมพ์ใบคืนสินค้า",
+                              " พิมพ์ใบสั่งซื้อ",
                               style: Styles.headerWhite18(context),
                             ),
                           ],
@@ -1583,7 +1524,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
-                    //       builder: (context) => RefundDetailScreen()),
+                    //       builder: (context) => PrintWithdraw()),
                     // );
                   },
                   child: Padding(

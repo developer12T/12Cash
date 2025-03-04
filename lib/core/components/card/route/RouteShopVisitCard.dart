@@ -33,14 +33,14 @@ class RouteShopVisitCard extends StatelessWidget {
         height: 195,
         margin: EdgeInsets.all(8.0),
         child: BoxShadowCustom(
-          shadowColor: item.percentEffective < 50
+          shadowColor: item.percentVisit < 50
               ? Styles.fail!
-              : item.percentEffective < 80
+              : item.percentVisit < 80
                   ? Styles.warning!
                   : Styles.success!,
-          borderColor: item.percentEffective < 50
+          borderColor: item.percentVisit < 50
               ? Styles.fail!
-              : item.percentEffective < 80
+              : item.percentVisit < 80
                   ? Styles.warning!
                   : Styles.success!,
           child: Container(
@@ -143,8 +143,7 @@ class RouteShopVisitCard extends StatelessWidget {
                                 size: Size(200, 200),
                                 painter: CircularChartPainter(
                                   completionPercentage: item.percentComplete,
-                                  effectivenessPercentage:
-                                      item.percentEffective,
+                                  effectivenessPercentage: item.percentVisit,
                                 ),
                                 child: Center(
                                   child: Column(

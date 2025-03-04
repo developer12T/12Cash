@@ -471,34 +471,32 @@ class _DetailScreenState extends State<DetailScreen> {
                 Text('ตัวอย่างรายการสั่งซื้อ', style: Styles.black24(context)),
                 Container(
                   height: 300,
-                  child: BoxShadowCustom(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Scrollbar(
-                        controller: _scrollController,
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        thickness: 10,
-                        radius: Radius.circular(16),
-                        child: LoadingSkeletonizer(
-                          loading: _loading,
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            itemCount: orders.length,
-                            itemBuilder: (context, index) {
-                              return InvoiceCard(
-                                item: orders[index],
-                                onDetailsPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => OrderDetailScreen(
-                                          orderId: orders[index].orderId),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Scrollbar(
+                      controller: _scrollController,
+                      thumbVisibility: true,
+                      trackVisibility: true,
+                      thickness: 10,
+                      radius: Radius.circular(16),
+                      child: LoadingSkeletonizer(
+                        loading: _loading,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: orders.length,
+                          itemBuilder: (context, index) {
+                            return InvoiceCard(
+                              item: orders[index],
+                              onDetailsPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => OrderDetailScreen(
+                                        orderId: orders[index].orderId),
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
                     ),

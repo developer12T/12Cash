@@ -19,6 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../order/PrintWithdraw.dart';
+
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
 
@@ -171,7 +173,7 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                           onDetailsPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => OrderDetailScreen(
+                                builder: (context) => PrintWithdraw(
                                     orderId: orders[index].orderId),
                               ),
                             );

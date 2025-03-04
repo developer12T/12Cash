@@ -15,6 +15,7 @@ import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:intl/date_symbol_data_local.dart'; // For date localization
 import 'package:flutter/services.dart';
@@ -598,7 +599,7 @@ class _AuthCheckState extends State<AuthCheck> {
                     image: AssetImage('assets/images/logo12.png'),
                   ),
                 ),
-              ),
+              ).animate().shake(duration: 600.ms),
             ),
             // CircularProgressIndicator(
             //   color: Styles.primaryColor,

@@ -11,12 +11,13 @@ class DetailReportScreen extends StatefulWidget {
   final String customerNo;
   final String customerName;
 
-  const DetailReportScreen(
-      {super.key,
-      required this.date,
-      required this.orderNo,
-      required this.customerNo,
-      required this.customerName});
+  const DetailReportScreen({
+    super.key,
+    required this.date,
+    required this.orderNo,
+    required this.customerNo,
+    required this.customerName,
+  });
 
   @override
   State<DetailReportScreen> createState() => _DetailReportScreenState();
