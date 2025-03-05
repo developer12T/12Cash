@@ -18,18 +18,18 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:toastification/toastification.dart';
 
-class PrintWithdraw extends StatefulWidget {
+class PrinterGiveAwaysScreen extends StatefulWidget {
   final orderId;
-  const PrintWithdraw({
+  const PrinterGiveAwaysScreen({
     super.key,
     required this.orderId,
   });
 
   @override
-  State<PrintWithdraw> createState() => _PrintWithdrawState();
+  State<PrinterGiveAwaysScreen> createState() => _PrinterGiveAwaysScreenState();
 }
 
-class _PrintWithdrawState extends State<PrintWithdraw> {
+class _PrinterGiveAwaysScreenState extends State<PrinterGiveAwaysScreen> {
   Sale? saleDetail;
   Store? storeDetail;
   List<Product> listProduct = [];
@@ -352,12 +352,12 @@ class _PrintWithdrawState extends State<PrintWithdraw> {
   }
 
   String formatFixedWidthRow2(
-      String num, String itemName, String qty, String unit) {
+      String num, String itemName, String qty, String unit, String price) {
     const int numWidth = 3;
-    const int nameWidth = 50;
+    const int nameWidth = 42;
     const int qtyWidth = 3;
     const int unitWidth = 5;
-    // const int priceWidth = 8;
+    const int priceWidth = 8;
     // const int discountWidth = 8;
     // const int totalWidth = 9;
 
@@ -380,7 +380,7 @@ class _PrintWithdrawState extends State<PrintWithdraw> {
     String formattedQty = qty.padLeft(qtyWidth);
     String formattedUnit =
         unit.padRight(unitWidth + _getNoOfUpperLowerChars(unit));
-    // String formattedPrice = price.padLeft(priceWidth);
+    String formattedPrice = price.padLeft(priceWidth);
     // String formattedDiscount = discount.padLeft(discountWidth);
     // String formattedTotal = total.padLeft(totalWidth);
 
@@ -397,7 +397,7 @@ class _PrintWithdrawState extends State<PrintWithdraw> {
 
       if (i == 0) {
         // First line includes all columns
-        rowBuffer.write('   $formattedQty $formattedUnit');
+        rowBuffer.write('   $formattedQty $formattedUnit $formattedPrice');
       } else {
         // Subsequent lines only contain the wrapped item name
 
@@ -533,40 +533,41 @@ ${centerText('บริษัท วันทูเทรดดิ้ง จำ�
 ${centerText('58/3 หมู่ที่ 6 ถ.พระประโทน-บ้านแพ้ว', 69)}
 ${centerText('ต.ตลาดจินดา อ.สามพราน จ.นครปฐม 73110', 69)}
 ${centerText('โทร.(034) 981-555', 69)}
-${centerText('เลขประจำตัวผู้เสียภาษี 0105563063410', 69)}
-${centerText('ออกใบกำกับภาษีโดยสำนักงานใหญ่', 69)}
 ${centerText('($typeBill)', 69)}
-${centerText('เอกสารออกเป็นชุด', 69)}
 ''';
     Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
   Future<void> printBodyBill(Map<String, dynamic> data) async {
-    await printBill("เบิกสินค้าระหว่างทริป", isBold: true);
-    await printBetween('เลขที่ ${data['CUOR']}', 'วันที่ ${data['OAORDT']}');
-    await printBetween('พนักงานขาย ${data['OBSMCD']}', 'เขต กทม.');
-    await printBill('สถานที่ส่ง รับของเอง');
-    await printBill('วันที่ส่ง ${data['OAORDT']}\n');
-    await printBill('สินค้าที่ขอเบิก');
+    await printBetween('รหัสลูกค้า ${data['customer']['customercode']}',
+        'เลขที่ ${data['CUOR']}');
+    await printBetween('ชื่อลูกค้า ${data['customer']['customername']}',
+        'วันที่ ${data['OAORDT']}');
+    await printBill("ที่อยู่ ${data['customer']['address1']}");
+    await printBill('รายการกิจกรรมตกแต่งร้านขายเส้นลูกชิ้น');
     printHeaderSeparator2();
-    await printBill("${' ' * (3)}รายการสินค้า${' ' * (44)}จำนวน", isBold: true);
+    await printBill(
+        "${' ' * (3)}รายการสินค้า${' ' * (36)}จำนวน${' ' * (8)}มูลค่า",
+        isBold: true);
     String items = await data['items'].asMap().entries.map((entry) {
       int index = entry.key;
       var item = entry.value;
       // Safely get a substring only if the length is greater than 36
       String itemName = item['name'];
-      return formatFixedWidthRow2(
-          "${(index + 1).toString()}", '$itemName', item['qty'], item['unit']);
+      return formatFixedWidthRow2("${(index + 1).toString()}", '$itemName',
+          item['qty'], item['unit'], item['price']);
     }).join('\n');
     Uint8List encodedItems = await CharsetConverter.encode('TIS-620', items);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedItems));
 
     String footer = '''
     \n
+    ${leftRightText('ลงชื่อพนักงานขาย ${data['OBSMCD']}', '', 70)}
     ${leftRightText('', '.........................', 58)}
-    ${leftRightText('', '${data['OBSMCD']}', 55)}
-    ${leftRightText('', 'ผู้ขอเบิก\n\n\n', 53)}
+    ${leftRightText('', 'ลายเซ็นลูกค้า', 55)}
+    ${leftRightText('.........................', '', 58)}
+    ${leftRightText('    ลายเซ็น Supervisor\n\n\n', '', 55)}
     ''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
@@ -658,7 +659,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
     if (connectionStatus) {
       // await printHeaderSeparator();
-      await printHeaderBill('สำเนาใบขอเบิกสินค้า');
+      await printHeaderBill('สำเนาเอกสารการตั้งโชว์สินค้า');
       await printBodyBill(receiptData);
       // await printHeaderSeparator();
       // await printHeaderBill('ใบลดหนี้');
@@ -726,7 +727,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(
-          title: " รายละเอียดรายการสินค้า",
+          title: " รายละเอียดการแจกสินค้า",
           icon: FontAwesomeIcons.clipboardList,
         ),
       ),
@@ -1524,7 +1525,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
-                    //       builder: (context) => PrintWithdraw()),
+                    //       builder: (context) => PrinterGiveAwaysScreen()),
                     // );
                   },
                   child: Padding(

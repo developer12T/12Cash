@@ -18,18 +18,18 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:toastification/toastification.dart';
 
-class OrderDetailScreen extends StatefulWidget {
+class PrintWithdraw extends StatefulWidget {
   final orderId;
-  const OrderDetailScreen({
+  const PrintWithdraw({
     super.key,
     required this.orderId,
   });
 
   @override
-  State<OrderDetailScreen> createState() => _OrderDetailScreenState();
+  State<PrintWithdraw> createState() => _PrintWithdrawState();
 }
 
-class _OrderDetailScreenState extends State<OrderDetailScreen> {
+class _PrintWithdrawState extends State<PrintWithdraw> {
   Sale? saleDetail;
   Store? storeDetail;
   List<Product> listProduct = [];
@@ -351,15 +351,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     await _printText(formattedText, fontSize: fontSize, isBold: isBold);
   }
 
-  String formatFixedWidthRow2(String num, String itemName, String qty,
-      String unit, String price, String discount, String total) {
+  String formatFixedWidthRow2(
+      String num, String itemName, String qty, String unit) {
     const int numWidth = 3;
-    const int nameWidth = 25;
+    const int nameWidth = 50;
     const int qtyWidth = 3;
     const int unitWidth = 5;
-    const int priceWidth = 8;
-    const int discountWidth = 8;
-    const int totalWidth = 9;
+    // const int priceWidth = 8;
+    // const int discountWidth = 8;
+    // const int totalWidth = 9;
 
     List<String> wrapText(String text, int width) {
       List<String> lines = [];
@@ -380,9 +380,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     String formattedQty = qty.padLeft(qtyWidth);
     String formattedUnit =
         unit.padRight(unitWidth + _getNoOfUpperLowerChars(unit));
-    String formattedPrice = price.padLeft(priceWidth);
-    String formattedDiscount = discount.padLeft(discountWidth);
-    String formattedTotal = total.padLeft(totalWidth);
+    // String formattedPrice = price.padLeft(priceWidth);
+    // String formattedDiscount = discount.padLeft(discountWidth);
+    // String formattedTotal = total.padLeft(totalWidth);
 
     StringBuffer rowBuffer = StringBuffer();
     for (int i = 0; i < itemNameLines.length; i++) {
@@ -397,8 +397,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
       if (i == 0) {
         // First line includes all columns
-        rowBuffer.write(
-            '   $formattedQty $formattedUnit  $formattedPrice $formattedDiscount $formattedTotal\n');
+        rowBuffer.write('   $formattedQty $formattedUnit');
       } else {
         // Subsequent lines only contain the wrapped item name
 
@@ -528,12 +527,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return ' ' * leftPadding + text;
   }
 
-  Future<void> printHeaderSeparator2() async {
-    String header = '${centerTextSeparator('', paperWidth)}';
-    Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
-    await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
-  }
-
   Future<void> printHeaderBill(String typeBill) async {
     String header = '''
 ${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', 69)}
@@ -545,75 +538,39 @@ ${centerText('ออกใบกำกับภาษีโดยสำนัก
 ${centerText('($typeBill)', 69)}
 ${centerText('เอกสารออกเป็นชุด', 69)}
 ''';
-//     String header = '''
-// ${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', paperWidthHeader)}
-// ${centerText('58/3 หมู่ที่ 6 ถ.พระประโทน-บ้านแพ้ว', paperWidthHeader)}
-// ${centerText('ต.ตลาดจินดา อ.สามพราน จ.นครปฐม 73110', paperWidthHeader)}
-// ${centerText('โทร.(034) 981-555', paperWidthHeader)}
-// ${centerText('เลขประจำตัวผู้เสียภาษี 0105563063410', paperWidthHeader)}
-// ${centerText('ออกใบกำกับภาษีโดยสำนักงานใหญ่', paperWidthHeader)}
-// ${centerText('($typeBill)', paperWidthHeader)}
-// ${centerText('เอกสารออกเป็นชุด', paperWidthHeader)}''';
     Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
   Future<void> printBodyBill(Map<String, dynamic> data) async {
-    await printBetween('รหัสลูกค้า ${data['customer']['customercode']}',
-        'เลขที่ ${data['CUOR']}');
-    await printBetween('ชื่อลูกค้า ${data['customer']['customername']}',
-        'วันที่ ${data['OAORDT']}');
-    await printBill(
-        'ที่อยู่ ${data['customer']['address1']} ${data['customer']['address2']} ${data['customer']['address3']}');
-    await printBill('เลขประจำตัวผู้เสียภาษี ${data['customer']['taxno']}');
+    await printBetween(
+        'พนักงานขาย ${data['OBSMCD']}', 'เลขที่ ${data['CUOR']}');
+
+    await printBetween(
+        'วันที่ส่ง ${data['OAORDT']}', 'วันที่ ${data['OAORDT']}');
+
+    await printBill('สถานที่ส่ง รับของเอง\n');
+
+    await printBill("หมายเหตุ", isBold: true);
+    await printBill('สินค้าที่ขอเบิก');
     printHeaderSeparator2();
-    await printBill(
-        "\nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม");
-
-//     String body = '''
-// \nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม
-// ''';
-//     Uint8List encodedBody = await CharsetConverter.encode('TIS-620', body);
-//     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedBody));
-
+    await printBill("${' ' * (3)}รายการสินค้า${' ' * (44)}จำนวน", isBold: true);
     String items = await data['items'].asMap().entries.map((entry) {
       int index = entry.key;
       var item = entry.value;
       // Safely get a substring only if the length is greater than 36
       String itemName = item['name'];
       return formatFixedWidthRow2(
-        "${(index + 1).toString()}",
-        '$itemName',
-        item['qty'],
-        item['unit'],
-        item['price'],
-        item['discount'],
-        item['discountProduct'],
-      );
+          "${(index + 1).toString()}", '$itemName', item['qty'], item['unit']);
     }).join('\n');
     Uint8List encodedItems = await CharsetConverter.encode('TIS-620', items);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedItems));
 
-    double? totalValue = double.tryParse(data['totaltext'] ?? "00.00");
-    String totalText = thaiNumberToWords(totalValue!);
-    String? totalCurrency =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totaltext'] ?? "00.00"))}";
-    String? discountCurrency =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['discount'] ?? "00.00"))}";
-
-    String? discountProduct =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['discountProduct'] ?? "00.00"))}";
-
-    await printBetween('รวมมูลค่าสินค้า', data['ex_vat'].toString());
-    // await printBetween('ส่วนลด', '0.00');
-    await printBetween('ภาษีมูลค่าเพิ่ม 7%', data['vat'].toString());
-    await printBetween('ส่วนลดท้ายบิล', discountProduct);
-    await printBetween('ส่วนลดสินค้า', discountCurrency);
-    await printBetween('จำนวนเงินรวมสุทธิ', totalCurrency);
-    await printBetween("", "($totalText)");
     String footer = '''
-    ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
-    ${leftRightText('', 'ลายเซ็นลูกค้า\n\n\n', 61)}
+    \n
+    ${leftRightText('', '.........................', 58)}
+    ${leftRightText('', '${data['OBSMCD']}', 55)}
+    ${leftRightText('', 'ผู้ขอเบิก\n\n\n', 53)}
     ''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
@@ -695,11 +652,17 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
+  Future<void> printHeaderSeparator2() async {
+    String header = '${centerTextSeparator('', paperWidth)}';
+    Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
+    await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
+  }
+
   Future<void> printTest() async {
     bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
     if (connectionStatus) {
       // await printHeaderSeparator();
-      await printHeaderBill('บิลเงินสด/ใบกำกับภาษี');
+      await printHeaderBill('สำเนาใบขอเบิกสินค้า');
       await printBodyBill(receiptData);
       // await printHeaderSeparator();
       // await printHeaderBill('ใบลดหนี้');
@@ -1565,7 +1528,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
-                    //       builder: (context) => OrderDetailScreen()),
+                    //       builder: (context) => PrintWithdraw()),
                     // );
                   },
                   child: Padding(

@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/components/card/order/InvoiceCard.dart';
 import 'package:_12sale_app/core/components/refund/RefundCard.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 import 'package:_12sale_app/core/page/refund/RefundDetailScreen.dart';
+import 'package:_12sale_app/core/page/withdraw/PrinterGiveAwaysScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/RefundFilter.dart';
@@ -19,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
-import '../order/PrintWithdraw.dart';
+import '../withdraw/PrintWithdraw.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});

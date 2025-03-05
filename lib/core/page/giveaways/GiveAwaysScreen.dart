@@ -28,6 +28,10 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
   List<Store> storeList = [];
   List<Product> productList = [];
 
+  double count = 1;
+  double price = 0;
+  double total = 0.00;
+
   String isStoreId = "";
   String nameStore = "";
   String addressStore = "";
@@ -409,7 +413,6 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                       ],
                                     ),
                                     onPressed: () {
-                                      print("dawd");
                                       _showAddressSheet(context);
                                     },
                                   ),
@@ -632,9 +635,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                                       setState(() {
                                                         selectedUnit = '';
                                                         selectedSize = '';
-                                                        // price = 0.00;
-                                                        // count = 1;
-                                                        // total = 0.00;
+                                                        price = 0.00;
+                                                        count = 1;
+                                                        total = 0.00;
                                                       });
 
                                                       _showProductSheet(
@@ -655,9 +658,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                                         setState(() {
                                                           selectedUnit = '';
                                                           selectedSize = '';
-                                                          // price = 0.00;
-                                                          // count = 1;
-                                                          // total = 0.00;
+                                                          price = 0.00;
+                                                          count = 1;
+                                                          total = 0.00;
                                                         });
                                                         _showProductSheet(
                                                             context,
@@ -708,9 +711,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                                 setState(() {
                                                   selectedUnit = '';
                                                   selectedSize = '';
-                                                  // price = 0.00;
-                                                  // count = 1;
-                                                  // total = 0.00;
+                                                  price = 0.00;
+                                                  count = 1;
+                                                  total = 0.00;
                                                 });
                                                 _showProductSheet(context,
                                                     productList[index]);
@@ -1011,24 +1014,27 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                               margin: EdgeInsets.all(8),
                                               child: ElevatedButton(
                                                 onPressed: () {
-                                                  setModalState(() {
-                                                    // price = double.parse(
-                                                    //     data.price);
-                                                  });
+                                                  setModalState(
+                                                    () {
+                                                      price = double.parse(
+                                                          data.price);
+                                                    },
+                                                  );
+                                                  print(data.unit);
 
                                                   setModalState(
                                                     () {
                                                       selectedSize = data.name;
                                                       selectedUnit = data.unit;
-                                                      // total = price * count;
+                                                      total = price * count;
                                                     },
                                                   );
                                                   setState(() {
-                                                    // price = double.parse(
-                                                    //     data.price);
+                                                    price = double.parse(
+                                                        data.price);
                                                     selectedSize = data.name;
                                                     selectedUnit = data.unit;
-                                                    // total = price * count;
+                                                    total = price * count;
                                                   });
                                                 },
                                                 style: ElevatedButton.styleFrom(
@@ -1087,8 +1093,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                       style: Styles.black18(context),
                                     ),
                                     Text(
-                                      // '฿${total.toStringAsFixed(2)} บาท',
-                                      'dawd',
+                                      '฿${total.toStringAsFixed(2)} บาท',
                                       style: Styles.black18(context),
                                     ),
                                   ],
@@ -1112,16 +1117,16 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                         children: [
                                           ElevatedButton(
                                             onPressed: () {
-                                              // if (count > 1) {
-                                              //   setModalState(() {
-                                              //     count--;
-                                              //     total = price * count;
-                                              //   });
-                                              //   setState(() {
-                                              //     count = count;
-                                              //     total = price * count;
-                                              //   });
-                                              // }
+                                              if (count > 1) {
+                                                setModalState(() {
+                                                  count--;
+                                                  total = price * count;
+                                                });
+                                                setState(() {
+                                                  count = count;
+                                                  total = price * count;
+                                                });
+                                              }
                                             },
                                             style: ElevatedButton.styleFrom(
                                               shape: const CircleBorder(
@@ -1151,8 +1156,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                             ),
                                             width: 75,
                                             child: Text(
-                                              // '${count.toStringAsFixed(0)}',
-                                              "dawd",
+                                              '${count.toStringAsFixed(0)}',
                                               textAlign: TextAlign.center,
                                               style: Styles.black18(context),
                                             ),
@@ -1160,12 +1164,12 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                           ElevatedButton(
                                             onPressed: () {
                                               setModalState(() {
-                                                // count++;
-                                                // total = price * count;
+                                                count++;
+                                                total = price * count;
                                               });
                                               setState(() {
-                                                // count = count;
-                                                // total = price * count;
+                                                count = count;
+                                                total = price * count;
                                               });
                                               // print("total${total}");
                                             },
