@@ -23,8 +23,8 @@ class CircularChartPainter extends CustomPainter {
 
     Paint section1 = Paint()
       ..color = effectivenessPercentage < 50
-          ? Colors.red
-          : effectivenessPercentage > 80
+          ? Styles.fail!
+          : effectivenessPercentage > 79
               ? Styles.success!
               : Styles.warning!
       ..style = PaintingStyle.stroke

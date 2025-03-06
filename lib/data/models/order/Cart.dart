@@ -3,7 +3,7 @@ class Cart {
   final String type;
   // final String area;
   // final String storeId;
-  final Store store;
+  final CartListStore store;
   final double total;
   final List<CartList> listCartList;
   final DateTime created;
@@ -28,8 +28,8 @@ class Cart {
       // area: json['area'],
       // storeId: json['storeId'],
       store: json['store'] is Map<String, dynamic>
-          ? Store.fromJson(json['store'] ?? {})
-          : Store.fromJson(json['store'] ?? {}),
+          ? CartListStore.fromJson(json['store'] ?? {})
+          : CartListStore.fromJson(json['store'] ?? {}),
       total: json['total'].toDouble(),
       listCartList: (json['listProduct'] as List)
           .map((item) => CartList.fromJson(item))
@@ -125,7 +125,7 @@ class CartList {
   }
 }
 
-class Store {
+class CartListStore {
   final String storeId;
   final String name;
   final String taxId;
@@ -140,7 +140,7 @@ class Store {
   final String zone;
   final String area;
 
-  Store({
+  CartListStore({
     required this.storeId,
     required this.name,
     required this.taxId,
@@ -157,8 +157,8 @@ class Store {
   });
 
   // ✅ Convert JSON to Dart Object
-  factory Store.fromJson(Map<String, dynamic> json) {
-    return Store(
+  factory CartListStore.fromJson(Map<String, dynamic> json) {
+    return CartListStore(
       storeId: json['storeId'],
       name: json['name'],
       taxId: json['taxId'],

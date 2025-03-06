@@ -35,12 +35,12 @@ class RouteShopVisitCard extends StatelessWidget {
         child: BoxShadowCustom(
           shadowColor: item.percentVisit < 50
               ? Styles.fail!
-              : item.percentVisit < 80
+              : item.percentVisit < 79
                   ? Styles.warning!
                   : Styles.success!,
           borderColor: item.percentVisit < 50
               ? Styles.fail!
-              : item.percentVisit < 80
+              : item.percentVisit < 79
                   ? Styles.warning!
                   : Styles.success!,
           child: Container(

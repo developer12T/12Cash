@@ -540,7 +540,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(
-          title: "${widget.storeName}",
+          title: "สั่งซื้อสินค้า",
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -675,7 +675,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  "${widget.storeId}",
+                                  "${widget.storeName} ${widget.storeId}",
                                   style: Styles.black24(context),
                                 )
                               ],
