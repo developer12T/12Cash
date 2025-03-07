@@ -2892,192 +2892,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     );
   }
 
-  void _showFilterGroupSheet(BuildContext context) {
-    double sreenWidth = MediaQuery.of(context).size.width;
-    double sreenHeight = MediaQuery.of(context).size.height;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 0.6,
-
-            builder: (context, scrollController) {
-              return Container(
-                width: sreenWidth * 0.95,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SizedBox(width: 16),
-                          Text('เลือกกลุ่ม', style: Styles.white24(context)),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        controller: scrollController,
-                        child: Container(
-                          height: sreenHeight * 0.6,
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 8.0),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    const SizedBox(width: 16),
-                                    Text('กลุ่ม',
-                                        style: Styles.black24(context)),
-                                  ],
-                                ),
-                                Divider(
-                                  color: Colors.grey[200],
-                                  thickness: 1,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: groupList.map((data) {
-                                    bool isSelected =
-                                        selectedGroups.contains(data);
-                                    return ChoiceChip(
-                                      showCheckmark: false,
-                                      label: Text(
-                                        data,
-                                        style: isSelected
-                                            ? Styles.pirmary18(context)
-                                            : Styles.grey18(context),
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                      ),
-                                      selected: selectedGroups.contains(data),
-                                      side: BorderSide(
-                                        color: isSelected
-                                            ? Styles.primaryColor
-                                            : Colors
-                                                .grey, // Change border color
-                                        width: 1.5,
-                                      ),
-                                      backgroundColor: Colors.white,
-                                      selectedColor: Colors.white,
-                                      onSelected: (selected) {
-                                        setModalState(() {
-                                          if (selected) {
-                                            selectedGroups.add(data);
-                                          } else {
-                                            selectedGroups.remove(data);
-                                          }
-                                        });
-                                        setState(() {
-                                          if (selected) {
-                                            selectedGroups = selectedGroups;
-                                          } else {
-                                            selectedGroups = selectedGroups;
-                                          }
-                                        });
-                                        _getFliterGroup();
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                                SizedBox(
-                                  height: sreenHeight * 0.22,
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () {
-                                          setModalState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                          setState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                        },
-                                        text: 'ล้างข้อมูล',
-                                        blackGroundColor: Styles.secondaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () async {
-                                          await _getProduct(isSelect);
-
-                                          Navigator.pop(context);
-                                        },
-                                        text: 'ค้นหา',
-                                        blackGroundColor: Styles.primaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
-    );
-  }
-
   Widget badgeFilter(Widget child, double width,
       {bool openIcon = true, bool isSelected = false}) {
     return GestureDetector(
@@ -3125,6 +2939,192 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     );
   }
 
+  void _showFilterGroupSheet(BuildContext context) {
+    double sreenWidth = MediaQuery.of(context).size.width;
+    double sreenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.6,
+            builder: (context, scrollController) {
+              return Container(
+                width: sreenWidth * 0.95,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const SizedBox(width: 16),
+                          Text('เลือกกลุ่ม', style: Styles.white24(context)),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 8.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                const SizedBox(width: 16),
+                                Text('กลุ่ม', style: Styles.black24(context)),
+                              ],
+                            ),
+                            Divider(
+                              color: Colors.grey[200],
+                              thickness: 1,
+                              indent: 16,
+                              endIndent: 16,
+                            ),
+                            Wrap(
+                              spacing: 8.0,
+                              runSpacing: 8.0,
+                              children: groupList.map((data) {
+                                bool isSelected = selectedGroups.contains(data);
+                                return ChoiceChip(
+                                  showCheckmark: false,
+                                  label: Text(
+                                    data,
+                                    style: isSelected
+                                        ? Styles.pirmary18(context)
+                                        : Styles.grey18(context),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  selected: selectedGroups.contains(data),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? Styles.primaryColor
+                                        : Colors.grey, // Change border color
+                                    width: 1.5,
+                                  ),
+                                  backgroundColor: Colors.white,
+                                  selectedColor: Colors.white,
+                                  onSelected: (selected) {
+                                    setModalState(() {
+                                      if (selected) {
+                                        selectedGroups.add(data);
+                                      } else {
+                                        selectedGroups.remove(data);
+                                      }
+                                    });
+                                    setState(() {
+                                      if (selected) {
+                                        selectedGroups = selectedGroups;
+                                      } else {
+                                        selectedGroups = selectedGroups;
+                                      }
+                                    });
+                                    _getFliterGroup();
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ButtonFullWidth(
+                                onPressed: () async {
+                                  setModalState(() {
+                                    selectedBrands = [];
+                                    selectedGroups = [];
+                                    selectedSizes = [];
+                                    selectedFlavours = [];
+                                    brandList = [];
+                                    sizeList = [];
+                                    flavourList = [];
+                                  });
+                                  setState(() {
+                                    selectedBrands = [];
+                                    selectedGroups = [];
+                                    selectedSizes = [];
+                                    selectedFlavours = [];
+                                    brandList = [];
+                                    sizeList = [];
+                                    flavourList = [];
+                                  });
+                                  context.loaderOverlay.show();
+                                  _getProduct(isSelect).then((_) {
+                                    context.loaderOverlay.hide();
+                                    Navigator.pop(context);
+                                  });
+                                },
+                                text: 'ล้างข้อมูล',
+                                blackGroundColor: Styles.secondaryColor,
+                                textStyle: Styles.white18(context),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: ButtonFullWidth(
+                                onPressed: () async {
+                                  await _getProduct(isSelect);
+                                  Navigator.pop(context);
+                                },
+                                text: 'ค้นหา',
+                                blackGroundColor: Styles.primaryColor,
+                                textStyle: Styles.white18(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
+    );
+  }
+
   void _showFilterBrandSheet(BuildContext context) {
     double sreenWidth = MediaQuery.of(context).size.width;
     double sreenHeight = MediaQuery.of(context).size.height;
@@ -3146,8 +3146,14 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
             builder: (context, scrollController) {
               return Container(
                 width: sreenWidth * 0.95,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
@@ -3173,139 +3179,137 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                       ),
                     ),
                     Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        controller: scrollController,
-                        child: Container(
-                          height: sreenHeight * 0.6,
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      flex: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 16),
+                            Row(
                               children: [
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    const SizedBox(width: 16),
-                                    Text('แบรนด์',
-                                        style: Styles.black24(context)),
-                                  ],
-                                ),
-                                Divider(
-                                  color: Colors.grey[200],
-                                  thickness: 1,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                if (selectedGroups.isEmpty)
-                                  Center(
-                                    child: Text(
-                                      "กรุณาเลือกกลุ่มก่อน",
-                                      style: Styles.grey18(context),
-                                    ),
-                                  ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: brandList.map((data) {
-                                    bool isSelected =
-                                        selectedBrands.contains(data);
-                                    return ChoiceChip(
-                                      showCheckmark: false,
-                                      label: Text(
-                                        data,
-                                        style: isSelected
-                                            ? Styles.pirmary18(context)
-                                            : Styles.grey18(context),
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                      ),
-                                      selected: selectedBrands.contains(data),
-                                      side: BorderSide(
-                                        color: isSelected
-                                            ? Styles.primaryColor
-                                            : Colors
-                                                .grey, // Change border color
-                                        width: 1.5,
-                                      ),
-                                      backgroundColor: Colors.white,
-                                      selectedColor: Colors.white,
-                                      onSelected: (selected) {
-                                        setModalState(() {
-                                          if (selected) {
-                                            selectedBrands.add(data);
-                                          } else {
-                                            selectedBrands.remove(data);
-                                          }
-                                        });
-                                        setState(() {
-                                          if (selected) {
-                                            selectedBrands = selectedBrands;
-                                          } else {
-                                            selectedBrands = selectedBrands;
-                                          }
-                                        });
-                                        _getFliterBrand();
-                                        print(
-                                            "selectedBrands: ${selectedBrands}");
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () {
-                                          setModalState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                          setState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                        },
-                                        text: 'ล้างข้อมูล',
-                                        blackGroundColor: Styles.secondaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () async {
-                                          await _getProduct(isSelect);
-                                        },
-                                        text: 'ค้นหา',
-                                        blackGroundColor: Styles.primaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                  ],
-                                )
+                                const SizedBox(width: 16),
+                                Text('แบรนด์', style: Styles.black24(context)),
                               ],
                             ),
-                          ),
+                            Divider(
+                              color: Colors.grey[200],
+                              thickness: 1,
+                              indent: 16,
+                              endIndent: 16,
+                            ),
+                            if (selectedGroups.isEmpty)
+                              Center(
+                                child: Text(
+                                  "กรุณาเลือกกลุ่มก่อน",
+                                  style: Styles.grey18(context),
+                                ),
+                              ),
+                            Wrap(
+                              spacing: 8.0,
+                              runSpacing: 8.0,
+                              children: brandList.map((data) {
+                                bool isSelected = selectedBrands.contains(data);
+                                return ChoiceChip(
+                                  showCheckmark: false,
+                                  label: Text(
+                                    data,
+                                    style: isSelected
+                                        ? Styles.pirmary18(context)
+                                        : Styles.grey18(context),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  selected: selectedBrands.contains(data),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? Styles.primaryColor
+                                        : Colors.grey, // Change border color
+                                    width: 1.5,
+                                  ),
+                                  backgroundColor: Colors.white,
+                                  selectedColor: Colors.white,
+                                  onSelected: (selected) {
+                                    setModalState(() {
+                                      if (selected) {
+                                        selectedBrands.add(data);
+                                      } else {
+                                        selectedBrands.remove(data);
+                                      }
+                                    });
+                                    setState(() {
+                                      if (selected) {
+                                        selectedBrands = selectedBrands;
+                                      } else {
+                                        selectedBrands = selectedBrands;
+                                      }
+                                    });
+                                    _getFliterBrand();
+                                    print("selectedBrands: ${selectedBrands}");
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                    Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ButtonFullWidth(
+                              onPressed: () async {
+                                setModalState(() {
+                                  selectedBrands = [];
+                                  selectedGroups = [];
+                                  selectedSizes = [];
+                                  selectedFlavours = [];
+                                  brandList = [];
+                                  sizeList = [];
+                                  flavourList = [];
+                                });
+                                setState(() {
+                                  selectedBrands = [];
+                                  selectedGroups = [];
+                                  selectedSizes = [];
+                                  selectedFlavours = [];
+                                  brandList = [];
+                                  sizeList = [];
+                                  flavourList = [];
+                                });
+                                context.loaderOverlay.show();
+                                _getProduct(isSelect).then((_) {
+                                  context.loaderOverlay.hide();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              text: 'ล้างข้อมูล',
+                              blackGroundColor: Styles.secondaryColor,
+                              textStyle: Styles.white18(context),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: ButtonFullWidth(
+                              onPressed: () async {
+                                await _getProduct(isSelect);
+                                Navigator.of(context).pop();
+                              },
+                              text: 'ค้นหา',
+                              blackGroundColor: Styles.primaryColor,
+                              textStyle: Styles.white18(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ))
                   ],
                 ),
               );
@@ -3337,8 +3341,14 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
             builder: (context, scrollController) {
               return Container(
                 width: sreenWidth * 0.95,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
@@ -3364,137 +3374,136 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                       ),
                     ),
                     Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        controller: scrollController,
-                        child: Container(
-                          height: sreenHeight * 0.6,
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      flex: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 16),
+                            Row(
                               children: [
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    const SizedBox(width: 16),
-                                    Text('ขนาด',
-                                        style: Styles.black24(context)),
-                                  ],
-                                ),
-                                Divider(
-                                  color: Colors.grey[200],
-                                  thickness: 1,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                if (selectedGroups.isEmpty)
-                                  Center(
-                                    child: Text(
-                                      "กรุณาเลือกกลุ่มก่อน",
-                                      style: Styles.grey18(context),
-                                    ),
-                                  ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: sizeList.map((data) {
-                                    bool isSelected =
-                                        selectedSizes.contains(data);
-                                    return ChoiceChip(
-                                      showCheckmark: false,
-                                      label: Text(
-                                        data,
-                                        style: isSelected
-                                            ? Styles.pirmary18(context)
-                                            : Styles.grey18(context),
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                      ),
-                                      selected: selectedSizes.contains(data),
-                                      side: BorderSide(
-                                        color: isSelected
-                                            ? Styles.primaryColor
-                                            : Colors
-                                                .grey, // Change border color
-                                        width: 1.5,
-                                      ),
-                                      backgroundColor: Colors.white,
-                                      selectedColor: Colors.white,
-                                      onSelected: (selected) {
-                                        setModalState(() {
-                                          if (selected) {
-                                            selectedSizes.add(data);
-                                          } else {
-                                            selectedSizes.remove(data);
-                                          }
-                                        });
-                                        setState(() {
-                                          if (selected) {
-                                            selectedSizes = selectedSizes;
-                                          } else {
-                                            selectedSizes = selectedSizes;
-                                          }
-                                        });
-                                        _getFliterSize();
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () {
-                                          setModalState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                          setState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                        },
-                                        text: 'ล้างข้อมูล',
-                                        blackGroundColor: Styles.secondaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () async {
-                                          await _getProduct(isSelect);
-                                        },
-                                        text: 'ค้นหา',
-                                        blackGroundColor: Styles.primaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                  ],
-                                )
+                                const SizedBox(width: 16),
+                                Text('ขนาด', style: Styles.black24(context)),
                               ],
                             ),
-                          ),
+                            Divider(
+                              color: Colors.grey[200],
+                              thickness: 1,
+                              indent: 16,
+                              endIndent: 16,
+                            ),
+                            if (selectedGroups.isEmpty)
+                              Center(
+                                child: Text(
+                                  "กรุณาเลือกกลุ่มก่อน",
+                                  style: Styles.grey18(context),
+                                ),
+                              ),
+                            Wrap(
+                              spacing: 8.0,
+                              runSpacing: 8.0,
+                              children: sizeList.map((data) {
+                                bool isSelected = selectedSizes.contains(data);
+                                return ChoiceChip(
+                                  showCheckmark: false,
+                                  label: Text(
+                                    data,
+                                    style: isSelected
+                                        ? Styles.pirmary18(context)
+                                        : Styles.grey18(context),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  selected: selectedSizes.contains(data),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? Styles.primaryColor
+                                        : Colors.grey, // Change border color
+                                    width: 1.5,
+                                  ),
+                                  backgroundColor: Colors.white,
+                                  selectedColor: Colors.white,
+                                  onSelected: (selected) {
+                                    setModalState(() {
+                                      if (selected) {
+                                        selectedSizes.add(data);
+                                      } else {
+                                        selectedSizes.remove(data);
+                                      }
+                                    });
+                                    setState(() {
+                                      if (selected) {
+                                        selectedSizes = selectedSizes;
+                                      } else {
+                                        selectedSizes = selectedSizes;
+                                      }
+                                    });
+                                    _getFliterSize();
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                    Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ButtonFullWidth(
+                              onPressed: () async {
+                                setModalState(() {
+                                  selectedBrands = [];
+                                  selectedGroups = [];
+                                  selectedSizes = [];
+                                  selectedFlavours = [];
+                                  brandList = [];
+                                  sizeList = [];
+                                  flavourList = [];
+                                });
+                                setState(() {
+                                  selectedBrands = [];
+                                  selectedGroups = [];
+                                  selectedSizes = [];
+                                  selectedFlavours = [];
+                                  brandList = [];
+                                  sizeList = [];
+                                  flavourList = [];
+                                });
+                                context.loaderOverlay.show();
+                                _getProduct(isSelect).then((_) {
+                                  context.loaderOverlay.hide();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              text: 'ล้างข้อมูล',
+                              blackGroundColor: Styles.secondaryColor,
+                              textStyle: Styles.white18(context),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: ButtonFullWidth(
+                              onPressed: () async {
+                                await _getProduct(isSelect);
+                                Navigator.of(context).pop();
+                              },
+                              text: 'ค้นหา',
+                              blackGroundColor: Styles.primaryColor,
+                              textStyle: Styles.white18(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ))
                   ],
                 ),
               );
@@ -3526,8 +3535,14 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
             builder: (context, scrollController) {
               return Container(
                 width: sreenWidth * 0.95,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
@@ -3553,136 +3568,137 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                       ),
                     ),
                     Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        controller: scrollController,
-                        child: Container(
-                          height: sreenHeight * 0.6,
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      flex: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 16),
+                            Row(
                               children: [
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    const SizedBox(width: 16),
-                                    Text('รสชาติ',
-                                        style: Styles.black24(context)),
-                                  ],
-                                ),
-                                Divider(
-                                  color: Colors.grey[200],
-                                  thickness: 1,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                if (selectedGroups.isEmpty)
-                                  Center(
-                                    child: Text(
-                                      "กรุณาเลือกกลุ่มก่อน",
-                                      style: Styles.grey18(context),
-                                    ),
-                                  ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: flavourList.map((data) {
-                                    bool isSelected =
-                                        selectedFlavours.contains(data);
-                                    return ChoiceChip(
-                                      showCheckmark: false,
-                                      label: Text(
-                                        data,
-                                        style: isSelected
-                                            ? Styles.pirmary18(context)
-                                            : Styles.grey18(context),
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                      ),
-                                      selected: selectedFlavours.contains(data),
-                                      side: BorderSide(
-                                        color: isSelected
-                                            ? Styles.primaryColor
-                                            : Colors
-                                                .grey, // Change border color
-                                        width: 1.5,
-                                      ),
-                                      backgroundColor: Colors.white,
-                                      selectedColor: Colors.white,
-                                      onSelected: (selected) {
-                                        setModalState(() {
-                                          if (selected) {
-                                            selectedFlavours.add(data);
-                                          } else {
-                                            selectedFlavours.remove(data);
-                                          }
-                                        });
-                                        setState(() {
-                                          if (selected) {
-                                            selectedFlavours = selectedFlavours;
-                                          } else {
-                                            selectedFlavours = selectedFlavours;
-                                          }
-                                        });
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () {
-                                          setModalState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                          setState(() {
-                                            selectedBrands = [];
-                                            selectedGroups = [];
-                                            selectedSizes = [];
-                                            selectedFlavours = [];
-                                            brandList = [];
-                                            sizeList = [];
-                                            flavourList = [];
-                                          });
-                                        },
-                                        text: 'ล้างข้อมูล',
-                                        blackGroundColor: Styles.secondaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Expanded(
-                                      child: ButtonFullWidth(
-                                        onPressed: () async {
-                                          await _getProduct(isSelect);
-                                        },
-                                        text: 'ค้นหา',
-                                        blackGroundColor: Styles.primaryColor,
-                                        textStyle: Styles.white18(context),
-                                      ),
-                                    ),
-                                  ],
-                                )
+                                const SizedBox(width: 16),
+                                Text('รสชาติ', style: Styles.black24(context)),
                               ],
                             ),
-                          ),
+                            Divider(
+                              color: Colors.grey[200],
+                              thickness: 1,
+                              indent: 16,
+                              endIndent: 16,
+                            ),
+                            if (selectedGroups.isEmpty)
+                              Center(
+                                child: Text(
+                                  "กรุณาเลือกกลุ่มก่อน",
+                                  style: Styles.grey18(context),
+                                ),
+                              ),
+                            Wrap(
+                              spacing: 8.0,
+                              runSpacing: 8.0,
+                              children: flavourList.map((data) {
+                                bool isSelected =
+                                    selectedFlavours.contains(data);
+                                return ChoiceChip(
+                                  showCheckmark: false,
+                                  label: Text(
+                                    data,
+                                    style: isSelected
+                                        ? Styles.pirmary18(context)
+                                        : Styles.grey18(context),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  selected: selectedFlavours.contains(data),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? Styles.primaryColor
+                                        : Colors.grey, // Change border color
+                                    width: 1.5,
+                                  ),
+                                  backgroundColor: Colors.white,
+                                  selectedColor: Colors.white,
+                                  onSelected: (selected) {
+                                    setModalState(() {
+                                      if (selected) {
+                                        selectedFlavours.add(data);
+                                      } else {
+                                        selectedFlavours.remove(data);
+                                      }
+                                    });
+                                    setState(() {
+                                      if (selected) {
+                                        selectedFlavours = selectedFlavours;
+                                      } else {
+                                        selectedFlavours = selectedFlavours;
+                                      }
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ButtonFullWidth(
+                                onPressed: () async {
+                                  setModalState(() {
+                                    selectedBrands = [];
+                                    selectedGroups = [];
+                                    selectedSizes = [];
+                                    selectedFlavours = [];
+                                    brandList = [];
+                                    sizeList = [];
+                                    flavourList = [];
+                                  });
+                                  setState(() {
+                                    selectedBrands = [];
+                                    selectedGroups = [];
+                                    selectedSizes = [];
+                                    selectedFlavours = [];
+                                    brandList = [];
+                                    sizeList = [];
+                                    flavourList = [];
+                                  });
+                                  context.loaderOverlay.show();
+                                  _getProduct(isSelect).then((_) {
+                                    context.loaderOverlay.hide();
+                                    Navigator.pop(context);
+                                  });
+                                },
+                                text: 'ล้างข้อมูล',
+                                blackGroundColor: Styles.secondaryColor,
+                                textStyle: Styles.white18(context),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: ButtonFullWidth(
+                                onPressed: () async {
+                                  await _getProduct(isSelect);
+                                  Navigator.of(context).pop();
+                                },
+                                text: 'ค้นหา',
+                                blackGroundColor: Styles.primaryColor,
+                                textStyle: Styles.white18(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                   ],
                 ),
               );

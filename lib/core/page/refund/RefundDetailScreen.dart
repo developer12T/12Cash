@@ -32,8 +32,8 @@ class RefundDetailScreen extends StatefulWidget {
 }
 
 class _RefundDetailScreenState extends State<RefundDetailScreen> {
-  Sale? saleDetail;
-  Store? storeDetail;
+  // Sale? saleDetail;
+  // Store? storeDetail;
 
   RefundDetail? refundDetails;
   List<Product> listProduct = [];
@@ -129,6 +129,40 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
       final Map<String, dynamic> data = response.data;
       setState(() {
         refundDetails = RefundDetail.fromJson(data);
+        // saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
+        receiptData['customer']['customercode'] = refundDetails?.store.storeId;
+        receiptData['customer']['customername'] = refundDetails?.store.name;
+        receiptData['customer']['address1'] = refundDetails?.store.address;
+        receiptData['customer']['salecode'] = refundDetails?.sale.saleCode;
+        receiptData['customer']['taxno'] = refundDetails?.store.taxId;
+        receiptData['CUOR'] = widget.orderId;
+        receiptData['OAORDT'] = DateFormat('dd/MM/yyyy').format(DateTime.now());
+
+        receiptData['totalRefundExVat'] =
+            "${refundDetails?.totalRefundExVat.toStringAsFixed(2)}";
+        receiptData['totalRefundVat'] =
+            "${refundDetails?.totalRefundVat.toStringAsFixed(2)}";
+        receiptData['totalRefund'] =
+            "${refundDetails?.totalRefund.toStringAsFixed(2)}";
+        receiptData['totalChangeExVat'] =
+            "${refundDetails?.totalChangeExVat.toStringAsFixed(2)}";
+        receiptData['totalChangeVat'] =
+            "${refundDetails?.totalChangeVat.toStringAsFixed(2)}";
+        receiptData['totalChange'] =
+            "${refundDetails?.totalChange.toStringAsFixed(2)}";
+        receiptData['totalDiff'] =
+            "${refundDetails?.totalDiff.toStringAsFixed(2)}";
+
+        // receiptData['totalChange'] =
+        //     "${refundDetails?.totalChange.toStringAsFixed(2)}";
+        // receiptData['totalRefund'] =
+        //     "${refundDetails?.totalRefund.toStringAsFixed(2)}";
+        // receiptData['vat'] = "${refundDetails?.vat.toStringAsFixed(2)}";
+        // receiptData['totalExVat'] =
+        //     "${refundDetails?.totalExVat.toStringAsFixed(2)}";
+        // receiptData['total'] = "${refundDetails?.total.toStringAsFixed(2)}";
+        receiptData['OBSMCD'] = "${refundDetails?.sale.name}";
+        // receiptData['totaltext'] = "${refundDetails?.total.toStringAsFixed(2)}";
       });
       for (var element in refundDetails!.listProductRefund) {
         listProductRefund.add(element);
@@ -139,6 +173,27 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
       for (var element in refundDetails!.listImage) {
         listImage.add(element);
       }
+      receiptData["items"] = listProductChange
+          .map((item) => {
+                "name": item.name,
+                "qty": item.qty.toStringAsFixed(0),
+                "unit": item.unitName,
+                "price": item.price.toStringAsFixed(2),
+                "discount": "0.00",
+                "discountProduct": item.netTotal.toStringAsFixed(2)
+              })
+          .toList();
+      receiptData["refundItems"] = listProductRefund
+          .map((item) => {
+                "name": item.name,
+                "condition": item.condition,
+                "qty": item.qty.toStringAsFixed(0),
+                "unit": item.unitName,
+                "price": item.price.toStringAsFixed(2),
+                "discount": "0.00",
+                "discountProduct": item.netTotal.toStringAsFixed(2)
+              })
+          .toList();
     }
 
     context.loaderOverlay.hide();
@@ -196,7 +251,7 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
   //         receiptData['total'] =
   //             "${response.data['data'][0]['total'].toStringAsFixed(2)}";
   //         receiptData['OBSMCD'] = "${saleDetail?.name}";
-  //         receiptData['taxno'] = "${storeDetail?.taxId}";
+  // receiptData['taxno'] = "${storeDetail?.taxId}";
 
   //         receiptData["items"] = listProduct
   //             .map((cartItem) => {
@@ -265,12 +320,17 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
     "CUOR": "",
     "OAORDT": "",
     "items": [],
-    "totaltext": "0.00",
-    "ex_vat": "0.00",
-    "vat": "0.00",
-    "discount": "0.00",
-    "discountProduct": "0.00",
-    "total": "0.00",
+    "refundItems": [],
+    "totalRefundExVat": 0.0,
+    "totalRefundVat": 0.0,
+    "totalRefund": 0.0,
+    "totalChangeExVat": 0.0,
+    "totalChangeVat": 0.0,
+    "totalChange": 0.0,
+    "totalDiff": 0.0,
+    "totaltextChange": "",
+    "totaltextRefund": "",
+    "totaltextDiff": "",
     "OBSMCD": ""
   };
 
@@ -388,6 +448,72 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
     String formattedText =
         frontText.padRight(frontSpaces) + backText.padLeft(backSpaces);
     await _printText(formattedText, fontSize: fontSize, isBold: isBold);
+  }
+
+  String formatFixedWidthRowRefund(
+    String num,
+    String itemName,
+    String qty,
+    String unit,
+    String price,
+    String discount,
+    String total,
+    // String condition,
+  ) {
+    const int numWidth = 3;
+    const int nameWidth = 25;
+    const int qtyWidth = 3;
+    const int unitWidth = 5;
+    const int priceWidth = 8;
+    const int discountWidth = 8;
+    const int totalWidth = 9;
+
+    List<String> wrapText(String text, int width) {
+      List<String> lines = [];
+      for (int i = 0; i < text.length; i += width) {
+        lines.add(text.substring(
+            i, i + width > text.length ? text.length : i + width));
+      }
+      return lines;
+    }
+
+    List<String> itemNameLines = wrapText(itemName, nameWidth);
+
+    // Ensure all wrapped lines are properly padded
+    itemNameLines = itemNameLines.map((line) {
+      return line.padRight(nameWidth + _getNoOfUpperLowerChars(line));
+    }).toList();
+    String formattedNum = num.padRight(numWidth);
+    String formattedQty = qty.padLeft(qtyWidth);
+    String formattedUnit =
+        unit.padRight(unitWidth + _getNoOfUpperLowerChars(unit));
+    String formattedPrice = price.padLeft(priceWidth);
+    String formattedDiscount = discount.padLeft(discountWidth);
+    String formattedTotal = total.padLeft(totalWidth);
+
+    StringBuffer rowBuffer = StringBuffer();
+    for (int i = 0; i < itemNameLines.length; i++) {
+      if (i == 0) {
+        rowBuffer.write(formattedNum);
+      }
+      if (i > 0) {
+        rowBuffer.write(''.padRight(numWidth));
+      }
+
+      rowBuffer.write(itemNameLines[i]);
+
+      if (i == 0) {
+        // First line includes all columns
+        rowBuffer.write(
+            '   $formattedQty $formattedUnit  $formattedPrice $formattedDiscount $formattedTotal\n');
+      } else {
+        // Subsequent lines only contain the wrapped item name
+
+        // rowBuffer.write('\n');
+      }
+    }
+
+    return rowBuffer.toString();
   }
 
   String formatFixedWidthRow2(String num, String itemName, String qty,
@@ -565,6 +691,12 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
     return ' ' * leftPadding + text;
   }
 
+  Future<void> printHeaderSeparator2() async {
+    String header = '${centerTextSeparator('', paperWidth)}';
+    Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
+    await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
+  }
+
   Future<void> printHeaderBill(String typeBill) async {
     String header = '''
 ${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', 69)}
@@ -589,6 +721,59 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
+  Future<void> printBodyBillRefund(Map<String, dynamic> data) async {
+    await printBetween('รหัสลูกค้า ${data['customer']['customercode']}',
+        'เลขที่ ${data['CUOR']}');
+    await printBetween('ชื่อลูกค้า ${data['customer']['customername']}',
+        'วันที่ ${data['OAORDT']}');
+    await printBill(
+        'ที่อยู่ ${data['customer']['address1']} ${data['customer']['address2']} ${data['customer']['address3']}');
+    await printBill('เลขประจำตัวผู้เสียภาษี ${data['customer']['taxno']}');
+    await printBill('สินค้าที่รับคืนมาจากร้านค้า');
+    await printHeaderSeparator2();
+    await printBill(
+        "\nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม");
+    String items = await data['refundItems'].asMap().entries.map((entry) {
+      int index = entry.key;
+      var item = entry.value;
+      // Safely get a substring only if the length is greater than 36
+      String itemName = "${item['name']}";
+      return formatFixedWidthRowRefund(
+        "${(index + 1).toString()}",
+        '$itemName',
+        item['qty'],
+        item['unit'],
+        item['price'],
+        item['discount'],
+        item['discountProduct'],
+        // item['condition'],
+      );
+    }).join('\n');
+    Uint8List encodedItems = await CharsetConverter.encode('TIS-620', items);
+    await PrintBluetoothThermal.writeBytes(List<int>.from(encodedItems));
+
+    double? totalValue = double.tryParse(data['totalRefund'] ?? "0");
+    String totalText = thaiNumberToWords(totalValue!);
+
+    String? totalRefundExVat =
+        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalRefundExVat'] ?? "0.00"))}";
+    String? totalRefundVat =
+        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalRefundVat'] ?? "0.00"))}";
+    String? totalRefund =
+        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalRefund'] ?? "0.00"))}";
+
+    await printBetween('รวมมูลค่าสินค้ารับคืน', totalRefundExVat);
+    await printBetween('ภาษีมูลค่าเพิ่ม 7%', totalRefundVat);
+    await printBetween('จำนวนเงินรวมสุทธิ', totalRefund);
+    await printBetween("", "($totalText)");
+    String footer = '''
+    ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
+    ${leftRightText('', 'ลายเซ็นลูกค้า\n', 61)}
+    ''';
+    Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
+    await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
+  }
+
   Future<void> printBodyBill(Map<String, dynamic> data) async {
     await printBetween('รหัสลูกค้า ${data['customer']['customercode']}',
         'เลขที่ ${data['CUOR']}');
@@ -597,14 +782,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     await printBill(
         'ที่อยู่ ${data['customer']['address1']} ${data['customer']['address2']} ${data['customer']['address3']}');
     await printBill('เลขประจำตัวผู้เสียภาษี ${data['customer']['taxno']}');
+    await printBill('สินค้าที่เปลี่ยนให้ร้านค้า');
+    await printHeaderSeparator2();
     await printBill(
         "\nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม");
-//     String body = '''
-// \nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม
-// ''';
-//     Uint8List encodedBody = await CharsetConverter.encode('TIS-620', body);
-//     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedBody));
-
     String items = await data['items'].asMap().entries.map((entry) {
       int index = entry.key;
       var item = entry.value;
@@ -623,26 +804,51 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     Uint8List encodedItems = await CharsetConverter.encode('TIS-620', items);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedItems));
 
-    double? totalValue = double.tryParse(data['totaltext'] ?? "00.00");
-    String totalText = thaiNumberToWords(totalValue!);
-    String? totalCurrency =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totaltext'] ?? "00.00"))}";
-    String? discountCurrency =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['discount'] ?? "00.00"))}";
+    String? totalChangeExVat =
+        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalChangeExVat'] ?? "0.00"))}";
+    String? totalChangeVat =
+        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalChangeVat'] ?? "0.00"))}";
+    String? totalChange =
+        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalChange'] ?? "0.00"))}";
+    String? totalDiff =
+        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalDiff'] ?? "0.00"))}";
 
-    String? discountProduct =
-        " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['discountProduct'] ?? "00.00"))}";
+    // double? totalValue = double.tryParse(data['totaltext'] ?? "00.00");
+    // String totalText = thaiNumberToWords(totalValue!);
+    double? totalValueR = double.tryParse(data['totalChange'] ?? "0.00");
+    String totalTextR = thaiNumberToWords(totalValueR!);
 
-    await printBetween('รวมมูลค่าสินค้า', data['ex_vat'].toString());
-    // await printBetween('ส่วนลด', '0.00');
-    await printBetween('ภาษีมูลค่าเพิ่ม 7%', data['vat'].toString());
-    await printBetween('ส่วนลดท้ายบิล', discountProduct);
-    await printBetween('ส่วนลดสินค้า', discountCurrency);
-    await printBetween('จำนวนเงินรวมสุทธิ', totalCurrency);
-    await printBetween("", "($totalText)");
+    double? totalValueD = double.tryParse(data['totalDiff'] ?? "0.00");
+    String totalTextD = thaiNumberToWords(totalValueD!);
+
+    await printBetween('รวมมูลค่าสินค้ารับคืน', totalChangeExVat);
+    await printBetween('ภาษีมูลค่าเพิ่ม 7%', totalChangeVat);
+    await printBetween('จำนวนเงินรวมสุทธิ', totalChange);
+    await printBetween("", "($totalTextR)\n");
+    await printBetween('ค่าส่วนต่างที่ต้องชำระ', totalDiff);
+    await printBetween("", "($totalTextD)");
+
+    // String? totalChange =
+    //     " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalChange'] ?? "00.00"))}";
+    // String? totalRefund =
+    //     " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalRefund'] ?? "00.00"))}";
+    // String? vat =
+    //     " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['vat'] ?? "00.00"))}";
+    // String? totalExVat =
+    //     " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['totalExVat'] ?? "00.00"))}";
+    // String? totalCurrency =
+    //     " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['total'] ?? "00.00"))}";
+
+    // await printBetween('รวมรับคืนสินค้า', totalChange);
+    // await printBetween('รวมรับเปลี่ยนสินค้า', totalRefund);
+    // await printBetween('ภาษีมูลค่าเพิ่ม 7%', vat);
+    // await printBetween(
+    //     'รวมมูลค่าส่วนต่างก่อนหัก ภาษีมูลค่าเพิ่ม 7%', totalExVat);
+    // await printBetween('จำนวนเงินรวมสุทธิ', totalCurrency);
+    // await printBetween("", "($totalText)");
     String footer = '''
     ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
-    ${leftRightText('', 'ลายเซ็นลูกค้า\n\n\n', 58)}
+    ${leftRightText('', 'ลายเซ็นลูกค้า\n\n\n', 61)}
     ''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
@@ -738,12 +944,11 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
   Future<void> printTest() async {
     bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
     if (connectionStatus) {
-      // await printHeaderSeparator();
+      await printHeaderBill('ใบลดหนี้');
+      await printBodyBillRefund(receiptData);
+      await printHeaderSeparator();
       await printHeaderBill('บิลเงินสด/ใบกำกับภาษี');
       await printBodyBill(receiptData);
-      // await printHeaderSeparator();
-      // await printHeaderBill('ใบลดหนี้');
-      // await printBodyBill(receiptData);
     } else {
       toastification.show(
         autoCloseDuration: const Duration(seconds: 5),
@@ -1396,11 +1601,63 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
+                            "รวมรับคืนสินค้าก่อนหัก VAT 7%",
+                            style: Styles.grey18(context),
+                          ),
+                          Text(
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefundExVat : 0)} บาท",
+                            style: Styles.grey18(context),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "VAT 7%",
+                            style: Styles.grey18(context),
+                          ),
+                          Text(
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefundVat : 0)} บาท",
+                            style: Styles.grey18(context),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
                             "รวมรับคืนสินค้า",
                             style: Styles.grey18(context),
                           ),
                           Text(
                             "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefund : 0)} บาท",
+                            style: Styles.grey18(context),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "รวมรับเปลี่ยนสินค้าก่อนหัก VAT 7%",
+                            style: Styles.grey18(context),
+                          ),
+                          Text(
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChangeExVat : 0)} บาท",
+                            style: Styles.grey18(context),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "VAT 7%",
+                            style: Styles.grey18(context),
+                          ),
+                          Text(
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChangeVat : 0)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1422,50 +1679,11 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "รวมมูลค่าส่วนต่าง",
-                            style: Styles.grey18(context),
-                          ),
-                          Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalExVat : 0)} บาท",
-                            style: Styles.grey18(context),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "VAT 7%",
-                            style: Styles.grey18(context),
-                          ),
-                          Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.vat : 0)} บาท",
-                            style: Styles.grey18(context),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "รวมมูลค่าก่อนหัก VAT 7%",
-                            style: Styles.grey18(context),
-                          ),
-                          Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalExVat : 0)} บาท",
-                            style: Styles.grey18(context),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
                             "จำนวนเงินรวมสุทธิ",
                             style: Styles.green24(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.total : 0)} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalDiff : 0)} บาท",
                             style: Styles.green24(context),
                           )
                         ],

@@ -353,24 +353,24 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'][0]['listProduct'];
-        final List<dynamic> data2 = response.data['data'][0]['listPromotion'];
+        // final List<dynamic> data2 = response.data['data'][0]['listPromotion'];
         setState(() {
           if (cartList.length == 0) {
             cartList = data.map((item) => CartList.fromJson(item)).toList();
           }
-          promotionList =
-              data2.map((item) => PromotionList.fromJson(item)).toList();
-          listPromotions.clear();
-          for (var promotion in promotionList) {
-            for (var item in promotion.listPromotion) {
-              listPromotions.add(item);
-            }
-          }
-          subtotal = response.data['data'][0]['subtotal'].toDouble();
-          discount = response.data['data'][0]['discount'].toDouble();
-          discountProduct =
-              response.data['data'][0]['discountProduct'].toDouble();
-          vat = response.data['data'][0]['vat'].toDouble();
+          // promotionList =
+          //     data2.map((item) => PromotionList.fromJson(item)).toList();
+          // listPromotions.clear();
+          // for (var promotion in promotionList) {
+          //   for (var item in promotion.listPromotion) {
+          //     listPromotions.add(item);
+          //   }
+          // }
+          // subtotal = response.data['data'][0]['subtotal'].toDouble();
+          // discount = response.data['data'][0]['discount'].toDouble();
+          // discountProduct =
+          //     response.data['data'][0]['discountProduct'].toDouble();
+          vat = response.data['data'][0]['totalVat'].toDouble();
           totalExVat = response.data['data'][0]['totalExVat'].toDouble();
           total = response.data['data'][0]['total'].toDouble();
         });
@@ -407,7 +407,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
         endpoint: 'api/cash/cart/delete',
         method: 'POST',
         body: {
-          "type": "sale",
+          "type": "give",
           "area": "${User.area}",
           "storeId": "${widget.storeId}",
           "id": "${cart.id}",

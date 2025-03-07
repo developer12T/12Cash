@@ -10,6 +10,7 @@ import 'package:_12sale_app/core/components/chart/ItemSummarize.dart';
 import 'package:_12sale_app/core/components/chart/LineChart.dart';
 import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/giveaways/GiveAwaysHistoryScreen.dart';
 import 'package:_12sale_app/core/page/giveaways/GiveAwaysScreen.dart';
 import 'package:_12sale_app/core/page/notification/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/3D_canvas/Ractangle3D.dart';
@@ -185,7 +186,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         icon_4: Icons.campaign_rounded,
         onTap4: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => GiveAwaysScreen()),
+            MaterialPageRoute(builder: (context) => GiveawaysHistoryScreen()),
           );
         },
         title_5: "ตั้งค่าเครื่องปริ้น",

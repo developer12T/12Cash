@@ -77,7 +77,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
     super.initState();
     _getStore();
     _getGiveType();
-    _getProduct();
+    // _getProductFilter();
+    // _getProduct(groupList);
   }
 
   @override
@@ -249,6 +250,13 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                 data.map((item) => GiveType.fromJson(item)).toList();
           });
         }
+        Timer(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() {
+              _loadingProduct = false;
+            });
+          }
+        });
       }
     } catch (e) {
       print("Error $e");
@@ -363,7 +371,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
     }
   }
 
-  Future<void> _getProduct() async {
+  Future<void> _getProduct(List<String> groups) async {
     try {
       ApiService apiService = ApiService();
       await apiService.init();
@@ -373,7 +381,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
         method: 'POST',
         body: {
           "type": "sale",
-          "group": selectedGroups,
+          "group": groups,
           "brand": selectedBrands,
           "size": selectedSize,
           "flavour": selectedFlavours
@@ -807,7 +815,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                         onTap: () {
                                           _clearFilter();
                                           context.loaderOverlay.show();
-                                          _getProduct();
+                                          _getProduct(groupList);
                                         },
                                         child: badgeFilter(
                                           openIcon: false,
@@ -882,6 +890,15 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                           SizedBox(
                             height: 16,
                           ),
+                          productList.isNotEmpty
+                              ? SizedBox()
+                              : Expanded(
+                                  child: Center(
+                                  child: Text(
+                                    "กรุณาเลือกประเภทการแจกก่อน",
+                                    style: Styles.black18(context),
+                                  ),
+                                )),
                           _isGridView
                               ? Expanded(
                                   child: Column(
@@ -1969,6 +1986,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                   color: Colors.white,
                                   size: 30,
                                 ),
+                                SizedBox(
+                                  width: 8,
+                                ),
                                 Text('เลือกร้านค้า',
                                     style: Styles.white24(context)),
                               ],
@@ -2352,23 +2372,31 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                                                 .giveId;
                                                       });
                                                       // await _getCart();
+
                                                       setState(() {
                                                         isGiveTypeText =
                                                             filter[index].name;
-
                                                         isGiveTypeVal =
                                                             "${filter[index].giveId}";
                                                       });
-                                                      setState(() {
-                                                        selectedBrands = [];
-                                                        selectedGroups = [];
-                                                        selectedSizes = [];
-                                                        selectedFlavours = [];
-                                                        brandList = [];
-                                                        sizeList = [];
-                                                        flavourList = [];
-                                                      });
-                                                      _getProductFilter();
+                                                      // if (isGiveTypeVal !=
+                                                      //     filter[index]
+                                                      //         .giveId) {
+                                                      //   setState(() {
+                                                      //     selectedBrands = [];
+                                                      //     selectedGroups = [];
+                                                      //     selectedSizes = [];
+                                                      //     selectedFlavours = [];
+                                                      //     brandList = [];
+                                                      //     sizeList = [];
+                                                      //     flavourList = [];
+                                                      //   });
+                                                      // }
+                                                      await _getProductFilter();
+                                                      print(
+                                                          "groupList: $groupList");
+                                                      await _getProduct(
+                                                          groupList);
                                                     },
                                                     child: Column(
                                                       children: [
@@ -2644,6 +2672,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                     sizeList = [];
                                     flavourList = [];
                                   });
+                                  context.loaderOverlay.show();
+                                  _getProduct(groupList).then((_) {
+                                    context.loaderOverlay.hide();
+                                    Navigator.pop(context);
+                                  });
                                 },
                                 text: 'ล้างข้อมูล',
                                 blackGroundColor: Styles.secondaryColor,
@@ -2656,7 +2689,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                             Expanded(
                               child: ButtonFullWidth(
                                 onPressed: () async {
-                                  await _getProduct();
+                                  await _getProduct(groupList);
                                   Navigator.pop(context);
                                 },
                                 text: 'ค้นหา',
@@ -2799,7 +2832,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                         selectedBrands = selectedBrands;
                                       }
                                     });
-                                    _getFliterBrand();
+                                    // _getFliterBrand();
                                     print("selectedBrands: ${selectedBrands}");
                                   },
                                 );
@@ -2835,6 +2868,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                     sizeList = [];
                                     flavourList = [];
                                   });
+                                  context.loaderOverlay.show();
+                                  _getProduct(groupList).then((_) {
+                                    context.loaderOverlay.hide();
+                                    Navigator.pop(context);
+                                  });
                                 },
                                 text: 'ล้างข้อมูล',
                                 blackGroundColor: Styles.secondaryColor,
@@ -2847,7 +2885,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                             Expanded(
                               child: ButtonFullWidth(
                                 onPressed: () async {
-                                  await _getProduct();
+                                  await _getProduct(groupList);
                                   Navigator.pop(context);
                                 },
                                 text: 'ค้นหา',
@@ -2990,7 +3028,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                         selectedSizes = selectedSizes;
                                       }
                                     });
-                                    _getFliterSize();
+                                    _getProductFilter();
+                                    // _getFliterSize();
                                   },
                                 );
                               }).toList(),
@@ -3025,6 +3064,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                   sizeList = [];
                                   flavourList = [];
                                 });
+                                context.loaderOverlay.show();
+                                _getProduct(groupList).then((_) {
+                                  context.loaderOverlay.hide();
+                                  Navigator.pop(context);
+                                });
                               },
                               text: 'ล้างข้อมูล',
                               blackGroundColor: Styles.secondaryColor,
@@ -3037,7 +3081,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                           Expanded(
                             child: ButtonFullWidth(
                               onPressed: () async {
-                                await _getProduct();
+                                await _getProduct(groupList);
                                 Navigator.pop(context);
                               },
                               text: 'ค้นหา',
@@ -3213,6 +3257,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                                   sizeList = [];
                                   flavourList = [];
                                 });
+                                context.loaderOverlay.show();
+                                _getProduct(groupList).then((_) {
+                                  context.loaderOverlay.hide();
+                                  Navigator.pop(context);
+                                });
                               },
                               text: 'ล้างข้อมูล',
                               blackGroundColor: Styles.secondaryColor,
@@ -3225,7 +3274,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> {
                           Expanded(
                             child: ButtonFullWidth(
                               onPressed: () async {
-                                await _getProduct();
+                                await _getProduct(groupList);
                                 Navigator.pop(context);
                               },
                               text: 'ค้นหา',

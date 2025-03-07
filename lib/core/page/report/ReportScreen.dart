@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/order/InvoiceCard.dart';
 import 'package:_12sale_app/core/components/refund/RefundCard.dart';
+import 'package:_12sale_app/core/page/giveaways/GiveAwaysDetailScreen.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 import 'package:_12sale_app/core/page/refund/RefundDetailScreen.dart';
 import 'package:_12sale_app/core/page/withdraw/PrinterGiveAwaysScreen.dart';
@@ -174,7 +175,7 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                           onDetailsPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => PrintWithdraw(
+                                builder: (context) => OrderDetailScreen(
                                     orderId: orders[index].orderId),
                               ),
                             );

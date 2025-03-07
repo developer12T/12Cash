@@ -10,11 +10,15 @@ class RefundDetail {
   final String status;
   final List<Product> listProductRefund;
   final List<Product> listProductChange;
-  final double totalChange;
+
+  final double totalRefundExVat;
+  final double totalRefundVat;
   final double totalRefund;
-  final double vat;
-  final double totalExVat;
-  final double total;
+  final double totalChangeExVat;
+  final double totalChangeVat;
+  final double totalChange;
+  final double totalDiff;
+
   final Shipping shipping;
   final String paymentMethod;
   final String paymentStatus;
@@ -34,11 +38,13 @@ class RefundDetail {
     required this.status,
     required this.listProductRefund,
     required this.listProductChange,
-    required this.totalChange,
+    required this.totalRefundExVat,
+    required this.totalRefundVat,
     required this.totalRefund,
-    required this.vat,
-    required this.totalExVat,
-    required this.total,
+    required this.totalChangeExVat,
+    required this.totalChangeVat,
+    required this.totalChange,
+    required this.totalDiff,
     required this.shipping,
     required this.paymentMethod,
     required this.paymentStatus,
@@ -64,11 +70,15 @@ class RefundDetail {
       listProductChange: (json['listProductChange'] as List)
           .map((item) => Product.fromJson(item))
           .toList(),
-      totalChange: double.tryParse(json['totalChange'].toString()) ?? 0.0,
+      totalRefundExVat:
+          double.tryParse(json['totalRefundExVat'].toString()) ?? 0.0,
+      totalRefundVat: double.tryParse(json['totalRefundVat'].toString()) ?? 0.0,
       totalRefund: double.tryParse(json['totalRefund'].toString()) ?? 0.0,
-      vat: double.tryParse(json['vat'].toString()) ?? 0.0,
-      totalExVat: double.tryParse(json['totalExVat'].toString()) ?? 0.0,
-      total: double.tryParse(json['total'].toString()) ?? 0.0,
+      totalChangeExVat:
+          double.tryParse(json['totalChangeExVat'].toString()) ?? 0.0,
+      totalChangeVat: double.tryParse(json['totalChangeVat'].toString()) ?? 0.0,
+      totalChange: double.tryParse(json['totalChange'].toString()) ?? 0.0,
+      totalDiff: double.tryParse(json['totalDiff'].toString()) ?? 0.0,
       shipping: Shipping.fromJson(json['shipping']),
       paymentMethod: json['paymentMethod'],
       paymentStatus: json['paymentStatus'],
@@ -95,11 +105,13 @@ class RefundDetail {
           listProductRefund.map((product) => product.toJson()).toList(),
       'listProductChange':
           listProductChange.map((product) => product.toJson()).toList(),
-      'totalChange': totalChange.toStringAsFixed(2),
-      'totalRefund': totalRefund.toStringAsFixed(2),
-      'vat': vat.toStringAsFixed(2),
-      'totalExVat': totalExVat.toStringAsFixed(2),
-      'total': total.toStringAsFixed(2),
+      'totalRefundExVat,': totalRefundExVat,
+      'totalRefundVat': totalRefundVat,
+      'totalRefund': totalRefund,
+      'totalChangeExVat': totalChangeExVat,
+      'totalChangeVat': totalChangeVat,
+      'totalChange': totalChange,
+      'totalDiff': totalDiff,
       'shipping': shipping.toJson(),
       'paymentMethod': paymentMethod,
       'paymentStatus': paymentStatus,
