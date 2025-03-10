@@ -1188,7 +1188,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "พนักงานขาย : ${refundDetails?.sale.name} เขต ${refundDetails?.sale.warehouse}",
+                                  "พนักงานขาย : ${refundDetails?.sale.name}",
                                   style: Styles.black24(context),
                                 )
                               ],
@@ -1601,24 +1601,37 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "รวมรับคืนสินค้าก่อนหัก VAT 7%",
+                            "รวมรับเปลี่ยนสินค้า",
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefundExVat : 0)} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChangeExVat : 0)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
                       ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     Text(
+                      //       "รวมรับเปลี่ยนสินค้า VAT",
+                      //       style: Styles.grey18(context),
+                      //     ),
+                      //     Text(
+                      //       "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChangeVat : 0)} บาท",
+                      //       style: Styles.grey18(context),
+                      //     )
+                      //   ],
+                      // ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "VAT 7%",
+                            "รวมรับเปลี่ยนสินค้ารวม VAT",
                             style: Styles.grey18(context),
                           ),
                           Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefundVat : 0)} บาท",
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChange : 0)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
@@ -1631,50 +1644,38 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                             style: Styles.grey18(context),
                           ),
                           Text(
+                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefundExVat : 0)} บาท",
+                            style: Styles.grey18(context),
+                          )
+                        ],
+                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     Text(
+                      //       "รวมรับคืนสินค้า VAT",
+                      //       style: Styles.grey18(context),
+                      //     ),
+                      //     Text(
+                      //       "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefundVat : 0)} บาท",
+                      //       style: Styles.grey18(context),
+                      //     )
+                      //   ],
+                      // ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "รวมรับคืนสินค้ารวม VAT",
+                            style: Styles.grey18(context),
+                          ),
+                          Text(
                             "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalRefund : 0)} บาท",
                             style: Styles.grey18(context),
                           )
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "รวมรับเปลี่ยนสินค้าก่อนหัก VAT 7%",
-                            style: Styles.grey18(context),
-                          ),
-                          Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChangeExVat : 0)} บาท",
-                            style: Styles.grey18(context),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "VAT 7%",
-                            style: Styles.grey18(context),
-                          ),
-                          Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChangeVat : 0)} บาท",
-                            style: Styles.grey18(context),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "รวมรับเปลี่ยนสินค้า",
-                            style: Styles.grey18(context),
-                          ),
-                          Text(
-                            "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundDetails != null ? refundDetails?.totalChange : 0)} บาท",
-                            style: Styles.grey18(context),
-                          )
-                        ],
-                      ),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

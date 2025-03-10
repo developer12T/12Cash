@@ -652,7 +652,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(
-          title: "${widget.storeName}",
+          title: "ขอคำอนุมัติคืนสินค้า",
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -788,7 +788,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  "${widget.storeId}",
+                                  "${widget.storeName} ${widget.storeId}",
                                   style: Styles.black24(context),
                                 )
                               ],

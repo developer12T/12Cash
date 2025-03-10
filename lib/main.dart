@@ -359,6 +359,25 @@ class _MyAppState extends State<MyApp> {
       splitScreenMode: true,
       builder: (context, child) {
         return GlobalLoaderOverlay(
+          overlayWidgetBuilder: (dynamic progress) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  color: Styles.white,
+                ),
+                Text(
+                  "กรุณารอสักครู่...",
+                  style: Styles.white18(context),
+                ),
+                // SizedBox(
+                //   height: 50,
+                // ),
+                if (progress != null) Text(progress)
+              ],
+            );
+          },
+          overlayColor: Styles.primaryColor.withOpacity(0.8),
           child: MaterialApp(
             routes: {
               '/': (context) => AuthCheck(),

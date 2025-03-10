@@ -5,6 +5,8 @@ import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
+import 'package:_12sale_app/core/components/datepicker/DatePickerHelper.dart';
+import 'package:_12sale_app/core/components/filter/BadgeFilterRefund.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/page/refund/CreateRefundScreen.dart';
@@ -676,7 +678,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                     Expanded(
                                       child: Text(
                                           isStoreId != ""
-                                              ? nameStore
+                                              ? "${nameStore} ${isStoreId}"
                                               : " กรุณาเลือกร้านค้า",
                                           style: Styles.black18(context)),
                                     )
@@ -757,13 +759,41 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
-                                        _showFilterGroupSheet(context);
+                                        BadageRefundFilter.showFilterSheet(
+                                          isSelect: isSelect,
+                                          context: context,
+                                          title: 'เลือกกลุ่ม',
+                                          title2: 'กลุ่ม',
+                                          itemList: groupList,
+                                          selectedItems: selectedGroups,
+                                          onItemSelected: (data, selected) {
+                                            if (selected) {
+                                              selectedGroups.add(data);
+                                            } else {
+                                              selectedGroups.remove(data);
+                                            }
+                                            _getFliterGroup();
+                                          },
+                                          onClear: () {
+                                            selectedGroups.clear();
+                                            selectedBrands.clear();
+                                            selectedSizes.clear();
+                                            selectedFlavours.clear();
+                                            brandList.clear();
+                                            sizeList.clear();
+                                            flavourList.clear();
+                                            context.loaderOverlay.show();
+                                            _getProduct(isSelect).then((_) =>
+                                                context.loaderOverlay.hide());
+                                          },
+                                          onSearch: _getProduct,
+                                        );
                                       },
                                       child: badgeFilter(
                                         isSelected: selectedGroups.isNotEmpty
                                             ? true
                                             : false,
-                                        Text(
+                                        child: Text(
                                           selectedGroups.isEmpty
                                               ? 'กลุ่ม'
                                               : selectedGroups.join(', '),
@@ -775,18 +805,46 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                           maxLines: 1, // Restrict to 1 line
                                           softWrap: false, // Avoid wrapping
                                         ),
-                                        selectedGroups.isEmpty ? 85 : 120,
+                                        width:
+                                            selectedGroups.isEmpty ? 85 : 120,
                                       ),
                                     ),
                                     GestureDetector(
                                       onTap: () {
-                                        _showFilterBrandSheet(context);
+                                        BadageRefundFilter.showFilterSheet(
+                                          isSelect: isSelect,
+                                          context: context,
+                                          title: 'เลือกแบรนด์',
+                                          title2: 'แบรนด์',
+                                          itemList: brandList,
+                                          selectedItems: selectedBrands,
+                                          onItemSelected: (data, selected) {
+                                            if (selected) {
+                                              selectedBrands.add(data);
+                                            } else {
+                                              selectedBrands.remove(data);
+                                            }
+                                            _getFliterBrand();
+                                          },
+                                          onClear: () {
+                                            selectedBrands.clear();
+                                            selectedSizes.clear();
+                                            selectedFlavours.clear();
+                                            brandList.clear();
+                                            sizeList.clear();
+                                            flavourList.clear();
+                                            context.loaderOverlay.show();
+                                            _getProduct(isSelect).then((_) =>
+                                                context.loaderOverlay.hide());
+                                          },
+                                          onSearch: _getProduct,
+                                        );
                                       },
                                       child: badgeFilter(
                                         isSelected: selectedBrands.isNotEmpty
                                             ? true
                                             : false,
-                                        Text(
+                                        child: Text(
                                           selectedBrands.isEmpty
                                               ? 'แบรนด์'
                                               : selectedBrands.join(', '),
@@ -798,18 +856,45 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                           maxLines: 1, // Restrict to 1 line
                                           softWrap: false, // Avoid wrapping
                                         ),
-                                        selectedBrands.isEmpty ? 120 : 120,
+                                        width:
+                                            selectedBrands.isEmpty ? 120 : 120,
                                       ),
                                     ),
                                     GestureDetector(
                                       onTap: () {
-                                        _showFilterSizeSheet(context);
+                                        BadageRefundFilter.showFilterSheet(
+                                          isSelect: isSelect,
+                                          context: context,
+                                          title: 'เลือกขนาด',
+                                          title2: 'ขนาด',
+                                          itemList: sizeList,
+                                          selectedItems: selectedSizes,
+                                          onItemSelected: (data, selected) {
+                                            if (selected) {
+                                              selectedSizes.add(data);
+                                            } else {
+                                              selectedSizes.remove(data);
+                                            }
+                                            _getFliterSize();
+                                          },
+                                          onClear: () {
+                                            selectedSizes.clear();
+                                            selectedFlavours.clear();
+                                            brandList.clear();
+                                            sizeList.clear();
+                                            flavourList.clear();
+                                            context.loaderOverlay.show();
+                                            _getProduct(isSelect).then((_) =>
+                                                context.loaderOverlay.hide());
+                                          },
+                                          onSearch: _getProduct,
+                                        );
                                       },
                                       child: badgeFilter(
                                         isSelected: selectedSizes.isNotEmpty
                                             ? true
                                             : false,
-                                        Text(
+                                        child: Text(
                                           selectedSizes.isEmpty
                                               ? 'ขนาด'
                                               : selectedSizes.join(', '),
@@ -821,18 +906,41 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                           maxLines: 1, // Restrict to 1 line
                                           softWrap: false, // Avoid wrapping
                                         ),
-                                        selectedSizes.isEmpty ? 120 : 120,
+                                        width:
+                                            selectedSizes.isEmpty ? 120 : 120,
                                       ),
                                     ),
                                     GestureDetector(
                                       onTap: () {
-                                        _showFilterFlavourSheet(context);
+                                        BadageRefundFilter.showFilterSheet(
+                                          isSelect: isSelect,
+                                          context: context,
+                                          title: 'เลือกรสชาติ',
+                                          title2: 'รสชาติ',
+                                          itemList: flavourList,
+                                          selectedItems: selectedFlavours,
+                                          onItemSelected: (data, selected) {
+                                            if (selected) {
+                                              selectedFlavours.add(data);
+                                            } else {
+                                              selectedFlavours.remove(data);
+                                            }
+                                          },
+                                          onClear: () {
+                                            selectedFlavours.clear();
+                                            flavourList.clear();
+                                            context.loaderOverlay.show();
+                                            _getProduct(isSelect).then((_) =>
+                                                context.loaderOverlay.hide());
+                                          },
+                                          onSearch: _getProduct,
+                                        );
                                       },
                                       child: badgeFilter(
                                         isSelected: selectedFlavours.isNotEmpty
                                             ? true
                                             : false,
-                                        Text(
+                                        child: Text(
                                           selectedFlavours.isEmpty
                                               ? 'รสชาติ'
                                               : selectedFlavours.join(', '),
@@ -844,21 +952,25 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                           maxLines: 1, // Restrict to 1 line
                                           softWrap: false, // Avoid wrapping
                                         ),
-                                        selectedFlavours.isEmpty ? 120 : 120,
+                                        width: selectedFlavours.isEmpty
+                                            ? 120
+                                            : 120,
                                       ),
                                     ),
                                     GestureDetector(
                                       onTap: () {
                                         _clearFilter();
-                                        _getProduct(isSelect);
+                                        context.loaderOverlay.show();
+                                        _getProduct(isSelect).then((_) =>
+                                            context.loaderOverlay.hide());
                                       },
                                       child: badgeFilter(
                                         openIcon: false,
-                                        Text(
+                                        child: Text(
                                           'ล้างตัวเลือก',
                                           style: Styles.grey18(context),
                                         ),
-                                        110,
+                                        width: 110,
                                       ),
                                     ),
                                   ],
@@ -966,7 +1078,11 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                             setState(() {
                               isSelect = v;
                             });
-                            await _getProduct(v);
+                            context.loaderOverlay.show();
+
+                            await _getProduct(v).then((_) {
+                              context.loaderOverlay.hide();
+                            });
                             print(isSelect);
                             // if (v == 1) {
                             //   await _getProduct(v);
@@ -1504,7 +1620,18 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         ),
                                       ),
                                       onPressed: () {
-                                        _showDatePicker(context, setModalState);
+                                        // _showDatePicker(context, setModalState);
+
+                                        DatePickerHelper.showDatePickerDialog(
+                                          context: context,
+                                          setModalState: setModalState,
+                                          initialDate: DateTime.now(),
+                                          onDateSelected: (DateTime date) {
+                                            setState(() {
+                                              _selectedDate = date;
+                                            });
+                                          },
+                                        );
                                       },
                                       child: Row(
                                         children: [
@@ -2892,874 +3019,57 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     );
   }
 
-  Widget badgeFilter(Widget child, double width,
-      {bool openIcon = true, bool isSelected = false}) {
-    return GestureDetector(
-      // onTap: () => onTap,
-      child: Container(
-        margin: const EdgeInsets.all(8.0),
-        width: width,
-        height: 50,
-        decoration: BoxDecoration(
-          // color: Styles.primaryColor,
-          border: Border.all(
-            color: isSelected ? Styles.primaryColor : Colors.grey,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: child,
-                ),
-                (openIcon)
-                    ? Row(
-                        children: [
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.arrow_drop_down_rounded,
-                            color:
-                                isSelected ? Styles.primaryColor : Colors.grey,
-                          )
-                        ],
-                      )
-                    : const SizedBox(),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
+  // void _showDatePicker(BuildContext context, StateSetter setModalState) async {
+  //   final DateTime? pickedDate = await showDatePicker(
+  //     locale: Locale('th', 'TH'),
+  //     context: context,
+  //     initialDate: DateTime.now(),
+  //     firstDate: DateTime(DateTime.now().year),
+  //     lastDate: DateTime(DateTime.now().year + 3),
+  //     initialEntryMode: DatePickerEntryMode.calendarOnly,
+  //     builder: (BuildContext context, Widget? child) {
+  //       return Theme(
+  //         data: Theme.of(context).copyWith(
+  //           textTheme: TextTheme(
+  //             headlineSmall: Styles.white18(context), // Month & Year in header
+  //             headlineLarge: Styles.white18(context),
+  //             headlineMedium: Styles.white18(context),
+  //             titleMedium: Styles.white18(context), // Selected date
+  //             titleLarge: Styles.white18(context),
+  //             titleSmall: Styles.white18(context),
+  //             bodyMedium: Styles.white18(context), // Day numbers in calendar
+  //             bodyLarge: Styles.white18(context),
+  //             bodySmall: Styles.white18(context),
+  //             labelLarge: Styles.white18(context), // OK / Cancel buttons
+  //             labelMedium: Styles.white18(context),
+  //             labelSmall: Styles.white18(context),
+  //           ),
+  //           colorScheme: const ColorScheme.light(
+  //             surface: Styles.primaryColor,
 
-  void _showFilterGroupSheet(BuildContext context) {
-    double sreenWidth = MediaQuery.of(context).size.width;
-    double sreenHeight = MediaQuery.of(context).size.height;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 0.6,
-            builder: (context, scrollController) {
-              return Container(
-                width: sreenWidth * 0.95,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SizedBox(width: 16),
-                          Text('เลือกกลุ่ม', style: Styles.white24(context)),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 8.0),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                const SizedBox(width: 16),
-                                Text('กลุ่ม', style: Styles.black24(context)),
-                              ],
-                            ),
-                            Divider(
-                              color: Colors.grey[200],
-                              thickness: 1,
-                              indent: 16,
-                              endIndent: 16,
-                            ),
-                            Wrap(
-                              spacing: 8.0,
-                              runSpacing: 8.0,
-                              children: groupList.map((data) {
-                                bool isSelected = selectedGroups.contains(data);
-                                return ChoiceChip(
-                                  showCheckmark: false,
-                                  label: Text(
-                                    data,
-                                    style: isSelected
-                                        ? Styles.pirmary18(context)
-                                        : Styles.grey18(context),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                  ),
-                                  selected: selectedGroups.contains(data),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? Styles.primaryColor
-                                        : Colors.grey, // Change border color
-                                    width: 1.5,
-                                  ),
-                                  backgroundColor: Colors.white,
-                                  selectedColor: Colors.white,
-                                  onSelected: (selected) {
-                                    setModalState(() {
-                                      if (selected) {
-                                        selectedGroups.add(data);
-                                      } else {
-                                        selectedGroups.remove(data);
-                                      }
-                                    });
-                                    setState(() {
-                                      if (selected) {
-                                        selectedGroups = selectedGroups;
-                                      } else {
-                                        selectedGroups = selectedGroups;
-                                      }
-                                    });
-                                    _getFliterGroup();
-                                  },
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: ButtonFullWidth(
-                                onPressed: () async {
-                                  setModalState(() {
-                                    selectedBrands = [];
-                                    selectedGroups = [];
-                                    selectedSizes = [];
-                                    selectedFlavours = [];
-                                    brandList = [];
-                                    sizeList = [];
-                                    flavourList = [];
-                                  });
-                                  setState(() {
-                                    selectedBrands = [];
-                                    selectedGroups = [];
-                                    selectedSizes = [];
-                                    selectedFlavours = [];
-                                    brandList = [];
-                                    sizeList = [];
-                                    flavourList = [];
-                                  });
-                                  context.loaderOverlay.show();
-                                  _getProduct(isSelect).then((_) {
-                                    context.loaderOverlay.hide();
-                                    Navigator.pop(context);
-                                  });
-                                },
-                                text: 'ล้างข้อมูล',
-                                blackGroundColor: Styles.secondaryColor,
-                                textStyle: Styles.white18(context),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: ButtonFullWidth(
-                                onPressed: () async {
-                                  await _getProduct(isSelect);
-                                  Navigator.pop(context);
-                                },
-                                text: 'ค้นหา',
-                                blackGroundColor: Styles.primaryColor,
-                                textStyle: Styles.white18(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
-    );
-  }
+  //             primary: Styles.white, // Header background color
+  //             onPrimary: Styles.primaryColor, // Header text color
+  //             onSurface: Styles.white, // Body text color
+  //           ),
+  //           textButtonTheme: TextButtonThemeData(
+  //             style: TextButton.styleFrom(
+  //               foregroundColor: Styles.white, // Button text color
+  //             ),
+  //           ),
+  //         ),
+  //         child: child ?? const SizedBox.shrink(),
+  //       );
+  //     },
+  //   );
 
-  void _showFilterBrandSheet(BuildContext context) {
-    double sreenWidth = MediaQuery.of(context).size.width;
-    double sreenHeight = MediaQuery.of(context).size.height;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 0.6,
-
-            builder: (context, scrollController) {
-              return Container(
-                width: sreenWidth * 0.95,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SizedBox(width: 16),
-                          Text('เลือกแบรนด์', style: Styles.white24(context)),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                const SizedBox(width: 16),
-                                Text('แบรนด์', style: Styles.black24(context)),
-                              ],
-                            ),
-                            Divider(
-                              color: Colors.grey[200],
-                              thickness: 1,
-                              indent: 16,
-                              endIndent: 16,
-                            ),
-                            if (selectedGroups.isEmpty)
-                              Center(
-                                child: Text(
-                                  "กรุณาเลือกกลุ่มก่อน",
-                                  style: Styles.grey18(context),
-                                ),
-                              ),
-                            Wrap(
-                              spacing: 8.0,
-                              runSpacing: 8.0,
-                              children: brandList.map((data) {
-                                bool isSelected = selectedBrands.contains(data);
-                                return ChoiceChip(
-                                  showCheckmark: false,
-                                  label: Text(
-                                    data,
-                                    style: isSelected
-                                        ? Styles.pirmary18(context)
-                                        : Styles.grey18(context),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                  ),
-                                  selected: selectedBrands.contains(data),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? Styles.primaryColor
-                                        : Colors.grey, // Change border color
-                                    width: 1.5,
-                                  ),
-                                  backgroundColor: Colors.white,
-                                  selectedColor: Colors.white,
-                                  onSelected: (selected) {
-                                    setModalState(() {
-                                      if (selected) {
-                                        selectedBrands.add(data);
-                                      } else {
-                                        selectedBrands.remove(data);
-                                      }
-                                    });
-                                    setState(() {
-                                      if (selected) {
-                                        selectedBrands = selectedBrands;
-                                      } else {
-                                        selectedBrands = selectedBrands;
-                                      }
-                                    });
-                                    _getFliterBrand();
-                                    print("selectedBrands: ${selectedBrands}");
-                                  },
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ButtonFullWidth(
-                              onPressed: () async {
-                                setModalState(() {
-                                  selectedBrands = [];
-                                  selectedGroups = [];
-                                  selectedSizes = [];
-                                  selectedFlavours = [];
-                                  brandList = [];
-                                  sizeList = [];
-                                  flavourList = [];
-                                });
-                                setState(() {
-                                  selectedBrands = [];
-                                  selectedGroups = [];
-                                  selectedSizes = [];
-                                  selectedFlavours = [];
-                                  brandList = [];
-                                  sizeList = [];
-                                  flavourList = [];
-                                });
-                                context.loaderOverlay.show();
-                                _getProduct(isSelect).then((_) {
-                                  context.loaderOverlay.hide();
-                                  Navigator.pop(context);
-                                });
-                              },
-                              text: 'ล้างข้อมูล',
-                              blackGroundColor: Styles.secondaryColor,
-                              textStyle: Styles.white18(context),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: ButtonFullWidth(
-                              onPressed: () async {
-                                await _getProduct(isSelect);
-                                Navigator.of(context).pop();
-                              },
-                              text: 'ค้นหา',
-                              blackGroundColor: Styles.primaryColor,
-                              textStyle: Styles.white18(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ))
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
-    );
-  }
-
-  void _showFilterSizeSheet(BuildContext context) {
-    double sreenWidth = MediaQuery.of(context).size.width;
-    double sreenHeight = MediaQuery.of(context).size.height;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 0.6,
-
-            builder: (context, scrollController) {
-              return Container(
-                width: sreenWidth * 0.95,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SizedBox(width: 16),
-                          Text('เลือกขนาด', style: Styles.white24(context)),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                const SizedBox(width: 16),
-                                Text('ขนาด', style: Styles.black24(context)),
-                              ],
-                            ),
-                            Divider(
-                              color: Colors.grey[200],
-                              thickness: 1,
-                              indent: 16,
-                              endIndent: 16,
-                            ),
-                            if (selectedGroups.isEmpty)
-                              Center(
-                                child: Text(
-                                  "กรุณาเลือกกลุ่มก่อน",
-                                  style: Styles.grey18(context),
-                                ),
-                              ),
-                            Wrap(
-                              spacing: 8.0,
-                              runSpacing: 8.0,
-                              children: sizeList.map((data) {
-                                bool isSelected = selectedSizes.contains(data);
-                                return ChoiceChip(
-                                  showCheckmark: false,
-                                  label: Text(
-                                    data,
-                                    style: isSelected
-                                        ? Styles.pirmary18(context)
-                                        : Styles.grey18(context),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                  ),
-                                  selected: selectedSizes.contains(data),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? Styles.primaryColor
-                                        : Colors.grey, // Change border color
-                                    width: 1.5,
-                                  ),
-                                  backgroundColor: Colors.white,
-                                  selectedColor: Colors.white,
-                                  onSelected: (selected) {
-                                    setModalState(() {
-                                      if (selected) {
-                                        selectedSizes.add(data);
-                                      } else {
-                                        selectedSizes.remove(data);
-                                      }
-                                    });
-                                    setState(() {
-                                      if (selected) {
-                                        selectedSizes = selectedSizes;
-                                      } else {
-                                        selectedSizes = selectedSizes;
-                                      }
-                                    });
-                                    _getFliterSize();
-                                  },
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ButtonFullWidth(
-                              onPressed: () async {
-                                setModalState(() {
-                                  selectedBrands = [];
-                                  selectedGroups = [];
-                                  selectedSizes = [];
-                                  selectedFlavours = [];
-                                  brandList = [];
-                                  sizeList = [];
-                                  flavourList = [];
-                                });
-                                setState(() {
-                                  selectedBrands = [];
-                                  selectedGroups = [];
-                                  selectedSizes = [];
-                                  selectedFlavours = [];
-                                  brandList = [];
-                                  sizeList = [];
-                                  flavourList = [];
-                                });
-                                context.loaderOverlay.show();
-                                _getProduct(isSelect).then((_) {
-                                  context.loaderOverlay.hide();
-                                  Navigator.pop(context);
-                                });
-                              },
-                              text: 'ล้างข้อมูล',
-                              blackGroundColor: Styles.secondaryColor,
-                              textStyle: Styles.white18(context),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: ButtonFullWidth(
-                              onPressed: () async {
-                                await _getProduct(isSelect);
-                                Navigator.of(context).pop();
-                              },
-                              text: 'ค้นหา',
-                              blackGroundColor: Styles.primaryColor,
-                              textStyle: Styles.white18(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ))
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
-    );
-  }
-
-  void _showFilterFlavourSheet(BuildContext context) {
-    double sreenWidth = MediaQuery.of(context).size.width;
-    double sreenHeight = MediaQuery.of(context).size.height;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 0.6,
-
-            builder: (context, scrollController) {
-              return Container(
-                width: sreenWidth * 0.95,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SizedBox(width: 16),
-                          Text('เลือกรสชาติ', style: Styles.white24(context)),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                const SizedBox(width: 16),
-                                Text('รสชาติ', style: Styles.black24(context)),
-                              ],
-                            ),
-                            Divider(
-                              color: Colors.grey[200],
-                              thickness: 1,
-                              indent: 16,
-                              endIndent: 16,
-                            ),
-                            if (selectedGroups.isEmpty)
-                              Center(
-                                child: Text(
-                                  "กรุณาเลือกกลุ่มก่อน",
-                                  style: Styles.grey18(context),
-                                ),
-                              ),
-                            Wrap(
-                              spacing: 8.0,
-                              runSpacing: 8.0,
-                              children: flavourList.map((data) {
-                                bool isSelected =
-                                    selectedFlavours.contains(data);
-                                return ChoiceChip(
-                                  showCheckmark: false,
-                                  label: Text(
-                                    data,
-                                    style: isSelected
-                                        ? Styles.pirmary18(context)
-                                        : Styles.grey18(context),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                  ),
-                                  selected: selectedFlavours.contains(data),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? Styles.primaryColor
-                                        : Colors.grey, // Change border color
-                                    width: 1.5,
-                                  ),
-                                  backgroundColor: Colors.white,
-                                  selectedColor: Colors.white,
-                                  onSelected: (selected) {
-                                    setModalState(() {
-                                      if (selected) {
-                                        selectedFlavours.add(data);
-                                      } else {
-                                        selectedFlavours.remove(data);
-                                      }
-                                    });
-                                    setState(() {
-                                      if (selected) {
-                                        selectedFlavours = selectedFlavours;
-                                      } else {
-                                        selectedFlavours = selectedFlavours;
-                                      }
-                                    });
-                                  },
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: ButtonFullWidth(
-                                onPressed: () async {
-                                  setModalState(() {
-                                    selectedBrands = [];
-                                    selectedGroups = [];
-                                    selectedSizes = [];
-                                    selectedFlavours = [];
-                                    brandList = [];
-                                    sizeList = [];
-                                    flavourList = [];
-                                  });
-                                  setState(() {
-                                    selectedBrands = [];
-                                    selectedGroups = [];
-                                    selectedSizes = [];
-                                    selectedFlavours = [];
-                                    brandList = [];
-                                    sizeList = [];
-                                    flavourList = [];
-                                  });
-                                  context.loaderOverlay.show();
-                                  _getProduct(isSelect).then((_) {
-                                    context.loaderOverlay.hide();
-                                    Navigator.pop(context);
-                                  });
-                                },
-                                text: 'ล้างข้อมูล',
-                                blackGroundColor: Styles.secondaryColor,
-                                textStyle: Styles.white18(context),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: ButtonFullWidth(
-                                onPressed: () async {
-                                  await _getProduct(isSelect);
-                                  Navigator.of(context).pop();
-                                },
-                                text: 'ค้นหา',
-                                blackGroundColor: Styles.primaryColor,
-                                textStyle: Styles.white18(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
-    );
-  }
-
-  void _showDatePicker(BuildContext context, StateSetter setModalState) async {
-    final DateTime? pickedDate = await showDatePicker(
-      locale: Locale('th', 'TH'),
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(DateTime.now().year),
-      lastDate: DateTime(DateTime.now().year + 3),
-      initialEntryMode: DatePickerEntryMode.calendarOnly,
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            textTheme: TextTheme(
-              headlineSmall: Styles.white18(context), // Month & Year in header
-              headlineLarge: Styles.white18(context),
-              headlineMedium: Styles.white18(context),
-              titleMedium: Styles.white18(context), // Selected date
-              titleLarge: Styles.white18(context),
-              titleSmall: Styles.white18(context),
-              bodyMedium: Styles.white18(context), // Day numbers in calendar
-              bodyLarge: Styles.white18(context),
-              bodySmall: Styles.white18(context),
-              labelLarge: Styles.white18(context), // OK / Cancel buttons
-              labelMedium: Styles.white18(context),
-              labelSmall: Styles.white18(context),
-            ),
-            colorScheme: const ColorScheme.light(
-              surface: Styles.primaryColor,
-
-              primary: Styles.white, // Header background color
-              onPrimary: Styles.primaryColor, // Header text color
-              onSurface: Styles.white, // Body text color
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Styles.white, // Button text color
-              ),
-            ),
-          ),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
-    );
-
-    if (pickedDate != null && pickedDate != _selectedDate) {
-      setState(() {
-        _selectedDate = pickedDate;
-      });
-      setModalState(() {
-        _selectedDate = pickedDate;
-      });
-      // widget.onDateSelected(pickedDate);
-    }
-  }
+  //   if (pickedDate != null && pickedDate != _selectedDate) {
+  //     setState(() {
+  //       _selectedDate = pickedDate;
+  //     });
+  //     setModalState(() {
+  //       _selectedDate = pickedDate;
+  //     });
+  //     // widget.onDateSelected(pickedDate);
+  //   }
+  // }
 }
