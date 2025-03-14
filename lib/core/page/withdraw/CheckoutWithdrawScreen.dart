@@ -756,47 +756,42 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.all(8),
-                                            elevation: 0, // Disable shadow
-                                            shadowColor: Colors
-                                                .transparent, // Ensure no shadow color
-                                            backgroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.zero,
-                                                side: BorderSide.none),
-                                          ),
-                                          onPressed: () {
-                                            _showNoteSheet(context);
-                                          },
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                flex: 3,
-                                                child: Text(
-                                                  "หมายเหตุ :",
-                                                  style:
-                                                      Styles.black18(context),
-                                                ),
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.all(8),
+                                          elevation: 0, // Disable shadow
+                                          shadowColor: Colors
+                                              .transparent, // Ensure no shadow color
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.zero,
+                                              side: BorderSide.none),
+                                        ),
+                                        onPressed: () {
+                                          _showNoteSheet(context);
+                                        },
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                "หมายเหตุ :",
+                                                style: Styles.black18(context),
                                               ),
-                                              Expanded(
-                                                child: Text(
-                                                  noteController.text != ''
-                                                      ? noteController.text
-                                                      : "กรุณาใส่หมายเหตุ...",
-                                                  style: Styles.grey18(context),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                noteController.text != ''
+                                                    ? noteController.text
+                                                    : "กรุณาใส่หมายเหตุ...",
+                                                style: Styles.grey18(context),
+                                                maxLines: 1,
+                                                textAlign: TextAlign.end,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),

@@ -362,8 +362,7 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
     final routeState = Provider.of<RouteVisitFilterLocal>(context);
 
     return Scaffold(
-      backgroundColor:
-          Colors.transparent, // set scaffold background color to transparent
+      backgroundColor: Colors.transparent,
       body: RefreshIndicator(
         edgeOffset: 0,
         color: Colors.white,

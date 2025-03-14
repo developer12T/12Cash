@@ -372,12 +372,12 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        if (mounted) {
-          setState(() {
-            productList = data.map((item) => Product.fromJson(item)).toList();
-          });
-          context.loaderOverlay.hide();
-        }
+
+        setState(() {
+          productList = data.map((item) => Product.fromJson(item)).toList();
+        });
+        context.loaderOverlay.hide();
+
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {

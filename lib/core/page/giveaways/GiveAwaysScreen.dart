@@ -2264,7 +2264,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                         .start,
                                                                 children: [
                                                                   Text(
-                                                                    "${filteredStores[index].name} ${filteredStores[index].storeId}",
+                                                                    "${filteredStores[index].storeId} ${filteredStores[index].name}",
                                                                     style: Styles
                                                                         .black18(
                                                                             context),
@@ -2289,14 +2289,16 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                               Styles.black18(context),
                                                                         )
                                                                       : SizedBox(),
-                                                                  Text(
-                                                                    filteredStores[
-                                                                            index]
-                                                                        .typeName,
-                                                                    style: Styles
-                                                                        .black18(
-                                                                            context),
-                                                                  ),
+                                                                  filteredStores[index]
+                                                                              .typeName !=
+                                                                          ""
+                                                                      ? Text(
+                                                                          filteredStores[index]
+                                                                              .typeName,
+                                                                          style:
+                                                                              Styles.black18(context),
+                                                                        )
+                                                                      : SizedBox(),
                                                                   Row(
                                                                     children: [
                                                                       Expanded(

@@ -1401,10 +1401,8 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                     ),
                                   ],
                                 ),
+
                                 Expanded(
-                                    child: Container(
-                                  height:
-                                      200, // Set a height to avoid rendering errors
                                   child: Scrollbar(
                                     controller: _promotionScrollController,
                                     thumbVisibility: true,
@@ -1412,174 +1410,299 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                     radius: Radius.circular(16),
                                     thickness: 10,
                                     child: ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: ClampingScrollPhysics(),
-                                        controller: _promotionScrollController,
-                                        itemCount: listProductChange.length,
-                                        itemBuilder: (context, innerIndex) {
-                                          return Column(
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    child: Image.network(
-                                                      'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                                      width: screenWidth / 8,
-                                                      height: screenWidth / 8,
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder: (context,
-                                                          error, stackTrace) {
-                                                        return const Center(
-                                                          child: Icon(
-                                                            Icons.error,
-                                                            color: Colors.red,
-                                                            size: 50,
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
+                                      physics: ClampingScrollPhysics(),
+                                      shrinkWrap: true,
+                                      controller: _promotionScrollController,
+                                      itemCount: listProductChange.length,
+                                      itemBuilder: (context, index) {
+                                        return Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.network(
+                                                    'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                    width: screenWidth / 8,
+                                                    height: screenWidth / 8,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return const Center(
+                                                        child: Icon(
+                                                          Icons.error,
+                                                          color: Colors.red,
+                                                          size: 50,
+                                                        ),
+                                                      );
+                                                    },
                                                   ),
-                                                  Expanded(
-                                                    flex: 3,
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              16.0),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Expanded(
-                                                                child: Text(
-                                                                  listProductChange[
-                                                                          innerIndex]
-                                                                      .name,
-                                                                  style: Styles
-                                                                      .black16(
-                                                                          context),
-                                                                  softWrap:
-                                                                      true,
-                                                                  maxLines: 2,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .visible,
-                                                                ),
+                                                ),
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            16.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child: Text(
+                                                                listProductChange[
+                                                                        index]
+                                                                    .name,
+                                                                style: Styles
+                                                                    .black16(
+                                                                        context),
+                                                                softWrap: true,
+                                                                maxLines: 2,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .visible,
                                                               ),
-                                                            ],
-                                                          ),
-                                                          // Row(
-                                                          //   children: [
-                                                          //     Expanded(
-                                                          //       child: Text(
-                                                          //         listPromotions[
-                                                          //                 innerIndex]
-                                                          //             .proName,
-                                                          //         style: Styles
-                                                          //             .black16(
-                                                          //                 context),
-                                                          //         softWrap: true,
-                                                          //         maxLines: 2,
-                                                          //         overflow:
-                                                          //             TextOverflow
-                                                          //                 .visible,
-                                                          //       ),
-                                                          //     ),
-                                                          //   ],
-                                                          // ),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Row(
-                                                                    children: [
-                                                                      Text(
-                                                                        '${listProductChange[innerIndex].id}',
-                                                                        style: Styles.black16(
-                                                                            context),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  Row(
-                                                                    children: [
-                                                                      Text(
-                                                                        '${listProductChange[innerIndex].group} รส${listProductChange[innerIndex].flavour}',
-                                                                        style: Styles.black16(
-                                                                            context),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                              Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .end,
-                                                                children: [
-                                                                  Container(
-                                                                    padding:
-                                                                        EdgeInsets
-                                                                            .all(4),
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      border:
-                                                                          Border
-                                                                              .all(
-                                                                        color: Colors
-                                                                            .grey,
-                                                                        width:
-                                                                            1,
-                                                                      ),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              16),
-                                                                    ),
-                                                                    width: 75,
-                                                                    child: Text(
-                                                                      '${listProductChange[innerIndex].qty.toStringAsFixed(0)} ${listProductChange[innerIndex].unitName}',
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .center,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      'จำนวน : ${listProductChange[index].qty.toStringAsFixed(0)} ${listProductChange[index].unit}',
                                                                       style: Styles
-                                                                          .black18(
-                                                                        context,
-                                                                      ),
+                                                                          .black16(
+                                                                              context),
                                                                     ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
+                                                                  ],
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      'ราคา : ${listProductChange[index].price}',
+                                                                      style: Styles
+                                                                          .black16(
+                                                                              context),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
-                                                ],
-                                              ),
-                                              Divider(
-                                                color: Colors.grey[200],
-                                                thickness: 1,
-                                                indent: 16,
-                                                endIndent: 16,
-                                              ),
-                                            ],
-                                          );
-                                        }),
+                                                ),
+                                              ],
+                                            ),
+                                            Divider(
+                                              color: Colors.grey[200],
+                                              thickness: 1,
+                                              indent: 16,
+                                              endIndent: 16,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ))
+                                ),
+
+                                // Expanded(
+                                //     child: Container(
+                                //   height:
+                                //       200, // Set a height to avoid rendering errors
+                                //   child: Scrollbar(
+                                //     controller: _promotionScrollController,
+                                //     thumbVisibility: true,
+                                //     trackVisibility: true,
+                                //     radius: Radius.circular(16),
+                                //     thickness: 10,
+                                //     child: ListView.builder(
+                                //         shrinkWrap: true,
+                                //         physics: ClampingScrollPhysics(),
+                                //         controller: _promotionScrollController,
+                                //         itemCount: listProductChange.length,
+                                //         itemBuilder: (context, innerIndex) {
+                                //           return Column(
+                                //             children: [
+                                //               Row(
+                                //                 mainAxisAlignment:
+                                //                     MainAxisAlignment.start,
+                                //                 children: [
+                                //                   ClipRRect(
+                                //                     borderRadius:
+                                //                         BorderRadius.circular(
+                                //                             8),
+                                //                     child: Image.network(
+                                //                       'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                //                       width: screenWidth / 8,
+                                //                       height: screenWidth / 8,
+                                //                       fit: BoxFit.cover,
+                                //                       errorBuilder: (context,
+                                //                           error, stackTrace) {
+                                //                         return const Center(
+                                //                           child: Icon(
+                                //                             Icons.error,
+                                //                             color: Colors.red,
+                                //                             size: 50,
+                                //                           ),
+                                //                         );
+                                //                       },
+                                //                     ),
+                                //                   ),
+                                //                   Expanded(
+                                //                     flex: 3,
+                                //                     child: Padding(
+                                //                       padding:
+                                //                           const EdgeInsets.all(
+                                //                               16.0),
+                                //                       child: Column(
+                                //                         crossAxisAlignment:
+                                //                             CrossAxisAlignment
+                                //                                 .start,
+                                //                         children: [
+                                //                           Row(
+                                //                             children: [
+                                //                               Expanded(
+                                //                                 child: Text(
+                                //                                   listProductChange[
+                                //                                           innerIndex]
+                                //                                       .name,
+                                //                                   style: Styles
+                                //                                       .black16(
+                                //                                           context),
+                                //                                   softWrap:
+                                //                                       true,
+                                //                                   maxLines: 2,
+                                //                                   overflow:
+                                //                                       TextOverflow
+                                //                                           .visible,
+                                //                                 ),
+                                //                               ),
+                                //                             ],
+                                //                           ),
+                                //                           // Row(
+                                //                           //   children: [
+                                //                           //     Expanded(
+                                //                           //       child: Text(
+                                //                           //         listPromotions[
+                                //                           //                 innerIndex]
+                                //                           //             .proName,
+                                //                           //         style: Styles
+                                //                           //             .black16(
+                                //                           //                 context),
+                                //                           //         softWrap: true,
+                                //                           //         maxLines: 2,
+                                //                           //         overflow:
+                                //                           //             TextOverflow
+                                //                           //                 .visible,
+                                //                           //       ),
+                                //                           //     ),
+                                //                           //   ],
+                                //                           // ),
+                                //                           Row(
+                                //                             mainAxisAlignment:
+                                //                                 MainAxisAlignment
+                                //                                     .spaceBetween,
+                                //                             children: [
+                                //                               Column(
+                                //                                 crossAxisAlignment:
+                                //                                     CrossAxisAlignment
+                                //                                         .start,
+                                //                                 children: [
+                                //                                   Row(
+                                //                                     children: [
+                                //                                       Text(
+                                //                                         '${listProductChange[innerIndex].id}',
+                                //                                         style: Styles.black16(
+                                //                                             context),
+                                //                                       ),
+                                //                                     ],
+                                //                                   ),
+                                //                                   Row(
+                                //                                     children: [
+                                //                                       Text(
+                                //                                         '${listProductChange[innerIndex].group} รส${listProductChange[innerIndex].flavour}',
+                                //                                         style: Styles.black16(
+                                //                                             context),
+                                //                                       ),
+                                //                                     ],
+                                //                                   ),
+                                //                                 ],
+                                //                               ),
+                                //                               Row(
+                                //                                 mainAxisAlignment:
+                                //                                     MainAxisAlignment
+                                //                                         .end,
+                                //                                 children: [
+                                //                                   Container(
+                                //                                     padding:
+                                //                                         EdgeInsets
+                                //                                             .all(4),
+                                //                                     decoration:
+                                //                                         BoxDecoration(
+                                //                                       border:
+                                //                                           Border
+                                //                                               .all(
+                                //                                         color: Colors
+                                //                                             .grey,
+                                //                                         width:
+                                //                                             1,
+                                //                                       ),
+                                //                                       borderRadius:
+                                //                                           BorderRadius.circular(
+                                //                                               16),
+                                //                                     ),
+                                //                                     width: 75,
+                                //                                     child: Text(
+                                //                                       '${listProductChange[innerIndex].qty.toStringAsFixed(0)} ${listProductChange[innerIndex].unitName}',
+                                //                                       textAlign:
+                                //                                           TextAlign
+                                //                                               .center,
+                                //                                       style: Styles
+                                //                                           .black18(
+                                //                                         context,
+                                //                                       ),
+                                //                                     ),
+                                //                                   ),
+                                //                                 ],
+                                //                               ),
+                                //                             ],
+                                //                           ),
+                                //                         ],
+                                //                       ),
+                                //                     ),
+                                //                   ),
+                                //                 ],
+                                //               ),
+                                //               Divider(
+                                //                 color: Colors.grey[200],
+                                //                 thickness: 1,
+                                //                 indent: 16,
+                                //                 endIndent: 16,
+                                //               ),
+                                //             ],
+                                //           );
+                                //         }),
+                                //   ),
+                                // ))
                               ],
                             ),
                           ),

@@ -1051,14 +1051,14 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
-                                  FontAwesomeIcons.peopleCarryBox,
+                                  FontAwesomeIcons.warehouse,
                                   color: isSelect == 1
                                       ? Styles.primaryColorIcons
                                       : Styles.white,
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  'รับคืน',
+                                  ' รับคืน',
                                   style: isSelect == 1
                                       ? Styles.headerPirmary18(context)
                                       : Styles.headerWhite18(context),
@@ -1545,7 +1545,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                     price = double.parse(
                                                         data.price);
                                                   });
-
                                                   setModalState(
                                                     () {
                                                       selectedSize = data.name;
@@ -1685,7 +1684,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                       style: Styles.black18(context),
                                     ),
                                     Text(
-                                      '฿${total} บาท',
+                                      '฿${total.toStringAsFixed(2)} บาท',
                                       style: Styles.black18(context),
                                     ),
                                   ],

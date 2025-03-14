@@ -265,7 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
         // body: _widgetOptions.elementAt(_selectedIndex),
         bottomNavigationBar: Container(
           decoration: const BoxDecoration(
-            color: Styles.primaryColor, // Primary color of the navigation bar
+            color: Colors.transparent,
+            // color: Styles.primaryColor, // Primary color of the navigation bar
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),

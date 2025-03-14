@@ -279,7 +279,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "ขอคำอนุมัติสำเร็จ",
+              "ขออนุมัติสำเร็จ",
               style: Styles.green18(context),
             ),
           );
@@ -300,7 +300,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "ขอคำอนุมัติสำเร็จ",
+              "ขออนุมัติสำเร็จ",
               style: Styles.green18(context),
             ),
           );
@@ -652,7 +652,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
         child: AppbarCustom(
-          title: "ขอคำอนุมัติคืนสินค้า",
+          title: "ขออนุมัติคืนสินค้า",
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -738,7 +738,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                               ),
                             ),
                             Text(
-                              " ขอคำอนุมัติ",
+                              " ขออนุมัติ",
                               style: Styles.headerWhite18(context),
                             ),
                           ],
@@ -863,45 +863,44 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                             Row(
                               children: [
                                 Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(8),
-                                        elevation: 0, // Disable shadow
-                                        shadowColor: Colors
-                                            .transparent, // Ensure no shadow color
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.zero,
-                                            side: BorderSide.none),
-                                      ),
-                                      onPressed: () {
-                                        _showNoteSheet(context);
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            flex: 3,
-                                            child: Text(
-                                              "หมายเหตุ :",
-                                              style: Styles.black18(context),
-                                            ),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      elevation: 0, // Disable shadow
+                                      shadowColor: Colors
+                                          .transparent, // Ensure no shadow color
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.zero,
+                                          side: BorderSide.none),
+                                    ),
+                                    onPressed: () {
+                                      _showNoteSheet(context);
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            "หมายเหตุ :",
+                                            style: Styles.black18(context),
                                           ),
-                                          Expanded(
-                                            child: Text(
-                                              noteController.text != ''
-                                                  ? noteController.text
-                                                  : "กรุณาใส่หมายเหตุ...",
-                                              style: Styles.grey18(context),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            noteController.text != ''
+                                                ? noteController.text
+                                                : "กรุณาใส่หมายเหตุ...",
+                                            style: Styles.grey18(context),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.end,
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -1071,189 +1070,178 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                                 // ),
                                                               ],
                                                             ),
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .end,
-                                                              children: [
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    setState(
-                                                                        () {
-                                                                      if (listRefund[index]
-                                                                              .qty >
-                                                                          1) {
-                                                                        listRefund[index]
-                                                                            .qty--;
-                                                                      }
-                                                                    });
-                                                                    await _reduceCartRefund(
-                                                                        listRefund[
-                                                                            index]);
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .grey,
-                                                                          width:
-                                                                              1),
-                                                                    ), // ✅ Makes the button circular
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons
-                                                                        .remove,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ), // Example
-                                                                ),
-                                                                Container(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .all(
-                                                                              4),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    border:
-                                                                        Border
-                                                                            .all(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            16),
-                                                                  ),
-                                                                  width: 75,
-                                                                  child: Text(
-                                                                    '${listRefund[index].qty.toStringAsFixed(0)}',
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style: Styles
-                                                                        .black18(
-                                                                      context,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    await _reduceCartRefund(
-                                                                        listRefund[
-                                                                            index]);
 
-                                                                    setState(
-                                                                        () {
-                                                                      listRefund[
-                                                                              index]
-                                                                          .qty++;
-                                                                    });
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .grey,
-                                                                          width:
-                                                                              1),
-                                                                    ), // ✅ Makes the button circular
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons.add,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ), // Example
-                                                                ),
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    await _deleteChangeRefund(
-                                                                        listRefund[
-                                                                            index]);
+                                                            // Row(
+                                                            //   mainAxisAlignment:
+                                                            //       MainAxisAlignment
+                                                            //           .end,
+                                                            //   children: [
+                                                            //     ElevatedButton(
+                                                            //       onPressed:
+                                                            //           () async {
+                                                            //         setState(
+                                                            //             () {
+                                                            //           if (listRefund[index]
+                                                            //                   .qty >
+                                                            //               1) {
+                                                            //             listRefund[index]
+                                                            //                 .qty--;
+                                                            //           }
+                                                            //         });
+                                                            //         await _reduceCartRefund(
+                                                            //             listRefund[
+                                                            //                 index]);
+                                                            //       },
+                                                            //       style: ElevatedButton
+                                                            //           .styleFrom(
+                                                            //         shape:
+                                                            //             const CircleBorder(
+                                                            //           side: BorderSide(
+                                                            //               color: Colors
+                                                            //                   .grey,
+                                                            //               width:
+                                                            //                   1),
+                                                            //         ), // ✅ Makes the button circular
+                                                            //         padding:
+                                                            //             const EdgeInsets
+                                                            //                 .all(
+                                                            //                 8),
+                                                            //         backgroundColor:
+                                                            //             Colors
+                                                            //                 .white, // Button color
+                                                            //       ),
+                                                            //       child:
+                                                            //           const Icon(
+                                                            //         Icons
+                                                            //             .remove,
+                                                            //         size: 24,
+                                                            //         color: Colors
+                                                            //             .grey,
+                                                            //       ), // Example
+                                                            //     ),
+                                                            //     Container(
+                                                            //       padding:
+                                                            //           EdgeInsets
+                                                            //               .all(
+                                                            //                   4),
+                                                            //       decoration:
+                                                            //           BoxDecoration(
+                                                            //         border:
+                                                            //             Border
+                                                            //                 .all(
+                                                            //           color: Colors
+                                                            //               .grey,
+                                                            //           width: 1,
+                                                            //         ),
+                                                            //         borderRadius:
+                                                            //             BorderRadius.circular(
+                                                            //                 16),
+                                                            //       ),
+                                                            //       width: 75,
+                                                            //       child: Text(
+                                                            //         '${listRefund[index].qty.toStringAsFixed(0)}',
+                                                            //         textAlign:
+                                                            //             TextAlign
+                                                            //                 .center,
+                                                            //         style: Styles
+                                                            //             .black18(
+                                                            //           context,
+                                                            //         ),
+                                                            //       ),
+                                                            //     ),
+                                                            //     ElevatedButton(
+                                                            //       onPressed:
+                                                            //           () async {
+                                                            //         await _reduceCartRefund(
+                                                            //             listRefund[
+                                                            //                 index]);
 
-                                                                    setState(
-                                                                      () {
-                                                                        listRefund.removeWhere((item) => (item.id == listRefund[index].id &&
-                                                                            item.unit ==
-                                                                                listRefund[index].unit &&
-                                                                            item.condition == listRefund[index].condition &&
-                                                                            item.expireDate == listRefund[index].expireDate));
-                                                                      },
-                                                                    );
-                                                                    // await _getTotalCart(setModalState);
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .red,
-                                                                          width:
-                                                                              1),
-                                                                    ),
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons
-                                                                        .delete,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .red,
-                                                                  ), // Example
-                                                                ),
-                                                              ],
-                                                            ),
+                                                            //         setState(
+                                                            //             () {
+                                                            //           listRefund[
+                                                            //                   index]
+                                                            //               .qty++;
+                                                            //         });
+                                                            //       },
+                                                            //       style: ElevatedButton
+                                                            //           .styleFrom(
+                                                            //         shape:
+                                                            //             const CircleBorder(
+                                                            //           side: BorderSide(
+                                                            //               color: Colors
+                                                            //                   .grey,
+                                                            //               width:
+                                                            //                   1),
+                                                            //         ), // ✅ Makes the button circular
+                                                            //         padding:
+                                                            //             const EdgeInsets
+                                                            //                 .all(
+                                                            //                 8),
+                                                            //         backgroundColor:
+                                                            //             Colors
+                                                            //                 .white, // Button color
+                                                            //       ),
+                                                            //       child:
+                                                            //           const Icon(
+                                                            //         Icons.add,
+                                                            //         size: 24,
+                                                            //         color: Colors
+                                                            //             .grey,
+                                                            //       ), // Example
+                                                            //     ),
+                                                            //     ElevatedButton(
+                                                            //       onPressed:
+                                                            //           () async {
+                                                            //         await _deleteChangeRefund(
+                                                            //             listRefund[
+                                                            //                 index]);
+
+                                                            //         setState(
+                                                            //           () {
+                                                            //             listRefund.removeWhere((item) => (item.id == listRefund[index].id &&
+                                                            //                 item.unit ==
+                                                            //                     listRefund[index].unit &&
+                                                            //                 item.condition == listRefund[index].condition &&
+                                                            //                 item.expireDate == listRefund[index].expireDate));
+                                                            //           },
+                                                            //         );
+                                                            //         // await _getTotalCart(setModalState);
+                                                            //       },
+                                                            //       style: ElevatedButton
+                                                            //           .styleFrom(
+                                                            //         shape:
+                                                            //             const CircleBorder(
+                                                            //           side: BorderSide(
+                                                            //               color: Colors
+                                                            //                   .red,
+                                                            //               width:
+                                                            //                   1),
+                                                            //         ),
+                                                            //         padding:
+                                                            //             const EdgeInsets
+                                                            //                 .all(
+                                                            //                 8),
+                                                            //         backgroundColor:
+                                                            //             Colors
+                                                            //                 .white, // Button color
+                                                            //       ),
+                                                            //       child:
+                                                            //           const Icon(
+                                                            //         Icons
+                                                            //             .delete,
+                                                            //         size: 24,
+                                                            //         color: Colors
+                                                            //             .red,
+                                                            //       ), // Example
+                                                            //     ),
+                                                            //   ],
+                                                            // ),
                                                           ],
                                                         ),
                                                       ],
                                                     ),
                                                   ),
                                                 ),
-                                                // Container(
-                                                //   color: Colors.red,
-                                                //   width: 50,
-                                                //   height: 100,
-                                                //   child: Center(
-                                                //     child: Icon(
-                                                //       Icons.delete,
-                                                //       color: Colors.white,
-                                                //       size: 25,
-                                                //     ),
-                                                //   ),
-                                                // ),
                                               ],
                                             ),
                                             Divider(
@@ -1306,185 +1294,499 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                     ),
                                   ],
                                 ),
+
                                 Expanded(
-                                    child: Container(
-                                  height:
-                                      200, // Set a height to avoid rendering errors
-                                  child: Scrollbar(
+                                    child: Scrollbar(
+                                  controller: _promotionScrollController,
+                                  thumbVisibility: true,
+                                  trackVisibility: true,
+                                  thickness: 10,
+                                  radius: Radius.circular(16),
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: ClampingScrollPhysics(),
                                     controller: _promotionScrollController,
-                                    thumbVisibility: true,
-                                    trackVisibility: true,
-                                    radius: Radius.circular(16),
-                                    thickness: 10,
-                                    child: ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: ClampingScrollPhysics(),
-                                        controller: _promotionScrollController,
-                                        itemCount: listProduct.length,
-                                        itemBuilder: (context, innerIndex) {
-                                          return Column(
+                                    itemCount: listProduct.length,
+                                    itemBuilder: (context, index) {
+                                      // int qty =
+                                      //     int.parse(listRefund[index].qty);
+                                      return Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    child: Image.network(
-                                                      'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                                      width: screenWidth / 8,
-                                                      height: screenWidth / 8,
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder: (context,
-                                                          error, stackTrace) {
-                                                        return const Center(
-                                                          child: Icon(
-                                                            Icons.error,
-                                                            color: Colors.red,
-                                                            size: 50,
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    flex: 3,
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              16.0),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                  width: screenWidth / 8,
+                                                  height: screenWidth / 8,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return const Center(
+                                                      child: Icon(
+                                                        Icons.error,
+                                                        color: Colors.red,
+                                                        size: 50,
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 3,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
                                                         children: [
-                                                          Row(
-                                                            children: [
-                                                              Expanded(
-                                                                child: Text(
-                                                                  listProduct[
-                                                                          innerIndex]
-                                                                      .name,
-                                                                  style: Styles
-                                                                      .black16(
-                                                                          context),
-                                                                  softWrap:
-                                                                      true,
-                                                                  maxLines: 2,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .visible,
-                                                                ),
-                                                              ),
-                                                            ],
+                                                          Expanded(
+                                                            child: Text(
+                                                              listProduct[index]
+                                                                  .name,
+                                                              style: Styles
+                                                                  .black16(
+                                                                      context),
+                                                              softWrap: true,
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .visible,
+                                                            ),
                                                           ),
-                                                          // Row(
-                                                          //   children: [
-                                                          //     Expanded(
-                                                          //       child: Text(
-                                                          //         listProduct[
-                                                          //                 innerIndex]
-                                                          //             .proName,
-                                                          //         style: Styles
-                                                          //             .black16(
-                                                          //                 context),
-                                                          //         softWrap: true,
-                                                          //         maxLines: 2,
-                                                          //         overflow:
-                                                          //             TextOverflow
-                                                          //                 .visible,
-                                                          //       ),
-                                                          //     ),
-                                                          //   ],
+                                                          // Text(
+                                                          //   ' ${DateFormat("dd-MM-yyyy").format(DateTime.parse(listProduct[index].expireDate))} คืน${listRefund[index].condition == "good" ? "ดี" : "เสีย"}',
+                                                          //   style:
+                                                          //       Styles.black16(
+                                                          //           context),
                                                           // ),
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
                                                             children: [
-                                                              Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
+                                                              Row(
                                                                 children: [
-                                                                  Row(
-                                                                    children: [
-                                                                      Text(
-                                                                        'รหัส${listProduct[innerIndex].id}',
-                                                                        style: Styles.black16(
+                                                                  Text(
+                                                                    'รหัส : ${listProduct[index].id}',
+                                                                    style: Styles
+                                                                        .black16(
                                                                             context),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  Row(
-                                                                    children: [
-                                                                      Text(
-                                                                        '${listProduct[innerIndex].group} รส${listProduct[innerIndex].flavour}',
-                                                                        style: Styles.black16(
-                                                                            context),
-                                                                      ),
-                                                                    ],
                                                                   ),
                                                                 ],
                                                               ),
                                                               Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .end,
                                                                 children: [
-                                                                  Container(
-                                                                    padding:
-                                                                        EdgeInsets
-                                                                            .all(4),
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      border:
-                                                                          Border
-                                                                              .all(
-                                                                        color: Colors
-                                                                            .grey,
-                                                                        width:
-                                                                            1,
-                                                                      ),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              16),
-                                                                    ),
-                                                                    width: 75,
-                                                                    child: Text(
-                                                                      '${listProduct[innerIndex].qty.toStringAsFixed(0)} ${listProduct[innerIndex].unitName}',
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .center,
-                                                                      style: Styles
-                                                                          .black18(
-                                                                        context,
-                                                                      ),
-                                                                    ),
+                                                                  Text(
+                                                                    'จำนวน : ${listProduct[index].qty.toStringAsFixed(0)} ${listProduct[index].unitName}',
+                                                                    style: Styles
+                                                                        .black16(
+                                                                            context),
                                                                   ),
                                                                 ],
                                                               ),
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    'ราคา : ${listProduct[index].price}',
+                                                                    style: Styles
+                                                                        .black16(
+                                                                            context),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              // Row(
+                                                              //   children: [
+                                                              //     Text(
+                                                              //       'วันที่หมดอายุ :',
+                                                              //       style: Styles
+                                                              //           .black16(
+                                                              //               context),
+                                                              //     ),
+                                                              //   ],
+                                                              // ),
                                                             ],
                                                           ),
+
+                                                          // Row(
+                                                          //   mainAxisAlignment:
+                                                          //       MainAxisAlignment
+                                                          //           .end,
+                                                          //   children: [
+                                                          //     ElevatedButton(
+                                                          //       onPressed:
+                                                          //           () async {
+                                                          //         setState(() {
+                                                          //           if (listProduct[index]
+                                                          //                   .qty >
+                                                          //               1) {
+                                                          //             listProduct[
+                                                          //                     index]
+                                                          //                 .qty--;
+                                                          //           }
+                                                          //         });
+                                                          //         // await _reduceCartChange(
+                                                          //         //     listProduct[
+                                                          //         //         index]);
+                                                          //       },
+                                                          //       style: ElevatedButton
+                                                          //           .styleFrom(
+                                                          //         shape:
+                                                          //             const CircleBorder(
+                                                          //           side: BorderSide(
+                                                          //               color: Colors
+                                                          //                   .grey,
+                                                          //               width:
+                                                          //                   1),
+                                                          //         ), // ✅ Makes the button circular
+                                                          //         padding:
+                                                          //             const EdgeInsets
+                                                          //                 .all(
+                                                          //                 8),
+                                                          //         backgroundColor:
+                                                          //             Colors
+                                                          //                 .white, // Button color
+                                                          //       ),
+                                                          //       child:
+                                                          //           const Icon(
+                                                          //         Icons.remove,
+                                                          //         size: 24,
+                                                          //         color: Colors
+                                                          //             .grey,
+                                                          //       ), // Example
+                                                          //     ),
+                                                          //     Container(
+                                                          //       padding:
+                                                          //           EdgeInsets
+                                                          //               .all(4),
+                                                          //       decoration:
+                                                          //           BoxDecoration(
+                                                          //         border: Border
+                                                          //             .all(
+                                                          //           color: Colors
+                                                          //               .grey,
+                                                          //           width: 1,
+                                                          //         ),
+                                                          //         borderRadius:
+                                                          //             BorderRadius
+                                                          //                 .circular(
+                                                          //                     16),
+                                                          //       ),
+                                                          //       width: 75,
+                                                          //       child: Text(
+                                                          //         '${listProduct[index].qty.toStringAsFixed(0)}',
+                                                          //         textAlign:
+                                                          //             TextAlign
+                                                          //                 .center,
+                                                          //         style: Styles
+                                                          //             .black18(
+                                                          //           context,
+                                                          //         ),
+                                                          //       ),
+                                                          //     ),
+                                                          //     ElevatedButton(
+                                                          //       onPressed:
+                                                          //           () async {
+                                                          //         // await _reduceCartRefund(
+                                                          //         //     listProduct[
+                                                          //         //         index]);
+
+                                                          //         setState(() {
+                                                          //           listProduct[
+                                                          //                   index]
+                                                          //               .qty++;
+                                                          //         });
+                                                          //       },
+                                                          //       style: ElevatedButton
+                                                          //           .styleFrom(
+                                                          //         shape:
+                                                          //             const CircleBorder(
+                                                          //           side: BorderSide(
+                                                          //               color: Colors
+                                                          //                   .grey,
+                                                          //               width:
+                                                          //                   1),
+                                                          //         ), // ✅ Makes the button circular
+                                                          //         padding:
+                                                          //             const EdgeInsets
+                                                          //                 .all(
+                                                          //                 8),
+                                                          //         backgroundColor:
+                                                          //             Colors
+                                                          //                 .white, // Button color
+                                                          //       ),
+                                                          //       child:
+                                                          //           const Icon(
+                                                          //         Icons.add,
+                                                          //         size: 24,
+                                                          //         color: Colors
+                                                          //             .grey,
+                                                          //       ), // Example
+                                                          //     ),
+                                                          //     ElevatedButton(
+                                                          //       onPressed:
+                                                          //           () async {
+                                                          //         // await _deleteChangeRefund(
+                                                          //         //     listProduct[
+                                                          //         //         index]);
+
+                                                          //         // setState(
+                                                          //         //   () {
+                                                          //         //     listProduct.removeWhere((item) => (item.id == listRefund[index].id &&
+                                                          //         //         item.unit ==
+                                                          //         //             listProduct[index]
+                                                          //         //                 .unit &&
+                                                          //         //         item.condition ==
+                                                          //         //             listProduct[index]
+                                                          //         //                 .condition &&
+                                                          //         //         item.expireDate ==
+                                                          //         //             listProduct[index].expireDate));
+                                                          //         //   },
+                                                          //         // );
+                                                          //         // await _getTotalCart(setModalState);
+                                                          //       },
+                                                          //       style: ElevatedButton
+                                                          //           .styleFrom(
+                                                          //         shape:
+                                                          //             const CircleBorder(
+                                                          //           side: BorderSide(
+                                                          //               color: Colors
+                                                          //                   .red,
+                                                          //               width:
+                                                          //                   1),
+                                                          //         ),
+                                                          //         padding:
+                                                          //             const EdgeInsets
+                                                          //                 .all(
+                                                          //                 8),
+                                                          //         backgroundColor:
+                                                          //             Colors
+                                                          //                 .white, // Button color
+                                                          //       ),
+                                                          //       child:
+                                                          //           const Icon(
+                                                          //         Icons.delete,
+                                                          //         size: 24,
+                                                          //         color: Colors
+                                                          //             .red,
+                                                          //       ), // Example
+                                                          //     ),
+                                                          //   ],
+                                                          // ),
                                                         ],
                                                       ),
-                                                    ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ),
-                                              Divider(
-                                                color: Colors.grey[200],
-                                                thickness: 1,
-                                                indent: 16,
-                                                endIndent: 16,
+                                                ),
                                               ),
                                             ],
-                                          );
-                                        }),
+                                          ),
+                                          Divider(
+                                            color: Colors.grey[200],
+                                            thickness: 1,
+                                            indent: 16,
+                                            endIndent: 16,
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 ))
+
+                                // Expanded(
+                                //     child: Container(
+                                //   height:
+                                //       200, // Set a height to avoid rendering errors
+                                //   child: Scrollbar(
+                                //     controller: _promotionScrollController,
+                                //     thumbVisibility: true,
+                                //     trackVisibility: true,
+                                //     radius: Radius.circular(16),
+                                //     thickness: 10,
+                                //     child: ListView.builder(
+                                //         shrinkWrap: true,
+                                //         physics: ClampingScrollPhysics(),
+                                //         controller: _promotionScrollController,
+                                //         itemCount: listProduct.length,
+                                //         itemBuilder: (context, innerIndex) {
+                                //           return Column(
+                                //             children: [
+                                //               Row(
+                                //                 mainAxisAlignment:
+                                //                     MainAxisAlignment.start,
+                                //                 children: [
+                                //                   ClipRRect(
+                                //                     borderRadius:
+                                //                         BorderRadius.circular(
+                                //                             8),
+                                //                     child: Image.network(
+                                //                       'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                //                       width: screenWidth / 8,
+                                //                       height: screenWidth / 8,
+                                //                       fit: BoxFit.cover,
+                                //                       errorBuilder: (context,
+                                //                           error, stackTrace) {
+                                //                         return const Center(
+                                //                           child: Icon(
+                                //                             Icons.error,
+                                //                             color: Colors.red,
+                                //                             size: 50,
+                                //                           ),
+                                //                         );
+                                //                       },
+                                //                     ),
+                                //                   ),
+                                //                   Expanded(
+                                //                     flex: 3,
+                                //                     child: Padding(
+                                //                       padding:
+                                //                           const EdgeInsets.all(
+                                //                               16.0),
+                                //                       child: Column(
+                                //                         crossAxisAlignment:
+                                //                             CrossAxisAlignment
+                                //                                 .start,
+                                //                         children: [
+                                //                           Row(
+                                //                             children: [
+                                //                               Expanded(
+                                //                                 child: Text(
+                                //                                   listProduct[
+                                //                                           innerIndex]
+                                //                                       .name,
+                                //                                   style: Styles
+                                //                                       .black16(
+                                //                                           context),
+                                //                                   softWrap:
+                                //                                       true,
+                                //                                   maxLines: 2,
+                                //                                   overflow:
+                                //                                       TextOverflow
+                                //                                           .visible,
+                                //                                 ),
+                                //                               ),
+                                //                             ],
+                                //                           ),
+                                //                           // Row(
+                                //                           //   children: [
+                                //                           //     Expanded(
+                                //                           //       child: Text(
+                                //                           //         listProduct[
+                                //                           //                 innerIndex]
+                                //                           //             .proName,
+                                //                           //         style: Styles
+                                //                           //             .black16(
+                                //                           //                 context),
+                                //                           //         softWrap: true,
+                                //                           //         maxLines: 2,
+                                //                           //         overflow:
+                                //                           //             TextOverflow
+                                //                           //                 .visible,
+                                //                           //       ),
+                                //                           //     ),
+                                //                           //   ],
+                                //                           // ),
+                                //                           Row(
+                                //                             mainAxisAlignment:
+                                //                                 MainAxisAlignment
+                                //                                     .spaceBetween,
+                                //                             children: [
+                                //                               Column(
+                                //                                 crossAxisAlignment:
+                                //                                     CrossAxisAlignment
+                                //                                         .start,
+                                //                                 children: [
+                                //                                   Row(
+                                //                                     children: [
+                                //                                       Text(
+                                //                                         'รหัส${listProduct[innerIndex].id}',
+                                //                                         style: Styles.black16(
+                                //                                             context),
+                                //                                       ),
+                                //                                     ],
+                                //                                   ),
+                                //                                   Row(
+                                //                                     children: [
+                                //                                       Text(
+                                //                                         '${listProduct[innerIndex].group} รส${listProduct[innerIndex].flavour}',
+                                //                                         style: Styles.black16(
+                                //                                             context),
+                                //                                       ),
+                                //                                     ],
+                                //                                   ),
+                                //                                 ],
+                                //                               ),
+                                //                               Row(
+                                //                                 mainAxisAlignment:
+                                //                                     MainAxisAlignment
+                                //                                         .end,
+                                //                                 children: [
+                                //                                   Container(
+                                //                                     padding:
+                                //                                         EdgeInsets
+                                //                                             .all(4),
+                                //                                     decoration:
+                                //                                         BoxDecoration(
+                                //                                       border:
+                                //                                           Border
+                                //                                               .all(
+                                //                                         color: Colors
+                                //                                             .grey,
+                                //                                         width:
+                                //                                             1,
+                                //                                       ),
+                                //                                       borderRadius:
+                                //                                           BorderRadius.circular(
+                                //                                               16),
+                                //                                     ),
+                                //                                     width: 75,
+                                //                                     child: Text(
+                                //                                       '${listProduct[innerIndex].qty.toStringAsFixed(0)} ${listProduct[innerIndex].unitName}',
+                                //                                       textAlign:
+                                //                                           TextAlign
+                                //                                               .center,
+                                //                                       style: Styles
+                                //                                           .black18(
+                                //                                         context,
+                                //                                       ),
+                                //                                     ),
+                                //                                   ),
+                                //                                 ],
+                                //                               ),
+                                //                             ],
+                                //                           ),
+                                //                         ],
+                                //                       ),
+                                //                     ),
+                                //                   ),
+                                //                 ],
+                                //               ),
+                                //               Divider(
+                                //                 color: Colors.grey[200],
+                                //                 thickness: 1,
+                                //                 indent: 16,
+                                //                 endIndent: 16,
+                                //               ),
+                                //             ],
+                                //           );
+                                //         }),
+                                //   ),
+                                // ))
                               ],
                             ),
                           ),
@@ -1605,7 +1907,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "รวมรับเปลี่ยนสินค้า",
+                                  "รวมเปลี่ยนสินค้า",
                                   style: Styles.grey18(context),
                                 ),
                                 Text(

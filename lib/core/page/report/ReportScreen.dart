@@ -158,19 +158,14 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
         child: Container(
           margin: EdgeInsets.only(top: 20),
           child: isSelect.isSelect == 1
-              ? Scrollbar(
-                  controller: _scrollController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  thickness: 10,
-                  radius: Radius.circular(16),
-                  child: LoadingSkeletonizer(
-                    loading: _loadingOrder,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: orders.length,
-                      itemBuilder: (context, index) {
-                        return InvoiceCard(
+              ? LoadingSkeletonizer(
+                  loading: _loadingOrder,
+                  child: ListView.builder(
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: InvoiceCard(
                           item: orders[index],
                           onDetailsPressed: () {
                             Navigator.of(context).push(
@@ -180,9 +175,9 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                               ),
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 )
               : refundOrders.isNotEmpty

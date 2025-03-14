@@ -183,7 +183,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
           );
         },
         title_4: "แจกสินค้า",
-        icon_4: Icons.campaign_rounded,
+        icon_4: FontAwesomeIcons.gift,
         onTap4: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => GiveawaysHistoryScreen()),

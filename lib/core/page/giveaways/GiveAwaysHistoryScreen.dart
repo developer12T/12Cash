@@ -64,35 +64,37 @@ class _GiveawaysHistoryScreenState extends State<GiveawaysHistoryScreen> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(70),
-          child: AppbarCustom(
-            title: " ประวัติการแจกสินค้า",
-            icon: Icons.campaign_rounded,
-          ),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(70),
+        child: AppbarCustom(
+          title: " ประวัติการแจกสินค้า",
+          icon: Icons.campaign_rounded,
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: FloatingActionButton(
-          shape: const CircleBorder(),
-          backgroundColor: Styles.primaryColor,
-          child: const Icon(
-            Icons.add_rounded,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const GiveAwaysScreen(),
-              ),
-            );
-          },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
+        backgroundColor: Styles.primaryColor,
+        child: const Icon(
+          Icons.add_rounded,
+          color: Colors.white,
         ),
-        body: Container(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                CustomSlidingSegmentedControl<int>(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const GiveAwaysScreen(),
+            ),
+          );
+        },
+      ),
+      body: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: CustomSlidingSegmentedControl<int>(
                   initialValue: 1,
                   isStretch: true,
                   children: {
@@ -153,8 +155,11 @@ class _GiveawaysHistoryScreenState extends State<GiveawaysHistoryScreen> {
                   ),
                   duration: const Duration(milliseconds: 300),
                 ),
-                SizedBox(height: 8),
-                isSelect == 2
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: isSelect == 2
                     ? Row(
                         children: [
                           Expanded(
@@ -253,28 +258,31 @@ class _GiveawaysHistoryScreenState extends State<GiveawaysHistoryScreen> {
                         ],
                       )
                     : SizedBox(),
-                Expanded(
-                  child: ListView.builder(
-                    // controller: _scrollController,
-                    itemCount: giveAwaysList.length,
-                    itemBuilder: (context, index) {
-                      return GiveAwayCard(
-                        item: giveAwaysList[index],
-                        onDetailsPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => GiveAwaysDetailScreen(
-                                  orderId: giveAwaysList[index].orderId),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                )
-              ],
-            ),
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  // controller: _scrollController,
+                  itemCount: giveAwaysList.length,
+                  itemBuilder: (context, index) {
+                    return GiveAwayCard(
+                      item: giveAwaysList[index],
+                      onDetailsPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => GiveAwaysDetailScreen(
+                                orderId: giveAwaysList[index].orderId),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              )
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

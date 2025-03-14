@@ -6,6 +6,7 @@ import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
+import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
@@ -220,7 +221,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         },
       );
       if (response.statusCode == 200) {
-        Navigator.pop(context);
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,
@@ -230,6 +230,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           title: Text(
             "ยกเลิกสั่งซื้อสําเร็จ",
             style: Styles.green18(context),
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(
+              index: 3,
+            ),
           ),
         );
       }
