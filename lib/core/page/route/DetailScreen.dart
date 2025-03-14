@@ -441,7 +441,9 @@ class _DetailScreenState extends State<DetailScreen> {
                                         MaterialPageRoute(
                                           builder: (context) =>
                                               OrderINRouteScreen(
-                                                  storeDetail: storeDetail),
+                                            storeDetail: storeDetail,
+                                            routeId: widget.routeId,
+                                          ),
                                         ),
                                       );
                                     }
@@ -468,11 +470,13 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                 ),
                 SizedBox(height: screenWidth / 37),
-                Text('ตัวอย่างรายการสั่งซื้อ', style: Styles.black24(context)),
+                orders.isNotEmpty
+                    ? Text('รายการสั่งซื้อ', style: Styles.black24(context))
+                    : SizedBox(),
                 Container(
                   height: 300,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Scrollbar(
                       controller: _scrollController,
                       thumbVisibility: true,

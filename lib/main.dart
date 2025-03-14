@@ -8,10 +8,10 @@ import 'package:_12sale_app/data/models/RefundFilter.dart';
 import 'package:_12sale_app/data/models/search/RouteVisitFilterLocal.dart';
 import 'package:_12sale_app/data/models/search/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
-import 'package:_12sale_app/data/service/AndroidAPIChecker.dart';
 import 'package:_12sale_app/data/service/localNotification.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +33,8 @@ import 'package:provider/provider.dart';
 
 void main() async {
   try {
+    SocketService socketService = SocketService();
+    socketService.connect();
     // tz.initializeTimeZones();
     // // Configure the HTTP client to use a proxy
     // final client = HttpClient()
@@ -51,15 +53,6 @@ void main() async {
     // Initialize the locale data for Thai lanqguage
     // Ensure the app is always in portrait mode
     WidgetsFlutterBinding.ensureInitialized();
-
-    bool isSupported = await AndroidAPILevelChecker.isCamera2APISupported();
-    if (isSupported) {
-      print("Camera2 API is supported");
-      // Use Camera2 API features
-    } else {
-      print("Legacy Camera API will be used");
-      // Use Legacy Camera API features
-    }
 
     await availableCameras();
     await EasyLocalization.ensureInitialized();
@@ -108,6 +101,7 @@ void main() async {
               ChangeNotifierProvider(create: (_) => RouteVisitFilterLocal()),
               ChangeNotifierProvider(create: (_) => StoreLocal()),
               ChangeNotifierProvider(create: (_) => RefundfilterLocal()),
+              ChangeNotifierProvider(create: (_) => SocketService()),
             ],
             child: MyApp(),
           ),

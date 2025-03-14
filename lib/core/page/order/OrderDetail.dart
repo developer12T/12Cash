@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
@@ -32,6 +33,7 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Sale? saleDetail;
   Store? storeDetail;
+  OrderDetail? orderDetail;
   List<Product> listProduct = [];
   List<Promotion> listPromotions = [];
   List<PromotionListItem> listPromotionItems = [];
@@ -102,7 +104,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
-  bool _loadOrderDetail = false;
+  bool _loadOrderDetail = true;
   Future<void> _getOrderDetail() async {
     try {
       print("Order ID : ${widget.orderId}");
@@ -117,6 +119,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         final List<dynamic> images = response.data['data'][0]['listImage'];
         final List<dynamic> prData = response.data['data'][0]['listPromotions'];
         setState(() {
+          orderDetail = OrderDetail.fromJson(response.data['data'][0]);
           note = response.data['data'][0]['note'];
           saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
           storeDetail = Store.fromJson(response.data['data'][0]['store']);
@@ -197,6 +200,38 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             });
           }
         });
+      }
+    } catch (e) {
+      print("Error $e");
+    }
+  }
+
+  Future<void> _updateStatus() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/order/updateStatus',
+        method: 'POST',
+        body: {
+          "orderId": "${widget.orderId}",
+          "status": "canceled"
+          // 'pending', 'completed', 'canceled', 'rejected'
+        },
+      );
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ยกเลิกสั่งซื้อสําเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
       }
     } catch (e) {
       print("Error $e");
@@ -799,7 +834,12 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              "${orderDetail?.orderId}",
+                              style: Styles.black24(context),
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -1556,12 +1596,22 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    backgroundColor: Styles.fail,
+                    backgroundColor: orderDetail?.status == "pending"
+                        ? Styles.fail
+                        : Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   onPressed: () {
+                    if (orderDetail?.status == "pending") {
+                      AllAlert.customAlert(
+                          context,
+                          "store.processtimeline_screen.alert.title".tr(),
+                          "คุณต้องการยกเลิกรายการใช่หรือไม่ ?",
+                          _updateStatus);
+                      // _updateStatus();
+                    }
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
@@ -1575,7 +1625,9 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                       children: [
                         Text(
                           "ยกเลิกรายการ",
-                          style: Styles.headerWhite18(context),
+                          style: orderDetail?.status == "pending"
+                              ? Styles.headerWhite18(context)
+                              : Styles.headergrey18(context),
                         ),
                       ],
                     ),

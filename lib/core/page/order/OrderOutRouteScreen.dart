@@ -18,6 +18,7 @@ import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/Cart.dart';
 import 'package:_12sale_app/data/models/order/Product.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -25,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
@@ -70,8 +72,9 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   String selectedStoreShopType = "";
   String selectedSize = "";
   String selectedUnit = "";
-  // ---------------------------------------------
 
+  // ---------------------------------------------
+  String latestMessage = '';
   double count = 1;
   double price = 0;
   double total = 0.00;
@@ -99,6 +102,31 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final socketService = Provider.of<SocketService>(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (socketService.latestMessage != latestMessage) {
+        context.loaderOverlay.show();
+        _getProduct().then((_) {
+          Timer(Duration(seconds: 3), () {
+            context.loaderOverlay.hide();
+          });
+        });
+
+        toastification.show(
+          context: context,
+          title: Text(
+            socketService.latestMessage,
+            style: Styles.green18(context),
+          ),
+          style: ToastificationStyle.flatColored,
+          primaryColor: Colors.green,
+          autoCloseDuration: Duration(seconds: 5),
+        );
+        setState(() {
+          latestMessage = socketService.latestMessage;
+        });
+      }
+    });
     // Register this screen as a route-aware widget
     final ModalRoute? route = ModalRoute.of(context);
     if (route is PageRoute) {
@@ -676,8 +704,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
                                                 _getProduct().then((_) =>
-                                                    context.loaderOverlay
-                                                        .hide());
+                                                    Timer(Duration(seconds: 3),
+                                                        () {
+                                                      context.loaderOverlay
+                                                          .hide();
+                                                    }));
                                               },
                                               onSearch: _getProduct,
                                             );
@@ -729,8 +760,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
                                                 _getProduct().then((_) =>
-                                                    context.loaderOverlay
-                                                        .hide());
+                                                    Timer(Duration(seconds: 3),
+                                                        () {
+                                                      context.loaderOverlay
+                                                          .hide();
+                                                    }));
                                               },
                                               onSearch: _getProduct,
                                             );
@@ -781,8 +815,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
                                                 _getProduct().then((_) =>
-                                                    context.loaderOverlay
-                                                        .hide());
+                                                    Timer(Duration(seconds: 3),
+                                                        () {
+                                                      context.loaderOverlay
+                                                          .hide();
+                                                    }));
                                               },
                                               onSearch: _getProduct,
                                             );
@@ -828,8 +865,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
                                                 _getProduct().then((_) =>
-                                                    context.loaderOverlay
-                                                        .hide());
+                                                    Timer(Duration(seconds: 3),
+                                                        () {
+                                                      context.loaderOverlay
+                                                          .hide();
+                                                    }));
                                               },
                                               onSearch: _getProduct,
                                             );
@@ -861,7 +901,9 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                             _clearFilter();
                                             context.loaderOverlay.show();
                                             _getProduct().then((_) =>
-                                                context.loaderOverlay.hide());
+                                                Timer(Duration(seconds: 3), () {
+                                                  context.loaderOverlay.hide();
+                                                }));
                                           },
                                           child: badgeFilter(
                                             openIcon: false,
@@ -1132,6 +1174,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   CreateOrderScreen(
+                                                      routeId: '',
                                                       storeId: selectedStoreId,
                                                       storeName: selectedStore,
                                                       storeAddress:
@@ -2184,7 +2227,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                         selectedStoreAddress =
                                                             "${filteredStores[index].address} ${filteredStores[index].district} ${filteredStores[index].subDistrict} ${filteredStores[index].province} ${filteredStores[index].postCode}";
                                                       });
-                                                      // await _getCart();
+                                                      // ฟไ _getCart();
+                                                      await _getCart();
                                                     },
                                                     child: Column(
                                                       children: [

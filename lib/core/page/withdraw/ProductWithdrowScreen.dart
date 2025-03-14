@@ -1058,8 +1058,11 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                                                 _clearFilter();
                                                 context.loaderOverlay.show();
                                                 _getProduct().then((_) =>
-                                                    context.loaderOverlay
-                                                        .hide());
+                                                    Timer(Duration(seconds: 3),
+                                                        () {
+                                                      context.loaderOverlay
+                                                          .hide();
+                                                    }));
                                               },
                                               child: badgeFilter(
                                                 openIcon: false,

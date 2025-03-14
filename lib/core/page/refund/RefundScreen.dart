@@ -784,7 +784,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                             flavourList.clear();
                                             context.loaderOverlay.show();
                                             _getProduct(isSelect).then((_) =>
-                                                context.loaderOverlay.hide());
+                                                Timer(Duration(seconds: 3), () {
+                                                  context.loaderOverlay.hide();
+                                                }));
                                           },
                                           onSearch: _getProduct,
                                         );
@@ -835,7 +837,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                             flavourList.clear();
                                             context.loaderOverlay.show();
                                             _getProduct(isSelect).then((_) =>
-                                                context.loaderOverlay.hide());
+                                                Timer(Duration(seconds: 3), () {
+                                                  context.loaderOverlay.hide();
+                                                }));
                                           },
                                           onSearch: _getProduct,
                                         );
@@ -885,7 +889,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                             flavourList.clear();
                                             context.loaderOverlay.show();
                                             _getProduct(isSelect).then((_) =>
-                                                context.loaderOverlay.hide());
+                                                Timer(Duration(seconds: 3), () {
+                                                  context.loaderOverlay.hide();
+                                                }));
                                           },
                                           onSearch: _getProduct,
                                         );
@@ -931,7 +937,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                             flavourList.clear();
                                             context.loaderOverlay.show();
                                             _getProduct(isSelect).then((_) =>
-                                                context.loaderOverlay.hide());
+                                                Timer(Duration(seconds: 3), () {
+                                                  context.loaderOverlay.hide();
+                                                }));
                                           },
                                           onSearch: _getProduct,
                                         );
@@ -962,7 +970,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         _clearFilter();
                                         context.loaderOverlay.show();
                                         _getProduct(isSelect).then((_) =>
-                                            context.loaderOverlay.hide());
+                                            Timer(Duration(seconds: 3), () {
+                                              context.loaderOverlay.hide();
+                                            }));
                                       },
                                       child: badgeFilter(
                                         openIcon: false,

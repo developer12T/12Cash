@@ -395,6 +395,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                                 MaterialPageRoute(
                                                   builder: (context) =>
                                                       OrderINRouteScreen(
+                                                    routeId: '',
                                                     storeDetail:
                                                         DetailStoreVisit(
                                                             id: '',

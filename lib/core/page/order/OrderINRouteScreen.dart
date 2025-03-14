@@ -32,10 +32,12 @@ import 'package:flutter_debouncer/flutter_debouncer.dart';
 
 class OrderINRouteScreen extends StatefulWidget {
   final DetailStoreVisit? storeDetail;
+  final String? routeId;
 
   const OrderINRouteScreen({
     super.key,
     required this.storeDetail,
+    required this.routeId,
   });
 
   @override
@@ -642,8 +644,12 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
                                                   _getProduct().then((_) =>
-                                                      context.loaderOverlay
-                                                          .hide());
+                                                      Timer(
+                                                          Duration(seconds: 1),
+                                                          () {
+                                                        context.loaderOverlay
+                                                            .hide();
+                                                      }));
                                                 },
                                                 onSearch: _getProduct,
                                               );
@@ -805,8 +811,12 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
                                                   _getProduct().then((_) =>
-                                                      context.loaderOverlay
-                                                          .hide());
+                                                      Timer(
+                                                          Duration(seconds: 1),
+                                                          () {
+                                                        context.loaderOverlay
+                                                            .hide();
+                                                      }));
                                                 },
                                                 onSearch: _getProduct,
                                               );
@@ -840,8 +850,11 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                             onTap: () {
                                               _clearFilter();
                                               context.loaderOverlay.show();
-                                              _getProduct().then((_) =>
-                                                  context.loaderOverlay.hide());
+                                              _getProduct().then((_) => Timer(
+                                                      Duration(seconds: 1), () {
+                                                    context.loaderOverlay
+                                                        .hide();
+                                                  }));
                                             },
                                             child: badgeFilter(
                                               openIcon: false,
@@ -1111,6 +1124,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     CreateOrderScreen(
+                                                  routeId: widget.routeId,
                                                   storeId: widget
                                                       .storeDetail
                                                       ?.listStore[0]

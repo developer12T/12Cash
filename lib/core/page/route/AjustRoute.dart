@@ -49,13 +49,21 @@ class _AjustRouteState extends State<AjustRoute> {
   RouteStore selectedToRoute = RouteStore(route: "R02");
   List<bool> checkedItems = [];
   List<ListStore> toStore = [];
+
+  List<ListStore> toStoreShow = [];
   List<String> toStoreString = [];
+
+  List<RouteStore> routeFix = [];
+  String isRouteTo = "";
+  String isRouteFrom = "";
 
   @override
   initState() {
     super.initState();
     _getRouteVisit();
     _getListStore();
+    _getListToStore();
+    getRouteFix();
   }
 
   Future<void> _getRouteVisit() async {
@@ -189,6 +197,22 @@ class _AjustRouteState extends State<AjustRoute> {
     }
   }
 
+  Future<void> getRouteFix() async {
+    try {
+      // Load the JSON file for districts
+      final String response = await rootBundle.loadString('data/route.json');
+      final data = json.decode(response);
+
+      // Filter and map JSON data to District model based on selected province and filter
+      routeFix =
+          (data as List).map((json) => RouteStore.fromJson(json)).toList();
+
+      // Group districts by amphoe
+    } catch (e) {
+      print("Error occurred: $e");
+    }
+  }
+
   Future<void> _getListStore() async {
     ApiService apiService = ApiService();
     await apiService.init();
@@ -202,7 +226,6 @@ class _AjustRouteState extends State<AjustRoute> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'][0]['listStore'];
-
       print("getRoute: ${response.data['data']}");
       if (mounted) {
         setState(() {
@@ -221,6 +244,40 @@ class _AjustRouteState extends State<AjustRoute> {
       });
 
       print("listStore: ${data.length}");
+    }
+  }
+
+  Future<void> _getListToStore() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      String routeId = "${period}${User.area}${selectedToRoute.route}";
+
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/route/getRoute?area=${User.area}&period=${period}&routeId=${routeId}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'][0]['listStore'];
+        print("getRoute: ${response.data['data']}");
+        if (mounted) {
+          setState(() {
+            toStoreShow.clear();
+            toStoreShow = data.map((item) => ListStore.fromJson(item)).toList();
+          });
+        }
+        Timer(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() {
+              _loadingAllStore = false;
+            });
+          }
+        });
+      }
+    } catch (e) {
+      toStoreShow.clear();
+      print("Error $e");
     }
   }
 
@@ -254,8 +311,9 @@ class _AjustRouteState extends State<AjustRoute> {
                         showMonthPicker(
                           context: context,
                           initialDate: DateTime.now(),
-                          firstDate: DateTime(2025),
-                          lastDate: DateTime(2026),
+                          firstDate: DateTime(
+                              DateTime.now().year, DateTime.now().month),
+                          lastDate: DateTime(DateTime.now().year + 1, 1),
                           monthPickerDialogSettings: MonthPickerDialogSettings(
                             headerSettings: PickerHeaderSettings(
                               headerBackgroundColor: Styles.primaryColor,
@@ -474,109 +532,152 @@ class _AjustRouteState extends State<AjustRoute> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Expanded(
-                                child: Row(
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: Text(
+                                      "เลือกร้านค้าที่จะ${isEdit ? "ย้าย " : "เพิ่ม"}",
+                                      style: Styles.black24(context),
+                                      // style: Styles.headerBlack20(context),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
-                                  child: Text(
-                                    "เลือกร้านค้าที่จะ${isEdit ? "ย้าย " : "เพิ่ม"}",
-                                    style: Styles.black24(context),
-                                    // style: Styles.headerBlack20(context),
+                                Container(
+                                  width: 100,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.all(0),
+                                      elevation: 0, // Disable shadow
+                                      shadowColor: Colors
+                                          .transparent, // Ensure no shadow color
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide.none, // Remove border
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            selectedRoute.route,
+                                            textAlign: TextAlign.center,
+                                            style: Styles.black18(context),
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.keyboard_arrow_right_sharp,
+                                          color: Styles.grey,
+                                          size: 30,
+                                        ),
+                                      ],
+                                    ),
+                                    onPressed: () {
+                                      _showStoreFromSheet(context);
+                                    },
                                   ),
                                 )
                               ],
-                            )),
-                            Container(
-                              // color: Colors.white,
-                              padding: EdgeInsets.only(top: 8),
-                              margin: EdgeInsets.only(
-                                left: 8,
-                                right: 8,
-                              ),
-                              width: 110,
-                              height: 75,
-                              child: DropdownSearchCustom<RouteStore>(
-                                initialSelectedValue: RouteStore(
-                                  route: 'R01',
-                                ),
-                                label: "เลือกรูท ",
-                                titleText: "เลือกรูท ",
-                                filterFn: (RouteStore product, String filter) {
-                                  return product.route != "R" &&
-                                      product.route
-                                          .toLowerCase()
-                                          .contains(filter.toLowerCase());
-                                },
-                                fetchItems: (filter) => getRoutes(filter),
-                                onChanged: (RouteStore? selected) async {
-                                  if (selected != null) {
-                                    selectedRoute =
-                                        RouteStore(route: selected.route);
-                                    _loadingAllStore = true;
-                                    _getListStore();
-                                    if (selected.route ==
-                                        selectedToRoute.route) {
-                                      toastification.show(
-                                        autoCloseDuration:
-                                            const Duration(seconds: 5),
-                                        context: context,
-                                        primaryColor: Colors.red,
-                                        type: ToastificationType.error,
-                                        style: ToastificationStyle.flatColored,
-                                        title: Text(
-                                          "ไม่สามารถเลือกรูทเดียวกันได้",
-                                          style: Styles.black18(context),
-                                        ),
-                                      );
-                                    }
-
-                                    // if (toStore.isNotEmpty) {
-                                    //   AllAlert.changeAjustRouteAlert(
-                                    //     context,
-                                    //     () {
-                                    //       setState(() {
-                                    //         toStore.clear();
-                                    //         toStoreString.clear();
-                                    //         checkedItems = List.generate(
-                                    //             listStore.length,
-                                    //             (index) => false);
-                                    //       });
-                                    //     },
-                                    //   );
-                                    // } else {
-                                    //   setState(() {
-                                    //     checkedItems = List.generate(
-                                    //         listStore.length, (index) => false);
-                                    //   });
-                                    // }
-                                  }
-                                },
-                                itemAsString: (RouteStore data) => data.route,
-                                itemBuilder: (context, item, isSelected) {
-                                  return Column(
-                                    children: [
-                                      ListTile(
-                                        title: Text(
-                                          " ${item.route}",
-                                          style: Styles.black18(context),
-                                        ),
-                                        selected: isSelected,
-                                      ),
-                                      Divider(
-                                        color: Colors.grey[
-                                            200], // Color of the divider line
-                                        thickness: 1, // Thickness of the line
-                                        indent:
-                                            16, // Left padding for the divider line
-                                        endIndent:
-                                            16, // Right padding for the divider line
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
                             ),
+                            // Container(
+                            //   // color: Colors.white,
+                            //   padding: EdgeInsets.only(top: 8),
+                            //   margin: EdgeInsets.only(
+                            //     left: 8,
+                            //     right: 8,
+                            //   ),
+                            //   width: 110,
+                            //   height: 75,
+                            //   child: DropdownSearchCustom<RouteStore>(
+                            //     initialSelectedValue: RouteStore(
+                            //       route: 'R01',
+                            //     ),
+                            //     label: "เลือกรูท ",
+                            //     titleText: "เลือกรูท ",
+                            //     filterFn: (RouteStore product, String filter) {
+                            //       return product.route != "R" &&
+                            //           product.route
+                            //               .toLowerCase()
+                            //               .contains(filter.toLowerCase());
+                            //     },
+                            //     fetchItems: (filter) => getRoutes(filter),
+                            //     onChanged: (RouteStore? selected) async {
+                            //       if (selected != null) {
+                            //         selectedRoute =
+                            //             RouteStore(route: selected.route);
+                            //         _loadingAllStore = true;
+                            //         _getListStore();
+                            //         if (selected.route ==
+                            //             selectedToRoute.route) {
+                            //           toastification.show(
+                            //             autoCloseDuration:
+                            //                 const Duration(seconds: 5),
+                            //             context: context,
+                            //             primaryColor: Colors.red,
+                            //             type: ToastificationType.error,
+                            //             style: ToastificationStyle.flatColored,
+                            //             title: Text(
+                            //               "ไม่สามารถเลือกรูทเดียวกันได้",
+                            //               style: Styles.black18(context),
+                            //             ),
+                            //           );
+                            //         }
+
+                            //         // if (toStore.isNotEmpty) {
+                            //         //   AllAlert.changeAjustRouteAlert(
+                            //         //     context,
+                            //         //     () {
+                            //         //       setState(() {
+                            //         //         toStore.clear();
+                            //         //         toStoreString.clear();
+                            //         //         checkedItems = List.generate(
+                            //         //             listStore.length,
+                            //         //             (index) => false);
+                            //         //       });
+                            //         //     },
+                            //         //   );
+                            //         // } else {
+                            //         //   setState(() {
+                            //         //     checkedItems = List.generate(
+                            //         //         listStore.length, (index) => false);
+                            //         //   });
+                            //         // }
+                            //       }
+                            //     },
+                            //     itemAsString: (RouteStore data) => data.route,
+                            //     itemBuilder: (context, item, isSelected) {
+                            //       return Column(
+                            //         children: [
+                            //           ListTile(
+                            //             title: Text(
+                            //               " ${item.route}",
+                            //               style: Styles.black18(context),
+                            //             ),
+                            //             selected: isSelected,
+                            //           ),
+                            //           Divider(
+                            //             color: Colors.grey[
+                            //                 200], // Color of the divider line
+                            //             thickness: 1, // Thickness of the line
+                            //             indent:
+                            //                 16, // Left padding for the divider line
+                            //             endIndent:
+                            //                 16, // Right padding for the divider line
+                            //           ),
+                            //         ],
+                            //       );
+                            //     },
+                            //   ),
+                            // ),
                             Container(
                               width: 130,
                               child: Padding(
@@ -694,7 +795,7 @@ class _AjustRouteState extends State<AjustRoute> {
                                           ),
                                           Text(
                                             " ${toStore.length} ร้าน",
-                                            style: Styles.black24(context),
+                                            style: Styles.black18(context),
                                           ),
                                         ],
                                       ),
@@ -703,7 +804,7 @@ class _AjustRouteState extends State<AjustRoute> {
                                       children: [
                                         Text(
                                           "${isEdit ? "ย้ายไปยังรูท " : "เพิ่มไปยังรูท "}",
-                                          style: Styles.black24(context),
+                                          style: Styles.black18(context),
                                         ),
                                         Icon(
                                           isEdit
@@ -718,71 +819,119 @@ class _AjustRouteState extends State<AjustRoute> {
                                   ],
                                 ),
                               ),
-                              Container(
-                                // color: Colors.white,
-                                padding: EdgeInsets.only(top: 8),
-                                margin: EdgeInsets.only(
-                                  left: 8,
-                                  right: 8,
-                                ),
-                                width: 100,
-                                height: 75,
-                                child: DropdownSearchCustom<RouteStore>(
-                                  initialSelectedValue: RouteStore(
-                                    route: 'R02',
-                                  ),
-                                  label: "เลือกรูท",
-                                  titleText: "เลือกรูท",
-                                  // label: "ปรับรูท R${widget.route}",
-                                  // titleText: "ปรับรูท R${widget.route}",
-                                  fetchItems: (filter) => getRoutes(filter),
-                                  onChanged: (RouteStore? selected) async {
-                                    if (selected != null) {
-                                      selectedToRoute =
-                                          RouteStore(route: selected.route);
-                                      if (selected.route ==
-                                          selectedRoute.route) {
-                                        toastification.show(
-                                          autoCloseDuration:
-                                              const Duration(seconds: 5),
-                                          context: context,
-                                          primaryColor: Colors.red,
-                                          type: ToastificationType.error,
-                                          style:
-                                              ToastificationStyle.flatColored,
-                                          title: Text(
-                                            "ไม่สามารถเลือกรูทเดียวกันได้",
-                                            style: Styles.black18(context),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  itemAsString: (RouteStore data) => data.route,
-                                  itemBuilder: (context, item, isSelected) {
-                                    return Column(
-                                      children: [
-                                        ListTile(
-                                          title: Text(
-                                            " ${item.route}",
-                                            style: Styles.black18(context),
-                                          ),
-                                          selected: isSelected,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    width: 100,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.all(0),
+                                        elevation: 0, // Disable shadow
+                                        shadowColor: Colors
+                                            .transparent, // Ensure no shadow color
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          side:
+                                              BorderSide.none, // Remove border
                                         ),
-                                        Divider(
-                                          color: Colors.grey[
-                                              200], // Color of the divider line
-                                          thickness: 1, // Thickness of the line
-                                          indent:
-                                              16, // Left padding for the divider line
-                                          endIndent:
-                                              16, // Right padding for the divider line
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              selectedToRoute.route,
+                                              textAlign: TextAlign.center,
+                                              style: Styles.black18(context),
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.keyboard_arrow_right_sharp,
+                                            color: Styles.grey,
+                                            size: 30,
+                                          ),
+                                        ],
+                                      ),
+                                      onPressed: () {
+                                        _showStoreToSheet(context);
+                                      },
+                                    ),
+                                  )
+                                ],
                               ),
+                              SizedBox(
+                                width: 8,
+                              )
+                              // Container(
+                              //   // color: Colors.white,
+                              //   padding: EdgeInsets.only(top: 8),
+                              //   margin: EdgeInsets.only(
+                              //     left: 8,
+                              //     right: 8,
+                              //   ),
+                              //   width: 100,
+                              //   height: 75,
+                              //   child: DropdownSearchCustom<RouteStore>(
+                              //     initialSelectedValue: RouteStore(
+                              //       route: 'R02',
+                              //     ),
+                              //     label: "เลือกรูท",
+                              //     titleText: "เลือกรูท",
+                              //     // label: "ปรับรูท R${widget.route}",
+                              //     // titleText: "ปรับรูท R${widget.route}",
+                              //     fetchItems: (filter) => getRoutes(filter),
+                              //     onChanged: (RouteStore? selected) async {
+                              //       if (selected != null) {
+                              //         selectedToRoute =
+                              //             RouteStore(route: selected.route);
+                              //         if (selected.route ==
+                              //             selectedRoute.route) {
+                              //           toastification.show(
+                              //             autoCloseDuration:
+                              //                 const Duration(seconds: 5),
+                              //             context: context,
+                              //             primaryColor: Colors.red,
+                              //             type: ToastificationType.error,
+                              //             style:
+                              //                 ToastificationStyle.flatColored,
+                              //             title: Text(
+                              //               "ไม่สามารถเลือกรูทเดียวกันได้",
+                              //               style: Styles.black18(context),
+                              //             ),
+                              //           );
+                              //         }
+                              //       }
+                              //     },
+                              //     itemAsString: (RouteStore data) => data.route,
+                              //     itemBuilder: (context, item, isSelected) {
+                              //       return Column(
+                              //         children: [
+                              //           ListTile(
+                              //             title: Text(
+                              //               " ${item.route}",
+                              //               style: Styles.black18(context),
+                              //             ),
+                              //             selected: isSelected,
+                              //           ),
+                              //           Divider(
+                              //             color: Colors.grey[
+                              //                 200], // Color of the divider line
+                              //             thickness: 1, // Thickness of the line
+                              //             indent:
+                              //                 16, // Left padding for the divider line
+                              //             endIndent:
+                              //                 16, // Right padding for the divider line
+                              //           ),
+                              //         ],
+                              //       );
+                              //     },
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
@@ -796,7 +945,7 @@ class _AjustRouteState extends State<AjustRoute> {
                                   toStore[index],
                                   index,
                                   routeId,
-                                  selectedRoute.route,
+                                  selectedToRoute.route,
                                   checkedItems[index],
                                   (bool value) {
                                     setState(() {
@@ -804,6 +953,23 @@ class _AjustRouteState extends State<AjustRoute> {
                                           value; // Update state
                                     });
                                   },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        Divider(color: Colors.black),
+                        Expanded(
+                          child: LoadingSkeletonizer(
+                            loading: _loadingAllStore,
+                            child: ListView.builder(
+                              itemCount: toStoreShow.length,
+                              itemBuilder: (context, index) {
+                                return _buildRouteToShow(
+                                  toStoreShow[index],
+                                  index,
+                                  routeId,
+                                  selectedToRoute.route,
                                 );
                               },
                             ),
@@ -864,8 +1030,8 @@ class _AjustRouteState extends State<AjustRoute> {
           value: checked,
           onChanged: (bool? value) {
             onCheckedChanged(value!); // Call parent function to update state
-            toStore.add(store);
-            toStoreString.add(store.storeInfo.storeId);
+            toStore.insert(0, store);
+            toStoreString.insert(0, store.storeInfo.storeId);
             if (checked == true &&
                 toStore.any((item) =>
                     item.storeInfo.storeId == store.storeInfo.storeId)) {
@@ -911,40 +1077,580 @@ class _AjustRouteState extends State<AjustRoute> {
     );
   }
 
+  Widget _buildRouteToShow(
+    ListStore store,
+    int index,
+    String routeId,
+    String ToRoute,
+    // bool checked,
+    // Function(bool) onCheckedChanged, // Callback to update parent state
+  ) {
+    return Container(
+      child: ListTile(
+        leading: Text(
+          "${index + 1}",
+          style: Styles.black18(context),
+        ),
+        title: Text(
+          store.storeInfo.name,
+          style: Styles.black20(context),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              store.storeInfo.address,
+              style: Styles.black18(context),
+            ),
+            Text(
+              store.storeInfo.typeName,
+              style: Styles.black18(context),
+            ),
+            Divider(
+              color: Colors.grey[200], // Color of the divider line
+              thickness: 1, // Thickness of the line
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildRouteTo(
     ListStore store,
     int index,
     String routeId,
-    String route,
+    String ToRoute,
     bool checked,
     Function(bool) onCheckedChanged, // Callback to update parent state
   ) {
-    return ListTile(
-      leading: Text(
-        "${index + 1}",
-        style: Styles.black24(context),
+    return Container(
+      color: Colors.greenAccent,
+      child: ListTile(
+        leading: Text(
+          "${index + 1}",
+          style: Styles.black18(context),
+        ),
+        title: Text(
+          store.storeInfo.name,
+          style: Styles.black20(context),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              store.storeInfo.address,
+              style: Styles.black18(context),
+            ),
+            Text(
+              store.storeInfo.typeName,
+              style: Styles.black18(context),
+            ),
+            Divider(
+              color: Colors.grey[200], // Color of the divider line
+              thickness: 1, // Thickness of the line
+            )
+          ],
+        ),
       ),
-      title: Text(
-        store.storeInfo.name,
-        style: Styles.black24(context),
+    );
+  }
+
+  void _showStoreToSheet(BuildContext context) {
+    TextEditingController searchController = TextEditingController();
+    List<RouteStore> filteredrouteFix = List.from(routeFix);
+    double screenWidth = MediaQuery.of(context).size.width;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            store.storeInfo.address,
-            style: Styles.black18(context),
-          ),
-          Text(
-            store.storeInfo.typeName,
-            style: Styles.black18(context),
-          ),
-          Divider(
-            color: Colors.grey[200], // Color of the divider line
-            thickness: 1, // Thickness of the line
-          )
-        ],
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.8,
+              minChildSize: 0.4,
+              maxChildSize: 0.9,
+              builder: (context, scrollController) {
+                return Container(
+                  width: screenWidth * 0.95,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Styles.primaryColor,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  FontAwesomeIcons.route,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Text('เลือกรูท',
+                                    style: Styles.white24(context)),
+                              ],
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            IconButton(
+                              icon:
+                                  const Icon(Icons.close, color: Colors.white),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: TextField(
+                          autofocus: true,
+                          style: Styles.black18(context),
+                          controller: searchController,
+                          onChanged: (query) {
+                            setModalState(
+                              () {
+                                filteredrouteFix = routeFix
+                                    .where((item) => item.route
+                                        .toLowerCase()
+                                        .contains(query.toLowerCase()))
+                                    .toList();
+                              },
+                            );
+                          },
+                          decoration: InputDecoration(
+                            hintText: "ค้นหาร้านค้า...",
+                            hintStyle: Styles.grey18(context),
+                            prefixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                      // Store List
+                      Expanded(
+                        child: Container(
+                          color: Colors.white,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ListView.builder(
+                                  // controller: _storeScrollController,
+                                  itemCount: filteredrouteFix.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    padding:
+                                                        const EdgeInsets.all(8),
+                                                    elevation: 0,
+                                                    shadowColor:
+                                                        Colors.transparent,
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.zero,
+                                                      side: BorderSide.none,
+                                                    ),
+                                                  ),
+                                                  onPressed: () async {
+                                                    if (filteredrouteFix[index]
+                                                            .route ==
+                                                        selectedRoute.route) {
+                                                      toastification.show(
+                                                        autoCloseDuration:
+                                                            const Duration(
+                                                                seconds: 5),
+                                                        context: context,
+                                                        primaryColor:
+                                                            Colors.red,
+                                                        type: ToastificationType
+                                                            .error,
+                                                        style:
+                                                            ToastificationStyle
+                                                                .flatColored,
+                                                        title: Text(
+                                                          "ไม่สามารถเลือกรูทเดียวกันได้",
+                                                          style: Styles.red18(
+                                                              context),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      setModalState(() {
+                                                        isRouteTo =
+                                                            filteredrouteFix[
+                                                                    index]
+                                                                .route;
+                                                      });
+                                                      setState(() {
+                                                        selectedToRoute = RouteStore(
+                                                            route:
+                                                                filteredrouteFix[
+                                                                        index]
+                                                                    .route);
+                                                      });
+
+                                                      _getListToStore();
+                                                    }
+                                                  },
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  "${filteredrouteFix[index].route}",
+                                                                  style: Styles
+                                                                      .black18(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          isRouteTo ==
+                                                                  filteredrouteFix[
+                                                                          index]
+                                                                      .route
+                                                              ? Icon(
+                                                                  Icons
+                                                                      .check_circle_outline_rounded,
+                                                                  color: Styles
+                                                                      .success,
+                                                                  size: 25,
+                                                                )
+                                                              : Icon(
+                                                                  Icons
+                                                                      .keyboard_arrow_right_sharp,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  size: 25,
+                                                                )
+                                                        ],
+                                                      ),
+                                                      Divider(
+                                                        color: Colors.grey[200],
+                                                        thickness: 1,
+                                                        indent: 16,
+                                                        endIndent: 16,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showStoreFromSheet(BuildContext context) {
+    TextEditingController searchController = TextEditingController();
+    List<RouteStore> filteredrouteFix =
+        routeFix.where((route) => route.route != "R").toList();
+    double screenWidth = MediaQuery.of(context).size.width;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.8,
+              minChildSize: 0.4,
+              maxChildSize: 0.9,
+              builder: (context, scrollController) {
+                return Container(
+                  width: screenWidth * 0.95,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Styles.primaryColor,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  FontAwesomeIcons.route,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Text('เลือกรูท',
+                                    style: Styles.white24(context)),
+                              ],
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            IconButton(
+                              icon:
+                                  const Icon(Icons.close, color: Colors.white),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: TextField(
+                          autofocus: true,
+                          style: Styles.black18(context),
+                          controller: searchController,
+                          onChanged: (query) {
+                            setModalState(
+                              () {
+                                filteredrouteFix = routeFix
+                                    .where((item) => item.route
+                                        .toLowerCase()
+                                        .contains(query.toLowerCase()))
+                                    .toList();
+                              },
+                            );
+                          },
+                          decoration: InputDecoration(
+                            hintText: "ค้นหาร้านค้า...",
+                            hintStyle: Styles.grey18(context),
+                            prefixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                      // Store List
+                      Expanded(
+                        child: Container(
+                          color: Colors.white,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ListView.builder(
+                                  // controller: _storeScrollController,
+                                  itemCount: filteredrouteFix.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    padding:
+                                                        const EdgeInsets.all(8),
+                                                    elevation: 0,
+                                                    shadowColor:
+                                                        Colors.transparent,
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.zero,
+                                                      side: BorderSide.none,
+                                                    ),
+                                                  ),
+                                                  onPressed: () async {
+                                                    if (filteredrouteFix[index]
+                                                            .route ==
+                                                        selectedToRoute.route) {
+                                                      toastification.show(
+                                                        autoCloseDuration:
+                                                            const Duration(
+                                                                seconds: 5),
+                                                        context: context,
+                                                        primaryColor:
+                                                            Colors.red,
+                                                        type: ToastificationType
+                                                            .error,
+                                                        style:
+                                                            ToastificationStyle
+                                                                .flatColored,
+                                                        title: Text(
+                                                          "ไม่สามารถเลือกรูทเดียวกันได้",
+                                                          style: Styles.red18(
+                                                              context),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      setModalState(() {
+                                                        isRouteFrom =
+                                                            filteredrouteFix[
+                                                                    index]
+                                                                .route;
+                                                      });
+                                                      setState(() {
+                                                        selectedRoute = RouteStore(
+                                                            route:
+                                                                filteredrouteFix[
+                                                                        index]
+                                                                    .route);
+                                                      });
+                                                      _getListStore();
+                                                    }
+                                                  },
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  "${filteredrouteFix[index].route}",
+                                                                  style: Styles
+                                                                      .black18(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          isRouteFrom ==
+                                                                  filteredrouteFix[
+                                                                          index]
+                                                                      .route
+                                                              ? Icon(
+                                                                  Icons
+                                                                      .check_circle_outline_rounded,
+                                                                  color: Styles
+                                                                      .success,
+                                                                  size: 25,
+                                                                )
+                                                              : Icon(
+                                                                  Icons
+                                                                      .keyboard_arrow_right_sharp,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  size: 25,
+                                                                )
+                                                        ],
+                                                      ),
+                                                      Divider(
+                                                        color: Colors.grey[200],
+                                                        thickness: 1,
+                                                        indent: 16,
+                                                        endIndent: 16,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

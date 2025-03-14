@@ -37,11 +37,14 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal_windows.dart';
 import 'package:toastification/toastification.dart';
 
 class CreateOrderScreen extends StatefulWidget {
+  final String? routeId;
   final String? storeName;
   final String? storeId;
   final String? storeAddress;
+
   CreateOrderScreen({
     super.key,
+    required this.routeId,
     required this.storeId,
     required this.storeName,
     required this.storeAddress,
@@ -256,12 +259,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         body: {
           "type": "sale",
           "area": "${User.area}",
+          "period":
+              "${widget.routeId == "" ? "" : widget.routeId?.substring(0, 5)}",
           "storeId": "${widget.storeId}",
+          "routeId": "${widget.routeId}",
           "note": "${noteController.text}",
           "latitude": "$latitude",
           "longitude": "$longitude",
           "shipping": "test",
-          "payment": "cash"
+          "payment": isSelectCheckout == "QR Payment" ? "qr" : "cash"
         },
       );
       if (response.statusCode == 200) {
@@ -314,9 +320,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       // Navigator.push(
       //   context,
       //   MaterialPageRoute(
-      //       builder: (context) => OrderDetailScreen(
-      //             orderId: response.data['data']['orderId'],
-      //           )),
+      //     builder: (context) => OrderDetailScreen(
+      //       orderId: response.data['data']['orderId'],
+      //     ),
+      //   ),
       // );
     } catch (e) {
       print("Error $e");

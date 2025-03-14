@@ -2,8 +2,10 @@ import 'package:_12sale_app/core/components/button/Button.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/core/utils/tost_util.dart';
 import 'package:_12sale_app/data/service/connectivityService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:toastification/toastification.dart';
 
@@ -25,6 +27,12 @@ class Header extends StatefulWidget {
 
 class _HeaderState extends State<Header> {
   bool? lastConnectedState; // Tracks the last connectivity state
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

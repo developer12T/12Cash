@@ -8,6 +8,7 @@ import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/core/page/store/StoreScreen.dart';
 import 'package:_12sale_app/data/models/RefundFilter.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 // import 'package:_12sale_app/page/TestTabel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:_12sale_app/core/components/Header.dart';
@@ -21,6 +22,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:toastification/toastification.dart';
 
 class HomeScreen extends StatefulWidget {
   final int index;
@@ -180,6 +182,29 @@ class _HomeScreenState extends State<HomeScreen> {
         return const Icon(Icons.shopping_basket, size: 30);
     }
   }
+
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+
+  //   final socketService = Provider.of<SocketService>(context);
+
+  //   // Listen for updates and show toast
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     if (socketService.latestMessage != '') {
+  //       toastification.show(
+  //         context: context,
+  //         title: Text(
+  //           socketService.latestMessage,
+  //           style: Styles.green18(context),
+  //         ),
+  //         style: ToastificationStyle.flatColored,
+  //         primaryColor: Colors.green,
+  //         autoCloseDuration: Duration(seconds: 5),
+  //       );
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {

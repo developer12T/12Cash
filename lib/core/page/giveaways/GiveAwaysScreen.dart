@@ -77,7 +77,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
   @override
   void initState() {
     super.initState();
-    _getStore();
+    // _getStore();
     _getGiveType();
   }
 
@@ -285,18 +285,18 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-        endpoint: 'api/cash/store/getStore?area=${User.area}',
+        endpoint:
+            'api/cash/give/getStoreFilter?area=${User.area}&giveId=${isGiveTypeVal}',
         method: 'GET',
       );
       if (response.statusCode == 200) {
         print("getStore");
+        print("isGiveTypeVal: $isGiveTypeVal");
         final List<dynamic> data = response.data['data'];
         // print(response.data['data'][0]);
-        if (mounted) {
-          setState(() {
-            storeList = data.map((item) => Store.fromJson(item)).toList();
-          });
-        }
+        setState(() {
+          storeList = data.map((item) => Store.fromJson(item)).toList();
+        });
       }
     } catch (e) {
       print("Error _getStore $e");
@@ -305,7 +305,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
           storeList = [];
         });
       }
-      print("Error $e");
+      print("Error _getStore $e");
     }
   }
 
@@ -707,6 +707,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                       ],
                                     ),
                                     onPressed: () {
+                                      // _getStore();
                                       _showAddressSheet(context);
                                     },
                                   ),
@@ -761,7 +762,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                               flavourList.clear();
                                               context.loaderOverlay.show();
                                               _getProduct(groupList).then((_) =>
-                                                  context.loaderOverlay.hide());
+                                                  Timer(Duration(seconds: 3),
+                                                      () {
+                                                    context.loaderOverlay
+                                                        .hide();
+                                                  }));
                                             },
                                             onSearch: _getProduct,
                                           );
@@ -811,7 +816,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                               flavourList.clear();
                                               context.loaderOverlay.show();
                                               _getProduct(groupList).then((_) =>
-                                                  context.loaderOverlay.hide());
+                                                  Timer(Duration(seconds: 3),
+                                                      () {
+                                                    context.loaderOverlay
+                                                        .hide();
+                                                  }));
                                             },
                                             onSearch: _getProduct,
                                           );
@@ -861,7 +870,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                               flavourList.clear();
                                               context.loaderOverlay.show();
                                               _getProduct(groupList).then((_) =>
-                                                  context.loaderOverlay.hide());
+                                                  Timer(Duration(seconds: 3),
+                                                      () {
+                                                    context.loaderOverlay
+                                                        .hide();
+                                                  }));
                                             },
                                             onSearch: _getProduct,
                                           );
@@ -906,7 +919,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                               flavourList.clear();
                                               context.loaderOverlay.show();
                                               _getProduct(groupList).then((_) =>
-                                                  context.loaderOverlay.hide());
+                                                  Timer(Duration(seconds: 3),
+                                                      () {
+                                                    context.loaderOverlay
+                                                        .hide();
+                                                  }));
                                             },
                                             onSearch: _getProduct,
                                           );
@@ -938,7 +955,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                           _clearFilter();
                                           context.loaderOverlay.show();
                                           _getProduct(groupList).then((_) =>
-                                              context.loaderOverlay.hide());
+                                              Timer(Duration(seconds: 3), () {
+                                                context.loaderOverlay.hide();
+                                              }));
                                         },
                                         child: badgeFilter(
                                           openIcon: false,
@@ -2515,6 +2534,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                       //     flavourList = [];
                                                       //   });
                                                       // }
+                                                      await _getStore();
                                                       await _getProductFilter();
                                                       print(
                                                           "groupList: $groupList");
