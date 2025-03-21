@@ -22,7 +22,6 @@ import 'package:image/image.dart' as img;
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/page/order/CheckoutScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/Cart.dart';
@@ -1877,13 +1876,6 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                       ),
                                       onPressed: () {
                                         _showCheckoutSheet(context);
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) =>
-                                        //         CheckOutScreen(),
-                                        //   ),
-                                        // );
                                       },
                                     ),
                                   ),

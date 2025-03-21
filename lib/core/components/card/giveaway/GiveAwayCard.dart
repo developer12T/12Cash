@@ -91,20 +91,15 @@ class GiveAwayCard extends StatelessWidget {
                                     // margin: EdgeInsets.only(right: 8),
                                     // height: screenWidth / ,
                                     decoration: BoxDecoration(
-                                      color: item.status == 'Agree'
+                                      color: item.status == 'completed'
                                           ? Styles.successTextColor
-                                          : item.status == 'Reject'
+                                          : item.status == 'canceled'
                                               ? Styles.failTextColor
-                                              : Styles.grey,
+                                              : Styles.warning,
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     child: Text(
-                                      item.status == 'Agree'
-                                          ? 'store.store_card_new.agree'.tr()
-                                          : item.status == 'Reject'
-                                              ? 'store.store_card_new.reject'
-                                                  .tr()
-                                              : '${item.status.toUpperCase()}',
+                                      '${item.status.toUpperCase()}',
                                       style: Styles.white16(context),
                                       textAlign: TextAlign.center,
                                     ),

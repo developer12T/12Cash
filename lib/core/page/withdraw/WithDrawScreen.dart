@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/WeightCude.dart';
 import 'package:_12sale_app/core/components/card/WithDrawCard.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/page/withdraw/PrintWithdraw.dart';
 import 'package:_12sale_app/core/page/withdraw/ProductWithdrowScreen.dart';
 import 'package:_12sale_app/core/page/withdraw/WithdrawDetailScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';

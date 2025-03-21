@@ -9,18 +9,19 @@ import 'package:_12sale_app/core/components/camera/IconButtonWithLabelFixed.dart
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 import 'package:_12sale_app/core/page/route/OrderDetailScreen.dart';
+import 'package:_12sale_app/data/models/order/ChangePromotion.dart';
 import 'package:_12sale_app/data/models/order/Promotion.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
 import 'package:dio/dio.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/page/order/CheckoutScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/Cart.dart';
@@ -136,6 +137,32 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     }
   }
 
+  // Future<List<GroupPromotion>> getRoutesDropdown(String filter) async {
+  //   try {
+  //     // Load the JSON file for districts
+  //     ApiService apiService = ApiService();
+  //     await apiService.init();
+  //     var response = await apiService.request(
+  //       endpoint: 'api/cash/manage/option/get?module=route&type=notSell',
+  //       method: 'GET',
+  //     );
+
+  //     // Filter and map JSON data to District model based on selected province and filter
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       final List<dynamic> data = response.data['data'];
+  //       setState(() {
+  //         causes = data.map((item) => Cause.fromJson(item)).toList();
+  //       });
+  //     }
+
+  //     // Group districts by amphoe
+  //     return causes;
+  //   } catch (e) {
+  //     print("Error occurred: $e");
+  //     return [];
+  //   }
+  // }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -175,13 +202,34 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   List<CartList> cartList = [];
   List<PromotionList> promotionList = [];
   List<PromotionListItem> listPromotions = [];
+  List<PromotionListItem> listPromotionsMock = [];
+
+  List<ProductGroup> listChangePromotions = [];
+  List<ItemProductChange> itemProductChange = [];
+  int totalChangePr = 0;
+  int totalPromotionqty = 0;
+  List<GroupPromotion> groupPromotion = [];
+
   List<ImageModel> imageList = [];
   final Debouncer _debouncer = Debouncer();
   final Throttler _throttler = Throttler();
 
   String latitude = '';
   String longitude = '';
+  List<String> proIdList = [];
   final LocationService locationService = LocationService();
+
+  List<int> itemQuantities = []; // Store item quantities for each item
+
+  Future<List<GroupPromotion>> getGroupDropdown(String filter) async {
+    try {
+      // Group districts by amphoe
+      return groupPromotion;
+    } catch (e) {
+      print("Error occurred: $e");
+      return [];
+    }
+  }
 
   Future<void> uploadImageSlip(String orderId) async {
     try {
@@ -217,6 +265,50 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           ),
         );
       }
+    } catch (e) {
+      print("Error $e");
+    }
+  }
+
+  Future<void> _changeProduct() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      print("proIdList $proIdList");
+      for (var proId in proIdList) {
+        var response = await apiService.request(
+          endpoint: 'api/cash/promotion/changeProduct',
+          method: 'POST',
+          body: {
+            "type": "sale",
+            "storeId": "${widget.storeId}",
+            "proId": "${proId}"
+          },
+        );
+        if (response.statusCode == 200) {
+          final List<dynamic> data = response.data['data']['listProduct'];
+          totalChangePr = response.data['data']['qty'].toInt();
+          totalPromotionqty = response.data['data']['qty'].toInt();
+          listChangePromotions =
+              data.map((item) => ProductGroup.fromJson(item)).toList();
+          itemProductChange.clear();
+          for (var changePromotion in listChangePromotions) {
+            groupPromotion.add(
+              GroupPromotion(
+                  group: changePromotion.group, size: changePromotion.size),
+            );
+            for (var itemChange in changePromotion.product) {
+              itemProductChange.add(itemChange);
+            }
+          }
+        }
+      }
+      setState(() {
+        itemQuantities = List.filled(
+            itemProductChange.length, 1); // Initialize quantities to 1
+      });
+
+      print("Change Promtion Product $itemProductChange");
     } catch (e) {
       print("Error $e");
     }
@@ -371,10 +463,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
               data2.map((item) => PromotionList.fromJson(item)).toList();
           listPromotions.clear();
           for (var promotion in promotionList) {
+            proIdList.add(promotion.proId);
             for (var item in promotion.listPromotion) {
               listPromotions.add(item);
             }
           }
+          print("Get Cart is Loading");
+
+          // proId = response.data['data'][0]['listPromotion']['proId'];
           subtotal = response.data['data'][0]['subtotal'].toDouble();
           discount = response.data['data'][0]['discount'].toDouble();
           discountProduct =
@@ -383,6 +479,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           totalExVat = response.data['data'][0]['totalExVat'].toDouble();
           total = response.data['data'][0]['total'].toDouble();
         });
+        await _changeProduct();
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
@@ -392,6 +489,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         });
 
         // Map cartList to receiptData["items"]
+        // print(proIdList);
       }
     } catch (e) {
       setState(() {
@@ -1341,7 +1439,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   ElevatedButton(
                                                                     onPressed:
                                                                         () async {
-                                                                      // _showCartSheet(context, cartList);
+                                                                      // _changeProduct();
+                                                                      _showChangePromotionSheet(
+                                                                          context,
+                                                                          itemProductChange);
                                                                     },
                                                                     style: ElevatedButton
                                                                         .styleFrom(
@@ -1479,13 +1580,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                       ),
                                       onPressed: () {
                                         _showCheckoutSheet(context);
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) =>
-                                        //         CheckOutScreen(),
-                                        //   ),
-                                        // );
                                       },
                                     ),
                                   ),
@@ -1661,9 +1755,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     );
   }
 
-  void _showCartSheet(BuildContext context, List<CartList> cartlist) {
+  void _showChangePromotionSheet(
+      BuildContext context, List<ItemProductChange> cartlist) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    List<ItemProductChange> filteredPromotion = List.from(cartlist);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allow full height and scrolling
@@ -1675,7 +1771,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             builder: (BuildContext context, StateSetter setModalState) {
           return DraggableScrollableSheet(
             expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
+            initialChildSize: 0.9, // 60% of screen height
             minChildSize: 0.4,
             maxChildSize: 0.9,
             builder: (context, scrollController) {
@@ -1714,7 +1810,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                             icon: const Icon(Icons.close, color: Colors.white),
                             onPressed: () {
                               Navigator.of(context).pop();
-                              _getCart();
+
+                              // _getCart();
                             },
                           ),
                         ],
@@ -1722,16 +1819,41 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                     ),
                     Expanded(
                       child: Container(
-                        height: screenHeight * 0.9,
                         color: Colors.white,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 8.0, horizontal: 16.0),
                           child: Column(
                             children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "รายการโปรโมชั่น",
+                                    style: Styles.black18(context),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // setModalState(() {
+                                      //   listPromotions.clear();
+                                      // });
+                                      // _getCart();
+                                    },
+                                    child: Text(
+                                      'เลือกใหม่',
+                                      style: Styles.black18(context),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Divider(
+                                color: Colors.black,
+                                indent: 1,
+                              ),
                               Expanded(
                                   child: ListView.builder(
-                                itemCount: cartlist.length,
+                                itemCount: listPromotions.length,
                                 itemBuilder: (context, index) {
                                   return Column(
                                     children: [
@@ -1772,7 +1894,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                     children: [
                                                       Expanded(
                                                         child: Text(
-                                                          cartlist[index].name,
+                                                          listPromotions[index]
+                                                              .name,
                                                           style: Styles.black16(
                                                               context),
                                                           softWrap: true,
@@ -1796,27 +1919,300 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                           Row(
                                                             children: [
                                                               Text(
-                                                                'id : ${cartlist[index].id}',
+                                                                'id : ${listPromotions[index].id}',
                                                                 style: Styles
                                                                     .black16(
                                                                         context),
                                                               ),
                                                             ],
                                                           ),
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'จำนวน : ${cartlist[index].qty.toStringAsFixed(0)} ${cartlist[index].unit}',
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Container(
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    4),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              border:
+                                                                  Border.all(
+                                                                color:
+                                                                    Colors.grey,
+                                                                width: 1,
                                                               ),
-                                                            ],
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          16),
+                                                            ),
+                                                            width: 75,
+                                                            child: Text(
+                                                              '${listPromotions[index].qty} ${listPromotions[index].unitName}',
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: Styles
+                                                                  .black18(
+                                                                context,
+                                                              ),
+                                                            ),
                                                           ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Divider(
+                                        color: Colors.grey[200],
+                                        thickness: 1,
+                                        indent: 16,
+                                        endIndent: 16,
+                                      ),
+                                    ],
+                                  );
+                                },
+                              )),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "รายการโปรโมชั่นที่สามารถเปลี่ยนได้",
+                                    style: Styles.black18(context),
+                                  ),
+                                  // DropdownMenu<GroupPromotion>(
+                                  //   onSelected: (value) {
+                                  //     if (value != null) {
+                                  //       print(value.group);
+                                  //       setModalState(() {
+                                  //         filteredPromotion = cartlist
+                                  //             .where((store) =>
+                                  //                 // store.name
+                                  //                 //     .contains(value!.group) &&
+                                  //                 // store.name
+                                  //                 //     .contains(value!.size))
+                                  //                 store.name.contains(value.size
+                                  //                     .replaceAll(" ", "")
+                                  //                     .toLowerCase()))
+                                  //             .toList();
+                                  //       });
+                                  //     }
+                                  //   },
+                                  //   textStyle: Styles.black18(context),
+                                  //   dropdownMenuEntries: groupPromotion
+                                  //       .map<DropdownMenuEntry<GroupPromotion>>(
+                                  //           (GroupPromotion value) {
+                                  //     return DropdownMenuEntry<GroupPromotion>(
+                                  //         value: value,
+                                  //         label:
+                                  //             "${value.group} ${value.size}");
+                                  //   }).toList(),
+                                  //   // dropdownMenuEntries: groupPromotion,
+                                  // )
+                                  SizedBox(
+                                    width: 16,
+                                  ),
+
+                                  Expanded(
+                                    child: DropdownSearch<GroupPromotion>(
+                                      dropdownButtonProps: DropdownButtonProps(
+                                        color: Colors.white,
+                                        icon: Icon(
+                                          Icons.arrow_drop_down,
+                                          size: screenWidth / 20,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+
+                                      itemAsString: (item) =>
+                                          "${item.group} ${item.size}",
+                                      asyncItems: (filter) =>
+                                          getGroupDropdown(filter),
+                                      // items:(filter, infiniteScrollProps) =>
+                                      dropdownDecoratorProps:
+                                          DropDownDecoratorProps(
+                                        baseStyle: Styles.black18(context),
+                                        dropdownSearchDecoration:
+                                            InputDecoration(
+                                          // fillColor: Colors.white,
+                                          // prefixIcon: widget.icon,
+                                          labelText: "เลือกกลุ่มของโปรโมทชั่น",
+                                          labelStyle: Styles.grey18(context),
+                                          hintText: "เลือกกลุ่มของโปรโมทชั่น",
+                                          hintStyle: Styles.grey18(context),
+                                          border: const OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8)),
+                                            borderSide: BorderSide(
+                                                color: Colors.grey, width: 1),
+                                          ),
+                                          focusedBorder:
+                                              const OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8)),
+                                            borderSide: BorderSide(
+                                                color: Colors.blue, width: 1.5),
+                                          ),
+                                        ),
+                                      ),
+                                      onChanged: (GroupPromotion? data) {
+                                        setModalState(() {
+                                          filteredPromotion = cartlist
+                                              .where((store) =>
+                                                  // store.name
+                                                  //     .contains(value!.group) &&
+                                                  store.name
+                                                      .contains(data!.group) &&
+                                                  store.name.contains(data!.size
+                                                      .replaceAll(" ", "")
+                                                      .toLowerCase()))
+                                              .toList();
+                                        });
+                                      },
+                                      popupProps:
+                                          PopupPropsMultiSelection.dialog(
+                                        constraints: BoxConstraints(
+                                          maxHeight: screenWidth * 0.7,
+                                          maxWidth: screenWidth,
+                                          minHeight: screenWidth * 0.7,
+                                          minWidth: screenWidth,
+                                        ),
+                                        title: Container(
+                                          decoration: const BoxDecoration(
+                                            color: Styles.primaryColor,
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(16),
+                                              topRight: Radius.circular(16),
+                                            ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8),
+                                          child: Text(
+                                            "เลือกกลุ่มของโปรโมทชั่น",
+                                            style: Styles.white18(context),
+                                          ),
+                                        ),
+
+                                        // showSearchBox: widget.showSearchBox,
+                                        itemBuilder:
+                                            (context, item, isSelected) {
+                                          return Column(
+                                            children: [
+                                              ListTile(
+                                                title: Text(
+                                                  "${item.group} ${item.size}",
+                                                  style:
+                                                      Styles.black18(context),
+                                                ),
+                                                selected: isSelected,
+                                              ),
+                                              Divider(
+                                                color: Colors.grey[
+                                                    200], // Color of the divider line
+                                                thickness:
+                                                    1, // Thickness of the line
+                                                indent:
+                                                    16, // Left padding for the divider line
+                                                endIndent:
+                                                    16, // Right padding for the divider line
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                        searchFieldProps: TextFieldProps(
+                                          style: Styles.black18(context),
+                                          autofocus: true,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Divider(
+                                color: Colors.black,
+                                indent: 1,
+                              ),
+                              Expanded(
+                                  child: ListView.builder(
+                                itemCount: filteredPromotion.length,
+                                itemBuilder: (context, index) {
+                                  return Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: Image.network(
+                                              'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                              width: screenWidth / 8,
+                                              height: screenWidth / 8,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return const Center(
+                                                  child: Icon(
+                                                    Icons.error,
+                                                    color: Colors.red,
+                                                    size: 50,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 3,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                          filteredPromotion[
+                                                                  index]
+                                                              .name,
+                                                          style: Styles.black16(
+                                                              context),
+                                                          softWrap: true,
+                                                          maxLines: 2,
+                                                          overflow: TextOverflow
+                                                              .visible,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
                                                           Row(
                                                             children: [
                                                               Text(
-                                                                'ราคา : ${cartlist[index].price}',
+                                                                'id : ${filteredPromotion[index].id}',
                                                                 style: Styles
                                                                     .black16(
                                                                         context),
@@ -1833,16 +2229,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                           ElevatedButton(
                                                             onPressed:
                                                                 () async {
-                                                              // setModalState(() {
-                                                              //   if (cartlist[
-                                                              //               index]
-                                                              //           .qty >
-                                                              //       1) {
-                                                              //     cartlist[
-                                                              //             index]
-                                                              //         .qty--;
-                                                              //   }
-                                                              // });
+                                                              setModalState(() {
+                                                                if (itemQuantities[
+                                                                        index] >
+                                                                    1) {
+                                                                  itemQuantities[
+                                                                      index]--;
+                                                                }
+                                                              });
+                                                              print(
+                                                                  itemQuantities[
+                                                                      index]);
                                                               // await _reduceCart(
                                                               //     cartlist[
                                                               //         index],
@@ -1891,7 +2288,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             ),
                                                             width: 75,
                                                             child: Text(
-                                                              '${cartlist[index].qty.toStringAsFixed(0)}',
+                                                              '${itemQuantities[index]}',
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,
@@ -1908,11 +2305,23 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                               //     cartlist[
                                                               //         index],
                                                               //     setModalState);
-
-                                                              // setModalState(() {
-                                                              //   cartlist[index]
-                                                              //       .qty++;
+                                                              // setState(() {
+                                                              //   itemQuantities[
+                                                              //       index]++;
                                                               // });
+                                                              if (itemQuantities[
+                                                                      index] <
+                                                                  totalChangePr) {
+                                                                setModalState(
+                                                                    () {
+                                                                  itemQuantities[
+                                                                      index]++;
+                                                                });
+                                                              }
+
+                                                              print(
+                                                                  itemQuantities[
+                                                                      index]);
                                                             },
                                                             style:
                                                                 ElevatedButton
@@ -1945,18 +2354,77 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                               //     cartlist[
                                                               //         index],
                                                               //     setModalState);
+                                                              if (totalChangePr >=
+                                                                  itemQuantities[
+                                                                      index]) {
+                                                                setModalState(
+                                                                  () {
+                                                                    // listPromotions
+                                                                    //     .clear();
+                                                                    totalChangePr =
+                                                                        totalChangePr -
+                                                                            itemQuantities[index];
+                                                                    listPromotionsMock
+                                                                        .add(
+                                                                      PromotionListItem(
+                                                                        id: cartlist[index]
+                                                                            .id,
+                                                                        name: cartlist[index]
+                                                                            .name,
+                                                                        unit: listPromotions[0]
+                                                                            .unit,
+                                                                        brand:
+                                                                            '',
+                                                                        flavour:
+                                                                            '',
+                                                                        group:
+                                                                            '',
+                                                                        qty: itemQuantities[
+                                                                            index],
+                                                                        size:
+                                                                            '',
+                                                                        unitName:
+                                                                            listPromotions[0].unitName,
+                                                                      ),
+                                                                    );
+                                                                    listPromotions =
+                                                                        listPromotionsMock;
+                                                                  },
+                                                                );
+                                                              } else {
+                                                                listPromotionsMock
+                                                                    .removeLast();
+                                                                listPromotionsMock
+                                                                    .insert(
+                                                                  0,
+                                                                  PromotionListItem(
+                                                                    id: cartlist[
+                                                                            index]
+                                                                        .id,
+                                                                    name: cartlist[
+                                                                            index]
+                                                                        .name,
+                                                                    unit: listPromotions[
+                                                                            0]
+                                                                        .unit,
+                                                                    brand: '',
+                                                                    flavour: '',
+                                                                    group: '',
+                                                                    qty: itemQuantities[
+                                                                        index],
+                                                                    size: '',
+                                                                    unitName:
+                                                                        listPromotions[0]
+                                                                            .unitName,
+                                                                  ),
+                                                                );
+                                                                setModalState(
+                                                                    () {
+                                                                  listPromotions =
+                                                                      listPromotionsMock;
+                                                                });
+                                                              }
 
-                                                              // setModalState(
-                                                              //   () {
-                                                              //     cartList.removeWhere((item) => (item
-                                                              //                 .id ==
-                                                              //             cartlist[index]
-                                                              //                 .id &&
-                                                              //         item.unit ==
-                                                              //             cartlist[index]
-                                                              //                 .unit));
-                                                              //   },
-                                                              // );
                                                               // await _getTotalCart(
                                                               //     setModalState);
 
@@ -1971,10 +2439,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 ElevatedButton
                                                                     .styleFrom(
                                                               shape:
-                                                                  const CircleBorder(
+                                                                  CircleBorder(
                                                                 side: BorderSide(
-                                                                    color: Colors
-                                                                        .red,
+                                                                    color: Styles
+                                                                        .warning!,
                                                                     width: 1),
                                                               ),
                                                               padding:
@@ -1984,10 +2452,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   Colors
                                                                       .white, // Button color
                                                             ),
-                                                            child: const Icon(
-                                                              Icons.delete,
+                                                            child: Icon(
+                                                              FontAwesomeIcons
+                                                                  .penToSquare,
                                                               size: 24,
-                                                              color: Colors.red,
+                                                              color: Styles
+                                                                  .warning,
                                                             ), // Example
                                                           ),
                                                         ],
@@ -2021,7 +2491,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                     ],
                                   );
                                 },
-                              ))
+                              )),
                             ],
                           ),
                         ),
@@ -2031,13 +2501,28 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                       color: Styles.primaryColor,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
                           children: [
-                            Text("ยอดรวม", style: Styles.white24(context)),
-                            Text(
-                                "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(100)} บาท",
-                                style: Styles.white24(context)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("จำนวนที่เหลือ",
+                                    style: Styles.white24(context)),
+                                Text(
+                                    "${totalChangePr} ${listPromotions[0].unitName}",
+                                    style: Styles.white24(context)),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("จำนวนที่เลือกได้",
+                                    style: Styles.white24(context)),
+                                Text(
+                                    "${totalPromotionqty} ${listPromotions[0].unitName}",
+                                    style: Styles.white24(context)),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -2051,6 +2536,397 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       },
     );
   }
+
+  // void _showCartSheet(BuildContext context, List<CartList> cartlist) {
+  //   double screenWidth = MediaQuery.of(context).size.width;
+  //   double screenHeight = MediaQuery.of(context).size.height;
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true, // Allow full height and scrolling
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+  //     ),
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //           builder: (BuildContext context, StateSetter setModalState) {
+  //         return DraggableScrollableSheet(
+  //           expand: false, // Allows dragging but does not expand fully
+  //           initialChildSize: 0.6, // 60% of screen height
+  //           minChildSize: 0.4,
+  //           maxChildSize: 0.9,
+  //           builder: (context, scrollController) {
+  //             return Container(
+  //               width: screenWidth * 0.95,
+  //               child: Column(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Container(
+  //                     decoration: const BoxDecoration(
+  //                       color: Styles.primaryColor,
+  //                       borderRadius: BorderRadius.only(
+  //                         topLeft: Radius.circular(16),
+  //                         topRight: Radius.circular(16),
+  //                       ),
+  //                     ),
+  //                     alignment: Alignment.centerLeft,
+  //                     padding: const EdgeInsets.symmetric(
+  //                         vertical: 8.0, horizontal: 16.0),
+  //                     child: Row(
+  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                       children: [
+  //                         Row(
+  //                           children: [
+  //                             Icon(
+  //                               Icons.shopping_bag_outlined,
+  //                               color: Colors.white,
+  //                               size: 30,
+  //                             ),
+  //                             Text('เปลี่ยนรายการโปรโมชั่น',
+  //                                 style: Styles.white24(context)),
+  //                           ],
+  //                         ),
+  //                         IconButton(
+  //                           icon: const Icon(Icons.close, color: Colors.white),
+  //                           onPressed: () {
+  //                             Navigator.of(context).pop();
+  //                             _getCart();
+  //                           },
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                   Expanded(
+  //                     child: Container(
+  //                       height: screenHeight * 0.9,
+  //                       color: Colors.white,
+  //                       child: Padding(
+  //                         padding: const EdgeInsets.symmetric(
+  //                             vertical: 8.0, horizontal: 16.0),
+  //                         child: Column(
+  //                           children: [
+  //                             Expanded(
+  //                                 child: ListView.builder(
+  //                               itemCount: cartlist.length,
+  //                               itemBuilder: (context, index) {
+  //                                 return Column(
+  //                                   children: [
+  //                                     Row(
+  //                                       mainAxisAlignment:
+  //                                           MainAxisAlignment.start,
+  //                                       children: [
+  //                                         ClipRRect(
+  //                                           borderRadius:
+  //                                               BorderRadius.circular(8),
+  //                                           child: Image.network(
+  //                                             'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+  //                                             width: screenWidth / 8,
+  //                                             height: screenWidth / 8,
+  //                                             fit: BoxFit.cover,
+  //                                             errorBuilder:
+  //                                                 (context, error, stackTrace) {
+  //                                               return const Center(
+  //                                                 child: Icon(
+  //                                                   Icons.error,
+  //                                                   color: Colors.red,
+  //                                                   size: 50,
+  //                                                 ),
+  //                                               );
+  //                                             },
+  //                                           ),
+  //                                         ),
+  //                                         Expanded(
+  //                                           flex: 3,
+  //                                           child: Padding(
+  //                                             padding:
+  //                                                 const EdgeInsets.all(16.0),
+  //                                             child: Column(
+  //                                               crossAxisAlignment:
+  //                                                   CrossAxisAlignment.start,
+  //                                               children: [
+  //                                                 Row(
+  //                                                   children: [
+  //                                                     Expanded(
+  //                                                       child: Text(
+  //                                                         cartlist[index].name,
+  //                                                         style: Styles.black16(
+  //                                                             context),
+  //                                                         softWrap: true,
+  //                                                         maxLines: 2,
+  //                                                         overflow: TextOverflow
+  //                                                             .visible,
+  //                                                       ),
+  //                                                     ),
+  //                                                   ],
+  //                                                 ),
+  //                                                 Row(
+  //                                                   mainAxisAlignment:
+  //                                                       MainAxisAlignment
+  //                                                           .spaceBetween,
+  //                                                   children: [
+  //                                                     Column(
+  //                                                       crossAxisAlignment:
+  //                                                           CrossAxisAlignment
+  //                                                               .start,
+  //                                                       children: [
+  //                                                         Row(
+  //                                                           children: [
+  //                                                             Text(
+  //                                                               'id : ${cartlist[index].id}',
+  //                                                               style: Styles
+  //                                                                   .black16(
+  //                                                                       context),
+  //                                                             ),
+  //                                                           ],
+  //                                                         ),
+  //                                                         Row(
+  //                                                           children: [
+  //                                                             Text(
+  //                                                               'จำนวน : ${cartlist[index].qty.toStringAsFixed(0)} ${cartlist[index].unit}',
+  //                                                               style: Styles
+  //                                                                   .black16(
+  //                                                                       context),
+  //                                                             ),
+  //                                                           ],
+  //                                                         ),
+  //                                                         Row(
+  //                                                           children: [
+  //                                                             Text(
+  //                                                               'ราคา : ${cartlist[index].price}',
+  //                                                               style: Styles
+  //                                                                   .black16(
+  //                                                                       context),
+  //                                                             ),
+  //                                                           ],
+  //                                                         ),
+  //                                                       ],
+  //                                                     ),
+  //                                                     Row(
+  //                                                       mainAxisAlignment:
+  //                                                           MainAxisAlignment
+  //                                                               .end,
+  //                                                       children: [
+  //                                                         ElevatedButton(
+  //                                                           onPressed:
+  //                                                               () async {
+  //                                                             // setModalState(() {
+  //                                                             //   if (cartlist[
+  //                                                             //               index]
+  //                                                             //           .qty >
+  //                                                             //       1) {
+  //                                                             //     cartlist[
+  //                                                             //             index]
+  //                                                             //         .qty--;
+  //                                                             //   }
+  //                                                             // });
+  //                                                             // await _reduceCart(
+  //                                                             //     cartlist[
+  //                                                             //         index],
+  //                                                             //     setModalState);
+  //                                                           },
+  //                                                           style:
+  //                                                               ElevatedButton
+  //                                                                   .styleFrom(
+  //                                                             shape:
+  //                                                                 const CircleBorder(
+  //                                                               side: BorderSide(
+  //                                                                   color: Colors
+  //                                                                       .grey,
+  //                                                                   width: 1),
+  //                                                             ), // ✅ Makes the button circular
+  //                                                             padding:
+  //                                                                 const EdgeInsets
+  //                                                                     .all(8),
+  //                                                             backgroundColor:
+  //                                                                 Colors
+  //                                                                     .white, // Button color
+  //                                                           ),
+  //                                                           child: const Icon(
+  //                                                             Icons.remove,
+  //                                                             size: 24,
+  //                                                             color:
+  //                                                                 Colors.grey,
+  //                                                           ), // Example
+  //                                                         ),
+  //                                                         Container(
+  //                                                           padding:
+  //                                                               EdgeInsets.all(
+  //                                                                   4),
+  //                                                           decoration:
+  //                                                               BoxDecoration(
+  //                                                             border:
+  //                                                                 Border.all(
+  //                                                               color:
+  //                                                                   Colors.grey,
+  //                                                               width: 1,
+  //                                                             ),
+  //                                                             borderRadius:
+  //                                                                 BorderRadius
+  //                                                                     .circular(
+  //                                                                         16),
+  //                                                           ),
+  //                                                           width: 75,
+  //                                                           child: Text(
+  //                                                             '${cartlist[index].qty.toStringAsFixed(0)}',
+  //                                                             textAlign:
+  //                                                                 TextAlign
+  //                                                                     .center,
+  //                                                             style: Styles
+  //                                                                 .black18(
+  //                                                               context,
+  //                                                             ),
+  //                                                           ),
+  //                                                         ),
+  //                                                         ElevatedButton(
+  //                                                           onPressed:
+  //                                                               () async {
+  //                                                             // await _addCartDu(
+  //                                                             //     cartlist[
+  //                                                             //         index],
+  //                                                             //     setModalState);
+
+  //                                                             // setModalState(() {
+  //                                                             //   cartlist[index]
+  //                                                             //       .qty++;
+  //                                                             // });
+  //                                                           },
+  //                                                           style:
+  //                                                               ElevatedButton
+  //                                                                   .styleFrom(
+  //                                                             shape:
+  //                                                                 const CircleBorder(
+  //                                                               side: BorderSide(
+  //                                                                   color: Colors
+  //                                                                       .grey,
+  //                                                                   width: 1),
+  //                                                             ), // ✅ Makes the button circular
+  //                                                             padding:
+  //                                                                 const EdgeInsets
+  //                                                                     .all(8),
+  //                                                             backgroundColor:
+  //                                                                 Colors
+  //                                                                     .white, // Button color
+  //                                                           ),
+  //                                                           child: const Icon(
+  //                                                             Icons.add,
+  //                                                             size: 24,
+  //                                                             color:
+  //                                                                 Colors.grey,
+  //                                                           ), // Example
+  //                                                         ),
+  //                                                         ElevatedButton(
+  //                                                           onPressed:
+  //                                                               () async {
+  //                                                             // await _deleteCart(
+  //                                                             //     cartlist[
+  //                                                             //         index],
+  //                                                             //     setModalState);
+
+  //                                                             // setModalState(
+  //                                                             //   () {
+  //                                                             //     cartList.removeWhere((item) => (item
+  //                                                             //                 .id ==
+  //                                                             //             cartlist[index]
+  //                                                             //                 .id &&
+  //                                                             //         item.unit ==
+  //                                                             //             cartlist[index]
+  //                                                             //                 .unit));
+  //                                                             //   },
+  //                                                             // );
+  //                                                             // await _getTotalCart(
+  //                                                             //     setModalState);
+
+  //                                                             // if (cartList
+  //                                                             //         .length ==
+  //                                                             //     0) {
+  //                                                             //   Navigator.pop(
+  //                                                             //       context);
+  //                                                             // }
+  //                                                           },
+  //                                                           style:
+  //                                                               ElevatedButton
+  //                                                                   .styleFrom(
+  //                                                             shape:
+  //                                                                 const CircleBorder(
+  //                                                               side: BorderSide(
+  //                                                                   color: Colors
+  //                                                                       .red,
+  //                                                                   width: 1),
+  //                                                             ),
+  //                                                             padding:
+  //                                                                 const EdgeInsets
+  //                                                                     .all(8),
+  //                                                             backgroundColor:
+  //                                                                 Colors
+  //                                                                     .white, // Button color
+  //                                                           ),
+  //                                                           child: const Icon(
+  //                                                             Icons.delete,
+  //                                                             size: 24,
+  //                                                             color: Colors.red,
+  //                                                           ), // Example
+  //                                                         ),
+  //                                                       ],
+  //                                                     ),
+  //                                                   ],
+  //                                                 ),
+  //                                               ],
+  //                                             ),
+  //                                           ),
+  //                                         ),
+  //                                         // Container(
+  //                                         //   color: Colors.red,
+  //                                         //   width: 50,
+  //                                         //   height: 100,
+  //                                         //   child: Center(
+  //                                         //     child: Icon(
+  //                                         //       Icons.delete,
+  //                                         //       color: Colors.white,
+  //                                         //       size: 25,
+  //                                         //     ),
+  //                                         //   ),
+  //                                         // ),
+  //                                       ],
+  //                                     ),
+  //                                     Divider(
+  //                                       color: Colors.grey[200],
+  //                                       thickness: 1,
+  //                                       indent: 16,
+  //                                       endIndent: 16,
+  //                                     ),
+  //                                   ],
+  //                                 );
+  //                               },
+  //                             ))
+  //                           ],
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   Container(
+  //                     color: Styles.primaryColor,
+  //                     child: Padding(
+  //                       padding: const EdgeInsets.all(16.0),
+  //                       child: Row(
+  //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                         children: [
+  //                           Text("ยอดรวม", style: Styles.white24(context)),
+  //                           Text(
+  //                               "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(100)} บาท",
+  //                               style: Styles.white24(context)),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   )
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         );
+  //       });
+  //     },
+  //   );
+  // }
 
   void _showCheckoutSheet(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;

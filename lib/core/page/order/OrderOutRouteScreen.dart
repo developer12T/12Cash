@@ -10,7 +10,6 @@ import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard
 import 'package:_12sale_app/core/components/modal_sheet/ProductSheet.dart';
 import 'package:_12sale_app/core/components/search/ProductSearch.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
-import 'package:_12sale_app/core/page/order/CheckOutScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
@@ -366,7 +365,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
           "type": "sale",
           "group": selectedGroups,
           "brand": selectedBrands,
-          "size": selectedSize,
+          "size": selectedSizes,
           "flavour": selectedFlavours
         },
       );

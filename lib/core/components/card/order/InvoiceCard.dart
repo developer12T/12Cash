@@ -94,16 +94,11 @@ class InvoiceCard extends StatelessWidget {
                                           ? Styles.successTextColor
                                           : item.status == 'canceled'
                                               ? Styles.failTextColor
-                                              : Styles.grey,
+                                              : Styles.warning,
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     child: Text(
-                                      item.status == 'completed'
-                                          ? '${item.status.toUpperCase()}'
-                                          : item.status == 'canceled'
-                                              ? '${item.status.toUpperCase()}'
-                                                  .tr()
-                                              : '${item.status.toUpperCase()}',
+                                      '${item.status.toUpperCase()}',
                                       style: Styles.white16(context),
                                       textAlign: TextAlign.center,
                                     ),

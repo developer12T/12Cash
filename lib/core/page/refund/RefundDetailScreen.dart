@@ -3,9 +3,11 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
+import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
@@ -87,6 +89,45 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
       setState(() {
         _isCreateOrderEnabled = false; // Enable the checkbox
       });
+    }
+  }
+
+  Future<void> _updateStatus() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/refund/updateStatus',
+        method: 'POST',
+        body: {
+          "orderId": "${widget.orderId}",
+          "status": "canceled"
+          // 'pending', 'completed', 'canceled', 'rejected'
+        },
+      );
+      if (response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ยกเลิกการคืนสินค้าสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(
+              index: 3,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error $e");
     }
   }
 
@@ -1311,6 +1352,19 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                                       .visible,
                                                             ),
                                                           ),
+                                                          Expanded(
+                                                            child: Text(
+                                                              "${listProductRefund[index].condition == "damaged" ? "คืนเสีย" : "คืนดี"}",
+                                                              style: Styles
+                                                                  .black16(
+                                                                      context),
+                                                              textAlign:
+                                                                  TextAlign.end,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .visible,
+                                                            ),
+                                                          ),
                                                         ],
                                                       ),
                                                       Row(
@@ -1916,27 +1970,29 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    backgroundColor: Styles.fail,
+                    backgroundColor: refundDetails?.status == "pending"
+                        ? Styles.fail
+                        : Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   onPressed: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => RefundDetailScreen()),
-                    // );
+                    if (refundDetails?.status == "pending") {
+                      AllAlert.customAlert(
+                          context,
+                          "store.processtimeline_screen.alert.title".tr(),
+                          "คุณต้องการยกเลิกรายการใช่หรือไม่ ?",
+                          _updateStatus);
+                    }
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          "ยกเลิกรายการ",
-                          style: Styles.headerWhite18(context),
-                        ),
+                        Text("ยกเลิกรายการ",
+                            style: Styles.headerWhite18(context)),
                       ],
                     ),
                   ),

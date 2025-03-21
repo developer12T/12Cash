@@ -207,7 +207,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           "type": isSelect == 1 ? "refund" : "sale",
           "group": selectedGroups,
           "brand": selectedBrands,
-          "size": selectedSize,
+          "size": selectedSizes,
           "flavour": selectedFlavours
         },
       );

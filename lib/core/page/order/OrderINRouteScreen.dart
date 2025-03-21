@@ -9,7 +9,6 @@ import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
 import 'package:_12sale_app/core/components/search/ProductSearch.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
-import 'package:_12sale_app/core/page/order/CheckOutScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
@@ -319,7 +318,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
           "type": "sale",
           "group": selectedGroups,
           "brand": selectedBrands,
-          "size": selectedSize,
+          "size": selectedSizes,
           "flavour": selectedFlavours
         },
       );
@@ -342,6 +341,10 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
       }
     } catch (e) {
       print("Error _getProduct: $e");
+      print("Error _getProduct: $selectedGroups");
+      print("Error _getProduct: $selectedBrands");
+      print("Error _getProduct: $selectedSizes");
+      print("Error _getProduct: $selectedFlavours");
     }
   }
 

@@ -22,7 +22,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _getWithdrawDetail();
+    // _getWithdrawDetail();
   }
 
   Future<void> _getWithdrawDetail() async {

@@ -980,7 +980,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "พนักงานขาย : ${saleDetail?.name} เขต ${saleDetail?.warehouse}",
+                                  "พนักงานขาย : ${saleDetail?.name}",
                                   style: Styles.black24(context),
                                 )
                               ],
@@ -1631,12 +1631,8 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          "ยกเลิกรายการ",
-                          style: orderDetail?.status == "pending"
-                              ? Styles.headerWhite18(context)
-                              : Styles.headergrey18(context),
-                        ),
+                        Text("ยกเลิกรายการ",
+                            style: Styles.headerWhite18(context)),
                       ],
                     ),
                   ),

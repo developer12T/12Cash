@@ -98,6 +98,8 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
         endpoint: 'api/cash/store/getStore?area=${User.area}&type=new',
         method: 'GET',
       );
+      print("_getStoreDataNew $response");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
         setState(() {

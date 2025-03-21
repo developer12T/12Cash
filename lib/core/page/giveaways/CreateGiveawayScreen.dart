@@ -21,7 +21,6 @@ import 'package:image/image.dart' as img;
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/page/order/CheckoutScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/Cart.dart';
@@ -163,7 +162,6 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
   @override
   void dispose() {
     // Unsubscribe when the widget is disposed
-
     routeObserver.unsubscribe(this);
     _cartScrollController.dispose();
     _promotionScrollController.dispose();
@@ -342,6 +340,35 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
     }
   }
 
+  Future<void> _getSummary() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/cart/get?type=give&area=${User.area}&storeId=${widget.storeId}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        vat = response.data['data'][0]['totalVat'].toDouble();
+        totalExVat = response.data['data'][0]['totalExVat'].toDouble();
+        total = response.data['data'][0]['total'].toDouble();
+      }
+    } catch (e) {
+      setState(() {
+        cartList = [];
+        promotionList = [];
+        vat = 0;
+        subtotal = 0;
+        discount = 0;
+        discountProduct = 0;
+        totalExVat = 0;
+        total = 0;
+      });
+      print("Error $e");
+    }
+  }
+
   Future<void> _getCart() async {
     try {
       ApiService apiService = ApiService();
@@ -373,6 +400,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
           vat = response.data['data'][0]['totalVat'].toDouble();
           totalExVat = response.data['data'][0]['totalExVat'].toDouble();
           total = response.data['data'][0]['total'].toDouble();
+          print("vat = $vat");
         });
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
@@ -381,8 +409,6 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
             });
           }
         });
-
-        // Map cartList to receiptData["items"]
       }
     } catch (e) {
       setState(() {
@@ -447,7 +473,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
             endpoint: 'api/cash/cart/adjust',
             method: 'PATCH',
             body: {
-              "type": "sale",
+              "type": "give",
               "area": "${User.area}",
               "storeId": "${widget.storeId}",
               "id": "${cart.id}",
@@ -757,6 +783,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                                                   : "กรุณาใส่หมายเหตุ...",
                                               style: Styles.grey18(context),
                                               maxLines: 1,
+                                              textAlign: TextAlign.end,
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
@@ -989,10 +1016,9 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                                                               ElevatedButton(
                                                                 onPressed:
                                                                     () async {
-                                                                  await _addCartDu(
+                                                                  await _reduceCart(
                                                                       cartList[
                                                                           index]);
-
                                                                   setState(() {
                                                                     cartList[
                                                                             index]
