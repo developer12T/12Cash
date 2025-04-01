@@ -1,11 +1,14 @@
 class ProductGroup {
   final String group;
   final String size;
+  // final String proId;
+
   final List<ItemProductChange> product;
 
   ProductGroup({
     required this.group,
     required this.size,
+    // required this.proId,
     required this.product,
   });
 
@@ -13,6 +16,7 @@ class ProductGroup {
     return ProductGroup(
       group: json['group'],
       size: json['size'],
+      // proId: json['proId'],
       product: (json['product'] as List)
           .map((item) => ItemProductChange.fromJson(item))
           .toList(),
@@ -23,6 +27,7 @@ class ProductGroup {
     return {
       'group': group,
       'size': size,
+      // 'proId': proId,
       'product': product.map((item) => item.toJson()).toList(),
     };
   }
@@ -47,6 +52,34 @@ class GroupPromotion {
     return {
       'group': group,
       'size': size,
+    };
+  }
+}
+
+class TotalProductChang {
+  String proId;
+  int total;
+  int totalShow;
+
+  TotalProductChang({
+    required this.proId,
+    required this.total,
+    required this.totalShow,
+  });
+
+  factory TotalProductChang.fromJson(Map<String, dynamic> json) {
+    return TotalProductChang(
+      proId: json['proId'],
+      total: json['qty'],
+      totalShow: json['qty'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'proId': proId,
+      'total': total,
+      'totalShow': totalShow,
     };
   }
 }

@@ -123,7 +123,7 @@ class Unit {
       unit: json['unit'] ?? '',
       name: json['name'] ?? '',
       factor: json['factor'] ?? '',
-      price: json['price'] ?? '',
+      price: json['price'].toString(),
     );
   }
 
