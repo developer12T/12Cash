@@ -326,8 +326,8 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       // client.findProxy = HttpClient.findProxyFromEnvironment;
 
       var response = await dio.post(
-        'http://192.168.44.57:8005/api/cash/store/addStore',
-        // '${ApiService.apiHost}/api/cash/store/addStore',
+        // 'http://192.168.44.57:8005/api/cash/store/addStore',
+        '${ApiService.apiHost}/api/cash/store/addStore',
         data: formData,
         options: Options(
           headers: {

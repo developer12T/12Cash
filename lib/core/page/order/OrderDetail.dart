@@ -47,6 +47,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   double totalExVat = 0;
   double total = 0;
   String note = '';
+  String orderId = '';
+  String status = '';
 //  Map<String, dynamic> itemPr = [];
 
   @override
@@ -119,87 +121,93 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         final List<dynamic> data = response.data['data'][0]['listProduct'];
         final List<dynamic> images = response.data['data'][0]['listImage'];
         final List<dynamic> prData = response.data['data'][0]['listPromotions'];
+        // print("Response: ${response.data['data'][0]}");
+
         setState(() {
-          orderDetail = OrderDetail.fromJson(response.data['data'][0]);
+          // orderDetail = OrderDetail.fromJson(response.data['data'][0]);
+          orderId = response.data['data'][0]['orderId'];
+          status = response.data['data'][0]['status'];
           note = response.data['data'][0]['note'];
           saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
           storeDetail = Store.fromJson(response.data['data'][0]['store']);
           listProduct = data.map((item) => Product.fromJson(item)).toList();
           listImage = images.map((item) => ListImage.fromJson(item)).toList();
 
+          print("Response: ${response.data['data'][0]}");
+
           listPromotions =
               prData.map((item) => Promotion.fromJson(item)).toList();
-
-          subtotal = response.data['data'][0]['subtotal'].toDouble();
-          discount = response.data['data'][0]['discount'].toDouble();
-          discountProduct =
-              response.data['data'][0]['discountProduct'].toDouble();
-          vat = response.data['data'][0]['vat'].toDouble();
-          totalExVat = response.data['data'][0]['totalExVat'].toDouble();
-          total = response.data['data'][0]['total'].toDouble();
-          // Map cartList to receiptData["items"]
-          receiptData['customer']['customercode'] = storeDetail?.storeId;
-          receiptData['customer']['customername'] = storeDetail?.name;
-          receiptData['customer']['address1'] = storeDetail?.address;
-          receiptData['customer']['salecode'] = storeDetail?.storeId;
-          receiptData['customer']['customercode'] = storeDetail?.storeId;
-          receiptData['customer']['taxno'] = storeDetail?.taxId;
-          receiptData['CUOR'] = widget.orderId;
-          receiptData['OAORDT'] =
-              DateFormat('dd/MM/yyyy').format(DateTime.now());
-
-          receiptData['totaltext'] =
-              "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
-          receiptData['ex_vat'] =
-              "${response.data['data'][0]['totalExVat'].toStringAsFixed(2)}";
-          receiptData['vat'] =
-              "${response.data['data'][0]['vat'].toStringAsFixed(2)}";
-          receiptData['discountProduct'] =
-              "${response.data['data'][0]['discountProduct'].toStringAsFixed(2)}";
-          receiptData['discount'] =
-              "${response.data['data'][0]['discount'].toStringAsFixed(2)}";
-          receiptData['total'] =
-              "${response.data['data'][0]['total'].toStringAsFixed(2)}";
-          receiptData['OBSMCD'] = "${saleDetail?.name}";
-          receiptData['taxno'] = "${storeDetail?.taxId}";
-
-          receiptData["items"] = listProduct
-              .map((cartItem) => {
-                    "name": cartItem.name,
-                    "qty": cartItem.qty.toString(),
-                    "unit": cartItem.unitName,
-                    "price": cartItem.price.toStringAsFixed(2),
-                    "discount": cartItem.discount.toStringAsFixed(2),
-                    "discountProduct": cartItem.netTotal.toStringAsFixed(2)
-                  })
-              .toList();
           for (var promotion in listPromotions) {
             for (var item in promotion.listPromotion) {
               listPromotionItems.add(item);
             }
           }
 
-          for (var promotion in listPromotions) {
-            for (var item in promotion.listPromotion) {
-              receiptData["items"].add({
-                "name": item.name,
-                "qty": item.qty.toString(),
-                "unit": item.unitName,
-                "price": "0.00",
-                "discount": "0.00",
-                "discountProduct": "0.00"
-              });
-            }
-          }
-        });
-        print(receiptData);
-        Timer(const Duration(milliseconds: 500), () {
-          context.loaderOverlay.hide();
-          if (mounted) {
-            setState(() {
-              _loadOrderDetail = false;
-            });
-          }
+          //   subtotal = response.data['data'][0]['subtotal'].toDouble();
+          //   discount = response.data['data'][0]['discount'].toDouble();
+          //   discountProduct =
+          //       response.data['data'][0]['discountProduct'].toDouble();
+          //   vat = response.data['data'][0]['vat'].toDouble();
+          //   totalExVat = response.data['data'][0]['totalExVat'].toDouble();
+          //   total = response.data['data'][0]['total'].toDouble();
+          //   // Map cartList to receiptData["items"]
+          //   receiptData['customer']['customercode'] = storeDetail?.storeId;
+          //   receiptData['customer']['customername'] = storeDetail?.name;
+          //   receiptData['customer']['address1'] = storeDetail?.address;
+          //   receiptData['customer']['salecode'] = storeDetail?.storeId;
+          //   receiptData['customer']['customercode'] = storeDetail?.storeId;
+          //   receiptData['customer']['taxno'] = storeDetail?.taxId;
+          //   receiptData['CUOR'] = widget.orderId;
+          //   receiptData['OAORDT'] =
+          //       DateFormat('dd/MM/yyyy').format(DateTime.now());
+
+          //   receiptData['totaltext'] =
+          //       "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
+          //   receiptData['ex_vat'] =
+          //       "${response.data['data'][0]['totalExVat'].toStringAsFixed(2)}";
+          //   receiptData['vat'] =
+          //       "${response.data['data'][0]['vat'].toStringAsFixed(2)}";
+          //   receiptData['discountProduct'] =
+          //       "${response.data['data'][0]['discountProduct'].toStringAsFixed(2)}";
+          //   receiptData['discount'] =
+          //       "${response.data['data'][0]['discount'].toStringAsFixed(2)}";
+          //   receiptData['total'] =
+          //       "${response.data['data'][0]['total'].toStringAsFixed(2)}";
+          //   receiptData['OBSMCD'] = "${saleDetail?.name}";
+          //   receiptData['taxno'] = "${storeDetail?.taxId}";
+
+          //   receiptData["items"] = listProduct
+          //       .map((cartItem) => {
+          //             "name": cartItem.name,
+          //             "qty": cartItem.qty.toString(),
+          //             "unit": cartItem.unitName,
+          //             "price": cartItem.price.toStringAsFixed(2),
+          //             "discount": cartItem.discount.toStringAsFixed(2),
+          //             "discountProduct": cartItem.netTotal.toStringAsFixed(2)
+          //           })
+          //       .toList();
+
+          //   for (var promotion in listPromotions) {
+          //     for (var item in promotion.listPromotion) {
+          //       receiptData["items"].add({
+          //         "name": item.name,
+          //         "qty": item.qty.toString(),
+          //         "unit": item.unitName,
+          //         "price": "0.00",
+          //         "discount": "0.00",
+          //         "discountProduct": "0.00"
+          //       });
+          //     }
+          //   }
+          // });
+          // print(receiptData);
+          // Timer(const Duration(milliseconds: 500), () {
+          //   context.loaderOverlay.hide();
+          //   if (mounted) {
+          //     setState(() {
+          //       _loadOrderDetail = false;
+          //     });
+          //   }
         });
       }
     } catch (e) {
@@ -845,7 +853,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "${orderDetail?.orderId}",
+                              "${orderId}",
                               style: Styles.black24(context),
                             ),
                             Row(
@@ -1604,15 +1612,14 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    backgroundColor: orderDetail?.status == "pending"
-                        ? Styles.fail
-                        : Colors.grey,
+                    backgroundColor:
+                        status == "pending" ? Styles.fail : Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   onPressed: () {
-                    if (orderDetail?.status == "pending") {
+                    if (status == "pending") {
                       AllAlert.customAlert(
                           context,
                           "store.processtimeline_screen.alert.title".tr(),

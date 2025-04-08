@@ -51,23 +51,25 @@ class OrderDetail {
 
   factory OrderDetail.fromJson(Map<String, dynamic> json) {
     return OrderDetail(
-      type: json['type'],
-      orderId: json['orderId'],
+      type: json['type'] ?? '',
+      orderId: json['orderId'] ?? '',
       sale: Sale.fromJson(json['sale']),
       store: Store.fromJson(json['store']),
-      note: json['note'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-      status: json['status'],
-      listProduct: (json['listProduct'] as List)
-          .map((item) => Product.fromJson(item))
-          .toList(),
+      note: json['note'] ?? '',
+      latitude: json['latitude'] ?? '',
+      longitude: json['longitude'] ?? '',
+      status: json['status'] ?? '',
+      listProduct: json['listProduct'] is List
+          ? (json['listProduct'] as List)
+              .map((item) => Product.fromJson(item))
+              .toList()
+          : [],
       listPromotions: (json['listPromotions'] as List)
           .map((item) => Promotion.fromJson(item))
           .toList(),
-      subtotal: json['subtotal'].toDouble(),
-      discount: json['discount'].toDouble(),
-      discountProduct: json['discountProduct'].toDouble(),
+      subtotal: json['subtotal'].toDouble() ?? '',
+      discount: json['discount'].toDouble() ?? '',
+      discountProduct: json['discountProduct'].toDouble() ?? '',
       vat: json['vat'].toDouble(),
       totalExVat: json['totalExVat'].toDouble(),
       total: json['total'].toDouble(),
@@ -288,13 +290,13 @@ class PromotionListItem {
   // ✅ Convert JSON to Dart Object
   factory PromotionListItem.fromJson(Map<String, dynamic> json) {
     return PromotionListItem(
-      id: json['id'], //  field name
-      name: json['name'], //  field name
-      group: json['group'], //  field name
-      flavour: json['flavour'], //  field name
-      brand: json['brand'], //  field name
-      size: json['size'], //  field name
-      unit: json['unit'], //  field name
+      id: json['id'] ?? '', //  field name
+      name: json['name'] ?? '', //  field name
+      group: json['group'] ?? '', //  field name
+      flavour: json['flavour'] ?? '', //  field name
+      brand: json['brand'] ?? '', //  field name
+      size: json['size'] ?? '', //  field name
+      unit: json['unit'] ?? '', //  field name
       unitName: json['unitName'] ?? '', //  field name
       qty: json['qty'] as int, //  it's int
     );

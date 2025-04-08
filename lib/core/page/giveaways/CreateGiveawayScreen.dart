@@ -197,7 +197,8 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
         },
       );
       var response = await dio.post(
-        'http://192.168.44.57:8006/api/cash/order/addSlip',
+        '${ApiService.apiHost} /api/cash/order/addSlip',
+        // 'http://192.168.44.57:8006/api/cash/order/addSlip',
         data: formData,
         options: Options(
           headers: {

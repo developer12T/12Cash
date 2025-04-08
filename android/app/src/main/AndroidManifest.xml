@@ -26,7 +26,7 @@
     <!-- foregroundServiceType: remoteMessaging -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <application
-        android:label="12Cash Testing"
+        android:label="12Cash UAT Testing Store"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

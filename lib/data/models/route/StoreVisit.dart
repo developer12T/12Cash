@@ -97,9 +97,9 @@ class ListStore {
     return ListStore(
       storeInfo: StoreInfo.fromJson(json['storeInfo']),
       note: json['note'] ?? '',
-      image: json['image'],
-      latitude: json['latitude'],
-      longtitude: json['longtitude'],
+      image: json['image'] ?? '',
+      latitude: json['latitude'] ?? '',
+      longtitude: json['longtitude'] ?? '',
       status: json['status'] ?? '0',
       statusText: json['statusText'] ?? '',
       date: json['date'] ?? '',

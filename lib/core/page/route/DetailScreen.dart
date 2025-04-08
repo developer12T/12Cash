@@ -265,8 +265,8 @@ class _DetailScreenState extends State<DetailScreen> {
             },
           );
           var response = await dio.post(
-            // '${ApiService.apiHost} /api/cash/route/checkIn',
-            'http://192.168.44.57:8006/api/cash/route/checkIn',
+            '${ApiService.apiHost} /api/cash/route/checkIn',
+            // 'http://192.168.44.57:8006/api/cash/route/checkIn',
             data: formData,
             options: Options(
               headers: {

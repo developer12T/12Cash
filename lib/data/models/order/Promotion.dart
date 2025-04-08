@@ -1,7 +1,7 @@
 class PromotionList {
-  final String proId;
-  final String proName;
-  final String proType;
+  final String? proId;
+  final String? proName;
+  final String? proType;
   final double discount;
   final List<PromotionListItem> listPromotion;
 
@@ -50,6 +50,7 @@ class PromotionListItem {
   final String unitName;
   String? proId;
   String? proName;
+  String? proType;
   final int qty;
   PromotionListItem({
     required this.id,
@@ -62,6 +63,7 @@ class PromotionListItem {
     required this.unitName,
     this.proId,
     this.proName,
+    this.proType,
     required this.qty,
   });
 
@@ -78,6 +80,7 @@ class PromotionListItem {
       unitName: json['unitName'], //  field name
       proId: json['proId'], //  field name
       proName: json['proName'], //  field name
+      proType: json['proType'], //  field name
       qty: json['qty'] as int, //  it's int
     );
   }

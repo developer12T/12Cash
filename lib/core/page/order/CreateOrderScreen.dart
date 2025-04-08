@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+import 'package:_12sale_app/core/components/Dropdown.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
@@ -202,6 +203,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   List<CartList> cartList = [];
   List<PromotionList> promotionList = [];
+  List<PromotionList> promotionListChange = [];
+  String promotionListChangeStatus = '0';
+
   List<PromotionListItem> listPromotions = [];
   List<PromotionListItem> listPromotionsMock = [];
   String unitPromotion = '';
@@ -222,7 +226,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   String latitude = '';
   String longitude = '';
-  List<String> proIdList = [];
+  List<String?> proIdList = [];
 
   List<PromotionChangeList> proChangeLsit = [];
   final LocationService locationService = LocationService();
@@ -252,7 +256,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         },
       );
       var response = await dio.post(
-        'http://192.168.44.57:8006/api/cash/order/addSlip',
+        '${ApiService.apiHost} /api/cash/order/addSlip',
+        // 'http://192.168.44.57:8006/api/cash/order/addSlip',
         data: formData,
         options: Options(
           headers: {
@@ -416,7 +421,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           "latitude": "$latitude",
           "longitude": "$longitude",
           "shipping": "test",
-          "payment": isSelectCheckout == "QR Payment" ? "qr" : "cash"
+          "payment": isSelectCheckout == "QR Payment" ? "qr" : "cash",
+          "changePromotionStatus": promotionListChangeStatus,
+          "listPromotion": promotionListChange,
         },
       );
       if (response.statusCode == 200) {
@@ -534,6 +541,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                 group: item.group,
                 proId: promotion.proId,
                 proName: promotion.proName,
+                proType: promotion.proType,
                 id: item.id,
                 name: item.name,
                 qty: item.qty,
@@ -1535,7 +1543,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                           listPromotions[innerIndex]
                                                                               .proId,
                                                                           listPromotions[innerIndex]
-                                                                              .proName);
+                                                                              .proName,
+                                                                          listPromotions[innerIndex]
+                                                                              .proType);
                                                                     },
                                                                     style: ElevatedButton
                                                                         .styleFrom(
@@ -1848,8 +1858,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     );
   }
 
-  void _showChangePromotionSheet(BuildContext context,
-      List<ItemProductChange> cartlist, String? proId, String? proName) {
+  void _showChangePromotionSheet(
+      BuildContext context,
+      List<ItemProductChange> cartlist,
+      String? proId,
+      String? proName,
+      String? proType) {
     double screenWidth = MediaQuery.of(context).size.width;
     // double screenHeight = MediaQuery.of(context).size.height;
     List<ItemProductChange> filteredPromotion = List.from(cartlist);
@@ -1897,7 +1911,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                               ),
                               // Text('เปลี่ยนโปรโมชั่น $proName',
                               //     style: Styles.white24(context)),
-                              Text('$proName', style: Styles.white24(context)),
+                              Text('$proId', style: Styles.white24(context)),
                             ],
                           ),
                           IconButton(
@@ -2520,6 +2534,21 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 () async {
                                                               setModalState(
                                                                 () {
+                                                                  setState(() {
+                                                                    promotionListChangeStatus =
+                                                                        '1';
+                                                                  });
+                                                                  print(
+                                                                      "promotionListChangeStatus $promotionListChangeStatus");
+                                                                  print(
+                                                                      "proId $proId");
+                                                                  print(
+                                                                      "total $total");
+                                                                  print(
+                                                                      "totalChangeList ${totalChangeList.firstWhere((item) => item.proId == proId).total}");
+                                                                  print(
+                                                                      "itemQuantities ${itemQuantities[index]}");
+
                                                                   if (totalChangeList
                                                                           .firstWhere((item) =>
                                                                               item.proId ==
@@ -2532,10 +2561,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                             item.proId ==
                                                                             proId)
                                                                         .total -= itemQuantities[index];
-
-                                                                    // totalChangePr -=
-                                                                    //     itemQuantities[
-                                                                    //         index];
 
                                                                     listPromotionsMock
                                                                         .add(
@@ -2566,66 +2591,41 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                             : '',
                                                                       ),
                                                                     );
-                                                                  } else if (listPromotionsMock
-                                                                      .isNotEmpty) {
-                                                                    listPromotionsMock
-                                                                        .add(
-                                                                      PromotionListItem(
-                                                                          proId:
-                                                                              proId,
-                                                                          proName:
-                                                                              proName,
-                                                                          id: cartlist[index]
-                                                                              .id,
-                                                                          name: cartlist[index]
-                                                                              .name,
-                                                                          unit:
-                                                                              unitPromotion,
-                                                                          brand:
-                                                                              '',
-                                                                          flavour:
-                                                                              '',
-                                                                          group:
-                                                                              '',
-                                                                          qty: itemQuantities[
-                                                                              index],
-                                                                          size:
-                                                                              '',
-                                                                          unitName:
-                                                                              unitPromotionText),
-                                                                    );
                                                                   }
 
-                                                                  listPromotions.removeWhere(
-                                                                      (item) =>
+                                                                  listPromotions
+                                                                      .removeWhere((item) =>
                                                                           item.proId ==
-                                                                          proId
-                                                                      //      &&
-                                                                      // item.id ==
-                                                                      //     cartlist[index].id,
-                                                                      );
-
-                                                                  // listPromotions
-                                                                  //     .removeWhere(
-                                                                  //         (item) {
-                                                                  //   item.proId ==
-                                                                  //       proId
-                                                                  // });
-
-                                                                  // Update the promotions list
-                                                                  // listPromotions =
-                                                                  //     List.from(
-                                                                  //         listPromotionsMock);
-
-                                                                  // listPromotions.re
+                                                                          proId);
                                                                   listPromotions
                                                                       .addAll(
                                                                     List.from(
                                                                         listPromotionsMock),
                                                                   );
+                                                                  if (promotionListChange
+                                                                      .isEmpty) {
+                                                                    promotionListChange.removeWhere(
+                                                                        (item) =>
+                                                                            item.proId ==
+                                                                            proId);
+                                                                    promotionListChange
+                                                                        .add(
+                                                                      PromotionList(
+                                                                          proId:
+                                                                              proId,
+                                                                          discount:
+                                                                              0,
+                                                                          proName:
+                                                                              proName,
+                                                                          proType:
+                                                                              proType,
+                                                                          listPromotion: listPromotionsMock
+                                                                              .where((item) => item.proId == proId)
+                                                                              .toList()),
+                                                                    );
+                                                                  }
                                                                 },
                                                               );
-
                                                               // Uncomment if needed to refresh cart details
                                                               // await _getTotalCart(setModalState);
 
