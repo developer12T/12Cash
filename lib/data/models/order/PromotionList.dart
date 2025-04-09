@@ -1,9 +1,9 @@
 import 'package:_12sale_app/data/models/order/Promotion.dart';
 
 class PromotionChangeList {
-  final String proId;
-  final String proName;
-  final String proType;
+  final String? proId;
+  final String? proName;
+  final String? proType;
   final List<PromotionListItem> promotionListItem;
 
   PromotionChangeList({

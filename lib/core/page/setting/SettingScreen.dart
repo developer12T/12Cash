@@ -303,7 +303,8 @@ class _SettingScreenState extends State<SettingScreen> {
                         children: [
                           SizedBox(width: screenWidth / 10),
                           Text(
-                            "เวอร์ชั่นปัจจุบัน : ${_packageInfo.version} ",
+                            // "เวอร์ชั่นปัจจุบัน : ${_packageInfo.version} ",
+                            "เวอร์ชั่นปัจจุบัน : 1.1.1",
                             style: Styles.black18(context),
                           ),
                         ],

@@ -57,7 +57,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     // requestPermissions();
     // _getCart();
     _getOrderDetail();
-    _fetchPairedDevices();
+    // _fetchPairedDevices();
     _cartScrollController.addListener(_handleInnerScroll);
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
@@ -119,21 +119,23 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'][0]['listProduct'];
-        final List<dynamic> images = response.data['data'][0]['listImage'];
+        // final List<dynamic> images = response.data['data'][0]['listImage'];
         final List<dynamic> prData = response.data['data'][0]['listPromotions'];
-        // print("Response: ${response.data['data'][0]}");
+        print("Response: ${response.data['data'][0]}");
 
         setState(() {
           // orderDetail = OrderDetail.fromJson(response.data['data'][0]);
+
           orderId = response.data['data'][0]['orderId'];
           status = response.data['data'][0]['status'];
           note = response.data['data'][0]['note'];
           saleDetail = Sale.fromJson(response.data['data'][0]['sale']);
           storeDetail = Store.fromJson(response.data['data'][0]['store']);
           listProduct = data.map((item) => Product.fromJson(item)).toList();
-          listImage = images.map((item) => ListImage.fromJson(item)).toList();
 
-          print("Response: ${response.data['data'][0]}");
+          // listImage = images.map((item) => ListImage.fromJson(item)).toList();
+
+          // print("Response: ${response.data['data'][0]}");
 
           listPromotions =
               prData.map((item) => Promotion.fromJson(item)).toList();
@@ -143,71 +145,71 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             }
           }
 
-          //   subtotal = response.data['data'][0]['subtotal'].toDouble();
-          //   discount = response.data['data'][0]['discount'].toDouble();
-          //   discountProduct =
-          //       response.data['data'][0]['discountProduct'].toDouble();
-          //   vat = response.data['data'][0]['vat'].toDouble();
-          //   totalExVat = response.data['data'][0]['totalExVat'].toDouble();
-          //   total = response.data['data'][0]['total'].toDouble();
-          //   // Map cartList to receiptData["items"]
-          //   receiptData['customer']['customercode'] = storeDetail?.storeId;
-          //   receiptData['customer']['customername'] = storeDetail?.name;
-          //   receiptData['customer']['address1'] = storeDetail?.address;
-          //   receiptData['customer']['salecode'] = storeDetail?.storeId;
-          //   receiptData['customer']['customercode'] = storeDetail?.storeId;
-          //   receiptData['customer']['taxno'] = storeDetail?.taxId;
-          //   receiptData['CUOR'] = widget.orderId;
-          //   receiptData['OAORDT'] =
-          //       DateFormat('dd/MM/yyyy').format(DateTime.now());
+          subtotal = response.data['data'][0]['subtotal'].toDouble();
+          discount = response.data['data'][0]['discount'].toDouble();
+          discountProduct =
+              response.data['data'][0]['discountProduct'].toDouble();
+          vat = response.data['data'][0]['vat'].toDouble();
+          totalExVat = response.data['data'][0]['totalExVat'].toDouble();
+          total = response.data['data'][0]['total'].toDouble();
+          // Map cartList to receiptData["items"]
+          receiptData['customer']['customercode'] = storeDetail?.storeId;
+          receiptData['customer']['customername'] = storeDetail?.name;
+          receiptData['customer']['address1'] = storeDetail?.address;
+          receiptData['customer']['salecode'] = storeDetail?.storeId;
+          receiptData['customer']['customercode'] = storeDetail?.storeId;
+          receiptData['customer']['taxno'] = storeDetail?.taxId;
+          receiptData['CUOR'] = widget.orderId;
+          receiptData['OAORDT'] =
+              DateFormat('dd/MM/yyyy').format(DateTime.now());
 
-          //   receiptData['totaltext'] =
-          //       "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
-          //   receiptData['ex_vat'] =
-          //       "${response.data['data'][0]['totalExVat'].toStringAsFixed(2)}";
-          //   receiptData['vat'] =
-          //       "${response.data['data'][0]['vat'].toStringAsFixed(2)}";
-          //   receiptData['discountProduct'] =
-          //       "${response.data['data'][0]['discountProduct'].toStringAsFixed(2)}";
-          //   receiptData['discount'] =
-          //       "${response.data['data'][0]['discount'].toStringAsFixed(2)}";
-          //   receiptData['total'] =
-          //       "${response.data['data'][0]['total'].toStringAsFixed(2)}";
-          //   receiptData['OBSMCD'] = "${saleDetail?.name}";
-          //   receiptData['taxno'] = "${storeDetail?.taxId}";
+          receiptData['totaltext'] =
+              "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
+          receiptData['ex_vat'] =
+              "${response.data['data'][0]['totalExVat'].toStringAsFixed(2)}";
+          receiptData['vat'] =
+              "${response.data['data'][0]['vat'].toStringAsFixed(2)}";
+          receiptData['discountProduct'] =
+              "${response.data['data'][0]['discountProduct'].toStringAsFixed(2)}";
+          receiptData['discount'] =
+              "${response.data['data'][0]['discount'].toStringAsFixed(2)}";
+          receiptData['total'] =
+              "${response.data['data'][0]['total'].toStringAsFixed(2)}";
+          receiptData['OBSMCD'] = "${saleDetail?.name}";
+          receiptData['taxno'] = "${storeDetail?.taxId}";
 
-          //   receiptData["items"] = listProduct
-          //       .map((cartItem) => {
-          //             "name": cartItem.name,
-          //             "qty": cartItem.qty.toString(),
-          //             "unit": cartItem.unitName,
-          //             "price": cartItem.price.toStringAsFixed(2),
-          //             "discount": cartItem.discount.toStringAsFixed(2),
-          //             "discountProduct": cartItem.netTotal.toStringAsFixed(2)
-          //           })
-          //       .toList();
+          receiptData["items"] = listProduct
+              .map((cartItem) => {
+                    "name": cartItem.name,
+                    "qty": cartItem.qty.toString(),
+                    "unit": cartItem.unitName,
+                    "price": cartItem.price.toStringAsFixed(2),
+                    "discount": cartItem.discount.toStringAsFixed(2),
+                    "discountProduct": cartItem.netTotal.toStringAsFixed(2)
+                  })
+              .toList();
 
-          //   for (var promotion in listPromotions) {
-          //     for (var item in promotion.listPromotion) {
-          //       receiptData["items"].add({
-          //         "name": item.name,
-          //         "qty": item.qty.toString(),
-          //         "unit": item.unitName,
-          //         "price": "0.00",
-          //         "discount": "0.00",
-          //         "discountProduct": "0.00"
-          //       });
-          //     }
-          //   }
-          // });
-          // print(receiptData);
-          // Timer(const Duration(milliseconds: 500), () {
-          //   context.loaderOverlay.hide();
-          //   if (mounted) {
-          //     setState(() {
-          //       _loadOrderDetail = false;
-          //     });
-          //   }
+          for (var promotion in listPromotions) {
+            for (var item in promotion.listPromotion) {
+              receiptData["items"].add({
+                "name": item.name,
+                "qty": item.qty.toString(),
+                "unit": item.unitName,
+                "price": "0.00",
+                "discount": "0.00",
+                "discountProduct": "0.00"
+              });
+            }
+          }
+        });
+        print(receiptData);
+        Timer(const Duration(milliseconds: 500), () {
+          context.loaderOverlay.hide();
+          if (mounted) {
+            setState(() {
+              _loadOrderDetail = false;
+            });
+          }
         });
       }
     } catch (e) {

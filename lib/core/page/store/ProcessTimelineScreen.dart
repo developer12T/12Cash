@@ -23,6 +23,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -326,8 +327,8 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       // client.findProxy = HttpClient.findProxyFromEnvironment;
 
       var response = await dio.post(
-        // 'http://192.168.44.57:8005/api/cash/store/addStore',
-        '${ApiService.apiHost}/api/cash/store/addStore',
+        'http://61.19.84.94:8000/api/cash/store/addStore',
+        // '${ApiService.apiHost}/api/cash/store/addStore',
         data: formData,
         options: Options(
           headers: {
@@ -372,6 +373,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
               style: Styles.black18(context),
             ),
           );
+          context.loaderOverlay.hide();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen(index: 2)),
@@ -389,6 +391,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           style: Styles.black18(context),
         ),
       );
+      context.loaderOverlay.hide();
       print("Error: ${e}");
     }
   }
@@ -729,6 +732,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
                                         context); // Handle cancel logic
                                   },
                                   onSubmit: () {
+                                    context.loaderOverlay.show();
                                     addStore(); // Handle submit logic
                                   },
                                   cancelText:

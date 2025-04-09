@@ -87,16 +87,31 @@ class TotalProductChang {
 class ItemProductChange {
   final String id;
   final String name;
+  final String group;
+  final String flavour;
+  final String brand;
+  final String size;
+  int qty;
 
   ItemProductChange({
     required this.id,
     required this.name,
+    required this.group,
+    required this.flavour,
+    required this.brand,
+    required this.size,
+    required this.qty,
   });
 
   factory ItemProductChange.fromJson(Map<String, dynamic> json) {
     return ItemProductChange(
       id: json['id'],
       name: json['name'],
+      group: json['group'],
+      flavour: json['flavour'],
+      brand: json['brand'],
+      size: json['size'],
+      qty: json['qty'],
     );
   }
 
@@ -104,6 +119,11 @@ class ItemProductChange {
     return {
       'id': id,
       'name': name,
+      'group': group,
+      'flavour': flavour,
+      'brand': brand,
+      'size': size,
+      'qty': qty,
     };
   }
 }

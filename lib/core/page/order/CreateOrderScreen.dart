@@ -74,6 +74,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   double totalExVat = 0;
   double total = 0;
 
+  int count = 1;
+
   bool _isInnerAtTop = true;
   bool _isInnerAtBottom = false;
   bool _isCreateOrderEnabled = false;
@@ -203,7 +205,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   List<CartList> cartList = [];
   List<PromotionList> promotionList = [];
+
   List<PromotionList> promotionListChange = [];
+
   String promotionListChangeStatus = '0';
 
   List<PromotionListItem> listPromotions = [];
@@ -231,7 +235,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   List<PromotionChangeList> proChangeLsit = [];
   final LocationService locationService = LocationService();
 
-  List<int> itemQuantities = []; // Store item quantities for each item
+  // List<int> itemQuantities = []; // Store item quantities for each item
 
   Future<List<GroupPromotion>> getGroupDropdown(String filter) async {
     try {
@@ -320,10 +324,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           // }
         }
       }
-      setState(() {
-        itemQuantities = List.filled(
-            itemProductChange.length, 1); // Initialize quantities to 1
-      });
+      // setState(() {
+      //   itemQuantities = List.filled(
+      //       itemProductChange.length, 1); // Initialize quantities to 1
+      // });
 
       print("Change Promtion Product $itemProductChange");
     } catch (e) {
@@ -365,10 +369,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         }
       }
 
-      setState(() {
-        itemQuantities = List.filled(
-            itemProductChange.length, 1); // Initialize quantities to 1
-      });
+      // setState(() {
+      //   itemQuantities = List.filled(
+      //       itemProductChange.length, 1); // Initialize quantities to 1
+      // });
 
       print("Change Promtion Product $itemProductChange");
     } catch (e) {
@@ -405,7 +409,23 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     context.loaderOverlay.show();
     try {
       await fetchLocation();
+
+      for (var proList in proChangeLsit) {
+        promotionListChange.add(
+          PromotionList(
+            proId: proList.proId,
+            proName: proList.proName,
+            proType: proList.proType,
+            discount: discount,
+            listPromotion: listPromotions
+                .where((item) => item.proId == proList.proId)
+                .toList(),
+          ),
+        );
+      }
+
       ApiService apiService = ApiService();
+      print("promotionListChange $promotionListChange");
       await apiService.init();
       var response = await apiService.request(
         endpoint: 'api/cash/order/checkout',
@@ -551,13 +571,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
               ));
             }
 
-            // proChangeLsit.add(
-            //   PromotionChangeList(
-            //       proId: promotion.proId,
-            //       proName: promotion.proName,
-            //       proType: promotion.proType,
-            //       promotionListItem: listPromotions),
-            // );
+            proChangeLsit.add(
+              PromotionChangeList(
+                  proId: promotion.proId,
+                  proName: promotion.proName,
+                  proType: promotion.proType,
+                  promotionListItem: listPromotions),
+            );
           }
           print("Get Cart is Loading");
 
@@ -1534,18 +1554,29 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   ElevatedButton(
                                                                     onPressed:
                                                                         () async {
+                                                                      // setState(
+                                                                      //   () {
+                                                                      //     itemQuantities = List.filled(
+                                                                      //         itemProductChange.length,
+                                                                      //         1);
+                                                                      //   },
+                                                                      // );
+
+                                                                      // await _changeTotalProduct();
+
                                                                       await _changeProduct2(
                                                                           listPromotions[innerIndex]
                                                                               .proId);
                                                                       _showChangePromotionSheet(
-                                                                          context,
-                                                                          itemProductChange,
-                                                                          listPromotions[innerIndex]
-                                                                              .proId,
-                                                                          listPromotions[innerIndex]
-                                                                              .proName,
-                                                                          listPromotions[innerIndex]
-                                                                              .proType);
+                                                                        context,
+                                                                        itemProductChange,
+                                                                        listPromotions[innerIndex]
+                                                                            .proId,
+                                                                        listPromotions[innerIndex]
+                                                                            .proName,
+                                                                        listPromotions[innerIndex]
+                                                                            .proType,
+                                                                      );
                                                                     },
                                                                     style: ElevatedButton
                                                                         .styleFrom(
@@ -1985,6 +2016,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                     .where((item) => item.proId == proId)
                                     .length,
                                 itemBuilder: (context, index) {
+                                  var filteredItems = listPromotionsMock
+                                      .where((item) => item.proId == proId)
+                                      .toList(); // Convert to a list after filtering
                                   return Column(
                                     children: [
                                       Row(
@@ -2024,8 +2058,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                     children: [
                                                       Expanded(
                                                         child: Text(
-                                                          listPromotionsMock[
-                                                                  index]
+                                                          filteredItems[index]
                                                               .name,
                                                           style: Styles.black16(
                                                               context),
@@ -2050,7 +2083,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                           Row(
                                                             children: [
                                                               Text(
-                                                                'id : ${listPromotionsMock[index].id}',
+                                                                'id : ${filteredItems[index].id}',
                                                                 style: Styles
                                                                     .black16(
                                                                         context),
@@ -2083,7 +2116,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             ),
                                                             width: 75,
                                                             child: Text(
-                                                              '${listPromotionsMock[index].qty} ${unitPromotionText}',
+                                                              '${filteredItems[index].qty} ${unitPromotionText}',
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,
@@ -2095,43 +2128,26 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                           ),
                                                           IconButton(
                                                             onPressed: () {
-                                                              // print(
-                                                              //     "cartlist ID : ${cartlist[index].id}");
-                                                              // print(
-                                                              //     "listPromotionsMock ID : ${listPromotionsMock[index].id}");
-                                                              setModalState(() {
-                                                                if (listPromotionsMock
-                                                                    .isNotEmpty) {
-                                                                  totalChangeList
-                                                                      .firstWhere((item) =>
-                                                                          item.proId ==
-                                                                          proId)
-                                                                      .total += listPromotionsMock[
-                                                                          index]
-                                                                      .qty;
-
-                                                                  // totalChangePr +=
-                                                                  //     listPromotionsMock[
-                                                                  //             index]
-                                                                  //         .qty;
-
-                                                                  listPromotionsMock.removeWhere((item) =>
-                                                                      item.id ==
-                                                                          listPromotionsMock[index]
-                                                                              .id &&
-                                                                      item.proId ==
-                                                                          listPromotionsMock[index]
-                                                                              .proId);
-
-                                                                  // listPromotions =
-                                                                  //     List.from(
-                                                                  //         listPromotionsMock);
-
-                                                                  // totalChangePr +=
-                                                                  //     itemQuantities[
-                                                                  //         index];
-                                                                }
-                                                              });
+                                                              setModalState(
+                                                                () {
+                                                                  if (filteredItems
+                                                                      .isNotEmpty) {
+                                                                    totalChangeList
+                                                                        .firstWhere((item) =>
+                                                                            item.proId ==
+                                                                            proId)
+                                                                        .total += filteredItems[
+                                                                            index]
+                                                                        .qty;
+                                                                    listPromotionsMock.removeWhere((item) =>
+                                                                        item.id ==
+                                                                            filteredItems[index]
+                                                                                .id &&
+                                                                        item.proId ==
+                                                                            filteredItems[index].proId);
+                                                                  }
+                                                                },
+                                                              );
                                                             },
                                                             icon: Icon(
                                                               FontAwesomeIcons
@@ -2408,16 +2424,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             onPressed:
                                                                 () async {
                                                               setModalState(() {
-                                                                if (itemQuantities[
-                                                                        index] >
+                                                                if (cartlist[
+                                                                            index]
+                                                                        .qty >
                                                                     1) {
-                                                                  itemQuantities[
-                                                                      index]--;
+                                                                  cartlist[
+                                                                          index]
+                                                                      .qty--;
                                                                 }
                                                               });
-                                                              print(
-                                                                  itemQuantities[
-                                                                      index]);
+
                                                               // await _reduceCart(
                                                               //     cartlist[
                                                               //         index],
@@ -2466,7 +2482,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             ),
                                                             width: 75,
                                                             child: Text(
-                                                              '${itemQuantities[index]}',
+                                                              '${cartlist[index].qty}',
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,
@@ -2487,8 +2503,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                               //   itemQuantities[
                                                               //       index]++;
                                                               // });
-                                                              if (itemQuantities[
-                                                                      index] <
+                                                              if (cartlist[
+                                                                          index]
+                                                                      .qty <
                                                                   totalChangeList
                                                                       .firstWhere((item) =>
                                                                           item.proId ==
@@ -2496,14 +2513,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                       .total) {
                                                                 setModalState(
                                                                     () {
-                                                                  itemQuantities[
-                                                                      index]++;
+                                                                  cartlist[
+                                                                          index]
+                                                                      .qty++;
                                                                 });
                                                               }
-
-                                                              print(
-                                                                  itemQuantities[
-                                                                      index]);
                                                             },
                                                             style:
                                                                 ElevatedButton
@@ -2546,21 +2560,25 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                       "total $total");
                                                                   print(
                                                                       "totalChangeList ${totalChangeList.firstWhere((item) => item.proId == proId).total}");
-                                                                  print(
-                                                                      "itemQuantities ${itemQuantities[index]}");
 
                                                                   if (totalChangeList
                                                                           .firstWhere((item) =>
                                                                               item.proId ==
                                                                               proId)
                                                                           .total >=
-                                                                      itemQuantities[
-                                                                          index]) {
+                                                                      cartlist[
+                                                                              index]
+                                                                          .qty) {
                                                                     totalChangeList
                                                                         .firstWhere((item) =>
                                                                             item.proId ==
                                                                             proId)
-                                                                        .total -= itemQuantities[index];
+                                                                        .total -= cartlist[
+                                                                            index]
+                                                                        .qty;
+
+                                                                    print(
+                                                                        "cartlist[index] ${cartlist[index].qty}");
 
                                                                     listPromotionsMock
                                                                         .add(
@@ -2576,16 +2594,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                         unit: listPromotions.isNotEmpty
                                                                             ? listPromotions[0].unit
                                                                             : '',
-                                                                        brand:
-                                                                            '',
+                                                                        brand: cartlist[index]
+                                                                            .brand,
                                                                         flavour:
-                                                                            '',
-                                                                        group:
-                                                                            '',
-                                                                        qty: itemQuantities[
-                                                                            index],
-                                                                        size:
-                                                                            '',
+                                                                            cartlist[index].flavour,
+                                                                        group: cartlist[index]
+                                                                            .group,
+                                                                        qty: cartlist[index]
+                                                                            .qty,
+                                                                        size: cartlist[index]
+                                                                            .size,
                                                                         unitName: listPromotions.isNotEmpty
                                                                             ? listPromotions[0].unitName
                                                                             : '',
@@ -2604,25 +2622,51 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   );
                                                                   if (promotionListChange
                                                                       .isEmpty) {
-                                                                    promotionListChange.removeWhere(
-                                                                        (item) =>
-                                                                            item.proId ==
-                                                                            proId);
-                                                                    promotionListChange
-                                                                        .add(
-                                                                      PromotionList(
-                                                                          proId:
-                                                                              proId,
-                                                                          discount:
-                                                                              0,
-                                                                          proName:
-                                                                              proName,
-                                                                          proType:
-                                                                              proType,
-                                                                          listPromotion: listPromotionsMock
-                                                                              .where((item) => item.proId == proId)
-                                                                              .toList()),
-                                                                    );
+                                                                    // print(listPromotions
+                                                                    //     .length);
+                                                                    // print(listPromotionsMock
+                                                                    //     .length);
+                                                                    // promotionListChange
+                                                                    //     .addAll(
+                                                                    //   List.from(
+                                                                    //       listPromotions),
+                                                                    // );
+
+                                                                    // promotionListChange
+                                                                    //     .add(
+                                                                    //   PromotionList(
+                                                                    //       proId:
+                                                                    //           proId,
+                                                                    //       proName:
+                                                                    //           proName,
+                                                                    //       proType:
+                                                                    //           proType,
+                                                                    //       discount:
+                                                                    //           discount,
+                                                                    //       listPromotion: listPromotionsMock
+                                                                    //           .where((item) => item.proId == proId)
+                                                                    //           .toList()),
+                                                                    // );
+
+                                                                    // promotionListChange.removeWhere(
+                                                                    //     (item) =>
+                                                                    //         item.proId ==
+                                                                    //         proId);
+                                                                    // promotionListChange
+                                                                    //     .add(
+                                                                    //   PromotionList(
+                                                                    //       proId:
+                                                                    //           proId,
+                                                                    //       discount:
+                                                                    //           0,
+                                                                    //       proName:
+                                                                    //           proName,
+                                                                    //       proType:
+                                                                    //           proType,
+                                                                    //       listPromotion: listPromotionsMock
+                                                                    //           .where((item) => item.proId == proId)
+                                                                    //           .toList()),
+                                                                    // );
                                                                   }
                                                                 },
                                                               );
