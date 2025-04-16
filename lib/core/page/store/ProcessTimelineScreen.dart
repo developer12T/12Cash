@@ -327,7 +327,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       // client.findProxy = HttpClient.findProxyFromEnvironment;
 
       var response = await dio.post(
-        'http://61.19.84.94:8000/api/cash/store/addStore',
+        'https://apps.onetwotrading.co.th/api/cash/store/addStore',
         // '${ApiService.apiHost}/api/cash/store/addStore',
         data: formData,
         options: Options(

@@ -1,7 +1,8 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
-import 'package:_12sale_app/data/models/withdraw/WithdrawDetail.dart';
+import 'package:_12sale_app/data/models/withdraw/WithdrawDetail2.dart';
+// import 'package:_12sale_app/data/models/withdraw/WithdrawDetail.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // _getWithdrawDetail();
+    _getWithdrawDetail();
   }
 
   Future<void> _getWithdrawDetail() async {
@@ -35,13 +36,20 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
         method: 'GET',
       );
       if (response.statusCode == 200) {
-        for (var element in response.data['data']) {
-          final Map<String, dynamic> data = element;
-          setState(() {
-            withdrawDetail.add(WithdrawDetail.fromJson(data));
-          });
-        }
+        final List<dynamic> data = response.data['data'];
+        print(data[0]);
+        setState(() {
+          withdrawDetail.add(WithdrawDetail.fromJson(data[0]));
+        });
       }
+      // if (response.statusCode == 200) {
+      //   for (var element in response.data['data']) {
+      //     final Map<String, dynamic> data = element;
+      //     setState(() {
+      //       withdrawDetail.add(WithdrawDetail.fromJson(data));
+      //     });
+      //   }
+      // }
       // print(withdrawDetail.length);
       // print(withdrawDetail[0].listProductWithdraw.length);
     } catch (e) {
@@ -88,7 +96,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          "วันที่ทำรายการ: ${DateFormat('dd/MM/yyyy').format(withdrawDetail[index].created)}",
+                                          "วันที่ทำรายการ: ${DateFormat('dd/MM/yyyy').format(withdrawDetail[index].createdAt)}",
                                           style: Styles.black16(context),
                                         ),
                                         Container(
@@ -135,13 +143,13 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                             children: [
                                               Row(
                                                 children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      "วันทีจัดส่ง: ${DateFormat('dd/MM/yyyy').format(withdrawDetail[index].sendDate)}",
-                                                      style: Styles.black16(
-                                                          context),
-                                                    ),
-                                                  ),
+                                                  // Expanded(
+                                                  //   child: Text(
+                                                  //     "วันทีจัดส่ง: ${DateFormat('dd/MM/yyyy').format(withdrawDetail[index].sendDate)}",
+                                                  //     style: Styles.black16(
+                                                  //         context),
+                                                  //   ),
+                                                  // ),
                                                 ],
                                               ),
                                               Row(
@@ -194,7 +202,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                           style: Styles.black18(context),
                                         ),
                                         Text(
-                                          "จำนวน ${withdrawDetail[index].listProductWithdraw.length} รายการ",
+                                          "จำนวน ${withdrawDetail[index].listProduct.length} รายการ",
                                           style: Styles.black18(context),
                                         ),
                                       ],
@@ -204,7 +212,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                       shrinkWrap: true,
                                       // controller: _cartScrollController,
                                       itemCount: withdrawDetail[index]
-                                          .listProductWithdraw
+                                          .listProduct
                                           .length,
                                       itemBuilder: (context, innerIndex) {
                                         return Column(
@@ -250,7 +258,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                               child: Text(
                                                                 withdrawDetail[
                                                                         index]
-                                                                    .listProductWithdraw[
+                                                                    .listProduct[
                                                                         innerIndex]
                                                                     .name,
                                                                 style: Styles
@@ -269,7 +277,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                           children: [
                                                             Expanded(
                                                               child: Text(
-                                                                "รหัส : ${withdrawDetail[index].listProductWithdraw[innerIndex].id}",
+                                                                "รหัส : ${withdrawDetail[index].listProduct[innerIndex].id}",
                                                                 style: Styles
                                                                     .black16(
                                                                         context),
@@ -398,10 +406,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "จำนวนรวม",
                                                 style: Styles.black18(context),
                                               ),
-                                              Text(
-                                                "${withdrawDetail[index].totalQtyWithdraw} หีบ",
-                                                style: Styles.black18(context),
-                                              ),
+                                              // Text(
+                                              //   "${withdrawDetail[index].totalQtyWithdraw} หีบ",
+                                              //   style: Styles.black18(context),
+                                              // ),
                                             ],
                                           ),
                                           Row(
@@ -413,7 +421,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 style: Styles.black18(context),
                                               ),
                                               Text(
-                                                "${withdrawDetail[index].totalWeightGrossWithdraw.toStringAsFixed(2)} กก.",
+                                                "${withdrawDetail[index].totalWeightGross.toStringAsFixed(2)} กก.",
                                                 style: Styles.black18(context),
                                               ),
                                             ],
@@ -427,7 +435,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 style: Styles.black18(context),
                                               ),
                                               Text(
-                                                "${withdrawDetail[index].totalWeightNetWithdraw.toStringAsFixed(2)} กก.",
+                                                "${withdrawDetail[index].totalWeightNet.toStringAsFixed(2)} กก.",
                                                 style: Styles.black18(context),
                                               ),
                                             ],
@@ -451,10 +459,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "จำนวนรวม",
                                                 style: Styles.black18(context),
                                               ),
-                                              Text(
-                                                "${withdrawDetail[index].totalQtyReceive} หีบ",
-                                                style: Styles.black18(context),
-                                              ),
+                                              // Text(
+                                              //   "${withdrawDetail[index].totalQtyReceive} หีบ",
+                                              //   style: Styles.black18(context),
+                                              // ),
                                             ],
                                           ),
                                           Row(
@@ -465,10 +473,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "น้ำหนักรวม",
                                                 style: Styles.black18(context),
                                               ),
-                                              Text(
-                                                "${withdrawDetail[index].totalWeightGrossReceive.toStringAsFixed(2)} กก.",
-                                                style: Styles.black18(context),
-                                              ),
+                                              // Text(
+                                              //   "${withdrawDetail[index].totalWeightGrossReceive.toStringAsFixed(2)} กก.",
+                                              //   style: Styles.black18(context),
+                                              // ),
                                             ],
                                           ),
                                           Row(
@@ -479,10 +487,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "น้ำหนักรวมสุทธิ",
                                                 style: Styles.black18(context),
                                               ),
-                                              Text(
-                                                "${withdrawDetail[index].totalWeightNetReceive.toStringAsFixed(2)} กก.",
-                                                style: Styles.black18(context),
-                                              ),
+                                              // Text(
+                                              //   "${withdrawDetail[index].totalWeightNetReceive.toStringAsFixed(2)} กก.",
+                                              //   style: Styles.black18(context),
+                                              // ),
                                             ],
                                           )
                                         ],

@@ -236,6 +236,8 @@ class _LoginScreenState extends State<LoginScreen> with RouteAware {
                                             .getString('fullName')!;
                                         User.salePayer = sharedPreferences
                                             .getString('salePayer')!;
+                                        User.saleCode = sharedPreferences
+                                            .getString('saleCode')!;
                                         User.tel =
                                             sharedPreferences.getString('tel')!;
                                         User.area = sharedPreferences

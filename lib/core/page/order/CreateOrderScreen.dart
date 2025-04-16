@@ -10,9 +10,11 @@ import 'package:_12sale_app/core/components/camera/IconButtonWithLabelFixed.dart
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 import 'package:_12sale_app/core/page/route/OrderDetailScreen.dart';
+import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/data/models/order/ChangePromotion.dart';
 import 'package:_12sale_app/data/models/order/Promotion.dart';
 import 'package:_12sale_app/data/models/order/PromotionList.dart';
+import 'package:_12sale_app/data/models/stock/StockMovement.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
@@ -62,6 +64,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _promotionScrollController = ScrollController();
 
+  // FocusNode _focusNode = FocusNode();
+
   String isSelectCheckout = '';
   String qrImagePath = "";
 
@@ -91,7 +95,23 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
     noteController = TextEditingController();
+    // _focusNode.requestFocus();
+    // RawKeyboard.instance.addListener(_handleKey);
   }
+
+  // void _handleKey(RawKeyEvent event) {
+  //   if (event is RawKeyUpEvent) {
+  //     if (event.logicalKey == LogicalKeyboardKey.escape ||
+  //         event.logicalKey == LogicalKeyboardKey.goBack ||
+  //         event.logicalKey == LogicalKeyboardKey.backspace) {
+  //       // Log or handle KEYCODE_BACK equivalent
+  //       print("Back key released (KeyUp)");
+  //       context.loaderOverlay.show();
+  //       _getCart();
+  //       // Optionally: Prevent pop or trigger some action
+  //     }
+  //   }
+  // }
 
   void _onScroll() {
     if (_outerController.offset >= _outerController.position.maxScrollExtent &&
@@ -150,7 +170,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   //       endpoint: 'api/cash/manage/option/get?module=route&type=notSell',
   //       method: 'GET',
   //     );
-
   //     // Filter and map JSON data to District model based on selected province and filter
   //     if (response.statusCode == 200 || response.statusCode == 201) {
   //       final List<dynamic> data = response.data['data'];
@@ -158,7 +177,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   //         causes = data.map((item) => Cause.fromJson(item)).toList();
   //       });
   //     }
-
   //     // Group districts by amphoe
   //     return causes;
   //   } catch (e) {
@@ -184,6 +202,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     //   _loadingRouteVisit = true;
     // });
     // Called when the screen is popped back to
+    // RawKeyboard.instance.removeListener(_handleKey);
+    // _focusNode.dispose();
     _getCart();
     _getQRImage();
   }
@@ -204,6 +224,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   }
 
   List<CartList> cartList = [];
+  List<ProductMoveMent> productMoveMent = [];
   List<PromotionList> promotionList = [];
 
   List<PromotionList> promotionListChange = [];
@@ -212,6 +233,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   List<PromotionListItem> listPromotions = [];
   List<PromotionListItem> listPromotionsMock = [];
+
   String unitPromotion = '';
   String unitPromotionText = '';
 
@@ -405,6 +427,33 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     }
   }
 
+  Future<void> _addStockMovement(String orderId) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      // print(User.saleCode);
+      // print(productMoveMent[0].id);
+
+      var response = await apiService.request(
+        endpoint: 'api/cash/stock/addStockMovement',
+        method: 'POST',
+        body: {
+          "orderId": orderId,
+          "area": "${User.area}",
+          "saleCode": "20430",
+          "period": "${period}",
+          "warehouse": "${User.warehouse}",
+          "action": "checkout",
+          "status": "pending",
+          "product": productMoveMent,
+        },
+      );
+    } catch (e) {
+      print("Error __addStockMovement $e");
+    }
+  }
+
   Future<void> _checkOutOrder() async {
     context.loaderOverlay.show();
     try {
@@ -447,6 +496,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         },
       );
       if (response.statusCode == 200) {
+        await _addStockMovement(response.data['data']['orderId']);
         if (isSelectCheckout == "QR Payment") {
           await uploadImageSlip(response.data['data']['orderId']);
           toastification.show(
@@ -544,6 +594,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             cartList = data.map((item) => CartList.fromJson(item)).toList();
           }
 
+          for (var cart in cartList) {
+            productMoveMent.add(ProductMoveMent(
+                id: cart.id,
+                lot: cart.lot,
+                qty: cart.qty.toInt(),
+                unit: cart.unit));
+          }
+
           promotionList =
               data2.map((item) => PromotionList.fromJson(item)).toList();
 
@@ -595,12 +653,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         });
         // listPromotionsMock = List.from(listPromotions);
         await _changeTotalProduct();
+
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() {
               _loading = false;
             });
           }
+          context.loaderOverlay.hide();
         });
 
         // Map cartList to receiptData["items"]
@@ -756,6 +816,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
@@ -863,552 +924,210 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           ],
         )
       ],
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          if (notification is OverscrollNotification) {
-            if (_isInnerAtTop && notification.overscroll < 0) {
-              _outerController
-                  .jumpTo(_outerController.offset + notification.overscroll);
-            } else if (_isInnerAtBottom && notification.overscroll > 0) {
-              _outerController
-                  .jumpTo(_outerController.offset + notification.overscroll);
+      body: Focus(
+        // focusNode: _focusNode,
+        autofocus: true,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification is OverscrollNotification) {
+              if (_isInnerAtTop && notification.overscroll < 0) {
+                _outerController
+                    .jumpTo(_outerController.offset + notification.overscroll);
+              } else if (_isInnerAtBottom && notification.overscroll > 0) {
+                _outerController
+                    .jumpTo(_outerController.offset + notification.overscroll);
+              }
             }
-          }
-          return false;
-        },
-        child: ListView(
-          controller: _outerController,
-          children: [
-            Container(
-              // color: Colors.amber,
-              height: screenHeight * 0.9,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    BoxShadowCustom(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${widget.storeName} ${widget.storeId}",
-                                  style: Styles.black24(context),
-                                )
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "ที่อยู่การจัดส่ง",
-                                  style: Styles.black18(context),
-                                ),
-                                Text(
-                                  "แก้ไขที่อยู่",
-                                  style: Styles.pirmary18(context),
-                                )
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(0),
-                                        elevation: 0, // Disable shadow
-                                        shadowColor: Colors
-                                            .transparent, // Ensure no shadow color
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius
-                                              .zero, // No rounded corners
-                                          side:
-                                              BorderSide.none, // Remove border
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.location_on_outlined,
-                                                  color: Colors.black,
-                                                  size: 30,
-                                                ),
-                                                Expanded(
-                                                  child: Text(
-                                                    " ${widget.storeAddress}",
-                                                    style:
-                                                        Styles.grey18(context),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons.arrow_forward_ios_rounded,
-                                            color: Colors.black,
-                                            size: 20,
-                                          )
-                                        ],
-                                      ),
-                                      onPressed: () {},
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(8),
-                                        elevation: 0, // Disable shadow
-                                        shadowColor: Colors
-                                            .transparent, // Ensure no shadow color
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.zero,
-                                            side: BorderSide.none),
-                                      ),
-                                      onPressed: () {
-                                        _showNoteSheet(context);
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            flex: 3,
-                                            child: Text(
-                                              "หมายเหตุ :",
-                                              style: Styles.black18(context),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              noteController.text != ''
-                                                  ? noteController.text
-                                                  : "กรุณาใส่หมายเหตุ...",
-                                              style: Styles.grey18(context),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: BoxShadowCustom(
+            return false;
+          },
+          child: ListView(
+            controller: _outerController,
+            children: [
+              Container(
+                // color: Colors.amber,
+                height: screenHeight * 0.9,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      BoxShadowCustom(
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            height: screenHeight * 0.9,
-                            // color: Colors.red,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16.0,
-                                horizontal: 16.0,
-                              ),
-                              child: Column(
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "รายการที่สั่ง",
-                                        style: Styles.black18(context),
-                                      ),
-                                      Text(
-                                        "จำนวน ${cartList.length} รายการ",
-                                        style: Styles.black18(context),
-                                      ),
-                                    ],
-                                  ),
-                                  Expanded(
-                                      child: Scrollbar(
-                                    controller: _cartScrollController,
-                                    thumbVisibility: true,
-                                    trackVisibility: true,
-                                    thickness: 10,
-                                    radius: Radius.circular(16),
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      physics: ClampingScrollPhysics(),
-                                      controller: _cartScrollController,
-                                      itemCount: cartList.length,
-                                      itemBuilder: (context, index) {
-                                        return Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                                    width: screenWidth / 8,
-                                                    height: screenWidth / 8,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                        error, stackTrace) {
-                                                      return const Center(
-                                                        child: Icon(
-                                                          Icons.error,
-                                                          color: Colors.red,
-                                                          size: 50,
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  flex: 3,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            16.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Expanded(
-                                                              child: Text(
-                                                                cartList[index]
-                                                                    .name,
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                                softWrap: true,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .visible,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      'id : ${cartList[index].id}',
-                                                                      style: Styles
-                                                                          .black16(
-                                                                              context),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      'จำนวน : ${cartList[index].qty.toStringAsFixed(0)} ${cartList[index].unitName}',
-                                                                      style: Styles
-                                                                          .black16(
-                                                                              context),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      'ราคา : ${cartList[index].price}',
-                                                                      style: Styles
-                                                                          .black16(
-                                                                              context),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .end,
-                                                              children: [
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    setState(
-                                                                        () {
-                                                                      if (cartList[index]
-                                                                              .qty >
-                                                                          1) {
-                                                                        cartList[index]
-                                                                            .qty--;
-                                                                      }
-                                                                    });
-                                                                    await _reduceCart(
-                                                                        cartList[
-                                                                            index]);
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .grey,
-                                                                          width:
-                                                                              1),
-                                                                    ), // ✅ Makes the button circular
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons
-                                                                        .remove,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ), // Example
-                                                                ),
-                                                                Container(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .all(
-                                                                              4),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    border:
-                                                                        Border
-                                                                            .all(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            16),
-                                                                  ),
-                                                                  width: 75,
-                                                                  child: Text(
-                                                                    '${cartList[index].qty.toStringAsFixed(0)}',
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style: Styles
-                                                                        .black18(
-                                                                      context,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    await _addCartDu(
-                                                                        cartList[
-                                                                            index]);
-
-                                                                    setState(
-                                                                        () {
-                                                                      cartList[
-                                                                              index]
-                                                                          .qty++;
-                                                                    });
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .grey,
-                                                                          width:
-                                                                              1),
-                                                                    ), // ✅ Makes the button circular
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons.add,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ), // Example
-                                                                ),
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    await _deleteCart(
-                                                                        cartList[
-                                                                            index]);
-
-                                                                    setState(
-                                                                      () {
-                                                                        cartList.removeWhere((item) =>
-                                                                            (item.id == cartList[index].id &&
-                                                                                item.unit == cartList[index].unit));
-                                                                      },
-                                                                    );
-                                                                    // await _getTotalCart(setModalState);
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .red,
-                                                                          width:
-                                                                              1),
-                                                                    ),
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons
-                                                                        .delete,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .red,
-                                                                  ), // Example
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                // Container(
-                                                //   color: Colors.red,
-                                                //   width: 50,
-                                                //   height: 100,
-                                                //   child: Center(
-                                                //     child: Icon(
-                                                //       Icons.delete,
-                                                //       color: Colors.white,
-                                                //       size: 25,
-                                                //     ),
-                                                //   ),
-                                                // ),
-                                              ],
-                                            ),
-                                            Divider(
-                                              color: Colors.grey[200],
-                                              thickness: 1,
-                                              indent: 16,
-                                              endIndent: 16,
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ))
+                                  Text(
+                                    "${widget.storeName} ${widget.storeId}",
+                                    style: Styles.black24(context),
+                                  )
                                 ],
                               ),
-                            ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "ที่อยู่การจัดส่ง",
+                                    style: Styles.black18(context),
+                                  ),
+                                  Text(
+                                    "แก้ไขที่อยู่",
+                                    style: Styles.pirmary18(context),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.all(0),
+                                          elevation: 0, // Disable shadow
+                                          shadowColor: Colors
+                                              .transparent, // Ensure no shadow color
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius
+                                                .zero, // No rounded corners
+                                            side: BorderSide
+                                                .none, // Remove border
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on_outlined,
+                                                    color: Colors.black,
+                                                    size: 30,
+                                                  ),
+                                                  Expanded(
+                                                    child: Text(
+                                                      " ${widget.storeAddress}",
+                                                      style: Styles.grey18(
+                                                          context),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              color: Colors.black,
+                                              size: 20,
+                                            )
+                                          ],
+                                        ),
+                                        onPressed: () {},
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.all(8),
+                                          elevation: 0, // Disable shadow
+                                          shadowColor: Colors
+                                              .transparent, // Ensure no shadow color
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.zero,
+                                              side: BorderSide.none),
+                                        ),
+                                        onPressed: () {
+                                          _showNoteSheet(context);
+                                        },
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              flex: 3,
+                                              child: Text(
+                                                "หมายเหตุ :",
+                                                style: Styles.black18(context),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                noteController.text != ''
+                                                    ? noteController.text
+                                                    : "กรุณาใส่หมายเหตุ...",
+                                                style: Styles.grey18(context),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              // color: Colors.amber,
-              height: screenHeight * 0.9,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: BoxShadowCustom(
-                        child: Container(
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: BoxShadowCustom(
                           child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "รายการโปรโมชั่น",
-                                      style: Styles.black18(context),
-                                    ),
-                                    Text(
-                                      "จำนวน ${promotionList.length} รายการ",
-                                      style: Styles.black18(context),
-                                    ),
-                                  ],
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              height: screenHeight * 0.9,
+                              // color: Colors.red,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16.0,
+                                  horizontal: 16.0,
                                 ),
-                                Expanded(
-                                    child: Container(
-                                  height:
-                                      200, // Set a height to avoid rendering errors
-                                  child: Scrollbar(
-                                    controller: _promotionScrollController,
-                                    thumbVisibility: true,
-                                    trackVisibility: true,
-                                    radius: Radius.circular(16),
-                                    thickness: 10,
-                                    child: ListView.builder(
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "รายการที่สั่ง",
+                                          style: Styles.black18(context),
+                                        ),
+                                        Text(
+                                          "จำนวน ${cartList.length} รายการ",
+                                          style: Styles.black18(context),
+                                        ),
+                                      ],
+                                    ),
+                                    Expanded(
+                                        child: Scrollbar(
+                                      controller: _cartScrollController,
+                                      thumbVisibility: true,
+                                      trackVisibility: true,
+                                      thickness: 10,
+                                      radius: Radius.circular(16),
+                                      child: ListView.builder(
                                         shrinkWrap: true,
                                         physics: ClampingScrollPhysics(),
-                                        controller: _promotionScrollController,
-                                        itemCount: listPromotions.length,
-                                        itemBuilder: (context, innerIndex) {
+                                        controller: _cartScrollController,
+                                        itemCount: cartList.length,
+                                        itemBuilder: (context, index) {
                                           return Column(
                                             children: [
                                               Row(
@@ -1451,8 +1170,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             children: [
                                                               Expanded(
                                                                 child: Text(
-                                                                  listPromotions[
-                                                                          innerIndex]
+                                                                  cartList[
+                                                                          index]
                                                                       .name,
                                                                   style: Styles
                                                                       .black16(
@@ -1467,25 +1186,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                               ),
                                                             ],
                                                           ),
-                                                          // Row(
-                                                          //   children: [
-                                                          //     Expanded(
-                                                          //       child: Text(
-                                                          //         listPromotions[
-                                                          //                 innerIndex]
-                                                          //             .proName,
-                                                          //         style: Styles
-                                                          //             .black16(
-                                                          //                 context),
-                                                          //         softWrap: true,
-                                                          //         maxLines: 2,
-                                                          //         overflow:
-                                                          //             TextOverflow
-                                                          //                 .visible,
-                                                          //       ),
-                                                          //     ),
-                                                          //   ],
-                                                          // ),
                                                           Row(
                                                             mainAxisAlignment:
                                                                 MainAxisAlignment
@@ -1499,21 +1199,30 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   Row(
                                                                     children: [
                                                                       Text(
-                                                                        '${listPromotions[innerIndex].id}',
+                                                                        'id : ${cartList[index].id}',
                                                                         style: Styles.black16(
                                                                             context),
                                                                       ),
                                                                     ],
                                                                   ),
-                                                                  // Row(
-                                                                  //   children: [
-                                                                  //     Text(
-                                                                  //       '${listPromotions[innerIndex].group} รส${listPromotions[innerIndex].flavour}',
-                                                                  //       style: Styles.black16(
-                                                                  //           context),
-                                                                  //     ),
-                                                                  //   ],
-                                                                  // ),
+                                                                  Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        'จำนวน : ${cartList[index].qty.toStringAsFixed(0)} ${cartList[index].unitName}',
+                                                                        style: Styles.black16(
+                                                                            context),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        'ราคา : ${cartList[index].price}',
+                                                                        style: Styles.black16(
+                                                                            context),
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ],
                                                               ),
                                                               Row(
@@ -1521,6 +1230,47 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                     MainAxisAlignment
                                                                         .end,
                                                                 children: [
+                                                                  ElevatedButton(
+                                                                    onPressed:
+                                                                        () async {
+                                                                      setState(
+                                                                          () {
+                                                                        if (cartList[index].qty >
+                                                                            1) {
+                                                                          cartList[index]
+                                                                              .qty--;
+                                                                        }
+                                                                      });
+                                                                      await _reduceCart(
+                                                                          cartList[
+                                                                              index]);
+                                                                    },
+                                                                    style: ElevatedButton
+                                                                        .styleFrom(
+                                                                      shape:
+                                                                          const CircleBorder(
+                                                                        side: BorderSide(
+                                                                            color:
+                                                                                Colors.grey,
+                                                                            width: 1),
+                                                                      ), // ✅ Makes the button circular
+                                                                      padding:
+                                                                          const EdgeInsets
+                                                                              .all(
+                                                                              8),
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .white, // Button color
+                                                                    ),
+                                                                    child:
+                                                                        const Icon(
+                                                                      Icons
+                                                                          .remove,
+                                                                      size: 24,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ), // Example
+                                                                  ),
                                                                   Container(
                                                                     padding:
                                                                         EdgeInsets
@@ -1541,7 +1291,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                     ),
                                                                     width: 75,
                                                                     child: Text(
-                                                                      '${listPromotions[innerIndex].qty.toStringAsFixed(0)} ${unitPromotionText}',
+                                                                      '${cartList[index].qty.toStringAsFixed(0)}',
                                                                       textAlign:
                                                                           TextAlign
                                                                               .center,
@@ -1554,37 +1304,63 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   ElevatedButton(
                                                                     onPressed:
                                                                         () async {
-                                                                      // setState(
-                                                                      //   () {
-                                                                      //     itemQuantities = List.filled(
-                                                                      //         itemProductChange.length,
-                                                                      //         1);
-                                                                      //   },
-                                                                      // );
+                                                                      await _addCartDu(
+                                                                          cartList[
+                                                                              index]);
 
-                                                                      // await _changeTotalProduct();
-
-                                                                      await _changeProduct2(
-                                                                          listPromotions[innerIndex]
-                                                                              .proId);
-                                                                      _showChangePromotionSheet(
-                                                                        context,
-                                                                        itemProductChange,
-                                                                        listPromotions[innerIndex]
-                                                                            .proId,
-                                                                        listPromotions[innerIndex]
-                                                                            .proName,
-                                                                        listPromotions[innerIndex]
-                                                                            .proType,
-                                                                      );
+                                                                      setState(
+                                                                          () {
+                                                                        cartList[index]
+                                                                            .qty++;
+                                                                      });
                                                                     },
                                                                     style: ElevatedButton
                                                                         .styleFrom(
                                                                       shape:
-                                                                          CircleBorder(
+                                                                          const CircleBorder(
                                                                         side: BorderSide(
                                                                             color:
-                                                                                Styles.warning!,
+                                                                                Colors.grey,
+                                                                            width: 1),
+                                                                      ), // ✅ Makes the button circular
+                                                                      padding:
+                                                                          const EdgeInsets
+                                                                              .all(
+                                                                              8),
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .white, // Button color
+                                                                    ),
+                                                                    child:
+                                                                        const Icon(
+                                                                      Icons.add,
+                                                                      size: 24,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ), // Example
+                                                                  ),
+                                                                  ElevatedButton(
+                                                                    onPressed:
+                                                                        () async {
+                                                                      await _deleteCart(
+                                                                          cartList[
+                                                                              index]);
+
+                                                                      setState(
+                                                                        () {
+                                                                          cartList.removeWhere((item) =>
+                                                                              (item.id == cartList[index].id && item.unit == cartList[index].unit));
+                                                                        },
+                                                                      );
+                                                                      // await _getTotalCart(setModalState);
+                                                                    },
+                                                                    style: ElevatedButton
+                                                                        .styleFrom(
+                                                                      shape:
+                                                                          const CircleBorder(
+                                                                        side: BorderSide(
+                                                                            color:
+                                                                                Colors.red,
                                                                             width: 1),
                                                                       ),
                                                                       padding:
@@ -1595,12 +1371,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                           Colors
                                                                               .white, // Button color
                                                                     ),
-                                                                    child: Icon(
-                                                                      FontAwesomeIcons
-                                                                          .penToSquare,
+                                                                    child:
+                                                                        const Icon(
+                                                                      Icons
+                                                                          .delete,
                                                                       size: 24,
-                                                                      color: Styles
-                                                                          .warning!,
+                                                                      color: Colors
+                                                                          .red,
                                                                     ), // Example
                                                                   ),
                                                                 ],
@@ -1611,6 +1388,18 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                       ),
                                                     ),
                                                   ),
+                                                  // Container(
+                                                  //   color: Colors.red,
+                                                  //   width: 50,
+                                                  //   height: 100,
+                                                  //   child: Center(
+                                                  //     child: Icon(
+                                                  //       Icons.delete,
+                                                  //       color: Colors.white,
+                                                  //       size: 25,
+                                                  //     ),
+                                                  //   ),
+                                                  // ),
                                                 ],
                                               ),
                                               Divider(
@@ -1621,269 +1410,547 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                               ),
                                             ],
                                           );
-                                        }),
-                                  ),
-                                ))
-                              ],
+                                        },
+                                      ),
+                                    ))
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: BoxShadowCustom(
+                ),
+              ),
+              Container(
+                // color: Colors.amber,
+                height: screenHeight * 0.9,
+                child: Column(
+                  children: [
+                    Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  "ชำระเงินโดย",
-                                  style: Styles.black18(context),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(0),
-                                        elevation: 0, // Disable shadow
-                                        shadowColor: Colors
-                                            .transparent, // Ensure no shadow color
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius
-                                              .zero, // No rounded corners
-                                          side:
-                                              BorderSide.none, // Remove border
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                FontAwesomeIcons.moneyBill,
-                                                color: Styles.primaryColorIcons,
-                                                size: 40,
-                                              ),
-                                              SizedBox(width: 8),
-                                              // ClipRRect(
-                                              //   borderRadius:
-                                              //       BorderRadius.circular(8),
-                                              //   child: Image.network(
-                                              //     'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                              //     width: screenWidth / 15,
-                                              //     height: screenWidth / 15,
-                                              //     fit: BoxFit.cover,
-                                              //     errorBuilder: (context, error,
-                                              //         stackTrace) {
-                                              //       return const Center(
-                                              //         child: Icon(
-                                              //           Icons.error,
-                                              //           color: Colors.red,
-                                              //           size: 50,
-                                              //         ),
-                                              //       );
-                                              //     },
-                                              //   ),
-                                              // ),
-                                              Text(
-                                                isSelectCheckout != ""
-                                                    ? isSelectCheckout
-                                                    : "เงินสด",
-                                                style: Styles.grey18(context),
-                                              )
-                                            ],
-                                          ),
-                                          Icon(
-                                            Icons.arrow_forward_ios_rounded,
-                                            color: Colors.black,
-                                            size: 20,
-                                          )
-                                        ],
-                                      ),
-                                      onPressed: () {
-                                        _showCheckoutSheet(context);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "รวมมูลค่าสินค้า",
-                                  style: Styles.grey18(context),
-                                ),
-                                Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(subtotal)} บาท",
-                                  style: Styles.grey18(context),
-                                )
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "ภาษีมูลค่าเพิ่ม 7% (VAT)",
-                                  style: Styles.grey18(context),
-                                ),
-                                Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(vat)} บาท",
-                                  style: Styles.grey18(context),
-                                )
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "รวมมูลค่าสินค้าก่อนหักภาษี",
-                                  style: Styles.grey18(context),
-                                ),
-                                Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalExVat)} บาท",
-                                  style: Styles.grey18(context),
-                                )
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "ส่วนลดท้ายบิล",
-                                  style: Styles.red18(context),
-                                ),
-                                Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discount)} บาท",
-                                  style: Styles.red18(context),
-                                )
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "ส่วนลดสินค้า",
-                                  style: Styles.red18(context),
-                                ),
-                                Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discountProduct)} บาท",
-                                  style: Styles.red18(context),
-                                )
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "จำนวนเงินรวมสุทธิ",
-                                  style: Styles.green24(context),
-                                ),
-                                Text(
-                                  "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(total)} บาท",
-                                  style: Styles.green24(context),
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  isSelectCheckout == "QR Payment"
-                      ? Padding(
-                          padding: EdgeInsets.all(8),
-                          child: BoxShadowCustom(
+                        child: BoxShadowCustom(
+                          child: Container(
                             child: Padding(
-                              padding: EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(16.0),
                               child: Column(
                                 children: [
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      ShowPhotoButton(
-                                        checkNetwork: true,
-                                        label: "QR Code",
-                                        icon:
-                                            Icons.image_not_supported_outlined,
-                                        imagePath: imageList.isNotEmpty
-                                            ? imageList
-                                                .firstWhere((element) =>
-                                                    element.type == "qrcode")
-                                                .path
-                                            : '',
+                                      Text(
+                                        "รายการโปรโมชั่น",
+                                        style: Styles.black18(context),
                                       ),
-                                      IconButtonWithLabelOld(
-                                        icon: Icons.photo_camera,
-                                        imagePath: qrImagePath != ""
-                                            ? qrImagePath
-                                            : null,
-                                        label: "ถ่ายภาพการโอน",
-                                        onImageSelected:
-                                            (String imagePath) async {
-                                          setState(() {
-                                            qrImagePath = imagePath;
-                                          });
-                                          // await uploadFormDataWithDio(
-                                          //     imagePath, 'store', context);
-                                        },
+                                      Text(
+                                        "จำนวน ${promotionList.length} รายการ",
+                                        style: Styles.black18(context),
                                       ),
-                                      // MenuButton(
-                                      //   color: Styles.success!,
-                                      //   icon: Icons.upload,
-                                      //   label: "อัพโหลด",
-                                      //   onPressed: () {},
-                                      // )
-                                      // IconButtonWithLabelFixed(
-                                      //   icon: Icons.photo_camera,
-                                      //   // imagePath: storeImagePath != ""
-                                      //   //     ? storeImagePath
-                                      //   //     : null,
-                                      //   label: "ถ่ายภาพการโอน",
-                                      //   onImageSelected:
-                                      //       (String imagePath) async {
-                                      //     // await uploadFormDataWithDio(
-                                      //     //     imagePath, 'store', context);
-                                      //   },
-                                      // ),
-                                      // IconButtonWithLabelFixed(
-                                      //   icon: Icons.photo_camera,
-                                      //   // imagePath: storeImagePath != ""
-                                      //   //     ? storeImagePath
-                                      //   //     : null,
-                                      //   label: "ถ่ายภาพการโอน",
-                                      //   onImageSelected:
-                                      //       (String imagePath) async {
-                                      //     // await uploadFormDataWithDio(
-                                      //     //     imagePath, 'store', context);
-                                      //   },
-                                      // ),
                                     ],
                                   ),
+                                  Expanded(
+                                      child: Container(
+                                    height:
+                                        200, // Set a height to avoid rendering errors
+                                    child: Scrollbar(
+                                      controller: _promotionScrollController,
+                                      thumbVisibility: true,
+                                      trackVisibility: true,
+                                      radius: Radius.circular(16),
+                                      thickness: 10,
+                                      child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics: ClampingScrollPhysics(),
+                                          controller:
+                                              _promotionScrollController,
+                                          itemCount: listPromotions.length,
+                                          itemBuilder: (context, innerIndex) {
+                                            return Column(
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      child: Image.network(
+                                                        'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                        width: screenWidth / 8,
+                                                        height: screenWidth / 8,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context,
+                                                            error, stackTrace) {
+                                                          return const Center(
+                                                            child: Icon(
+                                                              Icons.error,
+                                                              color: Colors.red,
+                                                              size: 50,
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      flex: 3,
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(16.0),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    listPromotions[
+                                                                            innerIndex]
+                                                                        .name,
+                                                                    style: Styles
+                                                                        .black16(
+                                                                            context),
+                                                                    softWrap:
+                                                                        true,
+                                                                    maxLines: 2,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .visible,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            // Row(
+                                                            //   children: [
+                                                            //     Expanded(
+                                                            //       child: Text(
+                                                            //         listPromotions[
+                                                            //                 innerIndex]
+                                                            //             .proName,
+                                                            //         style: Styles
+                                                            //             .black16(
+                                                            //                 context),
+                                                            //         softWrap: true,
+                                                            //         maxLines: 2,
+                                                            //         overflow:
+                                                            //             TextOverflow
+                                                            //                 .visible,
+                                                            //       ),
+                                                            //     ),
+                                                            //   ],
+                                                            // ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          '${listPromotions[innerIndex].id}',
+                                                                          style:
+                                                                              Styles.black16(context),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    // Row(
+                                                                    //   children: [
+                                                                    //     Text(
+                                                                    //       '${listPromotions[innerIndex].group} รส${listPromotions[innerIndex].flavour}',
+                                                                    //       style: Styles.black16(
+                                                                    //           context),
+                                                                    //     ),
+                                                                    //   ],
+                                                                    // ),
+                                                                  ],
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .end,
+                                                                  children: [
+                                                                    Container(
+                                                                      padding:
+                                                                          EdgeInsets.all(
+                                                                              4),
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        border:
+                                                                            Border.all(
+                                                                          color:
+                                                                              Colors.grey,
+                                                                          width:
+                                                                              1,
+                                                                        ),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(16),
+                                                                      ),
+                                                                      width: 75,
+                                                                      child:
+                                                                          Text(
+                                                                        '${listPromotions[innerIndex].qty.toStringAsFixed(0)} ${unitPromotionText}',
+                                                                        textAlign:
+                                                                            TextAlign.center,
+                                                                        style: Styles
+                                                                            .black18(
+                                                                          context,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    ElevatedButton(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        // setState(
+                                                                        //   () {
+                                                                        //     itemQuantities = List.filled(
+                                                                        //         itemProductChange.length,
+                                                                        //         1);
+                                                                        //   },
+                                                                        // );
+
+                                                                        // await _changeTotalProduct();
+
+                                                                        await _changeProduct2(
+                                                                            listPromotions[innerIndex].proId);
+                                                                        _showChangePromotionSheet(
+                                                                          context,
+                                                                          itemProductChange,
+                                                                          listPromotions[innerIndex]
+                                                                              .proId,
+                                                                          listPromotions[innerIndex]
+                                                                              .proName,
+                                                                          listPromotions[innerIndex]
+                                                                              .proType,
+                                                                        );
+                                                                        listPromotions.removeWhere((item) =>
+                                                                            item.proId ==
+                                                                            listPromotions[innerIndex].proId);
+                                                                      },
+                                                                      style: ElevatedButton
+                                                                          .styleFrom(
+                                                                        shape:
+                                                                            CircleBorder(
+                                                                          side: BorderSide(
+                                                                              color: Styles.warning!,
+                                                                              width: 1),
+                                                                        ),
+                                                                        padding: const EdgeInsets
+                                                                            .all(
+                                                                            8),
+                                                                        backgroundColor:
+                                                                            Colors.white, // Button color
+                                                                      ),
+                                                                      child:
+                                                                          Icon(
+                                                                        FontAwesomeIcons
+                                                                            .penToSquare,
+                                                                        size:
+                                                                            24,
+                                                                        color: Styles
+                                                                            .warning!,
+                                                                      ), // Example
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Divider(
+                                                  color: Colors.grey[200],
+                                                  thickness: 1,
+                                                  indent: 16,
+                                                  endIndent: 16,
+                                                ),
+                                              ],
+                                            );
+                                          }),
+                                    ),
+                                  ))
                                 ],
                               ),
                             ),
                           ),
-                        )
-                      : SizedBox()
-                ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: BoxShadowCustom(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    "ชำระเงินโดย",
+                                    style: Styles.black18(context),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.all(0),
+                                          elevation: 0, // Disable shadow
+                                          shadowColor: Colors
+                                              .transparent, // Ensure no shadow color
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius
+                                                .zero, // No rounded corners
+                                            side: BorderSide
+                                                .none, // Remove border
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  FontAwesomeIcons.moneyBill,
+                                                  color:
+                                                      Styles.primaryColorIcons,
+                                                  size: 40,
+                                                ),
+                                                SizedBox(width: 8),
+                                                // ClipRRect(
+                                                //   borderRadius:
+                                                //       BorderRadius.circular(8),
+                                                //   child: Image.network(
+                                                //     'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                //     width: screenWidth / 15,
+                                                //     height: screenWidth / 15,
+                                                //     fit: BoxFit.cover,
+                                                //     errorBuilder: (context, error,
+                                                //         stackTrace) {
+                                                //       return const Center(
+                                                //         child: Icon(
+                                                //           Icons.error,
+                                                //           color: Colors.red,
+                                                //           size: 50,
+                                                //         ),
+                                                //       );
+                                                //     },
+                                                //   ),
+                                                // ),
+                                                Text(
+                                                  isSelectCheckout != ""
+                                                      ? isSelectCheckout
+                                                      : "เงินสด",
+                                                  style: Styles.grey18(context),
+                                                )
+                                              ],
+                                            ),
+                                            Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              color: Colors.black,
+                                              size: 20,
+                                            )
+                                          ],
+                                        ),
+                                        onPressed: () {
+                                          _showCheckoutSheet(context);
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "รวมมูลค่าสินค้า",
+                                    style: Styles.grey18(context),
+                                  ),
+                                  Text(
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(subtotal)} บาท",
+                                    style: Styles.grey18(context),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "ภาษีมูลค่าเพิ่ม 7% (VAT)",
+                                    style: Styles.grey18(context),
+                                  ),
+                                  Text(
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(vat)} บาท",
+                                    style: Styles.grey18(context),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "รวมมูลค่าสินค้าก่อนหักภาษี",
+                                    style: Styles.grey18(context),
+                                  ),
+                                  Text(
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalExVat)} บาท",
+                                    style: Styles.grey18(context),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "ส่วนลดท้ายบิล",
+                                    style: Styles.red18(context),
+                                  ),
+                                  Text(
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discount)} บาท",
+                                    style: Styles.red18(context),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "ส่วนลดสินค้า",
+                                    style: Styles.red18(context),
+                                  ),
+                                  Text(
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(discountProduct)} บาท",
+                                    style: Styles.red18(context),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "จำนวนเงินรวมสุทธิ",
+                                    style: Styles.green24(context),
+                                  ),
+                                  Text(
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(total)} บาท",
+                                    style: Styles.green24(context),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    isSelectCheckout == "QR Payment"
+                        ? Padding(
+                            padding: EdgeInsets.all(8),
+                            child: BoxShadowCustom(
+                              child: Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        ShowPhotoButton(
+                                          checkNetwork: true,
+                                          label: "QR Code",
+                                          icon: Icons
+                                              .image_not_supported_outlined,
+                                          imagePath: imageList.isNotEmpty
+                                              ? imageList
+                                                  .firstWhere((element) =>
+                                                      element.type == "qrcode")
+                                                  .path
+                                              : '',
+                                        ),
+                                        IconButtonWithLabelOld(
+                                          icon: Icons.photo_camera,
+                                          imagePath: qrImagePath != ""
+                                              ? qrImagePath
+                                              : null,
+                                          label: "ถ่ายภาพการโอน",
+                                          onImageSelected:
+                                              (String imagePath) async {
+                                            setState(() {
+                                              qrImagePath = imagePath;
+                                            });
+                                            // await uploadFormDataWithDio(
+                                            //     imagePath, 'store', context);
+                                          },
+                                        ),
+                                        // MenuButton(
+                                        //   color: Styles.success!,
+                                        //   icon: Icons.upload,
+                                        //   label: "อัพโหลด",
+                                        //   onPressed: () {},
+                                        // )
+                                        // IconButtonWithLabelFixed(
+                                        //   icon: Icons.photo_camera,
+                                        //   // imagePath: storeImagePath != ""
+                                        //   //     ? storeImagePath
+                                        //   //     : null,
+                                        //   label: "ถ่ายภาพการโอน",
+                                        //   onImageSelected:
+                                        //       (String imagePath) async {
+                                        //     // await uploadFormDataWithDio(
+                                        //     //     imagePath, 'store', context);
+                                        //   },
+                                        // ),
+                                        // IconButtonWithLabelFixed(
+                                        //   icon: Icons.photo_camera,
+                                        //   // imagePath: storeImagePath != ""
+                                        //   //     ? storeImagePath
+                                        //   //     : null,
+                                        //   label: "ถ่ายภาพการโอน",
+                                        //   onImageSelected:
+                                        //       (String imagePath) async {
+                                        //     // await uploadFormDataWithDio(
+                                        //     //     imagePath, 'store', context);
+                                        //   },
+                                        // ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox()
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1909,868 +1976,937 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             builder: (BuildContext context, StateSetter setModalState) {
           return DraggableScrollableSheet(
             expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.9, // 60% of screen height
+            initialChildSize: 1, // 60% of screen height
             minChildSize: 0.4,
-            maxChildSize: 0.9,
+            maxChildSize: 1,
             builder: (context, scrollController) {
-              return Container(
-                width: screenWidth * 0.95,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
+              return GestureDetector(
+                onVerticalDragUpdate: (_) {}, // Disable vertical drag
+                child: Container(
+                  width: screenWidth,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Styles.primaryColor,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.shopping_bag_outlined,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                                // Text('เปลี่ยนโปรโมชั่น $proName',
+                                //     style: Styles.white24(context)),
+                                Text('$proId', style: Styles.white24(context)),
+                              ],
+                            ),
+                            IconButton(
+                              icon:
+                                  const Icon(Icons.close, color: Colors.white),
+                              onPressed: () {
+                                if (totalChangeList
+                                        .firstWhere(
+                                            (item) => item.proId == proId)
+                                        .total ==
+                                    0) {
+                                  Navigator.of(context).pop();
+                                } else {
+                                  toastification.show(
+                                    autoCloseDuration:
+                                        const Duration(seconds: 5),
+                                    context: context,
+                                    primaryColor: Colors.red,
+                                    type: ToastificationType.error,
+                                    style: ToastificationStyle.flatColored,
+                                    title: Text(
+                                      "กรุณาเลือกสินค้าโปรโมทชั่นให้ครบ",
+                                      style: Styles.red18(context),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
                         ),
                       ),
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.shopping_bag_outlined,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                              // Text('เปลี่ยนโปรโมชั่น $proName',
-                              //     style: Styles.white24(context)),
-                              Text('$proId', style: Styles.white24(context)),
-                            ],
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () {
-                              Navigator.of(context).pop();
+                      Expanded(
+                        child: Container(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 16.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "รายการโปรโมชั่น",
+                                      style: Styles.black18(context),
+                                    ),
+                                    // ElevatedButton(
+                                    //   onPressed: () {
+                                    //     // setModalState(() {
+                                    //     //   listPromotions.clear();
+                                    //     // });
+                                    //     // _getCart();
+                                    //   },
+                                    //   child: Text(
+                                    //     'เลือกใหม่',
+                                    //     style: Styles.black18(context),
+                                    //   ),
+                                    // ),
+                                    // Clear Product Button
+                                    // IconButton(
+                                    //   onPressed: () {
+                                    //     setModalState(() {
+                                    //       if (listPromotionsMock.isNotEmpty) {
+                                    //         listPromotionsMock.removeWhere(
+                                    //             (item) =>
+                                    //                 item.id ==
+                                    //                 cartlist[index].id);
+                                    //         listPromotions =
+                                    //             List.from(listPromotionsMock);
+                                    //       }
+                                    //     });
+                                    //   },
+                                  ],
+                                ),
+                                Divider(
+                                  color: Colors.black,
+                                  indent: 1,
+                                ),
+                                Expanded(
+                                    child: ListView.builder(
+                                  itemCount: listPromotionsMock
+                                      .where((item) => item.proId == proId)
+                                      .length,
+                                  itemBuilder: (context, index) {
+                                    var filteredItems = listPromotionsMock
+                                        .where((item) => item.proId == proId)
+                                        .toList(); // Convert to a list after filtering
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.network(
+                                                'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                width: screenWidth / 8,
+                                                height: screenWidth / 8,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return const Center(
+                                                    child: Icon(
+                                                      Icons.error,
+                                                      color: Colors.red,
+                                                      size: 50,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            filteredItems[index]
+                                                                .name,
+                                                            style:
+                                                                Styles.black16(
+                                                                    context),
+                                                            softWrap: true,
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .visible,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'id : ${filteredItems[index].id}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(4),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                border:
+                                                                    Border.all(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  width: 1,
+                                                                ),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            16),
+                                                              ),
+                                                              width: 75,
+                                                              child: Text(
+                                                                '${filteredItems[index].qty} ${unitPromotionText}',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: Styles
+                                                                    .black18(
+                                                                  context,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            IconButton(
+                                                              onPressed: () {
+                                                                setModalState(
+                                                                  () {
+                                                                    if (filteredItems
+                                                                        .isNotEmpty) {
+                                                                      if (filteredItems
+                                                                              .length >
+                                                                          1) {
+                                                                        totalChangeList
+                                                                            .firstWhere((item) =>
+                                                                                item.proId ==
+                                                                                proId)
+                                                                            .total += filteredItems[
+                                                                                index]
+                                                                            .qty;
+                                                                        listPromotionsMock.removeWhere((item) =>
+                                                                            item.id == filteredItems[index].id &&
+                                                                            item.proId ==
+                                                                                filteredItems[index].proId);
+                                                                      } else {
+                                                                        toastification
+                                                                            .show(
+                                                                          autoCloseDuration:
+                                                                              const Duration(seconds: 5),
+                                                                          context:
+                                                                              context,
+                                                                          primaryColor:
+                                                                              Colors.red,
+                                                                          type:
+                                                                              ToastificationType.error,
+                                                                          style:
+                                                                              ToastificationStyle.flatColored,
+                                                                          title:
+                                                                              Text(
+                                                                            "มีเพียงรายการเดียวไม่สมารถลบได้",
+                                                                            style:
+                                                                                Styles.red18(context),
+                                                                          ),
+                                                                        );
+                                                                      }
+                                                                    }
+                                                                  },
+                                                                );
+                                                              },
+                                                              icon: Icon(
+                                                                FontAwesomeIcons
+                                                                    .trash,
+                                                                color:
+                                                                    Colors.red,
+                                                                size: 24,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Divider(
+                                          color: Colors.grey[200],
+                                          thickness: 1,
+                                          indent: 16,
+                                          endIndent: 16,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                )),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "รายการโปรโมชั่นที่สามารถเปลี่ยนได้",
+                                      style: Styles.black18(context),
+                                    ),
+                                    // DropdownMenu<GroupPromotion>(
+                                    //   onSelected: (value) {
+                                    //     if (value != null) {
+                                    //       print(value.group);
+                                    //       setModalState(() {
+                                    //         filteredPromotion = cartlist
+                                    //             .where((store) =>
+                                    //                 // store.name
+                                    //                 //     .contains(value!.group) &&
+                                    //                 // store.name
+                                    //                 //     .contains(value!.size))
+                                    //                 store.name.contains(value.size
+                                    //                     .replaceAll(" ", "")
+                                    //                     .toLowerCase()))
+                                    //             .toList();
+                                    //       });
+                                    //     }
+                                    //   },
+                                    //   textStyle: Styles.black18(context),
+                                    //   dropdownMenuEntries: groupPromotion
+                                    //       .map<DropdownMenuEntry<GroupPromotion>>(
+                                    //           (GroupPromotion value) {
+                                    //     return DropdownMenuEntry<GroupPromotion>(
+                                    //         value: value,
+                                    //         label:
+                                    //             "${value.group} ${value.size}");
+                                    //   }).toList(),
+                                    //   // dropdownMenuEntries: groupPromotion,
+                                    // )
+                                    SizedBox(
+                                      width: 16,
+                                    ),
 
-                              // _getCart();
-                            },
+                                    Expanded(
+                                      child: DropdownSearch<GroupPromotion>(
+                                        dropdownButtonProps:
+                                            DropdownButtonProps(
+                                          color: Colors.white,
+                                          icon: Icon(
+                                            Icons.arrow_drop_down,
+                                            size: screenWidth / 20,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+
+                                        itemAsString: (item) =>
+                                            "${item.group} ${item.size}",
+                                        asyncItems: (filter) =>
+                                            getGroupDropdown(filter),
+                                        // items:(filter, infiniteScrollProps) =>
+                                        dropdownDecoratorProps:
+                                            DropDownDecoratorProps(
+                                          baseStyle: Styles.black18(context),
+                                          dropdownSearchDecoration:
+                                              InputDecoration(
+                                            // fillColor: Colors.white,
+                                            // prefixIcon: widget.icon,
+                                            labelText:
+                                                "เลือกกลุ่มของโปรโมทชั่น",
+                                            labelStyle: Styles.grey18(context),
+                                            hintText: "เลือกกลุ่มของโปรโมทชั่น",
+                                            hintStyle: Styles.grey18(context),
+                                            border: const OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(8)),
+                                              borderSide: BorderSide(
+                                                  color: Colors.grey, width: 1),
+                                            ),
+                                            focusedBorder:
+                                                const OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(8)),
+                                              borderSide: BorderSide(
+                                                  color: Colors.blue,
+                                                  width: 1.5),
+                                            ),
+                                          ),
+                                        ),
+                                        onChanged: (GroupPromotion? data) {
+                                          setModalState(() {
+                                            filteredPromotion = cartlist
+                                                .where((store) =>
+                                                    // store.name
+                                                    //     .contains(value!.group) &&
+                                                    store.name.contains(
+                                                        data!.group) &&
+                                                    store.name.contains(data!
+                                                        .size
+                                                        .replaceAll(" ", "")
+                                                        .toLowerCase()))
+                                                .toList();
+                                          });
+                                        },
+                                        popupProps:
+                                            PopupPropsMultiSelection.dialog(
+                                          constraints: BoxConstraints(
+                                            maxHeight: screenWidth * 0.7,
+                                            maxWidth: screenWidth,
+                                            minHeight: screenWidth * 0.7,
+                                            minWidth: screenWidth,
+                                          ),
+                                          title: Container(
+                                            decoration: const BoxDecoration(
+                                              color: Styles.primaryColor,
+                                              borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(16),
+                                                topRight: Radius.circular(16),
+                                              ),
+                                            ),
+                                            alignment: Alignment.center,
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8),
+                                            child: Text(
+                                              "เลือกกลุ่มของโปรโมทชั่น",
+                                              style: Styles.white18(context),
+                                            ),
+                                          ),
+
+                                          // showSearchBox: widget.showSearchBox,
+                                          itemBuilder:
+                                              (context, item, isSelected) {
+                                            return Column(
+                                              children: [
+                                                ListTile(
+                                                  title: Text(
+                                                    "${item.group} ${item.size}",
+                                                    style:
+                                                        Styles.black18(context),
+                                                  ),
+                                                  selected: isSelected,
+                                                ),
+                                                Divider(
+                                                  color: Colors.grey[
+                                                      200], // Color of the divider line
+                                                  thickness:
+                                                      1, // Thickness of the line
+                                                  indent:
+                                                      16, // Left padding for the divider line
+                                                  endIndent:
+                                                      16, // Right padding for the divider line
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                          searchFieldProps: TextFieldProps(
+                                            style: Styles.black18(context),
+                                            autofocus: true,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Divider(
+                                  color: Colors.black,
+                                  indent: 1,
+                                ),
+                                Expanded(
+                                    child: ListView.builder(
+                                  itemCount: filteredPromotion.length,
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.network(
+                                                'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                width: screenWidth / 8,
+                                                height: screenWidth / 8,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return const Center(
+                                                    child: Icon(
+                                                      Icons.error,
+                                                      color: Colors.red,
+                                                      size: 50,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            filteredPromotion[
+                                                                    index]
+                                                                .name,
+                                                            style:
+                                                                Styles.black16(
+                                                                    context),
+                                                            softWrap: true,
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .visible,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'id : ${filteredPromotion[index].id}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                setModalState(
+                                                                    () {
+                                                                  if (cartlist[
+                                                                              index]
+                                                                          .qty >
+                                                                      1) {
+                                                                    cartlist[
+                                                                            index]
+                                                                        .qty--;
+                                                                  }
+                                                                });
+
+                                                                // await _reduceCart(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.remove,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
+                                                            ),
+                                                            Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(4),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                border:
+                                                                    Border.all(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  width: 1,
+                                                                ),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            16),
+                                                              ),
+                                                              width: 75,
+                                                              child: Text(
+                                                                '${cartlist[index].qty}',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: Styles
+                                                                    .black18(
+                                                                  context,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                // await _addCartDu(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+                                                                // setState(() {
+                                                                //   itemQuantities[
+                                                                //       index]++;
+                                                                // });
+                                                                if (cartlist[
+                                                                            index]
+                                                                        .qty <
+                                                                    totalChangeList
+                                                                        .firstWhere((item) =>
+                                                                            item.proId ==
+                                                                            proId)
+                                                                        .total) {
+                                                                  setModalState(
+                                                                      () {
+                                                                    cartlist[
+                                                                            index]
+                                                                        .qty++;
+                                                                  });
+                                                                }
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.add,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                setModalState(
+                                                                  () {
+                                                                    setState(
+                                                                        () {
+                                                                      promotionListChangeStatus =
+                                                                          '1';
+                                                                    });
+                                                                    print(
+                                                                        "promotionListChangeStatus $promotionListChangeStatus");
+                                                                    print(
+                                                                        "proId $proId");
+                                                                    print(
+                                                                        "total $total");
+                                                                    print(
+                                                                        "totalChangeList ${totalChangeList.firstWhere((item) => item.proId == proId).total}");
+
+                                                                    if (totalChangeList
+                                                                            .firstWhere((item) =>
+                                                                                item.proId ==
+                                                                                proId)
+                                                                            .total >=
+                                                                        cartlist[index]
+                                                                            .qty) {
+                                                                      totalChangeList
+                                                                          .firstWhere((item) =>
+                                                                              item.proId ==
+                                                                              proId)
+                                                                          .total -= cartlist[
+                                                                              index]
+                                                                          .qty;
+
+                                                                      print(
+                                                                          "cartlist[index] ${cartlist[index].qty}");
+
+                                                                      listPromotionsMock
+                                                                          .add(
+                                                                        PromotionListItem(
+                                                                          proId:
+                                                                              proId,
+                                                                          proName:
+                                                                              proName,
+                                                                          id: cartlist[index]
+                                                                              .id,
+                                                                          name:
+                                                                              cartlist[index].name,
+                                                                          unit: listPromotions.isNotEmpty
+                                                                              ? listPromotions[0].unit
+                                                                              : '',
+                                                                          brand:
+                                                                              cartlist[index].brand,
+                                                                          flavour:
+                                                                              cartlist[index].flavour,
+                                                                          group:
+                                                                              cartlist[index].group,
+                                                                          qty: cartlist[index]
+                                                                              .qty,
+                                                                          size:
+                                                                              cartlist[index].size,
+                                                                          unitName: listPromotions.isNotEmpty
+                                                                              ? listPromotions[0].unitName
+                                                                              : '',
+                                                                        ),
+                                                                      );
+                                                                      listPromotions
+                                                                          .add(
+                                                                        PromotionListItem(
+                                                                          proId:
+                                                                              proId,
+                                                                          proName:
+                                                                              proName,
+                                                                          id: cartlist[index]
+                                                                              .id,
+                                                                          name:
+                                                                              cartlist[index].name,
+                                                                          unit: listPromotions.isNotEmpty
+                                                                              ? listPromotions[0].unit
+                                                                              : '',
+                                                                          brand:
+                                                                              cartlist[index].brand,
+                                                                          flavour:
+                                                                              cartlist[index].flavour,
+                                                                          group:
+                                                                              cartlist[index].group,
+                                                                          qty: cartlist[index]
+                                                                              .qty,
+                                                                          size:
+                                                                              cartlist[index].size,
+                                                                          unitName: listPromotions.isNotEmpty
+                                                                              ? listPromotions[0].unitName
+                                                                              : '',
+                                                                        ),
+                                                                      );
+                                                                    }
+
+                                                                    if (promotionListChange
+                                                                        .isEmpty) {
+                                                                      // print(listPromotions
+                                                                      //     .length);
+                                                                      // print(listPromotionsMock
+                                                                      //     .length);
+                                                                      // promotionListChange
+                                                                      //     .addAll(
+                                                                      //   List.from(
+                                                                      //       listPromotions),
+                                                                      // );
+
+                                                                      // promotionListChange
+                                                                      //     .add(
+                                                                      //   PromotionList(
+                                                                      //       proId:
+                                                                      //           proId,
+                                                                      //       proName:
+                                                                      //           proName,
+                                                                      //       proType:
+                                                                      //           proType,
+                                                                      //       discount:
+                                                                      //           discount,
+                                                                      //       listPromotion: listPromotionsMock
+                                                                      //           .where((item) => item.proId == proId)
+                                                                      //           .toList()),
+                                                                      // );
+
+                                                                      // promotionListChange.removeWhere(
+                                                                      //     (item) =>
+                                                                      //         item.proId ==
+                                                                      //         proId);
+                                                                      // promotionListChange
+                                                                      //     .add(
+                                                                      //   PromotionList(
+                                                                      //       proId:
+                                                                      //           proId,
+                                                                      //       discount:
+                                                                      //           0,
+                                                                      //       proName:
+                                                                      //           proName,
+                                                                      //       proType:
+                                                                      //           proType,
+                                                                      //       listPromotion: listPromotionsMock
+                                                                      //           .where((item) => item.proId == proId)
+                                                                      //           .toList()),
+                                                                      // );
+                                                                    }
+                                                                  },
+                                                                );
+                                                                // Uncomment if needed to refresh cart details
+                                                                // await _getTotalCart(setModalState);
+
+                                                                // Close modal if cart is empty
+                                                                // if (cartlist.isEmpty) {
+                                                                //   Navigator.pop(context);
+                                                                // }
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Styles
+                                                                          .warning!,
+                                                                      width: 1),
+                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: Icon(
+                                                                FontAwesomeIcons
+                                                                    .penToSquare,
+                                                                size: 24,
+                                                                color: Styles
+                                                                    .warning,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            // Container(
+                                            //   color: Colors.red,
+                                            //   width: 50,
+                                            //   height: 100,
+                                            //   child: Center(
+                                            //     child: Icon(
+                                            //       Icons.delete,
+                                            //       color: Colors.white,
+                                            //       size: 25,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          ],
+                                        ),
+                                        Divider(
+                                          color: Colors.grey[200],
+                                          thickness: 1,
+                                          indent: 16,
+                                          endIndent: 16,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                )),
+                              ],
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        color: Colors.white,
+                      Container(
+                        color: Styles.primaryColor,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
+                                  Text("จำนวนที่เหลือ",
+                                      style: Styles.white24(context)),
                                   Text(
-                                    "รายการโปรโมชั่น",
-                                    style: Styles.black18(context),
-                                  ),
-                                  // ElevatedButton(
-                                  //   onPressed: () {
-                                  //     // setModalState(() {
-                                  //     //   listPromotions.clear();
-                                  //     // });
-                                  //     // _getCart();
-                                  //   },
-                                  //   child: Text(
-                                  //     'เลือกใหม่',
-                                  //     style: Styles.black18(context),
-                                  //   ),
-                                  // ),
-                                  // Clear Product Button
-                                  // IconButton(
-                                  //   onPressed: () {
-                                  //     setModalState(() {
-                                  //       if (listPromotionsMock.isNotEmpty) {
-                                  //         listPromotionsMock.removeWhere(
-                                  //             (item) =>
-                                  //                 item.id ==
-                                  //                 cartlist[index].id);
-                                  //         listPromotions =
-                                  //             List.from(listPromotionsMock);
-                                  //       }
-                                  //     });
-                                  //   },
-                                  //   icon: Icon(
-                                  //     FontAwesomeIcons.trash,
-                                  //     color: Colors.red,
-                                  //     size: 24,
-                                  //   ),
-                                  // ),
+                                      "${totalChangeList.firstWhere((item) => item.proId == proId).total} ${unitPromotionText}",
+                                      style: Styles.white24(context)),
                                 ],
                               ),
-                              Divider(
-                                color: Colors.black,
-                                indent: 1,
-                              ),
-                              Expanded(
-                                  child: ListView.builder(
-                                itemCount: listPromotionsMock
-                                    .where((item) => item.proId == proId)
-                                    .length,
-                                itemBuilder: (context, index) {
-                                  var filteredItems = listPromotionsMock
-                                      .where((item) => item.proId == proId)
-                                      .toList(); // Convert to a list after filtering
-                                  return Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.network(
-                                              'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                              width: screenWidth / 8,
-                                              height: screenWidth / 8,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return const Center(
-                                                  child: Icon(
-                                                    Icons.error,
-                                                    color: Colors.red,
-                                                    size: 50,
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(16.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          filteredItems[index]
-                                                              .name,
-                                                          style: Styles.black16(
-                                                              context),
-                                                          softWrap: true,
-                                                          maxLines: 2,
-                                                          overflow: TextOverflow
-                                                              .visible,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'id : ${filteredItems[index].id}',
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    4),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              border:
-                                                                  Border.all(
-                                                                color:
-                                                                    Colors.grey,
-                                                                width: 1,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          16),
-                                                            ),
-                                                            width: 75,
-                                                            child: Text(
-                                                              '${filteredItems[index].qty} ${unitPromotionText}',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: Styles
-                                                                  .black18(
-                                                                context,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          IconButton(
-                                                            onPressed: () {
-                                                              setModalState(
-                                                                () {
-                                                                  if (filteredItems
-                                                                      .isNotEmpty) {
-                                                                    totalChangeList
-                                                                        .firstWhere((item) =>
-                                                                            item.proId ==
-                                                                            proId)
-                                                                        .total += filteredItems[
-                                                                            index]
-                                                                        .qty;
-                                                                    listPromotionsMock.removeWhere((item) =>
-                                                                        item.id ==
-                                                                            filteredItems[index]
-                                                                                .id &&
-                                                                        item.proId ==
-                                                                            filteredItems[index].proId);
-                                                                  }
-                                                                },
-                                                              );
-                                                            },
-                                                            icon: Icon(
-                                                              FontAwesomeIcons
-                                                                  .trash,
-                                                              color: Colors.red,
-                                                              size: 24,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Divider(
-                                        color: Colors.grey[200],
-                                        thickness: 1,
-                                        indent: 16,
-                                        endIndent: 16,
-                                      ),
-                                    ],
-                                  );
-                                },
-                              )),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
+                                  Text("จำนวนที่เลือกได้",
+                                      style: Styles.white24(context)),
                                   Text(
-                                    "รายการโปรโมชั่นที่สามารถเปลี่ยนได้",
-                                    style: Styles.black18(context),
-                                  ),
-                                  // DropdownMenu<GroupPromotion>(
-                                  //   onSelected: (value) {
-                                  //     if (value != null) {
-                                  //       print(value.group);
-                                  //       setModalState(() {
-                                  //         filteredPromotion = cartlist
-                                  //             .where((store) =>
-                                  //                 // store.name
-                                  //                 //     .contains(value!.group) &&
-                                  //                 // store.name
-                                  //                 //     .contains(value!.size))
-                                  //                 store.name.contains(value.size
-                                  //                     .replaceAll(" ", "")
-                                  //                     .toLowerCase()))
-                                  //             .toList();
-                                  //       });
-                                  //     }
-                                  //   },
-                                  //   textStyle: Styles.black18(context),
-                                  //   dropdownMenuEntries: groupPromotion
-                                  //       .map<DropdownMenuEntry<GroupPromotion>>(
-                                  //           (GroupPromotion value) {
-                                  //     return DropdownMenuEntry<GroupPromotion>(
-                                  //         value: value,
-                                  //         label:
-                                  //             "${value.group} ${value.size}");
-                                  //   }).toList(),
-                                  //   // dropdownMenuEntries: groupPromotion,
-                                  // )
-                                  SizedBox(
-                                    width: 16,
-                                  ),
-
-                                  Expanded(
-                                    child: DropdownSearch<GroupPromotion>(
-                                      dropdownButtonProps: DropdownButtonProps(
-                                        color: Colors.white,
-                                        icon: Icon(
-                                          Icons.arrow_drop_down,
-                                          size: screenWidth / 20,
-                                          color: Colors.black54,
-                                        ),
-                                      ),
-
-                                      itemAsString: (item) =>
-                                          "${item.group} ${item.size}",
-                                      asyncItems: (filter) =>
-                                          getGroupDropdown(filter),
-                                      // items:(filter, infiniteScrollProps) =>
-                                      dropdownDecoratorProps:
-                                          DropDownDecoratorProps(
-                                        baseStyle: Styles.black18(context),
-                                        dropdownSearchDecoration:
-                                            InputDecoration(
-                                          // fillColor: Colors.white,
-                                          // prefixIcon: widget.icon,
-                                          labelText: "เลือกกลุ่มของโปรโมทชั่น",
-                                          labelStyle: Styles.grey18(context),
-                                          hintText: "เลือกกลุ่มของโปรโมทชั่น",
-                                          hintStyle: Styles.grey18(context),
-                                          border: const OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(8)),
-                                            borderSide: BorderSide(
-                                                color: Colors.grey, width: 1),
-                                          ),
-                                          focusedBorder:
-                                              const OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(8)),
-                                            borderSide: BorderSide(
-                                                color: Colors.blue, width: 1.5),
-                                          ),
-                                        ),
-                                      ),
-                                      onChanged: (GroupPromotion? data) {
-                                        setModalState(() {
-                                          filteredPromotion = cartlist
-                                              .where((store) =>
-                                                  // store.name
-                                                  //     .contains(value!.group) &&
-                                                  store.name
-                                                      .contains(data!.group) &&
-                                                  store.name.contains(data!.size
-                                                      .replaceAll(" ", "")
-                                                      .toLowerCase()))
-                                              .toList();
-                                        });
-                                      },
-                                      popupProps:
-                                          PopupPropsMultiSelection.dialog(
-                                        constraints: BoxConstraints(
-                                          maxHeight: screenWidth * 0.7,
-                                          maxWidth: screenWidth,
-                                          minHeight: screenWidth * 0.7,
-                                          minWidth: screenWidth,
-                                        ),
-                                        title: Container(
-                                          decoration: const BoxDecoration(
-                                            color: Styles.primaryColor,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(16),
-                                              topRight: Radius.circular(16),
-                                            ),
-                                          ),
-                                          alignment: Alignment.center,
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 8),
-                                          child: Text(
-                                            "เลือกกลุ่มของโปรโมทชั่น",
-                                            style: Styles.white18(context),
-                                          ),
-                                        ),
-
-                                        // showSearchBox: widget.showSearchBox,
-                                        itemBuilder:
-                                            (context, item, isSelected) {
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                title: Text(
-                                                  "${item.group} ${item.size}",
-                                                  style:
-                                                      Styles.black18(context),
-                                                ),
-                                                selected: isSelected,
-                                              ),
-                                              Divider(
-                                                color: Colors.grey[
-                                                    200], // Color of the divider line
-                                                thickness:
-                                                    1, // Thickness of the line
-                                                indent:
-                                                    16, // Left padding for the divider line
-                                                endIndent:
-                                                    16, // Right padding for the divider line
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                        searchFieldProps: TextFieldProps(
-                                          style: Styles.black18(context),
-                                          autofocus: true,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                      "${totalChangeList.firstWhere((item) => item.proId == proId).totalShow} ${unitPromotionText}",
+                                      style: Styles.white24(context)),
                                 ],
                               ),
-                              Divider(
-                                color: Colors.black,
-                                indent: 1,
-                              ),
-                              Expanded(
-                                  child: ListView.builder(
-                                itemCount: filteredPromotion.length,
-                                itemBuilder: (context, index) {
-                                  return Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.network(
-                                              'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                              width: screenWidth / 8,
-                                              height: screenWidth / 8,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return const Center(
-                                                  child: Icon(
-                                                    Icons.error,
-                                                    color: Colors.red,
-                                                    size: 50,
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(16.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          filteredPromotion[
-                                                                  index]
-                                                              .name,
-                                                          style: Styles.black16(
-                                                              context),
-                                                          softWrap: true,
-                                                          maxLines: 2,
-                                                          overflow: TextOverflow
-                                                              .visible,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                'id : ${filteredPromotion[index].id}',
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          ElevatedButton(
-                                                            onPressed:
-                                                                () async {
-                                                              setModalState(() {
-                                                                if (cartlist[
-                                                                            index]
-                                                                        .qty >
-                                                                    1) {
-                                                                  cartlist[
-                                                                          index]
-                                                                      .qty--;
-                                                                }
-                                                              });
-
-                                                              // await _reduceCart(
-                                                              //     cartlist[
-                                                              //         index],
-                                                              //     setModalState);
-                                                            },
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              shape:
-                                                                  const CircleBorder(
-                                                                side: BorderSide(
-                                                                    color: Colors
-                                                                        .grey,
-                                                                    width: 1),
-                                                              ), // ✅ Makes the button circular
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8),
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .white, // Button color
-                                                            ),
-                                                            child: const Icon(
-                                                              Icons.remove,
-                                                              size: 24,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ), // Example
-                                                          ),
-                                                          Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    4),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              border:
-                                                                  Border.all(
-                                                                color:
-                                                                    Colors.grey,
-                                                                width: 1,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          16),
-                                                            ),
-                                                            width: 75,
-                                                            child: Text(
-                                                              '${cartlist[index].qty}',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: Styles
-                                                                  .black18(
-                                                                context,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          ElevatedButton(
-                                                            onPressed:
-                                                                () async {
-                                                              // await _addCartDu(
-                                                              //     cartlist[
-                                                              //         index],
-                                                              //     setModalState);
-                                                              // setState(() {
-                                                              //   itemQuantities[
-                                                              //       index]++;
-                                                              // });
-                                                              if (cartlist[
-                                                                          index]
-                                                                      .qty <
-                                                                  totalChangeList
-                                                                      .firstWhere((item) =>
-                                                                          item.proId ==
-                                                                          proId)
-                                                                      .total) {
-                                                                setModalState(
-                                                                    () {
-                                                                  cartlist[
-                                                                          index]
-                                                                      .qty++;
-                                                                });
-                                                              }
-                                                            },
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              shape:
-                                                                  const CircleBorder(
-                                                                side: BorderSide(
-                                                                    color: Colors
-                                                                        .grey,
-                                                                    width: 1),
-                                                              ), // ✅ Makes the button circular
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8),
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .white, // Button color
-                                                            ),
-                                                            child: const Icon(
-                                                              Icons.add,
-                                                              size: 24,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ), // Example
-                                                          ),
-                                                          ElevatedButton(
-                                                            onPressed:
-                                                                () async {
-                                                              setModalState(
-                                                                () {
-                                                                  setState(() {
-                                                                    promotionListChangeStatus =
-                                                                        '1';
-                                                                  });
-                                                                  print(
-                                                                      "promotionListChangeStatus $promotionListChangeStatus");
-                                                                  print(
-                                                                      "proId $proId");
-                                                                  print(
-                                                                      "total $total");
-                                                                  print(
-                                                                      "totalChangeList ${totalChangeList.firstWhere((item) => item.proId == proId).total}");
-
-                                                                  if (totalChangeList
-                                                                          .firstWhere((item) =>
-                                                                              item.proId ==
-                                                                              proId)
-                                                                          .total >=
-                                                                      cartlist[
-                                                                              index]
-                                                                          .qty) {
-                                                                    totalChangeList
-                                                                        .firstWhere((item) =>
-                                                                            item.proId ==
-                                                                            proId)
-                                                                        .total -= cartlist[
-                                                                            index]
-                                                                        .qty;
-
-                                                                    print(
-                                                                        "cartlist[index] ${cartlist[index].qty}");
-
-                                                                    listPromotionsMock
-                                                                        .add(
-                                                                      PromotionListItem(
-                                                                        proId:
-                                                                            proId,
-                                                                        proName:
-                                                                            proName,
-                                                                        id: cartlist[index]
-                                                                            .id,
-                                                                        name: cartlist[index]
-                                                                            .name,
-                                                                        unit: listPromotions.isNotEmpty
-                                                                            ? listPromotions[0].unit
-                                                                            : '',
-                                                                        brand: cartlist[index]
-                                                                            .brand,
-                                                                        flavour:
-                                                                            cartlist[index].flavour,
-                                                                        group: cartlist[index]
-                                                                            .group,
-                                                                        qty: cartlist[index]
-                                                                            .qty,
-                                                                        size: cartlist[index]
-                                                                            .size,
-                                                                        unitName: listPromotions.isNotEmpty
-                                                                            ? listPromotions[0].unitName
-                                                                            : '',
-                                                                      ),
-                                                                    );
-                                                                  }
-
-                                                                  listPromotions
-                                                                      .removeWhere((item) =>
-                                                                          item.proId ==
-                                                                          proId);
-                                                                  listPromotions
-                                                                      .addAll(
-                                                                    List.from(
-                                                                        listPromotionsMock),
-                                                                  );
-                                                                  if (promotionListChange
-                                                                      .isEmpty) {
-                                                                    // print(listPromotions
-                                                                    //     .length);
-                                                                    // print(listPromotionsMock
-                                                                    //     .length);
-                                                                    // promotionListChange
-                                                                    //     .addAll(
-                                                                    //   List.from(
-                                                                    //       listPromotions),
-                                                                    // );
-
-                                                                    // promotionListChange
-                                                                    //     .add(
-                                                                    //   PromotionList(
-                                                                    //       proId:
-                                                                    //           proId,
-                                                                    //       proName:
-                                                                    //           proName,
-                                                                    //       proType:
-                                                                    //           proType,
-                                                                    //       discount:
-                                                                    //           discount,
-                                                                    //       listPromotion: listPromotionsMock
-                                                                    //           .where((item) => item.proId == proId)
-                                                                    //           .toList()),
-                                                                    // );
-
-                                                                    // promotionListChange.removeWhere(
-                                                                    //     (item) =>
-                                                                    //         item.proId ==
-                                                                    //         proId);
-                                                                    // promotionListChange
-                                                                    //     .add(
-                                                                    //   PromotionList(
-                                                                    //       proId:
-                                                                    //           proId,
-                                                                    //       discount:
-                                                                    //           0,
-                                                                    //       proName:
-                                                                    //           proName,
-                                                                    //       proType:
-                                                                    //           proType,
-                                                                    //       listPromotion: listPromotionsMock
-                                                                    //           .where((item) => item.proId == proId)
-                                                                    //           .toList()),
-                                                                    // );
-                                                                  }
-                                                                },
-                                                              );
-                                                              // Uncomment if needed to refresh cart details
-                                                              // await _getTotalCart(setModalState);
-
-                                                              // Close modal if cart is empty
-                                                              // if (cartlist.isEmpty) {
-                                                              //   Navigator.pop(context);
-                                                              // }
-                                                            },
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              shape:
-                                                                  CircleBorder(
-                                                                side: BorderSide(
-                                                                    color: Styles
-                                                                        .warning!,
-                                                                    width: 1),
-                                                              ),
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8),
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .white, // Button color
-                                                            ),
-                                                            child: Icon(
-                                                              FontAwesomeIcons
-                                                                  .penToSquare,
-                                                              size: 24,
-                                                              color: Styles
-                                                                  .warning,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          // Container(
-                                          //   color: Colors.red,
-                                          //   width: 50,
-                                          //   height: 100,
-                                          //   child: Center(
-                                          //     child: Icon(
-                                          //       Icons.delete,
-                                          //       color: Colors.white,
-                                          //       size: 25,
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                        ],
-                                      ),
-                                      Divider(
-                                        color: Colors.grey[200],
-                                        thickness: 1,
-                                        indent: 16,
-                                        endIndent: 16,
-                                      ),
-                                    ],
-                                  );
-                                },
-                              )),
                             ],
                           ),
                         ),
-                      ),
-                    ),
-                    Container(
-                      color: Styles.primaryColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("จำนวนที่เหลือ",
-                                    style: Styles.white24(context)),
-                                Text(
-                                    "${totalChangeList.firstWhere((item) => item.proId == proId).total} ${unitPromotionText}",
-                                    style: Styles.white24(context)),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("จำนวนที่เลือกได้",
-                                    style: Styles.white24(context)),
-                                Text(
-                                    "${totalChangeList.firstWhere((item) => item.proId == proId).totalShow} ${unitPromotionText}",
-                                    style: Styles.white24(context)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               );
             },

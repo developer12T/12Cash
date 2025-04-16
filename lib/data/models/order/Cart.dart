@@ -61,6 +61,7 @@ class Cart {
 
 class CartList {
   final String id;
+  String lot;
   final String name;
   final String group;
   final String brand;
@@ -75,6 +76,7 @@ class CartList {
 
   CartList({
     required this.id,
+    required this.lot,
     required this.name,
     required this.group,
     required this.brand,
@@ -92,6 +94,7 @@ class CartList {
   factory CartList.fromJson(Map<String, dynamic> json) {
     return CartList(
       id: json['id'],
+      lot: json['lot'] ?? '',
       name: json['name'],
       group: json['group'],
       brand: json['brand'],
@@ -109,7 +112,8 @@ class CartList {
   // ✅ Convert Dart Object to JSON
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      'id': id,
+      'lot': lot,
       'name': name,
       'group': group,
       'brand': brand,

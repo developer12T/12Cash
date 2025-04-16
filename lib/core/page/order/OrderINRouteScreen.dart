@@ -76,6 +76,9 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
   String selectedUnit = "";
   double totalCart = 0.00;
 
+  int stockQty = 0;
+  String lotStock = "";
+
   String selectedStore = "กรุณาเลือกร้านค้า";
   String selectedStoreId = "";
   String selectedStoreAddress = "";
@@ -156,6 +159,35 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
       }
     } catch (e) {
       print("Error _deleteCart: $e");
+    }
+  }
+
+  Future<void> _getQty(Product product, StateSetter setModalState) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+          endpoint: 'api/cash/stock/get',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${selectedUnit}",
+            "productId": "${product.id}"
+          });
+
+      if (response.statusCode == 200) {
+        print(response.data['data']);
+        setModalState(
+          () {
+            stockQty = response.data['data']['qty'].toInt();
+          },
+        );
+        setState(() {
+          stockQty = response.data['data']['qty'].toInt();
+        });
+      }
+    } catch (e) {
+      print("Error in _getQty $e");
     }
   }
 
@@ -962,6 +994,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                             price = 0.00;
                                                             count = 1;
                                                             total = 0.00;
+                                                            stockQty = 0;
                                                           });
 
                                                           _showProductSheet(
@@ -985,6 +1018,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                               price = 0.00;
                                                               count = 1;
                                                               total = 0.00;
+                                                              stockQty = 0;
                                                             });
                                                             _showProductSheet(
                                                                 context,
@@ -1038,6 +1072,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                       price = 0.00;
                                                       count = 1;
                                                       total = 0.00;
+                                                      stockQty = 0;
                                                     });
                                                     _showProductSheet(context,
                                                         productList[index]);
@@ -1315,25 +1350,10 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                 ),
                                               ],
                                             ),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  'รสชาติ : ${product.flavour}',
-                                                  style:
-                                                      Styles.black16(context),
-                                                ),
-                                              ],
-                                            ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text('คงเหลือ',
-                                        style: Styles.black18(context)),
                                   ],
                                 ),
                                 Row(
@@ -1398,6 +1418,13 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                           }).toList(), // ✅ Ensure .toList() is here
                                         ),
                                       ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            'คงเหลือ ${stockQty} ${selectedSize}',
+                                            style: Styles.black18(context)),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -1538,8 +1565,27 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                 print(
                                                     "selectedSize $selectedSize");
                                                 if (selectedSize != "") {
-                                                  await _addCart(product);
-                                                  await _getCart();
+                                                  if (stockQty > 0) {
+                                                    await _addCart(product);
+                                                    await _getCart();
+                                                  } else {
+                                                    toastification.show(
+                                                      autoCloseDuration:
+                                                          const Duration(
+                                                              seconds: 5),
+                                                      context: context,
+                                                      primaryColor: Colors.red,
+                                                      type: ToastificationType
+                                                          .error,
+                                                      style: ToastificationStyle
+                                                          .flatColored,
+                                                      title: Text(
+                                                        "ไม่มีของในสต๊อก",
+                                                        style: Styles.red18(
+                                                            context),
+                                                      ),
+                                                    );
+                                                  }
                                                 } else {
                                                   toastification.show(
                                                     autoCloseDuration:

@@ -141,6 +141,7 @@ class Store {
 }
 
 class Product {
+  final String id;
   final String name;
   final String group;
   final String brand;
@@ -155,6 +156,7 @@ class Product {
   final double netTotal;
 
   Product({
+    required this.id,
     required this.name,
     required this.group,
     required this.brand,
@@ -171,6 +173,7 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
+      id: json['id'],
       name: json['name'],
       group: json['group'],
       brand: json['brand'],

@@ -92,10 +92,10 @@ class WithDrawCard extends StatelessWidget {
                               "จำนวนเบิก: ${item.total.toStringAsFixed(0)} หีบ",
                               style: Styles.black16(context),
                             ),
-                            Text(
-                              "วันที่เบิก: ${DateFormat('dd/MM/yyyy | HH:mm:ss').format(item.created)}",
-                              style: Styles.black16(context),
-                            ),
+                            // Text(
+                            //   "วันที่เบิก: ${DateFormat('dd/MM/yyyy | HH:mm:ss').format(item.created)}",
+                            //   style: Styles.black16(context),
+                            // ),
                             Row(
                               children: [
                                 Expanded(

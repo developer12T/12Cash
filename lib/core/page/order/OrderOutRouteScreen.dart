@@ -79,6 +79,9 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   double total = 0.00;
   double totalCart = 0.00;
 
+  int stockQty = 0;
+  String lotStock = "";
+
   List<Store> storeList = [];
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _productScrollController = ScrollController();
@@ -288,6 +291,97 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     }
   }
 
+  Future<void> _getQty(Product product, StateSetter setModalState) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+          endpoint: 'api/cash/stock/get',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${selectedUnit}",
+            "productId": "${product.id}"
+          });
+
+      if (response.statusCode == 200) {
+        print(response.data['data']);
+        setModalState(
+          () {
+            stockQty = response.data['data']['qty'].toInt();
+            lotStock = response.data['data']['lot'];
+          },
+        );
+        setState(() {
+          stockQty = response.data['data']['qty'].toInt();
+          lotStock = response.data['data']['lot'];
+        });
+      }
+    } catch (e) {
+      print("Error in _getQty $e");
+    }
+  }
+
+  Future<void> _updateStock(
+      Product product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${selectedUnit}",
+            "productId": "${product.id}",
+            "qty": count,
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
+  }
+
+  Future<void> _updateStock2(
+      CartList product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${product.unit}",
+            "productId": "${product.id}",
+            "qty": "${product.qty.toInt()}",
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
+  }
+
   Future<void> _getCart() async {
     try {
       print("Get Cart is Loading");
@@ -327,7 +421,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
           "storeId": "${selectedStoreId}",
           "id": "${product.id}",
           "qty": count,
-          "unit": "${selectedUnit}"
+          "unit": "${selectedUnit}",
+          "lot": "${lotStock}"
         },
       );
       // print("Response add Cart: ${response.data['data']['listProduct']}");
@@ -375,7 +470,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
         setState(() {
           productList = data.map((item) => Product.fromJson(item)).toList();
         });
-        context.loaderOverlay.hide();
 
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
@@ -1008,6 +1102,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                           price = 0.00;
                                                           count = 1;
                                                           total = 0.00;
+                                                          lotStock = '';
+                                                          stockQty = 0;
                                                         });
 
                                                         _showProductSheet(
@@ -1031,6 +1127,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                             price = 0.00;
                                                             count = 1;
                                                             total = 0.00;
+                                                            lotStock = '';
+                                                            stockQty = 0;
                                                           });
                                                           _showProductSheet(
                                                               context,
@@ -1086,6 +1184,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                     price = 0.00;
                                                     count = 1;
                                                     total = 0.00;
+                                                    stockQty = 0;
                                                   });
                                                   _showProductSheet(context,
                                                       productList[index]);
@@ -1386,12 +1485,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                 ),
                                 Row(
                                   children: [
-                                    Text('คงเหลือ',
-                                        style: Styles.black18(context)),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
                                     Expanded(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
@@ -1401,7 +1494,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                             return Container(
                                               margin: EdgeInsets.all(8),
                                               child: ElevatedButton(
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   setModalState(() {
                                                     price = double.parse(
                                                         data.price);
@@ -1421,6 +1514,12 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                     selectedUnit = data.unit;
                                                     total = price * count;
                                                   });
+                                                  context.loaderOverlay.show();
+                                                  // print(selectedUnit);
+                                                  // print(selectedSize);
+                                                  await _getQty(
+                                                      product, setModalState);
+                                                  context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   padding: const EdgeInsets
@@ -1452,6 +1551,13 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                           }).toList(), // ✅ Ensure .toList() is here
                                         ),
                                       ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            'คงเหลือ ${stockQty} ${selectedSize}',
+                                            style: Styles.black18(context)),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -1593,8 +1699,33 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                     "selectedSize $selectedSize");
                                                 if (selectedSize != "" &&
                                                     selectedStoreId != "") {
-                                                  await _addCart(product);
-                                                  await _getCart();
+                                                  if (stockQty > 0) {
+                                                    context.loaderOverlay
+                                                        .show();
+                                                    await _addCart(product);
+                                                    await _getCart();
+                                                    await _updateStock(product,
+                                                        setModalState, "OUT");
+                                                    context.loaderOverlay
+                                                        .hide();
+                                                  } else {
+                                                    toastification.show(
+                                                      autoCloseDuration:
+                                                          const Duration(
+                                                              seconds: 5),
+                                                      context: context,
+                                                      primaryColor: Colors.red,
+                                                      type: ToastificationType
+                                                          .error,
+                                                      style: ToastificationStyle
+                                                          .flatColored,
+                                                      title: Text(
+                                                        "ไม่มีของในสต๊อก",
+                                                        style: Styles.red18(
+                                                            context),
+                                                      ),
+                                                    );
+                                                  }
                                                 } else {
                                                   toastification.show(
                                                     autoCloseDuration:
@@ -1934,7 +2065,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
-
+                                                                await _updateStock2(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState,
+                                                                    "IN");
                                                                 setModalState(
                                                                   () {
                                                                     cartList.removeWhere((item) => (item.id ==

@@ -8,7 +8,7 @@ class Withdraw {
   final String sendDate;
   final double total;
   final String status;
-  final DateTime created;
+  // final DateTime created;
 
   Withdraw({
     required this.area,
@@ -18,21 +18,21 @@ class Withdraw {
     required this.sendDate,
     required this.total,
     required this.status,
-    required this.created,
+    // required this.created,
   });
 
   // Factory constructor to create an Order from JSON
   factory Withdraw.fromJson(Map<String, dynamic> json) {
     return Withdraw(
-      area: json['area'] as String,
+      area: json['area'] ?? '' as String,
       orderId: json['orderId'] as String,
       orderType: json['orderType'] as String,
       orderTypeName: json['orderTypeName'] as String,
       sendDate: json['sendDate'] as String,
       total: (json['total'] as num).toDouble(), // Ensures conversion to double
       status: json['status'] as String,
-      created:
-          DateTime.parse(json['created']), // Converts ISO string to DateTime
+      // created:
+      //     DateTime.parse(json['created']), // Converts ISO string to DateTime
     );
   }
 
@@ -46,7 +46,7 @@ class Withdraw {
       'sendDate': sendDate,
       'total': total,
       'status': status,
-      'created': created.toIso8601String(),
+      // 'created': created.toIso8601String(),
     };
   }
 }
