@@ -282,7 +282,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         },
       );
       var response = await dio.post(
-        '${ApiService.apiHost} /api/cash/order/addSlip',
+        '${ApiService.apiHost}/api/cash/order/addSlip',
         // 'http://192.168.44.57:8006/api/cash/order/addSlip',
         data: formData,
         options: Options(
@@ -429,19 +429,25 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   Future<void> _addStockMovement(String orderId) async {
     try {
+      for (var cart in cartList) {
+        productMoveMent.add(ProductMoveMent(
+            id: cart.id,
+            lot: cart.lot,
+            qty: cart.qty.toInt(),
+            unit: cart.unit));
+      }
       ApiService apiService = ApiService();
       await apiService.init();
 
       // print(User.saleCode);
       // print(productMoveMent[0].id);
-
       var response = await apiService.request(
         endpoint: 'api/cash/stock/addStockMovement',
         method: 'POST',
         body: {
           "orderId": orderId,
           "area": "${User.area}",
-          "saleCode": "20430",
+          "saleCode": "${User.saleCode}",
           "period": "${period}",
           "warehouse": "${User.warehouse}",
           "action": "checkout",
@@ -449,8 +455,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           "product": productMoveMent,
         },
       );
+      if (response.statusCode == 200) {}
     } catch (e) {
-      print("Error __addStockMovement $e");
+      print("Error _addStockMovement $e");
     }
   }
 
@@ -594,14 +601,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             cartList = data.map((item) => CartList.fromJson(item)).toList();
           }
 
-          for (var cart in cartList) {
-            productMoveMent.add(ProductMoveMent(
-                id: cart.id,
-                lot: cart.lot,
-                qty: cart.qty.toInt(),
-                unit: cart.unit));
-          }
-
           promotionList =
               data2.map((item) => PromotionList.fromJson(item)).toList();
 
@@ -715,6 +714,35 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         Navigator.pop(context);
       }
     } catch (e) {}
+  }
+
+  Future<void> _updateStock2(CartList product, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${product.unit}",
+            "productId": "${product.id}",
+            "qty": "${product.qty.toInt()}",
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        // setModalState(
+        //   () {
+        //     stockQty -= count.toInt();
+        //   },
+        // );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
   }
 
   Future<void> _reduceCart(CartList cart) async {
@@ -1345,7 +1373,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                       await _deleteCart(
                                                                           cartList[
                                                                               index]);
-
+                                                                      await _updateStock2(
+                                                                          cartList[
+                                                                              index],
+                                                                          "IN");
                                                                       setState(
                                                                         () {
                                                                           cartList.removeWhere((item) =>

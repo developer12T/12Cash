@@ -180,10 +180,12 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
         setModalState(
           () {
             stockQty = response.data['data']['qty'].toInt();
+            lotStock = response.data['data']['lot'];
           },
         );
         setState(() {
           stockQty = response.data['data']['qty'].toInt();
+          lotStock = response.data['data']['lot'];
         });
       }
     } catch (e) {
@@ -311,7 +313,8 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
           "storeId": "${widget.storeDetail?.listStore[0].storeInfo.storeId}",
           "id": "${product.id}",
           "qty": count,
-          "unit": "${selectedUnit}"
+          "unit": "${selectedUnit}",
+          "lot": "${lotStock}"
         },
       );
       print("Response add Cart: ${response.data['data']['listProduct']}");
@@ -335,6 +338,66 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
       }
     } catch (e) {
       print("Error addCart: $e");
+    }
+  }
+
+  Future<void> _updateStock(
+      Product product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${selectedUnit}",
+            "productId": "${product.id}",
+            "qty": count,
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
+  }
+
+  Future<void> _updateStock2(
+      CartList product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${product.unit}",
+            "productId": "${product.id}",
+            "qty": "${product.qty.toInt()}",
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
     }
   }
 
@@ -994,6 +1057,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                             price = 0.00;
                                                             count = 1;
                                                             total = 0.00;
+                                                            lotStock = '';
                                                             stockQty = 0;
                                                           });
 
@@ -1018,6 +1082,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                               price = 0.00;
                                                               count = 1;
                                                               total = 0.00;
+                                                              lotStock = '';
                                                               stockQty = 0;
                                                             });
                                                             _showProductSheet(
@@ -1367,7 +1432,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                             return Container(
                                               margin: EdgeInsets.all(8),
                                               child: ElevatedButton(
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   setModalState(() {
                                                     price = double.parse(
                                                         data.price);
@@ -1387,6 +1452,12 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                     selectedUnit = data.unit;
                                                     total = price * count;
                                                   });
+                                                  context.loaderOverlay.show();
+                                                  // print(selectedUnit);
+                                                  // print(selectedSize);
+                                                  await _getQty(
+                                                      product, setModalState);
+                                                  context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   padding: const EdgeInsets
@@ -1565,9 +1636,16 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                 print(
                                                     "selectedSize $selectedSize");
                                                 if (selectedSize != "") {
-                                                  if (stockQty > 0) {
+                                                  if ((stockQty > 0) &&
+                                                      (stockQty >= count)) {
+                                                    context.loaderOverlay
+                                                        .show();
                                                     await _addCart(product);
                                                     await _getCart();
+                                                    await _updateStock(product,
+                                                        setModalState, "OUT");
+                                                    context.loaderOverlay
+                                                        .hide();
                                                   } else {
                                                     toastification.show(
                                                       autoCloseDuration:
@@ -1580,7 +1658,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                       style: ToastificationStyle
                                                           .flatColored,
                                                       title: Text(
-                                                        "ไม่มีของในสต๊อก",
+                                                        "ไม่มีของในสต๊อกหรือมีไม่พอ",
                                                         style: Styles.red18(
                                                             context),
                                                       ),
@@ -1925,6 +2003,11 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
+                                                                await _updateStock2(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState,
+                                                                    "IN");
 
                                                                 setModalState(
                                                                   () {

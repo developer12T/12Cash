@@ -1609,14 +1609,16 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                           ElevatedButton(
                                             onPressed: () {
                                               if (count > 1) {
-                                                setModalState(() {
-                                                  count--;
-                                                  total = price * count;
-                                                });
-                                                setState(() {
-                                                  count = count;
-                                                  total = price * count;
-                                                });
+                                                if (stockQty > 0) {
+                                                  setModalState(() {
+                                                    count--;
+                                                    total = price * count;
+                                                  });
+                                                  setState(() {
+                                                    count = count;
+                                                    total = price * count;
+                                                  });
+                                                }
                                               }
                                             },
                                             style: ElevatedButton.styleFrom(
@@ -1699,7 +1701,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                     "selectedSize $selectedSize");
                                                 if (selectedSize != "" &&
                                                     selectedStoreId != "") {
-                                                  if (stockQty > 0) {
+                                                  if ((stockQty > 0) &&
+                                                      (stockQty >= count)) {
                                                     context.loaderOverlay
                                                         .show();
                                                     await _addCart(product);
@@ -1720,7 +1723,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                       style: ToastificationStyle
                                                           .flatColored,
                                                       title: Text(
-                                                        "ไม่มีของในสต๊อก",
+                                                        "ไม่มีของในสต๊อกหรือมีไม่พอ",
                                                         style: Styles.red18(
                                                             context),
                                                       ),

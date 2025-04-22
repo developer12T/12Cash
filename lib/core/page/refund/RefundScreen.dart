@@ -88,6 +88,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
   String selectedSize = "";
   String selectedUnit = "";
 
+  int stockQty = 0;
+  String lotStock = "";
+
   @override
   void initState() {
     super.initState();
@@ -120,6 +123,37 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     super.dispose();
   }
 
+  Future<void> _getQty(Product product, StateSetter setModalState) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+          endpoint: 'api/cash/stock/get',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${selectedUnit}",
+            "productId": "${product.id}"
+          });
+
+      if (response.statusCode == 200) {
+        print(response.data['data']);
+        setModalState(
+          () {
+            stockQty = response.data['data']['qty'].toInt();
+            lotStock = response.data['data']['lot'];
+          },
+        );
+        setState(() {
+          stockQty = response.data['data']['qty'].toInt();
+          lotStock = response.data['data']['lot'];
+        });
+      }
+    } catch (e) {
+      print("Error in _getQty $e");
+    }
+  }
+
   Future<void> _addCart(Product product) async {
     try {
       ApiService apiService = ApiService();
@@ -132,11 +166,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           "area": "${User.area}",
           "storeId": "${isStoreId}",
           "id": "${product.id}",
-          "qty": count,
-          "unit": "${selectedUnit}"
+          "qty": 1,
+          "unit": "${selectedUnit}",
+          "lot": "${lotStock}"
         },
       );
-      // print("Response add Cart: ${response.data['data']['listProduct']}");
+      print("Response add Cart: ${response.statusCode}");
       if (response.statusCode == 200) {
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
@@ -439,7 +474,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
         listRefund.clear();
         cartListData["items"].clear();
       });
-      print("Error $e");
+      print("Error _getCart $e");
     }
   }
 
@@ -465,7 +500,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           storeList = [];
         });
       }
-      print("Error $e");
+      print("Error _getStore $e");
     }
   }
 
@@ -504,7 +539,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
         print("groupList: $groupList");
         // print("listStore: ${data.length}");
       }
-    } catch (e) {}
+    } catch (e) {
+      print("Error getFliter: $e");
+    }
   }
 
   Future<void> _getFliterGroup() async {
@@ -552,6 +589,36 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
         });
       }
     } catch (e) {}
+  }
+
+  Future<void> _updateStock(
+      Product product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "unit": "${selectedUnit}",
+            "productId": "${product.id}",
+            "qty": count,
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
   }
 
   Future<void> _getFliterBrand() async {
@@ -1541,23 +1608,23 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               margin: EdgeInsets.all(8),
                                               child: ElevatedButton(
                                                 onPressed: () {
-                                                  setModalState(() {
-                                                    price = double.parse(
-                                                        data.price);
-                                                  });
+                                                  // setModalState(() {
+                                                  //   price = double.parse(
+                                                  //       data.price);
+                                                  // });
                                                   setModalState(
                                                     () {
                                                       selectedSize = data.name;
                                                       selectedUnit = data.unit;
-                                                      total = price * count;
+                                                      // total = price * count;
                                                     },
                                                   );
                                                   setState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    // price = double.parse(
+                                                    //     data.price);
                                                     selectedSize = data.name;
                                                     selectedUnit = data.unit;
-                                                    total = price * count;
+                                                    // total = price * count;
                                                   });
                                                 },
                                                 style: ElevatedButton.styleFrom(
@@ -1661,34 +1728,34 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                   ],
                                 ),
 
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'ราคา',
-                                      style: Styles.black18(context),
-                                    ),
-                                    Text(
-                                      "฿${product.listUnit.any((element) => element.name == selectedSize) ? product.listUnit.where((element) => element.name == selectedSize).first.price : '0.00'} บาท",
-                                      style: Styles.black18(context),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'รวม',
-                                      style: Styles.black18(context),
-                                    ),
-                                    Text(
-                                      '฿${total.toStringAsFixed(2)} บาท',
-                                      style: Styles.black18(context),
-                                    ),
-                                  ],
-                                ),
+                                // Row(
+                                //   mainAxisAlignment:
+                                //       MainAxisAlignment.spaceBetween,
+                                //   children: [
+                                //     Text(
+                                //       'ราคา',
+                                //       style: Styles.black18(context),
+                                //     ),
+                                //     Text(
+                                //       "฿${product.listUnit.any((element) => element.name == selectedSize) ? product.listUnit.where((element) => element.name == selectedSize).first.price : '0.00'} บาท",
+                                //       style: Styles.black18(context),
+                                //     ),
+                                //   ],
+                                // ),
+                                // Row(
+                                //   mainAxisAlignment:
+                                //       MainAxisAlignment.spaceBetween,
+                                //   children: [
+                                //     Text(
+                                //       'รวม',
+                                //       style: Styles.black18(context),
+                                //     ),
+                                //     // Text(
+                                //     //   // '฿${total.toStringAsFixed(2)} บาท',
+                                //     //   style: Styles.black18(context),
+                                //     // ),
+                                //   ],
+                                // ),
                                 Divider(
                                   color: Colors.grey[200],
                                   thickness: 1,
@@ -1994,12 +2061,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                 ),
                                 Row(
                                   children: [
-                                    Text('คงเหลือ',
-                                        style: Styles.black18(context)),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
                                     Expanded(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
@@ -2009,7 +2070,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                             return Container(
                                               margin: EdgeInsets.all(8),
                                               child: ElevatedButton(
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   setModalState(() {
                                                     price = double.parse(
                                                         data.price);
@@ -2029,6 +2090,13 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                     selectedUnit = data.unit;
                                                     total = price * count;
                                                   });
+
+                                                  context.loaderOverlay.show();
+                                                  // print(selectedUnit);
+                                                  // print(selectedSize);
+                                                  await _getQty(
+                                                      product, setModalState);
+                                                  context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   padding: const EdgeInsets
@@ -2060,6 +2128,13 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                           }).toList(), // ✅ Ensure .toList() is here
                                         ),
                                       ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            'คงเหลือ ${stockQty} ${selectedSize}',
+                                            style: Styles.black18(context)),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -2200,10 +2275,38 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               onPressed: () async {
                                                 print(
                                                     "selectedSize $selectedSize");
+                                                print("stockQty $stockQty");
+                                                print("stockQty $count");
+                                                print(
+                                                    "stockQty ${(stockQty > 0) && (stockQty >= count)}");
                                                 if (selectedSize != "" &&
                                                     isStoreId != "") {
-                                                  await _addCart(product);
-                                                  await _getCart();
+                                                  if ((stockQty > 0) &&
+                                                      (stockQty >= count)) {
+                                                    await _addCart(product);
+                                                    await _getCart();
+                                                    await _updateStock(product,
+                                                        setModalState, "OUT");
+                                                    context.loaderOverlay
+                                                        .hide();
+                                                  } else {
+                                                    toastification.show(
+                                                      autoCloseDuration:
+                                                          const Duration(
+                                                              seconds: 5),
+                                                      context: context,
+                                                      primaryColor: Colors.red,
+                                                      type: ToastificationType
+                                                          .error,
+                                                      style: ToastificationStyle
+                                                          .flatColored,
+                                                      title: Text(
+                                                        "ไม่มีของในสต๊อกหรือมีไม่พอ",
+                                                        style: Styles.red18(
+                                                            context),
+                                                      ),
+                                                    );
+                                                  }
                                                 } else {
                                                   toastification.show(
                                                     autoCloseDuration:

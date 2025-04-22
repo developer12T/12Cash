@@ -234,7 +234,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
         }
       }
       if (isShippingId.isEmpty) {
-        missingFields.add("");
+        missingFields.add("ไม่มี ShippingId การจัดส่ง");
       }
       if (isWithdrawType.isEmpty) {
         missingFields.add("ประเภทการเบิก");
