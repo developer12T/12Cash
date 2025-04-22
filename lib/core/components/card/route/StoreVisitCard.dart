@@ -42,26 +42,26 @@ class StoreVisitCard extends StatelessWidget {
       indicatorStyle: IndicatorStyle(
         width: 30,
         height: 30,
-        color: store.status == '1'
+        color: store.status == '3'
             ? Styles.success!
-            : store.status == '2'
+            : store.status == '2' || store.status == '1'
                 ? Styles.success!
                 : Styles.fail!,
         indicator: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: store.status == '1'
+            color: store.status == '3'
                 ? Styles.success!
-                : store.status == '2'
+                : store.status == '2' || store.status == '1'
                     ? Styles.success!
                     : Styles.fail!,
           ),
-          child: store.status == '1'
+          child: store.status == '3'
               ? Icon(
                   Icons.attach_money_rounded,
                   color: Colors.white,
                 )
-              : store.status == '2'
+              : store.status == '2' || store.status == '1'
                   ? Icon(
                       Icons.check,
                       color: Colors.white,
@@ -74,17 +74,17 @@ class StoreVisitCard extends StatelessWidget {
       ),
       afterLineStyle: LineStyle(
         thickness: 1,
-        color: store.status == '1'
+        color: store.status == '3'
             ? Styles.success!
-            : store.status == '2'
+            : store.status == '2' || store.status == '1'
                 ? Styles.success!
                 : Styles.fail!,
       ),
       beforeLineStyle: LineStyle(
         thickness: 1,
-        color: store.status == '1'
+        color: store.status == '3'
             ? Styles.success!
-            : store.status == '2'
+            : store.status == '2' || store.status == '1'
                 ? Styles.success!
                 : Styles.fail!,
       ),
@@ -173,9 +173,9 @@ class StoreCard extends StatelessWidget {
                       // padding: EdgeInsets.symmetric(horizontal: 8),
                       width: 100,
                       decoration: BoxDecoration(
-                        color: store.status == '1'
+                        color: store.status == '3'
                             ? Styles.success
-                            : store.status == '2'
+                            : store.status == '2' || store.status == '1'
                                 ? Styles.warning
                                 : Styles.fail,
                         borderRadius: BorderRadius.circular(8),

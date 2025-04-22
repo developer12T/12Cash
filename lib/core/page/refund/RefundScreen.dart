@@ -18,6 +18,7 @@ import 'package:_12sale_app/data/models/refund/RefundCart.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:dartx/dartx.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
@@ -87,6 +88,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
   String selectedStoreShopType = "";
   String selectedSize = "";
   String selectedUnit = "";
+
+  TextEditingController countController = TextEditingController();
 
   int stockQty = 0;
   String lotStock = "";
@@ -1802,21 +1805,42 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               color: Colors.grey,
                                             ), // Example
                                           ),
-                                          Container(
-                                            padding: EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.grey,
-                                                width: 1,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              // padding: const EdgeInsets.all(8),
+                                              elevation: 0, // Disable shadow
+                                              shadowColor: Colors
+                                                  .transparent, // Ensure no shadow color
+                                              backgroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                  side: BorderSide.none),
                                             ),
-                                            width: 75,
-                                            child: Text(
-                                              '${count}',
-                                              textAlign: TextAlign.center,
-                                              style: Styles.black18(context),
+                                            onPressed: () {
+                                              setState(() {
+                                                count = 1;
+                                              });
+                                              _showCountSheet(
+                                                context,
+                                              );
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.grey,
+                                                  width: 1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              width: 75,
+                                              child: Text(
+                                                '${count}',
+                                                textAlign: TextAlign.center,
+                                                style: Styles.black18(context),
+                                              ),
                                             ),
                                           ),
                                           ElevatedButton(
@@ -1851,7 +1875,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                       ),
                                     ),
                                     Expanded(
-                                      flex: 3,
+                                      flex: 2,
                                       child: Row(
                                         children: [
                                           Expanded(
@@ -2838,6 +2862,133 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                         ),
                       ),
                     )
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
+    );
+  }
+
+  void _showCountSheet(
+    BuildContext context,
+  ) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              // Icon(
+                              //   Icons.shopping_bag_outlined,
+                              //   color: Colors.white,
+                              //   size: 30,
+                              // ),
+                              Text('ใส่จำนวน', style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _getCart();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            autofocus: true,
+                            style: Styles.black18(context),
+                            controller: countController,
+                            maxLines: 1,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                  width: 1,
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.all(16),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(8),
+                                    elevation: 0, // Disable shadow
+                                    shadowColor: Colors
+                                        .transparent, // Ensure no shadow color
+                                    backgroundColor: Styles.primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        side: BorderSide.none),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      count = countController.text.toInt();
+                                      total = price * count;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text(
+                                    "ตกลง",
+                                    style: Styles.white18(context),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               );
