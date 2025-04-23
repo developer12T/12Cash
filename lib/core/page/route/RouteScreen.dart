@@ -7,6 +7,7 @@ import 'package:_12sale_app/core/components/card/order/InvoiceCard.dart';
 import 'package:_12sale_app/core/components/card/route/RouteVisitCard.dart';
 import 'package:_12sale_app/core/components/card/route/RouteVisitCard.dart';
 import 'package:_12sale_app/core/components/card/route/RouteVisitCard.dart';
+import 'package:_12sale_app/core/components/search/DropdownSearchGroup.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/route/DetailScreen.dart';
@@ -15,6 +16,7 @@ import 'package:_12sale_app/core/page/route/ShopRouteScreen.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/StoreScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/Location.dart';
 import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/search/RouteVisitFilterLocal.dart';
 import 'package:_12sale_app/data/models/search/SaleRoute.dart';
@@ -25,6 +27,7 @@ import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/function/SavetoStorage.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +75,9 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
   late GoogleMapController _mapController;
   Map<PolylineId, Polyline> polylines = <PolylineId, Polyline>{};
   PolylineId? selectedPolyline;
+
+  String province = "";
+  String amphoe = "";
 
   Future<void> fetchPolylineDataWithDio(
       LatLng origin, LatLng destination, String apiKey) async {
@@ -357,6 +363,74 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
     super.dispose();
   }
 
+  Future<List<Location>> _fetchProvince(String filter) async {
+    Map<String, List<Location>> groupedDatasets =
+        await getProvince(filter, province);
+
+    // Flatten the grouped results for display
+    return groupedDatasets.values.expand((datalist) => datalist).toList();
+  }
+
+  Future<Map<String, List<Location>>> getProvince(
+      String filter, String province) async {
+    try {
+      // Load the JSON file for districts
+      final String response = await rootBundle.loadString('data/location.json');
+      final data = json.decode(response);
+
+      // Filter and map JSON data to District model based on selected province and filter
+      final List<Location> districts = (data as List)
+          .map((json) => Location.fromJson(json))
+          .where((district) => district.province
+              .toLowerCase()
+              .contains(filter.toLowerCase())) // Apply both filters
+          .toList();
+      Map<String, List<Location>> groupedData =
+          groupBy(districts, (Location location) => location.province);
+
+      // Group districts by amphoe
+      return groupedData;
+    } catch (e) {
+      print("Error occurred: $e");
+      return {};
+    }
+  }
+
+  Future<List<Location>> _fetchDistricts(String filter) async {
+    Map<String, List<Location>> groupedDatasets =
+        await getDistrict(filter, province);
+
+    // Flatten the grouped results for display
+    return groupedDatasets.values.expand((datalist) => datalist).toList();
+  }
+
+  Future<Map<String, List<Location>>> getDistrict(
+      String filter, String province) async {
+    try {
+      // Load the JSON file for districts
+      final String response = await rootBundle.loadString('data/location.json');
+      final data = json.decode(response);
+
+      // Filter and map JSON data to District model based on selected province and filter
+      final List<Location> districts = (data as List)
+          .map((json) => Location.fromJson(json))
+          .where((district) =>
+              district.province == province &&
+              district.amphoe
+                  .toLowerCase()
+                  .contains(filter.toLowerCase())) // Apply both filters
+          .toList();
+      Map<String, List<Location>> groupedData =
+          groupBy(districts, (Location location) => location.amphoe);
+
+      // Group districts by amphoe
+      return groupedData;
+    } catch (e) {
+      print("Error occurred: $e");
+      return {};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final routeState = Provider.of<RouteVisitFilterLocal>(context);
@@ -371,164 +445,311 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
           _getRouteVisit();
           routeState.routeVisitList.clear();
         },
-        child: Container(
-          margin: EdgeInsets.only(top: 20),
-          child: LoadingSkeletonizer(
-            loading: _loadingRouteVisit,
-            child: routeVisits.isNotEmpty
-                ? ListView.builder(
-                    itemCount: routeState.routeVisitList.length > 0
-                        ? (routeState.routeVisitList.length / 2).ceil()
-                        : (routeVisits.length / 2)
-                            .ceil(), // Number of rows needed
-                    itemBuilder: (context, index) {
-                      final firstIndex = index * 2;
-                      final secondIndex = firstIndex + 1;
-                      return routeState.routeVisitList.length > 0
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: RouteVisitCard(
-                                    item: routeState.routeVisitList[firstIndex],
-                                    onDetailsPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => DetailScreen(
-                                            routeId: routeState
-                                                .routeVisitList[firstIndex].id,
-                                            route: routeState
-                                                .routeVisitList[firstIndex].day,
-                                            customerNo: routeState
-                                                .routeVisitList[firstIndex]
-                                                .listStore![0]
-                                                .storeInfo
-                                                .storeId,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                if (secondIndex <
-                                    routeState.routeVisitList
-                                        .length) // Check if the second card exists
-                                  Expanded(
-                                    child: RouteVisitCard(
-                                      item: routeState
-                                          .routeVisitList[secondIndex],
-                                      onDetailsPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => DetailScreen(
-                                              routeId: routeState
-                                                  .routeVisitList[secondIndex]
-                                                  .id,
-                                              route: routeState
-                                                  .routeVisitList[secondIndex]
-                                                  .day,
-                                              customerNo: routeState
-                                                  .routeVisitList[secondIndex]
-                                                  .listStore![0]
-                                                  .storeInfo
-                                                  .storeId,
+        child: Column(
+          children: [
+            SizedBox(height: 10),
+
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.end,
+            //   children: [
+            //     Padding(
+            //       padding: const EdgeInsets.all(4.0),
+            //       child: Container(
+            //         width: 250,
+            //         padding: EdgeInsets.all(8),
+            //         decoration: BoxDecoration(
+            //           color: Colors.white,
+            //           borderRadius: BorderRadius.circular(16),
+            //         ),
+            //         child: DropdownSearchCustomGroup<Location>(
+            //             label:
+            //                 '${"store.store_address_screen.input_province.name".tr()}',
+            //             titleText:
+            //                 "${"store.store_address_screen.input_province.name".tr()}",
+            //             fetchItems: (filter) async {
+            //               // Replace with your district fetching logic
+            //               return await _fetchProvince(filter);
+            //             },
+            //             groupByKey: (Location location) =>
+            //                 location.province, // Group by amphoe
+            //             transformGroup: (String province) => Location(
+            //                   amphoe: '',
+            //                   province: province,
+            //                   district: '',
+            //                   zipcode: '',
+            //                   id: '',
+            //                   amphoeCode: '',
+            //                   districtCode: '',
+            //                   provinceCode: '',
+            //                 ), // Transform group key into Location
+            //             itemAsString: (Location location) =>
+            //                 location.province, // Display amphoe name
+            //             itemBuilder: (context, item, isSelected) {
+            //               return Column(
+            //                 children: [
+            //                   ListTile(
+            //                     title: Text(
+            //                       " ${item.province}",
+            //                       style: Styles.black18(context),
+            //                     ),
+            //                     selected: isSelected,
+            //                   ),
+            //                   Divider(
+            //                     color: Colors
+            //                         .grey[200], // Color of the divider line
+            //                     thickness: 1, // Thickness of the line
+            //                     indent: 16, // Left padding for the divider line
+            //                     endIndent:
+            //                         16, // Right padding for the divider line
+            //                   ),
+            //                 ],
+            //               );
+            //             },
+            //             onChanged: (Location? selected) {
+            //               if (selected != null) {
+            //                 setState(() {
+            //                   province = selected.province;
+            //                 });
+            //               }
+            //             }),
+            //       ),
+            //     ),
+            //     Padding(
+            //       padding: const EdgeInsets.all(4.0),
+            //       child: Container(
+            //         width: 200,
+            //         padding: EdgeInsets.all(8),
+            //         decoration: BoxDecoration(
+            //           color: Colors.white,
+            //           borderRadius: BorderRadius.circular(16),
+            //         ),
+            //         child: DropdownSearchCustomGroup<Location>(
+            //             key: ValueKey('DistrictSearch-$province'),
+            //             label: 'เลือกอำเภอ',
+            //             titleText: "เลือกอำเภอ",
+            //             fetchItems: (filter) async {
+            //               // Replace with your district fetching logic
+            //               return await _fetchDistricts(filter);
+            //             },
+            //             groupByKey: (Location location) =>
+            //                 location.amphoe, // Group by amphoe
+            //             transformGroup: (String amphoe) => Location(
+            //                   amphoe: amphoe,
+            //                   province: '',
+            //                   district: '',
+            //                   zipcode: '',
+            //                   id: '',
+            //                   amphoeCode: '',
+            //                   districtCode: '',
+            //                   provinceCode: '',
+            //                 ), // Transform group key into Location
+            //             itemAsString: (Location location) =>
+            //                 location.amphoe, // Display amphoe name
+            //             itemBuilder: (context, item, isSelected) {
+            //               return Column(
+            //                 children: [
+            //                   ListTile(
+            //                     title: Text(
+            //                       " ${item.amphoe}",
+            //                       style: Styles.black18(context),
+            //                     ),
+            //                     selected: isSelected,
+            //                   ),
+            //                   Divider(
+            //                     color: Colors
+            //                         .grey[200], // Color of the divider line
+            //                     thickness: 1, // Thickness of the line
+            //                     indent: 16, // Left padding for the divider line
+            //                     endIndent:
+            //                         16, // Right padding for the divider line
+            //                   ),
+            //                 ],
+            //               );
+            //             },
+            //             onChanged: (Location? selected) {
+            //               if (selected != null) {
+            //                 setState(() {
+            //                   amphoe = selected.amphoe;
+            //                 });
+            //               }
+            //             }),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+
+            Expanded(
+              child: LoadingSkeletonizer(
+                loading: _loadingRouteVisit,
+                child: routeVisits.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: routeState.routeVisitList.length > 0
+                            ? (routeState.routeVisitList.length / 2).ceil()
+                            : (routeVisits.length / 2)
+                                .ceil(), // Number of rows needed
+                        itemBuilder: (context, index) {
+                          final firstIndex = index * 2;
+                          final secondIndex = firstIndex + 1;
+                          return routeState.routeVisitList.length > 0
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: RouteVisitCard(
+                                        item: routeState
+                                            .routeVisitList[firstIndex],
+                                        onDetailsPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailScreen(
+                                                routeId: routeState
+                                                    .routeVisitList[firstIndex]
+                                                    .id,
+                                                route: routeState
+                                                    .routeVisitList[firstIndex]
+                                                    .day,
+                                                customerNo: routeState
+                                                    .routeVisitList[firstIndex]
+                                                    .listStore![0]
+                                                    .storeInfo
+                                                    .storeId,
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) => ShopRouteScreen(
-                                        //       day: routeState
-                                        //           .routeVisitList[secondIndex].day,
-                                        //       route: routeState
-                                        //           .routeVisitList[secondIndex].day,
-                                        //       status: routeState
-                                        //           .routeVisitList[secondIndex].day,
-                                        //       listStore: routeState
-                                        //           .routeVisitList[secondIndex]
-                                        //           .listStore,
-                                        //     ),
-                                        //   ),
-                                        // );
-                                      },
+                                          );
+                                        },
+                                      ),
                                     ),
-                                  )
-                                else
-                                  Expanded(
-                                    child:
-                                        SizedBox(), // Placeholder for spacing if no second card
-                                  ),
-                              ],
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: RouteVisitCard(
-                                    item: routeVisits[firstIndex],
-                                    onDetailsPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ShopRouteScreen(
-                                            routeId: routeVisits[firstIndex].id,
-                                            route: routeVisits[firstIndex].day,
-                                            // status: routeVisits[firstIndex].day,
-                                            // listStore:
-                                            //     routeVisits[firstIndex].listStore,
-                                          ),
+                                    if (secondIndex <
+                                        routeState.routeVisitList
+                                            .length) // Check if the second card exists
+                                      Expanded(
+                                        child: RouteVisitCard(
+                                          item: routeState
+                                              .routeVisitList[secondIndex],
+                                          onDetailsPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DetailScreen(
+                                                  routeId: routeState
+                                                      .routeVisitList[
+                                                          secondIndex]
+                                                      .id,
+                                                  route: routeState
+                                                      .routeVisitList[
+                                                          secondIndex]
+                                                      .day,
+                                                  customerNo: routeState
+                                                      .routeVisitList[
+                                                          secondIndex]
+                                                      .listStore![0]
+                                                      .storeInfo
+                                                      .storeId,
+                                                ),
+                                              ),
+                                            );
+                                            // Navigator.push(
+                                            //   context,
+                                            //   MaterialPageRoute(
+                                            //     builder: (context) => ShopRouteScreen(
+                                            //       day: routeState
+                                            //           .routeVisitList[secondIndex].day,
+                                            //       route: routeState
+                                            //           .routeVisitList[secondIndex].day,
+                                            //       status: routeState
+                                            //           .routeVisitList[secondIndex].day,
+                                            //       listStore: routeState
+                                            //           .routeVisitList[secondIndex]
+                                            //           .listStore,
+                                            //     ),
+                                            //   ),
+                                            // );
+                                          },
                                         ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                if (secondIndex <
-                                    routeVisits
-                                        .length) // Check if the second card exists
-                                  Expanded(
-                                    child: RouteVisitCard(
-                                      item: routeVisits[secondIndex],
-                                      onDetailsPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                ShopRouteScreen(
-                                              routeId:
-                                                  routeVisits[secondIndex].id,
-                                              route:
-                                                  routeVisits[secondIndex].day,
-                                              // status: routeVisits[secondIndex].day,
-                                              // listStore:
-                                              //     routeVisits[secondIndex].listStore,
+                                      )
+                                    else
+                                      Expanded(
+                                        child:
+                                            SizedBox(), // Placeholder for spacing if no second card
+                                      ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: RouteVisitCard(
+                                        item: routeVisits[firstIndex],
+                                        onDetailsPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ShopRouteScreen(
+                                                routeId:
+                                                    routeVisits[firstIndex].id,
+                                                route:
+                                                    routeVisits[firstIndex].day,
+                                                // status: routeVisits[firstIndex].day,
+                                                // listStore:
+                                                //     routeVisits[firstIndex].listStore,
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      },
+                                          );
+                                        },
+                                      ),
                                     ),
-                                  )
-                                else
-                                  Expanded(
-                                    child:
-                                        SizedBox(), // Placeholder for spacing if no second card
-                                  ),
-                              ],
-                            );
-                    },
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "ไม่มีข้อมูล",
-                        style: Styles.black18(context),
+                                    if (secondIndex <
+                                        routeVisits
+                                            .length) // Check if the second card exists
+                                      Expanded(
+                                        child: RouteVisitCard(
+                                          item: routeVisits[secondIndex],
+                                          onDetailsPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ShopRouteScreen(
+                                                  routeId:
+                                                      routeVisits[secondIndex]
+                                                          .id,
+                                                  route:
+                                                      routeVisits[secondIndex]
+                                                          .day,
+                                                  // status: routeVisits[secondIndex].day,
+                                                  // listStore:
+                                                  //     routeVisits[secondIndex].listStore,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    else
+                                      Expanded(
+                                        child:
+                                            SizedBox(), // Placeholder for spacing if no second card
+                                      ),
+                                  ],
+                                );
+                        },
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "ไม่มีข้อมูล",
+                            style: Styles.black18(context),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );

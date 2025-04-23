@@ -1,20 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:_12sale_app/core/components/input/CustomTextInput.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/store/StoreCardAll.dart';
 import 'package:_12sale_app/core/components/card/store/StoreCardNew.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
+import 'package:_12sale_app/core/components/search/DropdownSearchGroup.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
 import 'package:_12sale_app/core/page/store/DetailNewStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
+import 'package:_12sale_app/data/models/Location.dart';
 import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/search/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:_12sale_app/main.dart';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +38,8 @@ String filterRoute = 'R01';
 bool _isSelected = false;
 bool _loadingAllStore = true;
 bool _loadingNewStore = true;
+
+String province = "";
 
 class StoreScreen extends StatefulWidget {
   StoreScreen({super.key});
@@ -235,7 +241,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                 )
               ],
             ),
-            const SizedBox(height: 16), // Add spacing between buttons and list
+            // const SizedBox(height: 16), // Add spacing between buttons and list
             _isSelected
                 ? Expanded(
                     child: LoadingSkeletonizer(

@@ -38,7 +38,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
   List<CartList> cartList = [];
   List<GiveType> giveTypesList = [];
 
-  double count = 1;
+  int count = 1;
   double price = 0;
   double total = 0.00;
   double totalCart = 0.00;
@@ -2743,11 +2743,26 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                         side: BorderSide.none),
                                   ),
                                   onPressed: () {
-                                    setState(() {
-                                      count = countController.text.toDouble();
-                                      total = price * count;
-                                    });
-                                    Navigator.pop(context);
+                                    if (countController.text.toInt() > 0) {
+                                      setState(() {
+                                        count = countController.text.toInt();
+                                        total = price * count;
+                                      });
+                                      Navigator.pop(context);
+                                    } else {
+                                      toastification.show(
+                                        autoCloseDuration:
+                                            const Duration(seconds: 5),
+                                        context: context,
+                                        primaryColor: Colors.red,
+                                        type: ToastificationType.error,
+                                        style: ToastificationStyle.flatColored,
+                                        title: Text(
+                                          "กรุณาใส่จำนวนให้ถูกต้อง",
+                                          style: Styles.red18(context),
+                                        ),
+                                      );
+                                    }
                                   },
                                   child: Text(
                                     "ตกลง",

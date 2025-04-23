@@ -72,6 +72,7 @@ class _DetailScreenState extends State<DetailScreen> {
   List<Cause> causes = [];
   List<Orders> orders = [];
   bool _loading = true;
+  DateTime dateCheck = DateTime.now().add(Duration(hours: 1));
 
   final ScrollController _scrollController = ScrollController();
 
@@ -188,8 +189,24 @@ class _DetailScreenState extends State<DetailScreen> {
               data.isNotEmpty ? DetailStoreVisit.fromJson(data[0]) : null;
           status = storeDetail?.listStore[0].status ?? "0";
           statusCheck = int.tryParse(status) ?? 0;
+          String inputString = storeDetail?.listStore[0].date ?? "0";
+          print("inputString $inputString");
+          if (inputString != "0") {
+            DateTime inputDate = DateTime.parse(inputString);
+            dateCheck = inputDate.add(Duration(hours: 7));
+            // limitDate = dateCheck?.add(Duration(days: 1));
+
+            // if (DateTime.now().isBefore(dateCheck!)) {
+            //   print('✅ Valid: limitDate is still before $dateCheck.');
+            // } else {
+            //   print('❌ Invalid: limitDate passed $dateCheck.');
+            // }
+          }
         });
       }
+      print("dateCheck $dateCheck");
+      print("DateTime.now() ${DateTime.now()}");
+
       Timer(const Duration(milliseconds: 500), () {
         if (mounted) {
           setState(() {
@@ -511,23 +528,25 @@ class _DetailScreenState extends State<DetailScreen> {
                                 MenuButton(
                                   icon: Icons.add_shopping_cart_rounded,
                                   label: "ขาย",
-                                  // color: Styles.success!,
-                                  // color: Colors.grey,
-                                  color: statusCheck == 1 || statusCheck == 0
-                                      ? Styles.success!
-                                      : Colors.grey,
+                                  color:
+                                      (statusCheck == 1 || statusCheck == 0) &&
+                                              DateTime.now().isBefore(dateCheck)
+                                          ? Styles.success!
+                                          : Colors.grey,
                                   onPressed: () {
                                     if (statusCheck == 1) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              OrderINRouteScreen(
-                                            storeDetail: storeDetail,
-                                            routeId: widget.routeId,
+                                      if (DateTime.now().isBefore(dateCheck)) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                OrderINRouteScreen(
+                                              storeDetail: storeDetail,
+                                              routeId: widget.routeId,
+                                            ),
                                           ),
-                                        ),
-                                      );
+                                        );
+                                      }
                                     } else if (statusCheck == 0) {
                                       _showCheckInAndSellSheet(context);
                                     }

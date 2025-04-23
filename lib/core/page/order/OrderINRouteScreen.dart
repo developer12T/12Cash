@@ -71,7 +71,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
   bool _isGridView = false;
   int _isSelectedGridView = 1;
 
-  double count = 1;
+  int count = 1;
   double price = 0;
   double total = 0.00;
   String selectedSize = "";
@@ -130,6 +130,10 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
     _productScrollController.dispose();
     _productListScrollController.dispose();
     super.dispose();
+  }
+
+  bool isInteger(String input) {
+    return int.tryParse(input) != null;
   }
 
   Future<void> _deleteCart(CartList cart, StateSetter setModalState) async {
@@ -2318,11 +2322,51 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                         side: BorderSide.none),
                                   ),
                                   onPressed: () {
-                                    setState(() {
-                                      count = countController.text.toDouble();
-                                      total = price * count;
-                                    });
-                                    Navigator.pop(context);
+                                    if (isInteger(countController.text)) {
+                                      setState(() {
+                                        double countD =
+                                            countController.text.toDouble();
+                                        count = countD.toInt();
+                                        total = price * count;
+                                      });
+                                      Navigator.pop(context);
+                                    } else {
+                                      toastification.show(
+                                        autoCloseDuration:
+                                            const Duration(seconds: 5),
+                                        context: context,
+                                        primaryColor: Colors.red,
+                                        type: ToastificationType.error,
+                                        style: ToastificationStyle.flatColored,
+                                        title: Text(
+                                          "กรุณาใส่จำนวนให้ถูกต้อง",
+                                          style: Styles.red18(context),
+                                        ),
+                                      );
+                                    }
+                                    // if (countController.text.isNotEmpty) {
+                                    //   double countD =
+                                    //       countController.text.toDouble();
+                                    //   if (countD > 0) {
+
+                                    //   } else {
+                                    //     toastification.show(
+                                    //       autoCloseDuration:
+                                    //           const Duration(seconds: 5),
+                                    //       context: context,
+                                    //       primaryColor: Colors.red,
+                                    //       type: ToastificationType.error,
+                                    //       style:
+                                    //           ToastificationStyle.flatColored,
+                                    //       title: Text(
+                                    //         "กรุณาใส่จำนวนให้ถูกต้อง",
+                                    //         style: Styles.red18(context),
+                                    //       ),
+                                    //     );
+                                    //   }
+                                    // } else {
+                                    //   Navigator.pop(context);
+                                    // }
                                   },
                                   child: Text(
                                     "ตกลง",
