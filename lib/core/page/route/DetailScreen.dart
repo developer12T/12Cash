@@ -1133,8 +1133,9 @@ class _DetailScreenState extends State<DetailScreen> {
                                 ),
                                 DialogButton(
                                   onPressed: () async {
-                                    // context.loaderOverlay.show();
+                                    context.loaderOverlay.show();
                                     await checkInStoreAndSell(context);
+                                    context.loaderOverlay.hide();
                                   },
                                   color: Styles.successButtonColor,
                                   child: Text(

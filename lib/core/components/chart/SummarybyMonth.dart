@@ -6,17 +6,19 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class ItemSummarize extends StatefulWidget {
-  ItemSummarize({
+class SummarybyMonth extends StatefulWidget {
+  List<FlSpot> spots;
+
+  SummarybyMonth({
     super.key,
+    required this.spots,
   });
 
   @override
-  State<ItemSummarize> createState() => _ItemSummarizeState();
+  State<SummarybyMonth> createState() => _SummarybyMonthState();
 }
 
-class _ItemSummarizeState extends State<ItemSummarize> {
-  List<FlSpot> spots = [];
+class _SummarybyMonthState extends State<SummarybyMonth> {
   List<MonthlySummary> dashboard = [];
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
@@ -25,32 +27,32 @@ class _ItemSummarizeState extends State<ItemSummarize> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getDataSummary();
+    // getDataSummary();
   }
 
-  Future<void> getDataSummary() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-      var response = await apiService.request(
-        endpoint:
-            'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}',
-        method: 'GET',
-      );
-      if (response.statusCode == 200) {
-        // dashboard = data.map((item) => MonthlySummary.fromJson(item)).toList();
-        var data = response.data['data'];
-        spots = data.map<FlSpot>((item) {
-          double x = (item['month'] as num).toDouble();
-          double y = (item['summary'] as num).toDouble();
-          return FlSpot(x, y);
-        }).toList();
-      }
-      print(spots);
-    } catch (e) {
-      print("Error on getDataSummary is $e");
-    }
-  }
+  // Future<void> getDataSummary() async {
+  //   try {
+  //     ApiService apiService = ApiService();
+  //     await apiService.init();
+  //     var response = await apiService.request(
+  //       endpoint:
+  //           'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}',
+  //       method: 'GET',
+  //     );
+  //     if (response.statusCode == 200) {
+  //       // dashboard = data.map((item) => MonthlySummary.fromJson(item)).toList();
+  //       var data = response.data['data'];
+  //       // spots = data.map<FlSpot>((item) {
+  //       //   double x = (item['month'] as num).toDouble();
+  //       //   double y = (item['summary'] as num).toDouble();
+  //       //   return FlSpot(x, y);
+  //       // }).toList();
+  //     }
+  //     // print(spots);
+  //   } catch (e) {
+  //     print("Error on getDataSummary is $e");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +72,7 @@ class _ItemSummarizeState extends State<ItemSummarize> {
         //       );
         //     },),
         show: true,
-        spots: spots,
+        spots: widget.spots,
         dotData: FlDotData(show: true), // Shows dots at data points
         isCurved: true,
         preventCurveOverShooting: true,
@@ -81,9 +83,9 @@ class _ItemSummarizeState extends State<ItemSummarize> {
         // isStrokeCapRound: true,
         );
 
-    final showingTooltipOnSpots = [
-      7,
-    ]; // Valid indices for 'spots'
+    // final showingTooltipOnSpots = [
+    //   12,
+    // ]; // Valid indices for 'spots'
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

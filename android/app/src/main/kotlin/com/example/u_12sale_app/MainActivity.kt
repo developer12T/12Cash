@@ -1,4 +1,4 @@
-package com.example.u_12sale_app
+package com.onetwotrading.onetwocashapp
 
 import io.flutter.embedding.android.FlutterActivity
 

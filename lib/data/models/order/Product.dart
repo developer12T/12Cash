@@ -17,6 +17,8 @@ class Product {
   final List<Unit> listUnit;
   final DateTime createdDate;
   final DateTime updatedDate;
+  final int? totalQtyPcs;
+  final int? totalQtyCtn;
 
   Product({
     required this.id,
@@ -35,6 +37,8 @@ class Product {
     required this.listUnit,
     required this.createdDate,
     required this.updatedDate,
+    this.totalQtyPcs,
+    this.totalQtyCtn,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -62,6 +66,8 @@ class Product {
       updatedDate: json['updatedDate'] != null
           ? DateTime.parse(json['updatedDate'])
           : DateTime.now(),
+      totalQtyPcs: json['totalQtyPcs'] ?? 0,
+      totalQtyCtn: json['totalQtyCtn'] ?? 0,
     );
   }
 
@@ -84,6 +90,8 @@ class Product {
       'listUnit': listUnit.map((unit) => unit.toJson()).toList(),
       'createdDate': createdDate.toIso8601String(),
       'updatedDate': updatedDate.toIso8601String(),
+      'totalQtyPcs': totalQtyPcs,
+      'totalQtyCtn': totalQtyCtn,
     };
   }
 

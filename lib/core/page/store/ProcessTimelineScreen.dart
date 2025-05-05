@@ -361,6 +361,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             description:
                 "${"store.processtimeline_screen.toasting_similar_des".tr()} ",
           );
+          context.loaderOverlay.hide();
         } else if (response.data['message'] == 'Store added successfully') {
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),

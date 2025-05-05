@@ -448,136 +448,194 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
         child: Column(
           children: [
             SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Container(
+                    width: 250,
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: DropdownSearchCustomGroup<Location>(
+                        label:
+                            '${"store.store_address_screen.input_province.name".tr()}',
+                        titleText:
+                            "${"store.store_address_screen.input_province.name".tr()}",
+                        fetchItems: (filter) async {
+                          // Replace with your district fetching logic
+                          return await _fetchProvince(filter);
+                        },
+                        groupByKey: (Location location) =>
+                            location.province, // Group by amphoe
+                        transformGroup: (String province) => Location(
+                              amphoe: '',
+                              province: province,
+                              district: '',
+                              zipcode: '',
+                              id: '',
+                              amphoeCode: '',
+                              districtCode: '',
+                              provinceCode: '',
+                            ), // Transform group key into Location
+                        itemAsString: (Location location) =>
+                            location.province, // Display amphoe name
+                        itemBuilder: (context, item, isSelected) {
+                          return Column(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  " ${item.province}",
+                                  style: Styles.black18(context),
+                                ),
+                                selected: isSelected,
+                              ),
+                              Divider(
+                                color: Colors
+                                    .grey[200], // Color of the divider line
+                                thickness: 1, // Thickness of the line
+                                indent: 16, // Left padding for the divider line
+                                endIndent:
+                                    16, // Right padding for the divider line
+                              ),
+                            ],
+                          );
+                        },
+                        onChanged: (Location? selected) async {
+                          if (selected != null) {
+                            setState(() {
+                              province = selected.province;
+                            });
 
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.end,
-            //   children: [
-            //     Padding(
-            //       padding: const EdgeInsets.all(4.0),
-            //       child: Container(
-            //         width: 250,
-            //         padding: EdgeInsets.all(8),
-            //         decoration: BoxDecoration(
-            //           color: Colors.white,
-            //           borderRadius: BorderRadius.circular(16),
-            //         ),
-            //         child: DropdownSearchCustomGroup<Location>(
-            //             label:
-            //                 '${"store.store_address_screen.input_province.name".tr()}',
-            //             titleText:
-            //                 "${"store.store_address_screen.input_province.name".tr()}",
-            //             fetchItems: (filter) async {
-            //               // Replace with your district fetching logic
-            //               return await _fetchProvince(filter);
-            //             },
-            //             groupByKey: (Location location) =>
-            //                 location.province, // Group by amphoe
-            //             transformGroup: (String province) => Location(
-            //                   amphoe: '',
-            //                   province: province,
-            //                   district: '',
-            //                   zipcode: '',
-            //                   id: '',
-            //                   amphoeCode: '',
-            //                   districtCode: '',
-            //                   provinceCode: '',
-            //                 ), // Transform group key into Location
-            //             itemAsString: (Location location) =>
-            //                 location.province, // Display amphoe name
-            //             itemBuilder: (context, item, isSelected) {
-            //               return Column(
-            //                 children: [
-            //                   ListTile(
-            //                     title: Text(
-            //                       " ${item.province}",
-            //                       style: Styles.black18(context),
-            //                     ),
-            //                     selected: isSelected,
-            //                   ),
-            //                   Divider(
-            //                     color: Colors
-            //                         .grey[200], // Color of the divider line
-            //                     thickness: 1, // Thickness of the line
-            //                     indent: 16, // Left padding for the divider line
-            //                     endIndent:
-            //                         16, // Right padding for the divider line
-            //                   ),
-            //                 ],
-            //               );
-            //             },
-            //             onChanged: (Location? selected) {
-            //               if (selected != null) {
-            //                 setState(() {
-            //                   province = selected.province;
-            //                 });
-            //               }
-            //             }),
-            //       ),
-            //     ),
-            //     Padding(
-            //       padding: const EdgeInsets.all(4.0),
-            //       child: Container(
-            //         width: 200,
-            //         padding: EdgeInsets.all(8),
-            //         decoration: BoxDecoration(
-            //           color: Colors.white,
-            //           borderRadius: BorderRadius.circular(16),
-            //         ),
-            //         child: DropdownSearchCustomGroup<Location>(
-            //             key: ValueKey('DistrictSearch-$province'),
-            //             label: 'เลือกอำเภอ',
-            //             titleText: "เลือกอำเภอ",
-            //             fetchItems: (filter) async {
-            //               // Replace with your district fetching logic
-            //               return await _fetchDistricts(filter);
-            //             },
-            //             groupByKey: (Location location) =>
-            //                 location.amphoe, // Group by amphoe
-            //             transformGroup: (String amphoe) => Location(
-            //                   amphoe: amphoe,
-            //                   province: '',
-            //                   district: '',
-            //                   zipcode: '',
-            //                   id: '',
-            //                   amphoeCode: '',
-            //                   districtCode: '',
-            //                   provinceCode: '',
-            //                 ), // Transform group key into Location
-            //             itemAsString: (Location location) =>
-            //                 location.amphoe, // Display amphoe name
-            //             itemBuilder: (context, item, isSelected) {
-            //               return Column(
-            //                 children: [
-            //                   ListTile(
-            //                     title: Text(
-            //                       " ${item.amphoe}",
-            //                       style: Styles.black18(context),
-            //                     ),
-            //                     selected: isSelected,
-            //                   ),
-            //                   Divider(
-            //                     color: Colors
-            //                         .grey[200], // Color of the divider line
-            //                     thickness: 1, // Thickness of the line
-            //                     indent: 16, // Left padding for the divider line
-            //                     endIndent:
-            //                         16, // Right padding for the divider line
-            //                   ),
-            //                 ],
-            //               );
-            //             },
-            //             onChanged: (Location? selected) {
-            //               if (selected != null) {
-            //                 setState(() {
-            //                   amphoe = selected.amphoe;
-            //                 });
-            //               }
-            //             }),
-            //       ),
-            //     ),
-            //   ],
-            // ),
+                            try {
+                              routeState.routeVisitList.clear();
+                              ApiService apiService = ApiService();
+                              await apiService.init();
 
+                              var response = await apiService.request(
+                                endpoint:
+                                    'api/cash/route/getRoute?area=${User.area}&period=${period}&province=${selected.province}',
+                                method: 'GET',
+                              );
+
+                              if (response.statusCode == 200) {
+                                final List<dynamic> data =
+                                    response.data['data'];
+                                // print("getRoute: ${response.data['data']}");
+                                if (mounted) {
+                                  setState(() {
+                                    routeVisits = data
+                                        .map(
+                                            (item) => RouteVisit.fromJson(item))
+                                        .toList();
+                                    // _loadingRouteVisit = false;
+                                  });
+                                }
+                                routeState.updateValue(routeVisits);
+                                print("getRoute: $routeVisits");
+                              }
+                            } catch (e) {
+                              print("Error in Filer Province $e");
+                            }
+                          }
+                        }),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Container(
+                    width: 200,
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: DropdownSearchCustomGroup<Location>(
+                        key: ValueKey('DistrictSearch-$province'),
+                        label: 'เลือกอำเภอ',
+                        titleText: "เลือกอำเภอ",
+                        fetchItems: (filter) async {
+                          // Replace with your district fetching logic
+                          return await _fetchDistricts(filter);
+                        },
+                        groupByKey: (Location location) =>
+                            location.amphoe, // Group by amphoe
+                        transformGroup: (String amphoe) => Location(
+                              amphoe: amphoe,
+                              province: '',
+                              district: '',
+                              zipcode: '',
+                              id: '',
+                              amphoeCode: '',
+                              districtCode: '',
+                              provinceCode: '',
+                            ), // Transform group key into Location
+                        itemAsString: (Location location) =>
+                            location.amphoe, // Display amphoe name
+                        itemBuilder: (context, item, isSelected) {
+                          return Column(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  " ${item.amphoe}",
+                                  style: Styles.black18(context),
+                                ),
+                                selected: isSelected,
+                              ),
+                              Divider(
+                                color: Colors
+                                    .grey[200], // Color of the divider line
+                                thickness: 1, // Thickness of the line
+                                indent: 16, // Left padding for the divider line
+                                endIndent:
+                                    16, // Right padding for the divider line
+                              ),
+                            ],
+                          );
+                        },
+                        onChanged: (Location? selected) async {
+                          if (selected != null) {
+                            setState(() {
+                              amphoe = selected.amphoe;
+                            });
+                            try {
+                              routeState.routeVisitList.clear();
+                              ApiService apiService = ApiService();
+                              await apiService.init();
+
+                              var response = await apiService.request(
+                                endpoint:
+                                    'api/cash/route/getRoute?area=${User.area}&period=${period}&province=${province}&district=${selected.amphoe}',
+                                method: 'GET',
+                              );
+
+                              if (response.statusCode == 200) {
+                                final List<dynamic> data =
+                                    response.data['data'];
+                                // print("getRoute: ${response.data['data']}");
+                                if (mounted) {
+                                  setState(() {
+                                    routeVisits = data
+                                        .map(
+                                            (item) => RouteVisit.fromJson(item))
+                                        .toList();
+                                  });
+                                }
+                                routeState.updateValue(routeVisits);
+                                print("getRoute: $routeVisits");
+                              }
+                            } catch (e) {
+                              print("Error in Filer Province $e");
+                            }
+                          }
+                        }),
+                  ),
+                ),
+              ],
+            ),
             Expanded(
               child: LoadingSkeletonizer(
                 loading: _loadingRouteVisit,
@@ -651,22 +709,6 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
                                                 ),
                                               ),
                                             );
-                                            // Navigator.push(
-                                            //   context,
-                                            //   MaterialPageRoute(
-                                            //     builder: (context) => ShopRouteScreen(
-                                            //       day: routeState
-                                            //           .routeVisitList[secondIndex].day,
-                                            //       route: routeState
-                                            //           .routeVisitList[secondIndex].day,
-                                            //       status: routeState
-                                            //           .routeVisitList[secondIndex].day,
-                                            //       listStore: routeState
-                                            //           .routeVisitList[secondIndex]
-                                            //           .listStore,
-                                            //     ),
-                                            //   ),
-                                            // );
                                           },
                                         ),
                                       )
@@ -998,12 +1040,6 @@ class _RouteHeaderState extends State<RouteHeader> {
                                   routeState.updateValue(routeVisits);
                                   print("getRoute: $routeVisits");
                                 }
-                                setState(
-                                  () {
-                                    _storeFavoriteLocal =
-                                        routeState.storesFavoriteList;
-                                  },
-                                );
                               }
                             },
                           ),
@@ -1035,15 +1071,7 @@ class _RouteHeaderState extends State<RouteHeader> {
                                         .toList();
                                   });
                                 }
-                                if (changeSearch == '') {
-                                  setState(() {
-                                    changeSearch = '1';
-                                  });
-                                } else {
-                                  setState(() {
-                                    changeSearch = '';
-                                  });
-                                }
+
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(

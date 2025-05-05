@@ -8,6 +8,7 @@ import 'package:_12sale_app/core/components/card/WeightCude.dart';
 import 'package:_12sale_app/core/components/chart/BarChart.dart';
 import 'package:_12sale_app/core/components/chart/ItemSummarize.dart';
 import 'package:_12sale_app/core/components/chart/LineChart.dart';
+import 'package:_12sale_app/core/components/chart/SummarybyMonth.dart';
 import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/giveaways/GiveAwaysHistoryScreen.dart';
@@ -23,6 +24,7 @@ import 'package:_12sale_app/core/page/withdraw/WithDrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Shipping.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -54,7 +56,39 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   Timer? _locationTimer;
   late Map<String, String> languages = {};
   String? selectedLanguageCode;
+
   final CarouselSliderController _controller = CarouselSliderController();
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+  List<FlSpot> spots = [];
+  bool isLoading = true;
+
+  Future<void> getDataSummary() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        // dashboard = data.map((item) => MonthlySummary.fromJson(item)).toList();
+        var data = response.data['data'];
+        spots = data.map<FlSpot>((item) {
+          double x = (item['month'] as num).toDouble();
+          double y = (item['summary'] as num).toDouble();
+          return FlSpot(x, y);
+        }).toList();
+        setState(() {
+          isLoading = false;
+        });
+      }
+      // print(spots);
+    } catch (e) {
+      print("Error on getDataSummary is $e");
+    }
+  }
 
   void onPageChange(int index, CarouselPageChangedReason changeReason) {
     setState(() {
@@ -65,6 +99,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   @override
   void initState() {
     super.initState();
+    getDataSummary();
     LocationService().initialize();
     _loadData();
   }
@@ -236,7 +271,14 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         child: Column(
           children: [
             // SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
-            SizedBox(height: 335, width: screenWidth, child: ItemSummarize()),
+            isLoading
+                ? CircularProgressIndicator()
+                : SizedBox(
+                    height: 335,
+                    width: screenWidth,
+                    child: SummarybyMonth(
+                      spots: spots,
+                    )),
             // SizedBox(
             //   height: 50,
             //   width: screenWidth,
