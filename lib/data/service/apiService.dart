@@ -41,7 +41,11 @@ class ApiService {
 
       Options options = Options(
         method: method,
-        headers: headers ?? {'Content-Type': 'application/json'},
+        headers: headers ??
+            {
+              'Content-Type': 'application/json',
+              'x-channel': 'cash',
+            },
       );
 
       Response response;
