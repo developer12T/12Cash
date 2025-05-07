@@ -462,6 +462,13 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                             height: 10,
                           ),
                           BoxShadowCustom(
+                              child: Column(
+                            children: [],
+                          )),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          BoxShadowCustom(
                             child: Column(
                               children: [
                                 Padding(

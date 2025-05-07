@@ -65,7 +65,6 @@ class _DetailScreenState extends State<DetailScreen> {
   double completionPercentage = 220;
   final LocationService locationService = LocationService();
   TextEditingController noteController = TextEditingController();
-  TextEditingController noteSellController = TextEditingController();
   late DetailStoreVisit? detailStoreVisit;
   String status = "0";
   int statusCheck = 0;
@@ -93,7 +92,6 @@ class _DetailScreenState extends State<DetailScreen> {
   void dispose() {
     _scrollController.dispose();
     noteController.dispose();
-    noteSellController.dispose();
     super.dispose();
   }
 
@@ -348,69 +346,54 @@ class _DetailScreenState extends State<DetailScreen> {
       Dio dio = Dio();
       MultipartFile? imageFile;
       imageFile = await MultipartFile.fromFile(checkinSellImagePath!);
-      if (noteSellController.text.isEmpty) {
-        Navigator.of(context).pop();
-        toastification.show(
-          autoCloseDuration: const Duration(seconds: 5),
-          context: context,
-          primaryColor: Colors.red,
-          type: ToastificationType.error,
-          style: ToastificationStyle.flatColored,
-          title: Text(
-            "กรุณาเลือกพิมพ์เหตุผลที่เช็คอิน",
-            style: Styles.red18(context),
+      if (checkinSellImagePath != null) {
+        var formData = FormData.fromMap(
+          {
+            'routeId': storeDetail?.id,
+            'storeId': widget.customerNo,
+            'note': "ขายสินค้า",
+            'checkInImage': imageFile,
+            "latitude": latitude,
+            "longtitude": longitude
+          },
+        );
+        var response = await dio.post(
+          '${ApiService.apiHost}/api/cash/route/checkInVisit',
+          // 'http://192.168.44.57:8006/api/cash/route/checkIn',
+          data: formData,
+          options: Options(
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
           ),
         );
-      } else {
-        if (checkinSellImagePath != null) {
-          var formData = FormData.fromMap(
-            {
-              'routeId': storeDetail?.id,
-              'storeId': widget.customerNo,
-              'note': noteSellController.text,
-              'checkInImage': imageFile,
-              "latitude": latitude,
-              "longtitude": longitude
-            },
-          );
-          var response = await dio.post(
-            '${ApiService.apiHost}/api/cash/route/checkInVisit',
-            // 'http://192.168.44.57:8006/api/cash/route/checkIn',
-            data: formData,
-            options: Options(
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          print("Response API ${response.data}");
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.green,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "store.processtimeline_screen.toasting_success".tr(),
+              style: Styles.black18(context),
             ),
           );
-          if (response.statusCode == 201 || response.statusCode == 200) {
-            print("Response API ${response.data}");
-            toastification.show(
-              autoCloseDuration: const Duration(seconds: 5),
-              context: context,
-              primaryColor: Colors.green,
-              type: ToastificationType.success,
-              style: ToastificationStyle.flatColored,
-              title: Text(
-                "store.processtimeline_screen.toasting_success".tr(),
-                style: Styles.black18(context),
+          setState(() {
+            statusCheck = 2;
+            storeDetail?.listStore[0].status = '2';
+          });
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderINRouteScreen(
+                storeDetail: storeDetail,
+                routeId: widget.routeId,
               ),
-            );
-            setState(() {
-              statusCheck = 2;
-              storeDetail?.listStore[0].status = '2';
-            });
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => OrderINRouteScreen(
-                  storeDetail: storeDetail,
-                  routeId: widget.routeId,
-                ),
-              ),
-              (route) => route.isFirst,
-            );
-          }
+            ),
+            (route) => route.isFirst,
+          );
         }
       }
     } on ApiException catch (e) {
@@ -1050,36 +1033,6 @@ class _DetailScreenState extends State<DetailScreen> {
                     '${widget.customerNo}',
                     style: Styles.black24(context),
                   ),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Container(
-                            child: TextField(
-                              autofocus: true,
-                              style: Styles.black18(context),
-                              controller: noteSellController,
-                              maxLines: 1,
-                              keyboardType: TextInputType.multiline,
-                              decoration: InputDecoration(
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(
-                                    color: Colors.grey[300]!,
-                                    width: 1,
-                                  ),
-                                ),
-                                contentPadding: EdgeInsets.all(16),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   CameraExpand(
                     icon: Icons.photo_camera,
                     imagePath: checkinSellImagePath != ""
@@ -1097,68 +1050,54 @@ class _DetailScreenState extends State<DetailScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (checkinSellImagePath != null) {
-                          if (noteSellController.text.isNotEmpty) {
-                            Alert(
-                              context: context,
-                              title: "store.processtimeline_screen.alert.title"
-                                  .tr(),
-                              style: AlertStyle(
-                                animationType: AnimationType.grow,
-                                isCloseButton: true,
-                                isOverlayTapDismiss: false,
-                                descStyle: Styles.black18(context),
-                                descTextAlign: TextAlign.start,
-                                animationDuration:
-                                    const Duration(milliseconds: 400),
-                                alertBorder: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(22.0),
-                                  side: const BorderSide(
-                                    color: Colors.grey,
-                                  ),
+                          Alert(
+                            context: context,
+                            title:
+                                "store.processtimeline_screen.alert.title".tr(),
+                            style: AlertStyle(
+                              animationType: AnimationType.grow,
+                              isCloseButton: true,
+                              isOverlayTapDismiss: false,
+                              descStyle: Styles.black18(context),
+                              descTextAlign: TextAlign.start,
+                              animationDuration:
+                                  const Duration(milliseconds: 400),
+                              alertBorder: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(22.0),
+                                side: const BorderSide(
+                                  color: Colors.grey,
                                 ),
-                                titleStyle: Styles.headerBlack32(context),
-                                alertAlignment: Alignment.center,
                               ),
-                              desc:
-                                  "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
-                              buttons: [
-                                DialogButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  color: Styles.failTextColor,
-                                  child: Text(
-                                    "store.processtimeline_screen.alert.cancel"
-                                        .tr(),
-                                    style: Styles.white18(context),
-                                  ),
+                              titleStyle: Styles.headerBlack32(context),
+                              alertAlignment: Alignment.center,
+                            ),
+                            desc:
+                                "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
+                            buttons: [
+                              DialogButton(
+                                onPressed: () => Navigator.pop(context),
+                                color: Styles.failTextColor,
+                                child: Text(
+                                  "store.processtimeline_screen.alert.cancel"
+                                      .tr(),
+                                  style: Styles.white18(context),
                                 ),
-                                DialogButton(
-                                  onPressed: () async {
-                                    context.loaderOverlay.show();
-                                    await checkInStoreAndSell(context);
-                                    context.loaderOverlay.hide();
-                                  },
-                                  color: Styles.successButtonColor,
-                                  child: Text(
-                                    "store.processtimeline_screen.alert.submit"
-                                        .tr(),
-                                    style: Styles.white18(context),
-                                  ),
-                                )
-                              ],
-                            ).show();
-                          } else {
-                            toastification.show(
-                              autoCloseDuration: const Duration(seconds: 5),
-                              context: context,
-                              primaryColor: Colors.red,
-                              type: ToastificationType.error,
-                              style: ToastificationStyle.flatColored,
-                              title: Text(
-                                "กรุณาเลือกเหตุผลที่เช็คอิน",
-                                style: Styles.red18(context),
                               ),
-                            );
-                          }
+                              DialogButton(
+                                onPressed: () async {
+                                  context.loaderOverlay.show();
+                                  await checkInStoreAndSell(context);
+                                  context.loaderOverlay.hide();
+                                },
+                                color: Styles.successButtonColor,
+                                child: Text(
+                                  "store.processtimeline_screen.alert.submit"
+                                      .tr(),
+                                  style: Styles.white18(context),
+                                ),
+                              )
+                            ],
+                          ).show();
                         } else {
                           toastification.show(
                             autoCloseDuration: const Duration(seconds: 5),

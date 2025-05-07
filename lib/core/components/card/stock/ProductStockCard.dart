@@ -90,9 +90,42 @@ class _ProductStockCardState extends State<ProductStockCard> {
                               ),
                               Row(
                                 children: [
-                                  Text(
-                                    '${widget.product.totalQtyPcs} ชิ้น | ${widget.product.totalQtyCtn} หีบ',
-                                    style: Styles.grey18(context),
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children:
+                                            widget.product.listUnit.map((data) {
+                                          return Container(
+                                            margin: EdgeInsets.all(8),
+                                            child: ElevatedButton(
+                                              onPressed: () async {},
+                                              style: ElevatedButton.styleFrom(
+                                                padding:
+                                                    const EdgeInsets.all(4),
+                                                backgroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  side: BorderSide(
+                                                    color: Styles.primaryColor,
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                      '${data.qty.toString()} ${data.name}',
+                                                      style: Styles.pirmary18(
+                                                          context)),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(), // ✅ Ensure .toList() is here
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),

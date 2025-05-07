@@ -561,6 +561,7 @@ class _AuthCheckState extends State<AuthCheck> {
           User.salePayer = sharedPreferences.getString('salePayer')!;
           User.tel = sharedPreferences.getString('tel')!;
           User.area = sharedPreferences.getString('area')!;
+          User.saleCode = sharedPreferences.getString('saleCode')!;
           User.zone = sharedPreferences.getString('zone')!;
           User.warehouse = sharedPreferences.getString('warehouse')!;
           User.role = sharedPreferences.getString('role')!;

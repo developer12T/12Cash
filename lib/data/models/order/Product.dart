@@ -117,12 +117,14 @@ class Unit {
   final String unit;
   final String factor;
   final String price;
+  final int? qty;
 
   Unit({
     required this.name,
     required this.unit,
     required this.factor,
     required this.price,
+    this.qty,
   });
 
   // ✅ Convert JSON to Dart Object
@@ -132,6 +134,7 @@ class Unit {
       name: json['name'] ?? '',
       factor: json['factor'] ?? '',
       price: json['price'].toString(),
+      qty: json['qty'] ?? 0,
     );
   }
 
@@ -142,6 +145,7 @@ class Unit {
       'name': name,
       'factor': factor,
       'price': price,
+      'qty': qty,
     };
   }
 }

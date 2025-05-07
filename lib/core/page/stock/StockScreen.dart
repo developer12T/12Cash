@@ -142,7 +142,7 @@ class _StockScreenState extends State<StockScreen> {
   void initState() {
     super.initState();
     _getFliter();
-    // _getProductStock();
+    _getProductStock();
   }
 
   String formatFixedWidthRow2(
@@ -152,7 +152,7 @@ class _StockScreenState extends State<StockScreen> {
     List<Map<String, dynamic>> listUnit,
   ) {
     const int numWidth = 3;
-    const int nameWidth = 40;
+    const int nameWidth = 30;
     const int itemCodeWidth = 12;
 
     List<String> wrapText(String text, int width) {
@@ -171,9 +171,7 @@ class _StockScreenState extends State<StockScreen> {
 
     // Format unit summary
     String formatUnitSummary(List<Map<String, dynamic>> listUnit) {
-      return listUnit
-          .map((unit) => "${unit['qty']} ${unit['unitText']}")
-          .join('/');
+      return listUnit.map((unit) => "${unit['qty']} ${unit['name']}").join('/');
     }
 
     List<String> itemNameLines = wrapText(itemName, nameWidth);
@@ -197,76 +195,13 @@ class _StockScreenState extends State<StockScreen> {
       rowBuffer.write(itemNameLines[i]);
 
       if (i == 0) {
-        rowBuffer.write('$unitSummary\n');
+        rowBuffer.write('    $unitSummary\n');
       } else {
         rowBuffer.write('\n');
       }
     }
-
-    // Add unit summary on new line
-
-    // rowBuffer
-    //     .write(''.padRight(numWidth + itemCodeWidth)); // indent under item name
-    // rowBuffer.write('=> $unitSummary\n');
-
     return rowBuffer.toString();
   }
-
-  // String formatFixedWidthRow2(String num, String itemName, String id,
-  //     String qty, String qtyCTN, List<Map<String, dynamic>> listUnit) {
-  //   const int numWidth = 3;
-  //   const int nameWidth = 25;
-  //   const int itemCodeWidth = 25;
-  //   const int qtyWidth = 12;
-
-  //   // const int qtyWidth = 4;
-  //   // const int qtyCTNWidth = 3;
-
-  //   List<String> wrapText(String text, int width) {
-  //     List<String> lines = [];
-  //     for (int i = 0; i < text.length; i += width) {
-  //       lines.add(text.substring(
-  //           i, i + width > text.length ? text.length : i + width));
-  //     }
-  //     return lines;
-  //   }
-
-  //   List<String> itemNameLines = wrapText(itemName, nameWidth);
-
-  //   // Ensure all wrapped lines are properly padded
-  //   itemNameLines = itemNameLines.map((line) {
-  //     return line.padRight(nameWidth + _getNoOfUpperLowerChars(line));
-  //   }).toList();
-
-  //   String formattedNum = num.padRight(numWidth);
-  //   String formatteditemCode = id.padRight(itemCodeWidth);
-  //   String formattedQty = qty.padLeft(qtyWidth);
-  //   // String formattedQtyCTN = qtyCTN.padLeft(qtyCTNWidth);
-
-  //   StringBuffer rowBuffer = StringBuffer();
-  //   for (int i = 0; i < itemNameLines.length; i++) {
-  //     if (i == 0) {
-  //       rowBuffer.write(formattedNum);
-  //       rowBuffer.write(formatteditemCode);
-  //     }
-  //     if (i > 0) {
-  //       rowBuffer.write(''.padRight(numWidth));
-  //     }
-
-  //     rowBuffer.write(itemNameLines[i]);
-
-  //     if (i == 0) {
-  //       // First line includes all columns
-  //       rowBuffer.write('    $formattedQty   $formattedQtyCTN \n');
-  //     } else {
-  //       // Subsequent lines only contain the wrapped item name
-
-  //       // rowBuffer.write('\n');
-  //     }
-  //   }
-
-  //   return rowBuffer.toString();
-  // }
 
   Future<void> printBill(String text,
       {TextAlign align = TextAlign.left,
@@ -305,7 +240,7 @@ class _StockScreenState extends State<StockScreen> {
   }
 
   Future<void> printBodyBill(Map<String, dynamic> data) async {
-    await printBill("\nรายการสินค้า${' ' * (42)}จำนวน");
+    await printBill("\nรายการสินค้า${' ' * (36)}จำนวน");
     String items = await data['items'].asMap().entries.map((entry) {
       int index = entry.key;
       var item = entry.value;
@@ -377,12 +312,21 @@ class _StockScreenState extends State<StockScreen> {
             receiptData["items"] = productList
                 .map((item) => {
                       "name": item.name,
-                      "id": item.name,
+                      "id": item.id,
                       "qty": item.totalQtyPcs.toString(),
                       "qtyCTN": item.totalQtyCtn.toString(),
+                      "listUnit": item.listUnit
+                          .map((unit) => {
+                                "name": unit.name,
+                                "unit": unit.unit,
+                                "qty": unit
+                                    .qty, // or unit.price, depending on what qty should represent
+                              })
+                          .toList(),
                     })
                 .toList();
           });
+          // print("receiptData: ${receiptData["items"]}");
 
           context.loaderOverlay.hide();
         }
@@ -712,13 +656,16 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    backgroundColor: Styles.primaryColor,
+                    backgroundColor:
+                        _loadingProduct ? Styles.grey : Styles.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   onPressed: () async {
-                    await printTest();
+                    if (!_loadingProduct) {
+                      await printTest();
+                    }
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),

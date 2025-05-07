@@ -93,6 +93,9 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
   TextEditingController countController = TextEditingController();
   TextEditingController searchController = TextEditingController();
 
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+
   @override
   void initState() {
     super.initState();
@@ -175,13 +178,15 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-          endpoint: 'api/cash/stock/get',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "unit": "${selectedUnit}",
-            "productId": "${product.id}"
-          });
+        endpoint: 'api/cash/stock/get',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "period": "${period}",
+          "unit": "${selectedUnit}",
+          "id": "${product.id}",
+        },
+      );
 
       if (response.statusCode == 200) {
         print(response.data['data']);
