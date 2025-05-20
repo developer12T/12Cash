@@ -107,6 +107,7 @@ class _DetailSimilarStoreState extends State<DetailSimilarStore> {
         options: Options(
           headers: {
             "Content-Type": "application/json",
+            'x-channel': 'cash',
           },
         ),
       );

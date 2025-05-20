@@ -184,7 +184,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
           "area": "${User.area}",
           "period": "${period}",
           "unit": "${selectedUnit}",
-          "id": "${product.id}",
+          "productId": "${product.id}",
         },
       );
 
@@ -202,6 +202,13 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
         });
       }
     } catch (e) {
+      print({
+        "area": "${User.area}",
+        "period": "${period}",
+        "unit": "${selectedUnit}",
+        "id": "${product.id}",
+      });
+
       print("Error in _getQty $e");
     }
   }
@@ -366,6 +373,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
           method: 'POST',
           body: {
             "area": "${User.area}",
+            "period": "${period}",
             "unit": "${selectedUnit}",
             "productId": "${product.id}",
             "qty": count,

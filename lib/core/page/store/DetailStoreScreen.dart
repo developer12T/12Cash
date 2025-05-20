@@ -104,6 +104,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
         options: Options(
           headers: {
             "Content-Type": "application/json",
+            'x-channel': 'cash',
           },
         ),
       );

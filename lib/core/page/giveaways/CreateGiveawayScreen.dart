@@ -203,6 +203,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
+            'x-channel': 'cash',
           },
         ),
       );

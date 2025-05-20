@@ -144,7 +144,7 @@ class _DetailScreenState extends State<DetailScreen> {
       // Group districts by amphoe
       return causes;
     } catch (e) {
-      print("Error occurred: $e");
+      print("Error _getOrder occurred: $e");
       return [];
     }
   }
@@ -236,7 +236,7 @@ class _DetailScreenState extends State<DetailScreen> {
           longitude = "Error fetching longitude";
         });
       }
-      print("Error: $e");
+      print("Error fetchLocation: $e");
     }
   }
 
@@ -288,19 +288,10 @@ class _DetailScreenState extends State<DetailScreen> {
             options: Options(
               headers: {
                 "Content-Type": "multipart/form-data",
+                'x-channel': 'cash',
               },
             ),
           );
-          // var response = await dio.post(
-          //   // '${ApiService.apiHost}/api/cash/route/checkIn',
-          //   'http://147.50.183.98:8000/api/cash/route/checkIn',
-          //   data: formData,
-          //   options: Options(
-          //     headers: {
-          //       "Content-Type": "multipart/form-data",
-          //     },
-          //   ),
-          // );
           if (response.statusCode == 201 || response.statusCode == 200) {
             print("Response API ${response.data}");
             toastification.show(
@@ -332,11 +323,11 @@ class _DetailScreenState extends State<DetailScreen> {
         }
       }
     } on ApiException catch (e) {
-      print('Error: ${e.message}');
+      print('Error in checkInStore: ${e.message}');
       CustomAlertDialog.showCommonAlert(context, "เกิดข้อผิดพลาด",
           "${e.message} Status Code: ${e.statusCode}");
     } catch (e) {
-      print('Error: $e');
+      print('Error checkInStore: $e');
     }
   }
 
@@ -364,6 +355,7 @@ class _DetailScreenState extends State<DetailScreen> {
           options: Options(
             headers: {
               "Content-Type": "multipart/form-data",
+              'x-channel': 'cash',
             },
           ),
         );
@@ -397,11 +389,11 @@ class _DetailScreenState extends State<DetailScreen> {
         }
       }
     } on ApiException catch (e) {
-      print('Error: ${e.message}');
+      print('Error in checkInStoreAndSell: ${e.message}');
       CustomAlertDialog.showCommonAlert(context, "เกิดข้อผิดพลาด",
           "${e.message} Status Code: ${e.statusCode}");
     } catch (e) {
-      print('Error: $e');
+      print('Error checkInStoreAndSell: $e');
     }
   }
 

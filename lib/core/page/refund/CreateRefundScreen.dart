@@ -12,6 +12,7 @@ import 'package:_12sale_app/core/page/refund/RefundDetailScreen.dart';
 import 'package:_12sale_app/core/page/route/OrderDetailScreen.dart';
 import 'package:_12sale_app/data/models/order/Promotion.dart';
 import 'package:_12sale_app/data/models/refund/RefundCart.dart';
+import 'package:_12sale_app/data/models/stock/StockMovement.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
@@ -202,6 +203,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
+            'x-channel': 'cash',
           },
         ),
       );

@@ -327,12 +327,12 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       // client.findProxy = HttpClient.findProxyFromEnvironment;
 
       var response = await dio.post(
-        'https://apps.onetwotrading.co.th/api/cash/store/addStore',
-        // '/api/cash/store/addStore',
+        '${ApiService.apiHost}/api/cash/store/addStore',
         data: formData,
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
+            'x-channel': 'cash',
           },
         ),
       );

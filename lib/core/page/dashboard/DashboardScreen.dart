@@ -5,6 +5,7 @@ import 'package:_12sale_app/core/components/camera/CameraPreviewScreen.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
 import 'package:_12sale_app/core/components/card/MenuDashboard.dart';
 import 'package:_12sale_app/core/components/card/WeightCude.dart';
+import 'package:_12sale_app/core/components/card/dashboard/BudgetCard.dart';
 import 'package:_12sale_app/core/components/chart/BarChart.dart';
 import 'package:_12sale_app/core/components/chart/ItemSummarize.dart';
 import 'package:_12sale_app/core/components/chart/LineChart.dart';
@@ -270,6 +271,12 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         // width: screenWidth / 1.5,
         child: Column(
           children: [
+            BudgetCard(
+              title: 'Total Sales',
+              value: '\$12,450',
+              icon: Icons.attach_money,
+              color: Colors.green,
+            ),
             // SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
             isLoading
                 ? CircularProgressIndicator()
@@ -278,43 +285,8 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                     width: screenWidth,
                     child: SummarybyMonth(
                       spots: spots,
-                    )),
-            // SizedBox(
-            //   height: 50,
-            //   width: screenWidth,
-            //   child: CalendarPicker(
-            //     label: 'dashboard.menu.calendar'.tr(),
-            //     firstDate: DateTime(2025),
-            //     onDateSelected: (p0) {
-            //       print(p0);
-            //     },
-            //     lastDate: DateTime.now(),
-            //     initialDate: DateTime(2025, 1, 14),
-            //   ),
-            // ),
-            // CustomPaint(
-            //   size: Size(200, 200),
-            //   painter: CircularChartPainter(),
-            //   child: Center(
-            //     child: Column(
-            //       mainAxisSize: MainAxisSize.min,
-            //       children: [
-            //         Text(
-            //           "Share Holder",
-            //           style: Styles.black24(context),
-            //         ),
-            //         Text(
-            //           "50%",
-            //           style: Styles.black32(context),
-            //         ),
-            //         Text(
-            //           "Promoter",
-            //           style: Styles.black18(context),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+                    ),
+                  ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: menuList.asMap().entries.map((entry) {

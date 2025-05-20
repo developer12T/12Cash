@@ -25,7 +25,7 @@ class RefundCard extends StatelessWidget {
     return GestureDetector(
       onTap: onDetailsPressed,
       child: Container(
-        height: screenWidth / 4.5,
+        height: screenWidth / 4,
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,

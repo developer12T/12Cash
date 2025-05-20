@@ -8,7 +8,6 @@ import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard
 import 'package:_12sale_app/core/components/datepicker/DatePickerHelper.dart';
 import 'package:_12sale_app/core/components/filter/BadgeFilterRefund.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/page/refund/CreateRefundScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Store.dart';
@@ -93,6 +92,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
 
   int stockQty = 0;
   String lotStock = "";
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   @override
   void initState() {
@@ -131,13 +132,15 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-          endpoint: 'api/cash/stock/get',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "unit": "${selectedUnit}",
-            "productId": "${product.id}"
-          });
+        endpoint: 'api/cash/stock/get',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "period": "${period}",
+          "unit": "${selectedUnit}",
+          "productId": "${product.id}"
+        },
+      );
 
       if (response.statusCode == 200) {
         print(response.data['data']);
@@ -605,6 +608,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           method: 'POST',
           body: {
             "area": "${User.area}",
+            "period": "${period}",
             "unit": "${selectedUnit}",
             "productId": "${product.id}",
             "qty": count,
@@ -2307,6 +2311,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                     isStoreId != "") {
                                                   if ((stockQty > 0) &&
                                                       (stockQty >= count)) {
+                                                    context.loaderOverlay
+                                                        .show();
                                                     await _addCart(product);
                                                     await _getCart();
                                                     await _updateStock(product,

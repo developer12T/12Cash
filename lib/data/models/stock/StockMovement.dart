@@ -1,11 +1,11 @@
 class ProductMoveMent {
-  final String id;
+  final String productId;
   final String lot;
   final String unit;
   final int qty;
 
   ProductMoveMent({
-    required this.id,
+    required this.productId,
     required this.lot,
     required this.unit,
     required this.qty,
@@ -13,7 +13,7 @@ class ProductMoveMent {
 
   factory ProductMoveMent.fromJson(Map<String, dynamic> json) {
     return ProductMoveMent(
-      id: json['id'],
+      productId: json['productId'],
       lot: json['lot'],
       unit: json['unit'],
       qty: json['qty'],
@@ -21,7 +21,7 @@ class ProductMoveMent {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
+        'productId': productId,
         'lot': lot,
         'unit': unit,
         'qty': qty,

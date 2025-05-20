@@ -288,6 +288,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
+            'x-channel': 'cash',
           },
         ),
       );
@@ -430,11 +431,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   Future<void> _addStockMovement(String orderId) async {
     try {
       for (var cart in cartList) {
-        productMoveMent.add(ProductMoveMent(
-            id: cart.id,
-            lot: cart.lot,
-            qty: cart.qty.toInt(),
-            unit: cart.unit));
+        productMoveMent.add(
+          ProductMoveMent(
+              productId: cart.id,
+              lot: cart.lot,
+              qty: cart.qty.toInt(),
+              unit: cart.unit),
+        );
       }
       ApiService apiService = ApiService();
       await apiService.init();

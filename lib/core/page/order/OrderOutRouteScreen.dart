@@ -303,13 +303,16 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     try {
       ApiService apiService = ApiService();
       await apiService.init();
-      var response = await apiService
-          .request(endpoint: 'api/cash/stock/get', method: 'POST', body: {
-        "area": "${User.area}",
-        "period": "${period}",
-        "unit": "${selectedUnit}",
-        "id": "${product.id}"
-      });
+      var response = await apiService.request(
+        endpoint: 'api/cash/stock/get',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "period": "${period}",
+          "unit": "${selectedUnit}",
+          "productId": "${product.id}"
+        },
+      );
 
       if (response.statusCode == 200) {
         print(response.data['data']);
