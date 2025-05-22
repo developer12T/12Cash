@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class InvoiceCard extends StatelessWidget {
   final Orders item;
@@ -20,12 +23,16 @@ class InvoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    // DateTime formattedDate =
-    //     DateTime(item.createAt.year, item.createAt.month, item.createAt.day);
+    tz.initializeTimeZones();
+    final bangkok = tz.getLocation('Asia/Bangkok');
+    final utcTime = item.createAt;
+    final bangkokTime = tz.TZDateTime.from(utcTime, bangkok);
+    final formatted = DateFormat('dd/MM/yyyy | HH:mm:ss').format(bangkokTime);
+
     return GestureDetector(
       onTap: onDetailsPressed,
       child: Container(
-        height: screenWidth / 4.5,
+        height: screenWidth / 4,
         margin: EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -78,7 +85,7 @@ class InvoiceCard extends StatelessWidget {
                                 Row(
                                   children: [
                                     Text(
-                                      "วันที่เวลา: ${DateFormat('dd/MM/yyyy | HH:mm:ss').format(DateTime.now())}",
+                                      "วันที่เวลา: ${formatted}",
                                       style: Styles.black16(context),
                                     ),
                                   ],
