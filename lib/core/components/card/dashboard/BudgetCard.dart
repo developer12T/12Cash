@@ -1,18 +1,20 @@
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:dartx/dartx.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-const List<String> list = <String>['Day', 'Month', 'Year', 'Custom'];
+const List<String> list = <String>['day', 'month', 'year'];
 
 class BudgetCard extends StatefulWidget {
   final String title;
-  final String value;
   final IconData icon;
   final Color color;
 
   const BudgetCard({
     Key? key,
     required this.title,
-    required this.value,
     required this.icon,
     required this.color,
   }) : super(key: key);
@@ -22,7 +24,47 @@ class BudgetCard extends StatefulWidget {
 }
 
 class _BudgetCardState extends State<BudgetCard> {
-  String dropdownValue = list.first;
+  String dropdownValue = list.second;
+
+  double totalSale = 0;
+  String date =
+      "${DateFormat('dd').format(DateTime.now())}${DateFormat('MM').format(DateTime.now())}${DateTime.now().year}";
+
+  Future<void> getDataSummaryChoince(String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      print({
+        "area": "${User.area}",
+        "date": "$date",
+        "type": "$type",
+      });
+      var response = await apiService.request(
+        endpoint: 'api/cash/order/getSummarybyChoice',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "date": "$date",
+          "type": "$type",
+        },
+      );
+      if (response.statusCode == 200) {
+        print(response.data);
+        setState(() {
+          totalSale = response.data['total'].toDouble();
+        });
+      }
+    } catch (e) {
+      print("Error on getDataSummaryChoince is $e");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getDataSummaryChoince('month');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +88,7 @@ class _BudgetCardState extends State<BudgetCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.value,
+                    '฿${totalSale.toStringAsFixed(2)}',
                     style: Styles.headerBlack24(context),
                   ),
                   const SizedBox(height: 4),
@@ -57,7 +99,7 @@ class _BudgetCardState extends State<BudgetCard> {
                 ],
               ),
             ),
-
+            SizedBox(width: 16),
             // Dropdown filter
             DropdownButton<String>(
               value: dropdownValue,
@@ -69,6 +111,7 @@ class _BudgetCardState extends State<BudgetCard> {
                 setState(() {
                   dropdownValue = newValue!;
                 });
+                getDataSummaryChoince(dropdownValue);
               },
               items: list.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(

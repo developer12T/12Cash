@@ -8,6 +8,7 @@ class RouteVisit {
   final int storeAll;
   final int storePending;
   final int storeSell;
+  final int storeCheckInNotSell;
   final int storeNotSell;
   final int storeTotal;
   final double percentComplete;
@@ -23,6 +24,7 @@ class RouteVisit {
     required this.storeAll,
     required this.storePending,
     required this.storeSell,
+    required this.storeCheckInNotSell,
     required this.storeNotSell,
     required this.storeTotal,
     required this.percentComplete,
@@ -41,6 +43,7 @@ class RouteVisit {
       storeAll: json['storeAll'],
       storePending: json['storePending'],
       storeSell: json['storeSell'],
+      storeCheckInNotSell: json['storeCheckInNotSell'],
       storeNotSell: json['storeNotSell'],
       storeTotal: json['storeTotal'],
       percentComplete: (json['percentComplete'] as num).toDouble(),
@@ -63,6 +66,7 @@ class RouteVisit {
       'storeAll': storeAll,
       'storePending': storePending,
       'storeSell': storeSell,
+      'storeCheckInNotSell': storeCheckInNotSell,
       'storeNotSell': storeNotSell,
       'storeTotal': storeTotal,
       'percentComplete': percentComplete,

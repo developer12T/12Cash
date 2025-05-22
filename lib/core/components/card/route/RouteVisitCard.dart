@@ -19,10 +19,11 @@ class RouteVisitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: onDetailsPressed,
       child: Container(
-        height: 170,
+        height: screenWidth / 3,
         margin: EdgeInsets.all(8.0),
         child: BoxShadowCustom(
           child: Container(
@@ -40,7 +41,7 @@ class RouteVisitCard extends StatelessWidget {
                     // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        width: 100,
+                        width: screenWidth / 5,
                         child: Column(
                           children: [
                             Row(
@@ -50,10 +51,6 @@ class RouteVisitCard extends StatelessWidget {
                                   'R${item.day}',
                                   style: Styles.headerBlack24(context),
                                 ),
-                                // Text(
-                                //   'R${item.day}',
-                                //   style: Styles.headerBlack24(context),
-                                // ),
                               ],
                             ),
                             Row(
@@ -65,6 +62,19 @@ class RouteVisitCard extends StatelessWidget {
                                 ),
                                 Text(
                                   '${item.storeAll}',
+                                  style: Styles.black18(context),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'เยี่ยมแล้ว',
+                                  style: Styles.black18(context),
+                                ),
+                                Text(
+                                  '${item.storeCheckInNotSell}',
                                   style: Styles.black18(context),
                                 ),
                               ],

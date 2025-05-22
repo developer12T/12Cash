@@ -57,12 +57,40 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   Timer? _locationTimer;
   late Map<String, String> languages = {};
   String? selectedLanguageCode;
+  int totalSale = 0;
 
   final CarouselSliderController _controller = CarouselSliderController();
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+  String date =
+      "${DateFormat('dd').format(DateTime.now())}${DateFormat('MM').format(DateTime.now())}${DateTime.now().year}";
+
   List<FlSpot> spots = [];
   bool isLoading = true;
+
+  Future<void> getDataSummaryChoince(String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/order/getSummarybyChoice',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "date": "$date",
+          "type": "$type",
+        },
+      );
+      if (response.statusCode == 200) {
+        print(response.data['data']['total']);
+        setState(() {
+          totalSale = response.data['data']['total'];
+        });
+      }
+    } catch (e) {
+      print("Error on getDataSummaryChoince is $e");
+    }
+  }
 
   Future<void> getDataSummary() async {
     try {
@@ -101,6 +129,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   void initState() {
     super.initState();
     getDataSummary();
+    getDataSummaryChoince('day');
     LocationService().initialize();
     _loadData();
   }
@@ -273,7 +302,6 @@ class _DashboardscreenState extends State<Dashboardscreen> {
           children: [
             BudgetCard(
               title: 'Total Sales',
-              value: '\$12,450',
               icon: Icons.attach_money,
               color: Colors.green,
             ),

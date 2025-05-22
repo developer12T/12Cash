@@ -7,6 +7,7 @@ class StoreVisit {
   final int? storeAll;
   final int? storePending;
   final int? storeSell;
+  final int? storeCheckInNotSell;
   final int? storeNotSell;
   final int? storeTotal;
   final double percentComplete;
@@ -23,6 +24,7 @@ class StoreVisit {
     this.storeAll,
     this.storePending,
     this.storeSell,
+    this.storeCheckInNotSell,
     this.storeNotSell,
     this.storeTotal,
     required this.percentComplete,
@@ -39,6 +41,7 @@ class StoreVisit {
       storeAll: json['storeAll'],
       storePending: json['storePending'],
       storeNotSell: json['storeNotSell'],
+      storeCheckInNotSell: json['storeCheckInNotSell'],
       storeSell: json['storeSell'],
       storeTotal: json['storeTotal'],
       percentComplete: (json['percentComplete'] as num).toDouble(),
@@ -59,6 +62,7 @@ class StoreVisit {
       'storeAll': storeAll,
       'storePending': storePending,
       'storeSell': storeSell,
+      'storeCheckInNotSell': storeCheckInNotSell,
       'storeNotSell': storeNotSell,
       'storeTotal': storeTotal,
       'percentComplete': percentComplete,
@@ -148,7 +152,7 @@ class StoreInfo {
       storeId: json['storeId'],
       name: json['name'],
       taxId: json['taxId'],
-      tel: json['name'],
+      tel: json['tel'],
       typeName: json['typeName'],
       address: json['address'],
     );

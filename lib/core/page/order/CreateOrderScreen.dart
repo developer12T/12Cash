@@ -231,6 +231,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   String promotionListChangeStatus = '0';
 
+  String qrImage = '';
+
   List<PromotionListItem> listPromotions = [];
   List<PromotionListItem> listPromotionsMock = [];
 
@@ -571,19 +573,21 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-        endpoint: 'api/cash/user/qrcode?area=${User.area}&type=qrcode',
+        endpoint: 'api/cash/user/qrcode?area=${User.area}',
         method: 'GET',
       );
       if (response.statusCode == 200) {
-        print(response.data['data']['image']);
-        final List<dynamic> data = response.data['data']['image'];
-
+        print("getQRImage ${response.data['data']}");
         setState(() {
-          imageList = data.map((item) => ImageModel.fromJson(item)).toList();
+          qrImage = response.data['data'];
         });
+        // final List<dynamic> data = response.data['data']['data'];
+        // setState(() {
+        //   imageList = data.map((item) => ImageModel.fromJson(item)).toList();
+        // });
       }
     } catch (e) {
-      print("Error $e");
+      print("Error _getQRImage $e");
     }
   }
 
@@ -1920,12 +1924,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                           label: "QR Code",
                                           icon: Icons
                                               .image_not_supported_outlined,
-                                          imagePath: imageList.isNotEmpty
-                                              ? imageList
-                                                  .firstWhere((element) =>
-                                                      element.type == "qrcode")
-                                                  .path
-                                              : '',
+                                          imagePath:
+                                              qrImage != "" ? qrImage : '',
                                         ),
                                         IconButtonWithLabelOld(
                                           icon: Icons.photo_camera,

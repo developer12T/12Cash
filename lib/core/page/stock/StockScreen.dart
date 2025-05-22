@@ -293,8 +293,8 @@ class _StockScreenState extends State<StockScreen> {
         endpoint: 'api/cash/stock/availableStock',
         method: 'POST',
         body: {
-          "area": "BE211",
-          "period": "202504",
+          "area": "${User.area}",
+          "period": "${period}",
           "type": "sale",
           "group": selectedGroups,
           "brand": selectedBrands,

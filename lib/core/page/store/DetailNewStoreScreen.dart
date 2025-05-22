@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
 import 'package:_12sale_app/core/components/chart/CircularChart.dart';
@@ -325,111 +326,126 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Column(
-                                      children: [
-                                        MenuButton(
-                                          icon: Icons.store_rounded,
-                                          label: "เช็คอิน",
-                                          color: Styles.bluePastel,
-                                          onPressed: () {
-                                            fetchLocation();
-                                            Alert(
-                                              context: context,
-                                              title:
-                                                  "store.processtimeline_screen.alert.title"
-                                                      .tr(),
-                                              style: AlertStyle(
-                                                animationType:
-                                                    AnimationType.grow,
-                                                isCloseButton: true,
-                                                isOverlayTapDismiss: false,
-                                                descStyle:
-                                                    Styles.black18(context),
-                                                descTextAlign: TextAlign.start,
-                                                animationDuration:
-                                                    const Duration(
-                                                        milliseconds: 400),
-                                                alertBorder:
-                                                    RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          22.0),
-                                                  side: const BorderSide(
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                                titleStyle:
-                                                    Styles.headerBlack32(
-                                                        context),
-                                                alertAlignment:
-                                                    Alignment.center,
-                                              ),
-                                              desc:
-                                                  "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
-                                              buttons: [
-                                                DialogButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                  color: Styles.failTextColor,
-                                                  child: Text(
-                                                    "store.processtimeline_screen.alert.cancel"
-                                                        .tr(),
-                                                    style:
-                                                        Styles.white18(context),
-                                                  ),
-                                                ),
-                                                DialogButton(
-                                                  onPressed: () {
-                                                    _checkin();
-                                                  },
-                                                  color:
-                                                      Styles.successButtonColor,
-                                                  child: Text(
-                                                    "store.processtimeline_screen.alert.submit"
-                                                        .tr(),
-                                                    style:
-                                                        Styles.white18(context),
-                                                  ),
-                                                )
-                                              ],
-                                            ).show();
-                                          },
-                                        ),
-                                        Text(
-                                          '',
-                                          style: Styles.black12(context),
-                                        ),
-                                      ],
+                                    ShowPhotoButton(
+                                      checkNetwork: true,
+                                      label: "ร้านค้า",
+                                      icon: Icons.image_not_supported_outlined,
+                                      imagePath: widget
+                                              .store.imageList.isNotEmpty
+                                          ? (widget.store.imageList
+                                                  .where((image) =>
+                                                      image.type == "store")
+                                                  .isNotEmpty
+                                              ? "${ApiService.apiHost}/images/${widget.store.imageList.where((image) => image.type == "store").last.path.split("images").last}"
+                                              : null)
+                                          : null,
                                     ),
-                                    Column(
-                                      children: [
-                                        // MenuButton(
-                                        //   icon: Icons.add_shopping_cart_rounded,
-                                        //   label: "ขาย",
-                                        //   // color: Colors.teal,
-                                        //   color: Styles.grey,
-                                        //   onPressed: () {
-                                        //     // Navigator.push(
-                                        //     //   context,
-                                        //     //   MaterialPageRoute(
-                                        //     //     builder: (context) =>
-                                        //     //         Orderscreen(
-                                        //     //             customerNo:
-                                        //     //                 widget.customerNo,
-                                        //     //             customerName:
-                                        //     //                 widget.customerName,
-                                        //     //             status: widget
-                                        //     //                 .store.status),
-                                        //     //   ),
-                                        //     // );
-                                        //   },
-                                        // ),
-                                        // Text(
-                                        //   'ยังไม่เปิดให้บริการ',
-                                        //   style: Styles.black12(context),
-                                        // ),
-                                      ],
+                                    SizedBox(width: 16),
+                                    ShowPhotoButton(
+                                      checkNetwork: true,
+                                      label: "ภ.พ.20",
+                                      icon: Icons.image_not_supported_outlined,
+                                      imagePath: widget
+                                              .store.imageList.isNotEmpty
+                                          ? (widget.store.imageList
+                                                  .where((image) =>
+                                                      image.type == "document")
+                                                  .isNotEmpty
+                                              ? "${ApiService.apiHost}/images/${widget.store.imageList.where((image) => image.type == "document").last.path.split("images").last}"
+                                              : null)
+                                          : null,
                                     ),
+                                    SizedBox(width: 16),
+                                    ShowPhotoButton(
+                                      checkNetwork: true,
+                                      label: "สำเนาบัตรปปช.",
+                                      icon: Icons.image_not_supported_outlined,
+                                      imagePath: widget
+                                              .store.imageList.isNotEmpty
+                                          ? (widget.store.imageList
+                                                  .where((image) =>
+                                                      image.type == "idCard")
+                                                  .isNotEmpty
+                                              ? "${ApiService.apiHost}/images/${widget.store.imageList.where((image) => image.type == "idCard").last.path.split("images").last}"
+                                              : null)
+                                          : null,
+                                    ),
+                                    // Column(
+                                    //   children: [
+                                    //     MenuButton(
+                                    //       icon: Icons.store_rounded,
+                                    //       label: "เช็คอิน",
+                                    //       color: Styles.bluePastel,
+                                    //       onPressed: () {
+                                    //         fetchLocation();
+                                    //         Alert(
+                                    //           context: context,
+                                    //           title:
+                                    //               "store.processtimeline_screen.alert.title"
+                                    //                   .tr(),
+                                    //           style: AlertStyle(
+                                    //             animationType:
+                                    //                 AnimationType.grow,
+                                    //             isCloseButton: true,
+                                    //             isOverlayTapDismiss: false,
+                                    //             descStyle:
+                                    //                 Styles.black18(context),
+                                    //             descTextAlign: TextAlign.start,
+                                    //             animationDuration:
+                                    //                 const Duration(
+                                    //                     milliseconds: 400),
+                                    //             alertBorder:
+                                    //                 RoundedRectangleBorder(
+                                    //               borderRadius:
+                                    //                   BorderRadius.circular(
+                                    //                       22.0),
+                                    //               side: const BorderSide(
+                                    //                 color: Colors.grey,
+                                    //               ),
+                                    //             ),
+                                    //             titleStyle:
+                                    //                 Styles.headerBlack32(
+                                    //                     context),
+                                    //             alertAlignment:
+                                    //                 Alignment.center,
+                                    //           ),
+                                    //           desc:
+                                    //               "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
+                                    //           buttons: [
+                                    //             DialogButton(
+                                    //               onPressed: () =>
+                                    //                   Navigator.pop(context),
+                                    //               color: Styles.failTextColor,
+                                    //               child: Text(
+                                    //                 "store.processtimeline_screen.alert.cancel"
+                                    //                     .tr(),
+                                    //                 style:
+                                    //                     Styles.white18(context),
+                                    //               ),
+                                    //             ),
+                                    //             DialogButton(
+                                    //               onPressed: () {
+                                    //                 _checkin();
+                                    //               },
+                                    //               color:
+                                    //                   Styles.successButtonColor,
+                                    //               child: Text(
+                                    //                 "store.processtimeline_screen.alert.submit"
+                                    //                     .tr(),
+                                    //                 style:
+                                    //                     Styles.white18(context),
+                                    //               ),
+                                    //             )
+                                    //           ],
+                                    //         ).show();
+                                    //       },
+                                    //     ),
+                                    //     Text(
+                                    //       '',
+                                    //       style: Styles.black12(context),
+                                    //     ),
+                                    //   ],
+                                    // ),
                                   ],
                                 ),
                               ],

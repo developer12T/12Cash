@@ -455,7 +455,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                       'ประเภทร้านค้า : ${storeDetail?.listStore[0].storeInfo.typeName}',
                                       style: Styles.black18(context)),
                                   Text(
-                                      'สถานะ : ${storeDetail?.listStore[0].status == '2' ? 'เช็คอินแล้ว' : 'ยังไม่ได้เช็คอิน'}',
+                                      'สถานะ : ${storeDetail?.listStore[0].statusText}',
                                       style: Styles.black18(context)),
                                 ],
                               ),

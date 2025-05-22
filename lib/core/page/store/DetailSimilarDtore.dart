@@ -517,7 +517,7 @@ class _DetailSimilarStoreState extends State<DetailSimilarStore> {
                               onEdit
                                   ? ShowPhotoButton(
                                       checkNetwork: true,
-                                      label: "ร้านค้า",
+                                      label: "ภ.พ.20",
                                       icon: Icons.image_not_supported_outlined,
                                       imagePath:
                                           widget.store.imageList.isNotEmpty

@@ -30,7 +30,7 @@ class RouteShopVisitCard extends StatelessWidget {
     return GestureDetector(
       onTap: onDetailsPressed,
       child: Container(
-        height: 195,
+        height: screenWidth / 3,
         margin: EdgeInsets.all(8.0),
         child: BoxShadowCustom(
           shadowColor: item.percentVisit < 50
@@ -59,7 +59,7 @@ class RouteShopVisitCard extends StatelessWidget {
                     // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        width: 150,
+                        width: screenWidth / 4,
                         child: Column(
                           children: [
                             Row(
@@ -97,6 +97,19 @@ class RouteShopVisitCard extends StatelessWidget {
                                 ),
                                 Text(
                                   '${item.storeSell}',
+                                  style: Styles.black18(context),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'เยี่ยมแล้ว',
+                                  style: Styles.black18(context),
+                                ),
+                                Text(
+                                  '${item.storeCheckInNotSell}',
                                   style: Styles.black18(context),
                                 ),
                               ],
