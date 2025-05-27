@@ -676,7 +676,9 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
                                     child: Container(
                                       // height: 400,
                                       // width: 500,
-                                      child: ItemSummarize(),
+                                      child: ItemSummarize(
+                                        storeId: widget.customerNo,
+                                      ),
                                     ),
                                   ),
                                 ],

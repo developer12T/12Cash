@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
@@ -24,6 +26,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
 
@@ -54,6 +57,9 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
   late TextEditingController storeTaxConroller;
   late TextEditingController storeShoptypeController;
   late TextEditingController storeAddressController;
+
+  List<ImageItem> imageList = [];
+  List<ImageItem> imageUpload = [];
 
   String selectedRoute = "";
   Store editStore = new Store(
@@ -87,6 +93,9 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
   String latitude = '';
   String longitude = '';
   double completionPercentage = 220;
+  String storeImagePath = "";
+  String taxIdImagePath = "";
+  String personalImagePath = "";
 
   @override
   initState() {
@@ -107,7 +116,140 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
       storePhoneController.text = widget.store.tel;
       storeLineIdController.text = widget.store.lineId;
       storeNoteController.text = widget.store.note;
+      imageList = List<ImageItem>.from(widget.store.imageList);
+      for (var value in imageList) {
+        if (value.type == "store") {
+          setState(() {
+            storeImagePath = value.path;
+          });
+        } else if (value.type == 'tax') {
+          setState(() {
+            taxIdImagePath = value.path;
+          });
+        } else {
+          setState(() {
+            personalImagePath = value.path;
+          });
+        }
+      }
     });
+  }
+
+  Future<void> uploadFormDataWithDio(
+      String imagePath, String typeImage, BuildContext context) async {
+    try {
+      final newImage = ImageItem(
+        name: imagePath.split('/').last,
+        path: imagePath,
+        type: typeImage,
+      );
+      switch (typeImage) {
+        case 'store':
+          setState(() {
+            storeImagePath = imagePath;
+          });
+          if (imageUpload.length > 0) {
+            imageUpload.removeWhere((item) => item.type == 'store');
+          }
+          imageUpload.add(newImage);
+          break;
+        case 'tax':
+          setState(() {
+            taxIdImagePath = imagePath;
+          });
+          if (imageUpload.any((item) => item.type == 'tax')) {
+            imageUpload.removeWhere((item) => item.type == 'tax');
+          }
+          imageUpload.add(newImage);
+          break;
+        case 'person':
+          setState(() {
+            personalImagePath = imagePath;
+          });
+          if (imageUpload.any((item) => item.type == 'person')) {
+            imageUpload.removeWhere((item) => item.type == 'person');
+          }
+          imageUpload.add(newImage);
+          break;
+        default:
+      }
+      print(imageUpload.length);
+    } catch (e) {
+      toastification.show(
+        autoCloseDuration: const Duration(seconds: 5),
+        context: context,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: Text(
+          "store.processtimeline_screen.toasting_error".tr(),
+          style: Styles.black18(context),
+        ),
+      );
+      print('Unexpected error: $e');
+    }
+  }
+
+  Future<void> _updateImage(BuildContext context) async {
+    try {
+      List<MultipartFile> imageListUpload = [];
+      for (var value in imageUpload) {
+        print("Checking path: ${value.path}");
+
+        if (!await File(value.path).exists()) {
+          print("❌ File not found: ${value.path}");
+          continue; // ข้ามไฟล์ที่ไม่มี
+        }
+
+        imageListUpload.add(
+          await MultipartFile.fromFile(value.path),
+        );
+      }
+      Dio dio = Dio();
+      String type = [
+        if (imageUpload.any((item) => item.type == 'store')) 'store',
+        if (imageUpload.any((item) => item.type == 'tax')) 'document',
+        if (imageUpload.any((item) => item.type == 'person')) 'idCard',
+      ].join(',');
+
+      var formData = FormData.fromMap(
+        {
+          'storeImages': imageListUpload,
+          'types': type,
+          "storeId": widget.store.storeId
+        },
+      );
+      // print(formData);
+      // print(imageList);
+      // print(type);
+      // print(widget.store.storeId);
+      var response = await dio.post(
+        '${ApiService.apiHost}/api/cash/store/updateImage',
+        data: formData,
+        options: Options(
+          headers: {
+            "Content-Type": "multipart/form-data",
+            'x-channel': 'cash',
+          },
+        ),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print("Image uploaded successfully ${response.data}");
+        toastification.dismissAll();
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "store.processtimeline_screen.toasting_success".tr(),
+            style: Styles.black18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> _editStore(BuildContext context) async {
@@ -369,44 +511,25 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
                                                   DialogButton(
                                                     onPressed: () async {
                                                       await _editStore(context);
+                                                      await _updateImage(
+                                                          context);
+                                                      // if (imageList.length >
+                                                      //     0) {
+                                                      //   await _updateImage(
+                                                      //       context);
+                                                      // }
                                                       Navigator
                                                           .pushAndRemoveUntil(
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (context) =>
-                                                              DetailStoreScreen(
-                                                            customerName:
-                                                                storeNameController
-                                                                    .text,
-                                                            customerNo: widget
-                                                                .customerNo,
-                                                            initialSelectedRoute:
-                                                                widget
-                                                                    .initialSelectedRoute,
-                                                            store: editStore,
+                                                              HomeScreen(
+                                                            index: 2,
                                                           ),
                                                         ),
                                                         (route) => route
                                                             .isFirst, // Keeps only the first route
                                                       );
-
-                                                      // Navigator.pushReplacement(
-                                                      //   context,
-                                                      //   MaterialPageRoute(
-                                                      //     builder: (context) =>
-                                                      //         DetailStoreScreen(
-                                                      //       customerName:
-                                                      //           storeNameController
-                                                      //               .text,
-                                                      //       customerNo: widget
-                                                      //           .customerNo,
-                                                      //       initialSelectedRoute:
-                                                      //           widget
-                                                      //               .initialSelectedRoute,
-                                                      //       store: editStore,
-                                                      //     ),
-                                                      //   ),
-                                                      // );
                                                     },
                                                     color: Styles
                                                         .successButtonColor,
@@ -573,52 +696,108 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      ShowPhotoButton(
-                                        checkNetwork: true,
-                                        label: "ร้านค้า",
-                                        icon:
-                                            Icons.image_not_supported_outlined,
-                                        imagePath: widget
-                                                .store.imageList.isNotEmpty
-                                            ? (widget.store.imageList
-                                                    .where((image) =>
-                                                        image.type == "store")
-                                                    .isNotEmpty
-                                                ? "${ApiService.apiHost}/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "store").last.name}"
-                                                : null)
-                                            : null,
-                                      ),
-                                      ShowPhotoButton(
-                                        checkNetwork: true,
-                                        label: "ภ.พ.20",
-                                        icon:
-                                            Icons.image_not_supported_outlined,
-                                        imagePath: widget
-                                                .store.imageList.isNotEmpty
-                                            ? (widget.store.imageList
-                                                    .where((image) =>
-                                                        image.type ==
-                                                        "document")
-                                                    .isNotEmpty
-                                                ? "${ApiService.apiHost}/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "document").last.name}"
-                                                : null)
-                                            : null,
-                                      ),
-                                      ShowPhotoButton(
-                                        checkNetwork: true,
-                                        label: "สำเนาบัตรปปช.",
-                                        icon:
-                                            Icons.image_not_supported_outlined,
-                                        imagePath: widget
-                                                .store.imageList.isNotEmpty
-                                            ? (widget.store.imageList
-                                                    .where((image) =>
-                                                        image.type == "idCard")
-                                                    .isNotEmpty
-                                                ? "${ApiService.apiHost}/image/stores/${User.area}/${widget.store.imageList.where((image) => image.type == "idCard").last.name}"
-                                                : null)
-                                            : null,
-                                      ),
+                                      widget.store.imageList
+                                              .where((image) =>
+                                                  image.type == "store")
+                                              .isNotEmpty
+                                          ? ShowPhotoButton(
+                                              checkNetwork: true,
+                                              label: "ร้านค้า",
+                                              icon: Icons
+                                                  .image_not_supported_outlined,
+                                              imagePath: widget.store.imageList
+                                                      .isNotEmpty
+                                                  ? (widget.store.imageList
+                                                          .where((image) =>
+                                                              image.type ==
+                                                              "store")
+                                                          .isNotEmpty
+                                                      ? "${ApiService.apiHost}/images/${widget.store.imageList.where((image) => image.type == "store").last.path.split("images").last}"
+                                                      : null)
+                                                  : null,
+                                            )
+                                          : IconButtonWithLabelOld(
+                                              icon: Icons.photo_camera,
+                                              imagePath: storeImagePath != ""
+                                                  ? storeImagePath
+                                                  : null,
+                                              label: "ร้านค้า",
+                                              onImageSelected:
+                                                  (String imagePath) async {
+                                                await uploadFormDataWithDio(
+                                                    imagePath,
+                                                    'store',
+                                                    context);
+                                              },
+                                            ),
+                                      widget.store.imageList
+                                              .where((image) =>
+                                                  image.type == "document")
+                                              .isNotEmpty
+                                          ? ShowPhotoButton(
+                                              checkNetwork: true,
+                                              label: "ภ.พ.20",
+                                              icon: Icons
+                                                  .image_not_supported_outlined,
+                                              imagePath: widget.store.imageList
+                                                      .isNotEmpty
+                                                  ? (widget.store.imageList
+                                                          .where((image) =>
+                                                              image.type ==
+                                                              "document")
+                                                          .isNotEmpty
+                                                      ? "${ApiService.apiHost}/images/${widget.store.imageList.where((image) => image.type == "document").last.path.split("images").last}"
+                                                      : null)
+                                                  : null,
+                                            )
+                                          : IconButtonWithLabelOld(
+                                              icon: Icons.photo_camera,
+                                              imagePath: taxIdImagePath != ""
+                                                  ? taxIdImagePath
+                                                  : null,
+                                              label: "ภ.พ.20",
+                                              onImageSelected:
+                                                  (String imagePath) async {
+                                                await uploadFormDataWithDio(
+                                                    imagePath, 'tax', context);
+                                              },
+                                            ),
+                                      widget.store.imageList
+                                              .where((image) =>
+                                                  image.type == "idCard")
+                                              .isNotEmpty
+                                          ? ShowPhotoButton(
+                                              checkNetwork: true,
+                                              label: "สำเนาบัตรปปช.",
+                                              icon: Icons
+                                                  .image_not_supported_outlined,
+                                              imagePath: widget.store.imageList
+                                                      .isNotEmpty
+                                                  ? (widget.store.imageList
+                                                          .where((image) =>
+                                                              image.type ==
+                                                              "idCard")
+                                                          .isNotEmpty
+                                                      ? "${ApiService.apiHost}/images/${widget.store.imageList.where((image) => image.type == "idCard").last.path.split("images").last}"
+                                                      : null)
+                                                  : null,
+                                            )
+                                          : IconButtonWithLabelOld(
+                                              icon: Icons.photo_camera,
+                                              imagePath: personalImagePath != ""
+                                                  ? personalImagePath
+                                                  : null,
+                                              label:
+                                                  "store.store_data_screen.image_identify"
+                                                      .tr(),
+                                              onImageSelected:
+                                                  (String imagePath) async {
+                                                await uploadFormDataWithDio(
+                                                    imagePath,
+                                                    'person',
+                                                    context);
+                                              },
+                                            ),
                                     ],
                                   )
                                 ],

@@ -53,7 +53,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
       // print(withdrawDetail.length);
       // print(withdrawDetail[0].listProductWithdraw.length);
     } catch (e) {
-      print("Error $e");
+      print("Error _getWithdrawDetail $e");
     }
   }
 
@@ -207,170 +207,172 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                         ),
                                       ],
                                     ),
-                                    ListView.builder(
-                                      physics: ClampingScrollPhysics(),
-                                      shrinkWrap: true,
-                                      // controller: _cartScrollController,
-                                      itemCount: withdrawDetail[index]
-                                          .listProduct
-                                          .length,
-                                      itemBuilder: (context, innerIndex) {
-                                        return Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
-                                                    width: screenWidth / 8,
-                                                    height: screenWidth / 8,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                        error, stackTrace) {
-                                                      return const Center(
-                                                        child: Icon(
-                                                          Icons.error,
-                                                          color: Colors.red,
-                                                          size: 50,
-                                                        ),
-                                                      );
-                                                    },
+                                    Expanded(
+                                      child: ListView.builder(
+                                        // controller: _cartScrollController,
+                                        itemCount: withdrawDetail[index]
+                                            .listProduct
+                                            .length,
+                                        itemBuilder: (context, innerIndex) {
+                                          return Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    child: Image.network(
+                                                      'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                      width: screenWidth / 8,
+                                                      height: screenWidth / 8,
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder: (context,
+                                                          error, stackTrace) {
+                                                        return const Center(
+                                                          child: Icon(
+                                                            Icons.error,
+                                                            color: Colors.red,
+                                                            size: 50,
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
                                                   ),
-                                                ),
-                                                Expanded(
-                                                  flex: 3,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            16.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Expanded(
-                                                              child: Text(
-                                                                withdrawDetail[
-                                                                        index]
-                                                                    .listProduct[
-                                                                        innerIndex]
-                                                                    .name,
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                                softWrap: true,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .visible,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          children: [
-                                                            Expanded(
-                                                              child: Text(
-                                                                "รหัส : ${withdrawDetail[index].listProduct[innerIndex].id}",
-                                                                style: Styles
-                                                                    .black16(
-                                                                        context),
-                                                                softWrap: true,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .visible,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      'Lot : 2407242110000000',
-                                                                      style: Styles
-                                                                          .black16(
-                                                                              context),
-                                                                    ),
-                                                                  ],
+                                                  Expanded(
+                                                    flex: 3,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16.0),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Text(
+                                                                  withdrawDetail[
+                                                                          index]
+                                                                      .listProduct[
+                                                                          innerIndex]
+                                                                      .name,
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                  softWrap:
+                                                                      true,
+                                                                  maxLines: 2,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .visible,
                                                                 ),
-                                                                // Row(
-                                                                //   children: [
-                                                                //     Text(
-                                                                //       'ราคา : ${withdrawDetail[index].listProductWithdraw[innerIndex].price}',
-                                                                //       style: Styles
-                                                                //           .black16(
-                                                                //               context),
-                                                                //     ),
-                                                                //   ],
-                                                                // ),
-                                                              ],
-                                                            ),
-                                                          ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Text(
+                                                                  "รหัส : ${withdrawDetail[index].listProduct[innerIndex].id}",
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                  softWrap:
+                                                                      true,
+                                                                  maxLines: 2,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .visible,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  // Row(
+                                                                  //   children: [
+                                                                  //     Text(
+                                                                  //       'Lot : 2407242110000000',
+                                                                  //       style: Styles.black16(
+                                                                  //           context),
+                                                                  //     ),
+                                                                  //   ],
+                                                                  // ),
+                                                                  // Row(
+                                                                  //   children: [
+                                                                  //     Text(
+                                                                  //       'ราคา : ${withdrawDetail[index].listProductWithdraw[innerIndex].price}',
+                                                                  //       style: Styles
+                                                                  //           .black16(
+                                                                  //               context),
+                                                                  //     ),
+                                                                  //   ],
+                                                                  // ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          "เบิก",
+                                                          style: Styles.black18(
+                                                              context),
+                                                        ),
+                                                        Text(
+                                                          "${withdrawDetail[index].listProduct[innerIndex].qty}",
+                                                          style: Styles.black18(
+                                                              context),
                                                         ),
                                                       ],
                                                     ),
                                                   ),
-                                                ),
-                                                Expanded(
-                                                  child: Column(
-                                                    children: [
-                                                      Text(
-                                                        "เบิก",
-                                                        style: Styles.black18(
-                                                            context),
-                                                      ),
-                                                      Text(
-                                                        "10",
-                                                        style: Styles.black18(
-                                                            context),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: Column(
-                                                    children: [
-                                                      Text(
-                                                        "รับ",
-                                                        style: Styles.red18(
-                                                            context),
-                                                      ),
-                                                      Text(
-                                                        "5",
-                                                        style: Styles.red18(
-                                                            context),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            Divider(
-                                              color: Colors.grey[200],
-                                              thickness: 1,
-                                              indent: 16,
-                                              endIndent: 16,
-                                            ),
-                                          ],
-                                        );
-                                      },
+                                                  Expanded(
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          "รับ",
+                                                          style: Styles.red18(
+                                                              context),
+                                                        ),
+                                                        Text(
+                                                          "0",
+                                                          style: Styles.red18(
+                                                              context),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              Divider(
+                                                color: Colors.grey[200],
+                                                thickness: 1,
+                                                indent: 16,
+                                                endIndent: 16,
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -406,10 +408,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "จำนวนรวม",
                                                 style: Styles.black18(context),
                                               ),
-                                              // Text(
-                                              //   "${withdrawDetail[index].totalQtyWithdraw} หีบ",
-                                              //   style: Styles.black18(context),
-                                              // ),
+                                              Text(
+                                                "${withdrawDetail[index].totalQty} หีบ",
+                                                style: Styles.black18(context),
+                                              ),
                                             ],
                                           ),
                                           Row(
@@ -459,10 +461,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "จำนวนรวม",
                                                 style: Styles.black18(context),
                                               ),
-                                              // Text(
-                                              //   "${withdrawDetail[index].totalQtyReceive} หีบ",
-                                              //   style: Styles.black18(context),
-                                              // ),
+                                              Text(
+                                                "${withdrawDetail[index].receivetotalQty} หีบ",
+                                                style: Styles.black18(context),
+                                              ),
                                             ],
                                           ),
                                           Row(
@@ -473,10 +475,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "น้ำหนักรวม",
                                                 style: Styles.black18(context),
                                               ),
-                                              // Text(
-                                              //   "${withdrawDetail[index].totalWeightGrossReceive.toStringAsFixed(2)} กก.",
-                                              //   style: Styles.black18(context),
-                                              // ),
+                                              Text(
+                                                "${withdrawDetail[index].receivetotalWeightGross.toStringAsFixed(2)} กก.",
+                                                style: Styles.black18(context),
+                                              ),
                                             ],
                                           ),
                                           Row(
@@ -487,10 +489,10 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                 "น้ำหนักรวมสุทธิ",
                                                 style: Styles.black18(context),
                                               ),
-                                              // Text(
-                                              //   "${withdrawDetail[index].totalWeightNetReceive.toStringAsFixed(2)} กก.",
-                                              //   style: Styles.black18(context),
-                                              // ),
+                                              Text(
+                                                "${withdrawDetail[index].receivetotalWeightNet.toStringAsFixed(2)} กก.",
+                                                style: Styles.black18(context),
+                                              ),
                                             ],
                                           )
                                         ],

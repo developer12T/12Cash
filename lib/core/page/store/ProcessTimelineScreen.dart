@@ -303,8 +303,6 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 ''';
 
     try {
-      // print(text);
-      // print(jsonData);
       List<MultipartFile> imageList = [];
       for (var value in _storeData.imageList) {
         imageList.add(
@@ -313,6 +311,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           ),
         );
       }
+
       print((_storeData.imageList.any((item) => item.type == 'person')));
       String type =
           "store${(_storeData.imageList.any((item) => item.type == 'tax')) ? ",document" : ""}${(_storeData.imageList.any((item) => item.type == 'person')) ? ",idCard" : ""}";

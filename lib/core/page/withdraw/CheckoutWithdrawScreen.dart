@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/core/page/withdraw/WithDrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/core/utils/tost_util.dart';
@@ -34,7 +35,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
   bool isLoading = true;
   bool _isInnerAtTop = true;
   bool _isInnerAtBottom = false;
-  String isType = '';
+  String isType = 'T04';
   String isWithdrawType = '';
   String isWithdrawTypeText = '';
   String optionType = '';
@@ -267,6 +268,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
             method: 'POST',
             body: {
               "type": "withdraw",
+              "period": "${period}",
               "area": "${User.area}",
               "shippingId": "${isShippingId}",
               "withdrawType": "${isWithdrawType}",

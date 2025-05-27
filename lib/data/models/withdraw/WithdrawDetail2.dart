@@ -18,6 +18,10 @@ class WithdrawDetail {
   final int totalQty;
   final double totalWeightGross;
   final double totalWeightNet;
+  final int receivetotal;
+  final int receivetotalQty;
+  final double receivetotalWeightGross;
+  final double receivetotalWeightNet;
   final String status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -43,6 +47,10 @@ class WithdrawDetail {
     required this.totalQty,
     required this.totalWeightGross,
     required this.totalWeightNet,
+    required this.receivetotal,
+    required this.receivetotalQty,
+    required this.receivetotalWeightGross,
+    required this.receivetotalWeightNet,
     required this.status,
     required this.createdAt,
     required this.updatedAt,
@@ -51,31 +59,36 @@ class WithdrawDetail {
 
   factory WithdrawDetail.fromJson(Map<String, dynamic> json) {
     return WithdrawDetail(
-      id: json['_id'],
-      type: json['type'],
-      orderId: json['orderId'],
-      orderType: json['orderType'],
-      orderTypeName: json['orderTypeName'],
-      area: json['area'],
-      fromWarehouse: json['fromWarehouse'],
-      toWarehouse: json['toWarehouse'],
-      shippingId: json['shippingId'],
-      shippingRoute: json['shippingRoute'],
-      shippingName: json['shippingName'],
-      sendAddress: json['sendAddress'],
-      sendDate: json['sendDate'],
-      remark: json['remark'],
-      listProduct: (json['listProduct'] as List)
+      id: json['_id'] ?? '',
+      type: json['type'] ?? '',
+      orderId: json['orderId'] ?? '',
+      orderType: json['orderType'] ?? '',
+      orderTypeName: json['orderTypeName'] ?? '',
+      area: json['area'] ?? '',
+      fromWarehouse: json['fromWarehouse'] ?? '',
+      toWarehouse: json['toWarehouse'] ?? '',
+      shippingId: json['shippingId'] ?? '',
+      shippingRoute: json['shippingRoute'] ?? '',
+      shippingName: json['shippingName'] ?? '',
+      sendAddress: json['sendAddress'] ?? '',
+      sendDate: json['sendDate'] ?? '',
+      remark: json['remark'] ?? '',
+      listProduct: (json['listProduct'] as List? ?? [])
           .map((item) => Product.fromJson(item))
           .toList(),
-      total: json['total'],
-      totalQty: json['totalQty'],
-      totalWeightGross: (json['totalWeightGross'] as num).toDouble(),
-      totalWeightNet: (json['totalWeightNet'] as num).toDouble(),
-      status: json['status'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      v: json['__v'],
+      total: json['total'] ?? 0,
+      totalQty: json['totalQty'] ?? 0,
+      totalWeightGross: (json['totalWeightGross'] ?? 0).toDouble(),
+      totalWeightNet: (json['totalWeightNet'] ?? 0).toDouble(),
+      receivetotal: json['receivetotal'] ?? 0,
+      receivetotalQty: json['receivetotalQty'] ?? 0,
+      receivetotalWeightGross:
+          (json['receivetotalWeightGross'] ?? 0).toDouble(),
+      receivetotalWeightNet: (json['receivetotalWeightNet'] ?? 0).toDouble(),
+      status: json['status'] ?? '',
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
+      v: json['__v'] ?? 0,
     );
   }
 
@@ -99,6 +112,10 @@ class WithdrawDetail {
         'totalQty': totalQty,
         'totalWeightGross': totalWeightGross,
         'totalWeightNet': totalWeightNet,
+        'receivetotal': receivetotal,
+        'receivetotalQty': receivetotalQty,
+        'receivetotalWeightGross': receivetotalWeightGross,
+        'receivetotalWeightNet': receivetotalWeightNet,
         'status': status,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
@@ -141,20 +158,20 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
-      name: json['name'],
-      group: json['group'],
-      brand: json['brand'],
-      size: json['size'],
-      flavour: json['flavour'],
-      qty: json['qty'],
-      unit: json['unit'],
-      qtyPcs: json['qtyPcs'],
-      price: json['price'],
-      total: json['total'],
-      weightGross: (json['weightGross'] as num).toDouble(),
-      weightNet: (json['weightNet'] as num).toDouble(),
-      productId: json['_id'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      group: json['group'] ?? '',
+      brand: json['brand'] ?? '',
+      size: json['size'] ?? '',
+      flavour: json['flavour'] ?? '',
+      qty: json['qty'] ?? 0,
+      unit: json['unit'] ?? '',
+      qtyPcs: json['qtyPcs'] ?? 0,
+      price: json['price'] ?? 0,
+      total: json['total'] ?? 0,
+      weightGross: (json['weightGross'] ?? 0).toDouble(),
+      weightNet: (json['weightNet'] ?? 0).toDouble(),
+      productId: json['_id'] ?? '',
     );
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/chart/SummarybyMonth.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/alert/Alert.dart';
@@ -30,6 +31,7 @@ import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -78,6 +80,8 @@ class _DetailScreenState extends State<DetailScreen> {
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
+  List<FlSpot> spots = [];
+
   // String
 
   @override
@@ -86,6 +90,34 @@ class _DetailScreenState extends State<DetailScreen> {
     _getDetailStore();
     _getCauses();
     _getOrder();
+    getDataSummary();
+  }
+
+  Future<void> getDataSummary() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}&storeId=${widget.customerNo}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        // dashboard = data.map((item) => MonthlySummary.fromJson(item)).toList();
+        var data = response.data['data'];
+        spots = data.map<FlSpot>((item) {
+          double x = (item['month'] as num).toDouble();
+          double y = (item['summary'] as num).toDouble();
+          return FlSpot(x, y);
+        }).toList();
+        setState(() {
+          // isLoadingGraph = false;
+        });
+      }
+      // print(spots);
+    } catch (e) {
+      print("Error on getDataSummary is $e");
+    }
   }
 
   @override
@@ -544,7 +576,9 @@ class _DetailScreenState extends State<DetailScreen> {
                   child: SizedBox(
                     height: 325,
                     width: screenWidth,
-                    child: ItemSummarize(),
+                    child: SummarybyMonth(
+                      spots: spots,
+                    ),
                   ),
                 ),
                 SizedBox(height: screenWidth / 37),

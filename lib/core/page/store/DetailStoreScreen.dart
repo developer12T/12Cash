@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/card/dashboard/BudgetCard.dart';
+import 'package:_12sale_app/core/components/chart/SummarybyMonth.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
@@ -22,6 +24,7 @@ import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -62,8 +65,17 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
   String latitude = '';
   String longitude = '';
   String api_url = '${ApiService.apiHost}/api/cash/store/checkIn/';
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+  List<FlSpot> spots = [];
+  bool isLoadingGraph = true;
+  String date =
+      "${DateFormat('dd').format(DateTime.now())}${DateFormat('MM').format(DateTime.now())}${DateTime.now().year}";
 
   double completionPercentage = 220;
+  double totalSale = 0;
+  double totalRefund = 0;
+  double totalSummary = 0;
 
   @override
   initState() {
@@ -76,6 +88,8 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
     storeNoteController = TextEditingController();
     storeAddressController = TextEditingController();
     _setStoreName();
+    getDataSummary();
+    getDataSummaryChoince('year');
   }
 
   Future<void> _setStoreName() async {
@@ -85,6 +99,33 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
       storeLineIdController.text = widget.store.lineId;
       storeNoteController.text = widget.store.note;
     });
+  }
+
+  Future<void> getDataSummary() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}&storeId=${widget.store.storeId}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        // dashboard = data.map((item) => MonthlySummary.fromJson(item)).toList();
+        var data = response.data['data'];
+        spots = data.map<FlSpot>((item) {
+          double x = (item['month'] as num).toDouble();
+          double y = (item['summary'] as num).toDouble();
+          return FlSpot(x, y);
+        }).toList();
+        setState(() {
+          isLoadingGraph = false;
+        });
+      }
+      // print(spots);
+    } catch (e) {
+      print("Error on getDataSummary is $e");
+    }
   }
 
   Future<void> _checkin() async {
@@ -198,6 +239,39 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
     }
   }
 
+  Future<void> getDataSummaryChoince(String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      print({
+        "area": "${User.area}",
+        "date": "$date",
+        "type": "$type",
+      });
+      var response = await apiService.request(
+        endpoint: 'api/cash/order/getSummarybyChoice',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "date": "$date",
+          "storeId": "${widget.store.storeId}",
+          "type": "$type",
+        },
+      );
+      if (response.statusCode == 200) {
+        print(response.data);
+        setState(() {
+          totalSale = response.data['total'].toDouble();
+        });
+      }
+    } catch (e) {
+      print("Error on getDataSummaryChoince is $e");
+      setState(() {
+        totalSale = 0.0;
+      });
+    }
+  }
+
   @override
   void dispose() {
     storeNameController.dispose();
@@ -257,10 +331,12 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  "${widget.customerName}",
-                                                  style:
-                                                      Styles.black24(context),
+                                                Expanded(
+                                                  child: Text(
+                                                    "${widget.customerName}",
+                                                    style:
+                                                        Styles.black24(context),
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -299,38 +375,38 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      Column(
-                                        children: [
-                                          MenuButton(
-                                            icon: Icons.image,
-                                            label: "รูปภาพ",
-                                            // color: Colors.teal,
-                                            color: Styles.grey,
-                                            onPressed: () {
-                                              // Navigator.push(
-                                              //   context,
-                                              //   MaterialPageRoute(
-                                              //     builder: (context) =>
-                                              //         EditStoreDataScreen(
-                                              //             initialSelectedRoute: RouteStore(
-                                              //                 route: widget
-                                              //                     .initialSelectedRoute
-                                              //                     .route),
-                                              //             store: widget.store,
-                                              //             customerNo:
-                                              //                 widget.customerNo,
-                                              //             customerName:
-                                              //                 widget.customerName),
-                                              //   ),
-                                              // );
-                                            },
-                                          ),
-                                          Text(
-                                            'ยังไม่เปิดให้บริการ',
-                                            style: Styles.black12(context),
-                                          ),
-                                        ],
-                                      ),
+                                      // Column(
+                                      //   children: [
+                                      //     MenuButton(
+                                      //       icon: Icons.image,
+                                      //       label: "รูปภาพ",
+                                      //       // color: Colors.teal,
+                                      //       color: Styles.grey,
+                                      //       onPressed: () {
+                                      //         // Navigator.push(
+                                      //         //   context,
+                                      //         //   MaterialPageRoute(
+                                      //         //     builder: (context) =>
+                                      //         //         EditStoreDataScreen(
+                                      //         //             initialSelectedRoute: RouteStore(
+                                      //         //                 route: widget
+                                      //         //                     .initialSelectedRoute
+                                      //         //                     .route),
+                                      //         //             store: widget.store,
+                                      //         //             customerNo:
+                                      //         //                 widget.customerNo,
+                                      //         //             customerName:
+                                      //         //                 widget.customerName),
+                                      //         //   ),
+                                      //         // );
+                                      //       },
+                                      //     ),
+                                      //     Text(
+                                      //       'ยังไม่เปิดให้บริการ',
+                                      //       style: Styles.black12(context),
+                                      //     ),
+                                      //   ],
+                                      // ),
                                       Column(
                                         children: [
                                           MenuButton(
@@ -482,235 +558,243 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                         color: Colors.black,
                                       ),
                                       Text(
-                                        'ตัวอย่าง Dashboard',
+                                        'ยอดการขายตามร้านค้า',
                                         textAlign: TextAlign.start,
                                         style: Styles.black24(context),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    // Container(
-                                    //   padding:
-                                    //       EdgeInsets.symmetric(vertical: 35),
-                                    //   child: CustomPaint(
-                                    //     size: Size(200, 200),
-                                    //     painter: CircularChartPainter(
-                                    //         completionPercentage:
-                                    //             completionPercentage),
-                                    //     child: Center(
-                                    //       child: Column(
-                                    //         mainAxisSize: MainAxisSize.min,
-                                    //         children: [
-                                    //           // Text(
-                                    //           //   "${((completionPercentage * 100) / 360).toStringAsFixed(2)}%",
-                                    //           //   style: Styles.black18(context),
-                                    //           // ),
-                                    //           Row(
-                                    //             children: [
-                                    //               Text(
-                                    //                 "ขาย : ",
-                                    //                 style:
-                                    //                     Styles.black18(context),
-                                    //               ),
-                                    //               Text(
-                                    //                 "${((completionPercentage * 100) / 360).toStringAsFixed(2)}%",
-                                    //                 style:
-                                    //                     Styles.black18(context),
-                                    //               ),
-                                    //             ],
-                                    //           ),
-                                    //           Row(
-                                    //             children: [
-                                    //               Text(
-                                    //                 "คืน : ",
-                                    //                 style:
-                                    //                     Styles.black18(context),
-                                    //               ),
-                                    //               Text(
-                                    //                 "${((140 * 100) / 360).toStringAsFixed(2)}%",
-                                    //                 style:
-                                    //                     Styles.black18(context),
-                                    //               ),
-                                    //             ],
-                                    //           ),
-                                    //         ],
-                                    //       ),
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[200],
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Padding(
-                                              padding: EdgeInsets.all(8),
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                    "ยอดขาย",
-                                                    style:
-                                                        Styles.black24(context),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      FaIcon(
-                                                          FontAwesomeIcons
-                                                              .caretUp,
-                                                          color: Styles
-                                                              .successButtonColor),
-                                                      Text(
-                                                        " 10%",
-                                                        style: Styles.green10(
-                                                            context),
-                                                      ),
-                                                      Text(
-                                                        " ${1500} บาท",
-                                                        style: Styles.green24(
-                                                            context),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(height: 10),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[200],
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Padding(
-                                              padding: EdgeInsets.all(8),
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                    "ยอดคืน",
-                                                    style:
-                                                        Styles.black24(context),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      FaIcon(
-                                                          FontAwesomeIcons
-                                                              .caretDown,
-                                                          color: Styles
-                                                              .failTextColor),
-                                                      Text(
-                                                        " 10%",
-                                                        style: Styles.red10(
-                                                            context),
-                                                      ),
-                                                      Text(
-                                                        " ${1500} บาท",
-                                                        style:
-                                                            Styles.headerRed24(
-                                                                context),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        // Container(
-                                        //   decoration: BoxDecoration(
-                                        //     color: Colors.grey[200],
-                                        //     borderRadius:
-                                        //         BorderRadius.circular(10),
-                                        //   ),
-                                        //   child: Padding(
-                                        //     padding: EdgeInsets.all(8),
-                                        //     child: Column(
-                                        //       children: [
-                                        //         Text(
-                                        //           "เป้าหมาย",
-                                        //           style:
-                                        //               Styles.black24(context),
-                                        //         ),
-                                        //         Row(
-                                        //           children: [
-                                        //             FaIcon(
-                                        //                 FontAwesomeIcons
-                                        //                     .caretDown,
-                                        //                 color: Styles
-                                        //                     .failTextColor),
-                                        //             Text(
-                                        //               " 10%",
-                                        //               style:
-                                        //                   Styles.red10(context),
-                                        //             ),
-                                        //             Text(
-                                        //               " ${1500} บาท",
-                                        //               style: Styles.headerRed24(
-                                        //                   context),
-                                        //             ),
-                                        //           ],
-                                        //         ),
-                                        //       ],
-                                        //     ),
-                                        //   ),
-                                        // ),
-                                        // SizedBox(height: 10),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[200],
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          child: Padding(
-                                            padding: EdgeInsets.all(8),
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  "ยอดรวม",
-                                                  style:
-                                                      Styles.black24(context),
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    FaIcon(
-                                                        FontAwesomeIcons
-                                                            .caretDown,
-                                                        color: Styles
-                                                            .failTextColor),
-                                                    Text(
-                                                      " 10%",
-                                                      style:
-                                                          Styles.red10(context),
-                                                    ),
-                                                    Text(
-                                                      " ${1500} บาท",
-                                                      style: Styles.headerRed24(
-                                                          context),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                BudgetCard(
+                                  title: 'Total Sales',
+                                  icon: Icons.attach_money,
+                                  color: Colors.green,
+                                  storeId: widget.store.storeId,
                                 ),
+                                // Row(
+                                //   mainAxisAlignment:
+                                //       MainAxisAlignment.spaceEvenly,
+                                //   children: [
+
+                                //     // Container(
+                                //     //   padding:
+                                //     //       EdgeInsets.symmetric(vertical: 35),
+                                //     //   child: CustomPaint(
+                                //     //     size: Size(200, 200),
+                                //     //     painter: CircularChartPainter(
+                                //     //         completionPercentage:
+                                //     //             completionPercentage),
+                                //     //     child: Center(
+                                //     //       child: Column(
+                                //     //         mainAxisSize: MainAxisSize.min,
+                                //     //         children: [
+                                //     //           // Text(
+                                //     //           //   "${((completionPercentage * 100) / 360).toStringAsFixed(2)}%",
+                                //     //           //   style: Styles.black18(context),
+                                //     //           // ),
+                                //     //           Row(
+                                //     //             children: [
+                                //     //               Text(
+                                //     //                 "ขาย : ",
+                                //     //                 style:
+                                //     //                     Styles.black18(context),
+                                //     //               ),
+                                //     //               Text(
+                                //     //                 "${((completionPercentage * 100) / 360).toStringAsFixed(2)}%",
+                                //     //                 style:
+                                //     //                     Styles.black18(context),
+                                //     //               ),
+                                //     //             ],
+                                //     //           ),
+                                //     //           Row(
+                                //     //             children: [
+                                //     //               Text(
+                                //     //                 "คืน : ",
+                                //     //                 style:
+                                //     //                     Styles.black18(context),
+                                //     //               ),
+                                //     //               Text(
+                                //     //                 "${((140 * 100) / 360).toStringAsFixed(2)}%",
+                                //     //                 style:
+                                //     //                     Styles.black18(context),
+                                //     //               ),
+                                //     //             ],
+                                //     //           ),
+                                //     //         ],
+                                //     //       ),
+                                //     //     ),
+                                //     //   ),
+                                //     // ),
+                                //     // Padding(
+                                //     //   padding: const EdgeInsets.symmetric(
+                                //     //       vertical: 8.0),
+                                //     //   child: Column(
+                                //     //     children: [
+                                //     //       Container(
+                                //     //         decoration: BoxDecoration(
+                                //     //           color: Colors.grey[200],
+                                //     //           borderRadius:
+                                //     //               BorderRadius.circular(10),
+                                //     //         ),
+                                //     //         child: Padding(
+                                //     //           padding: EdgeInsets.all(8),
+                                //     //           child: Column(
+                                //     //             children: [
+                                //     //               Text(
+                                //     //                 "ยอดขาย",
+                                //     //                 style:
+                                //     //                     Styles.black24(context),
+                                //     //               ),
+                                //     //               Row(
+                                //     //                 children: [
+                                //     //                   // FaIcon(
+                                //     //                   //     FontAwesomeIcons
+                                //     //                   //         .caretUp,
+                                //     //                   //     color: Styles
+                                //     //                   //         .successButtonColor),
+                                //     //                   // Text(
+                                //     //                   //   " 10%",
+                                //     //                   //   style: Styles.green10(
+                                //     //                   //       context),
+                                //     //                   // ),
+                                //     //                   Text(
+                                //     //                     " ${totalSale.toStringAsFixed(2)} บาท",
+                                //     //                     style: Styles.green24(
+                                //     //                         context),
+                                //     //                   ),
+                                //     //                 ],
+                                //     //               ),
+                                //     //             ],
+                                //     //           ),
+                                //     //         ),
+                                //     //       ),
+                                //     //       SizedBox(height: 10),
+                                //     //       Container(
+                                //     //         decoration: BoxDecoration(
+                                //     //           color: Colors.grey[200],
+                                //     //           borderRadius:
+                                //     //               BorderRadius.circular(10),
+                                //     //         ),
+                                //     //         child: Padding(
+                                //     //           padding: EdgeInsets.all(8),
+                                //     //           child: Column(
+                                //     //             children: [
+                                //     //               Text(
+                                //     //                 "ยอดคืน",
+                                //     //                 style:
+                                //     //                     Styles.black24(context),
+                                //     //               ),
+                                //     //               Row(
+                                //     //                 children: [
+                                //     //                   // FaIcon(
+                                //     //                   //     FontAwesomeIcons
+                                //     //                   //         .caretDown,
+                                //     //                   //     color: Styles
+                                //     //                   //         .failTextColor),
+                                //     //                   // Text(
+                                //     //                   //   " 10%",
+                                //     //                   //   style: Styles.red10(
+                                //     //                   //       context),
+                                //     //                   // ),
+                                //     //                   Text(
+                                //     //                     " ${totalRefund.toStringAsFixed(2)} บาท",
+                                //     //                     style:
+                                //     //                         Styles.headerRed24(
+                                //     //                             context),
+                                //     //                   ),
+                                //     //                 ],
+                                //     //               ),
+                                //     //             ],
+                                //     //           ),
+                                //     //         ),
+                                //     //       ),
+                                //     //     ],
+                                //     //   ),
+                                //     // ),
+                                //     // Column(
+                                //     //   children: [
+                                //     //     // Container(
+                                //     //     //   decoration: BoxDecoration(
+                                //     //     //     color: Colors.grey[200],
+                                //     //     //     borderRadius:
+                                //     //     //         BorderRadius.circular(10),
+                                //     //     //   ),
+                                //     //     //   child: Padding(
+                                //     //     //     padding: EdgeInsets.all(8),
+                                //     //     //     child: Column(
+                                //     //     //       children: [
+                                //     //     //         Text(
+                                //     //     //           "เป้าหมาย",
+                                //     //     //           style:
+                                //     //     //               Styles.black24(context),
+                                //     //     //         ),
+                                //     //     //         Row(
+                                //     //     //           children: [
+                                //     //     //             FaIcon(
+                                //     //     //                 FontAwesomeIcons
+                                //     //     //                     .caretDown,
+                                //     //     //                 color: Styles
+                                //     //     //                     .failTextColor),
+                                //     //     //             Text(
+                                //     //     //               " 10%",
+                                //     //     //               style:
+                                //     //     //                   Styles.red10(context),
+                                //     //     //             ),
+                                //     //     //             Text(
+                                //     //     //               " ${1500} บาท",
+                                //     //     //               style: Styles.headerRed24(
+                                //     //     //                   context),
+                                //     //     //             ),
+                                //     //     //           ],
+                                //     //     //         ),
+                                //     //     //       ],
+                                //     //     //     ),
+                                //     //     //   ),
+                                //     //     // ),
+                                //     //     // SizedBox(height: 10),
+                                //     //     Container(
+                                //     //       decoration: BoxDecoration(
+                                //     //         color: Colors.grey[200],
+                                //     //         borderRadius:
+                                //     //             BorderRadius.circular(10),
+                                //     //       ),
+                                //     //       child: Padding(
+                                //     //         padding: EdgeInsets.all(8),
+                                //     //         child: Column(
+                                //     //           children: [
+                                //     //             Text(
+                                //     //               "ยอดรวม",
+                                //     //               style:
+                                //     //                   Styles.black24(context),
+                                //     //             ),
+                                //     //             Row(
+                                //     //               children: [
+                                //     //                 // FaIcon(
+                                //     //                 //     FontAwesomeIcons
+                                //     //                 //         .caretDown,
+                                //     //                 //     color: Styles
+                                //     //                 //         .successButtonColor),
+                                //     //                 // Text(
+                                //     //                 //   " 10%",
+                                //     //                 //   style:
+                                //     //                 //       Styles.red10(context),
+                                //     //                 // ),
+                                //     //                 Text(
+                                //     //                   " ${totalSummary.toStringAsFixed(2)} บาท",
+                                //     //                   style:
+                                //     //                       Styles.headerGreen24(
+                                //     //                           context),
+                                //     //                 ),
+                                //     //               ],
+                                //     //             ),
+                                //     //           ],
+                                //     //         ),
+                                //     //       ),
+                                //     //     ),
+                                //     //   ],
+                                //     // ),
+                                //   ],
+                                // ),
                               ],
                             ),
                           ),
@@ -742,7 +826,9 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                       child: Container(
                                         // height: 400,
                                         // width: 500,
-                                        child: ItemSummarize(),
+                                        child: SummarybyMonth(
+                                          spots: spots,
+                                        ),
                                       ),
                                     ),
                                   ],

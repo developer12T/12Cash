@@ -11,12 +11,14 @@ class BudgetCard extends StatefulWidget {
   final String title;
   final IconData icon;
   final Color color;
+  final String? storeId;
 
   const BudgetCard({
     Key? key,
     required this.title,
     required this.icon,
     required this.color,
+    this.storeId,
   }) : super(key: key);
 
   @override
@@ -34,19 +36,20 @@ class _BudgetCardState extends State<BudgetCard> {
     try {
       ApiService apiService = ApiService();
       await apiService.init();
-      print({
+      var body = {
         "area": "${User.area}",
         "date": "$date",
         "type": "$type",
-      });
+      };
+
+      if (widget.storeId != null) {
+        body['storeId'] = widget.storeId!;
+      }
+
       var response = await apiService.request(
         endpoint: 'api/cash/order/getSummarybyChoice',
         method: 'POST',
-        body: {
-          "area": "${User.area}",
-          "date": "$date",
-          "type": "$type",
-        },
+        body: body,
       );
       if (response.statusCode == 200) {
         print(response.data);
@@ -91,7 +94,8 @@ class _BudgetCardState extends State<BudgetCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '฿${totalSale.toStringAsFixed(2)}',
+                    // '฿${totalSale.toStringAsFixed(2)} THB',
+                    '฿ ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalSale)} THB',
                     style: Styles.headerBlack24(context),
                   ),
                   const SizedBox(height: 4),

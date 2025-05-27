@@ -9,7 +9,9 @@ import 'package:fl_chart/fl_chart.dart';
 class ItemSummarize extends StatefulWidget {
   ItemSummarize({
     super.key,
+    required this.storeId,
   });
+  String storeId;
 
   @override
   State<ItemSummarize> createState() => _ItemSummarizeState();
@@ -34,10 +36,11 @@ class _ItemSummarizeState extends State<ItemSummarize> {
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}',
+            'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}&storeId=${widget.storeId}',
         method: 'GET',
       );
       if (response.statusCode == 200) {
+        print(response.data['data']);
         // dashboard = data.map((item) => MonthlySummary.fromJson(item)).toList();
         var data = response.data['data'];
         spots = data.map<FlSpot>((item) {

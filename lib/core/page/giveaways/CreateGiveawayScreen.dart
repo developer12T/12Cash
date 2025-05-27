@@ -10,6 +10,7 @@ import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/page/giveaways/GiveAwaysDetailScreen.dart';
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
 import 'package:_12sale_app/core/page/route/OrderDetailScreen.dart';
+import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/data/models/order/Promotion.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/main.dart';
@@ -261,6 +262,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
         method: 'POST',
         body: {
           "type": "give",
+          "period": "${period}",
           "area": "${User.area}",
           "storeId": "${widget.storeId}",
           "giveId": "${widget.giveawayId}",
@@ -807,7 +809,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
-                          height: screenHeight * 0.45,
+                          height: screenHeight * 0.44,
                           // color: Colors.red,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(

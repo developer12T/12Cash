@@ -82,6 +82,7 @@ class ListStore {
   final String? longtitude;
   final String status;
   final String statusText;
+  final List<dynamic>? storeType;
   final String? date;
   final List<dynamic> listOrder;
 
@@ -93,6 +94,7 @@ class ListStore {
     this.longtitude,
     required this.status,
     required this.statusText,
+    this.storeType,
     this.date,
     required this.listOrder,
   });
@@ -106,6 +108,7 @@ class ListStore {
       longtitude: json['longtitude'] ?? '',
       status: json['status'] ?? '0',
       statusText: json['statusText'] ?? '',
+      storeType: json['storeType'] ?? [],
       date: json['date'] ?? '',
       listOrder: json['listOrder'] ?? [],
     );
@@ -120,6 +123,7 @@ class ListStore {
       'longtitude': longtitude,
       'status': status,
       'statusText': statusText,
+      'storeType': storeType,
       'date': date,
       'listOrder': listOrder,
     };

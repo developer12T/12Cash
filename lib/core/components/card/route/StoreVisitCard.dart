@@ -108,25 +108,6 @@ class StoreCard extends StatelessWidget {
     required this.route,
     required this.routeId,
   });
-
-  Future<List<RouteStore>> getRoutes(String filter) async {
-    try {
-      // Load the JSON file for districts
-      final String response = await rootBundle.loadString('data/route.json');
-      final data = json.decode(response);
-
-      // Filter and map JSON data to District model based on selected province and filter
-      final List<RouteStore> route =
-          (data as List).map((json) => RouteStore.fromJson(json)).toList();
-
-      // Group districts by amphoe
-      return route;
-    } catch (e) {
-      print("Error occurred: $e");
-      return [];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -163,10 +144,18 @@ class StoreCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    store.storeInfo.storeId,
-                    style: Styles.black18(context),
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Text(
+                        "${store.storeInfo.storeId}",
+                        style: Styles.black18(context),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(width: 8),
+                      store.storeType!.contains('beauty')
+                          ? Icon(Icons.diamond_outlined)
+                          : SizedBox(width: 0),
+                    ],
                   ),
                   Skeleton.ignore(
                     child: Container(
@@ -514,24 +503,6 @@ class StoreAjust2RouteCard extends StatefulWidget {
 class _StoreAjust2RouteCardState extends State<StoreAjust2RouteCard> {
   String toRoute = '';
   bool isChecked = false;
-  Future<List<RouteStore>> getRoutes(String filter) async {
-    try {
-      // Load the JSON file for districts
-      final String response = await rootBundle.loadString('data/route.json');
-      final data = json.decode(response);
-
-      // Filter and map JSON data to District model based on selected province and filter
-      final List<RouteStore> route =
-          (data as List).map((json) => RouteStore.fromJson(json)).toList();
-
-      // Group districts by amphoe
-      return route;
-    } catch (e) {
-      print("Error occurred: $e");
-      return [];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

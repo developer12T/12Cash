@@ -84,9 +84,9 @@ class WithdrawDetail {
               .toList() ??
           [], // ✅ Default to empty list if null
       totalWithdraw: json["totalWithdraw"].toDouble() ?? 00.00,
-      totalQtyWithdraw: json["totalQtyWithdraw"] ?? "",
+      totalQtyWithdraw: json["totalQtyWithdraw"] ?? 0,
       totalReceive: json["totalReceive"].toDouble() ?? 00.00,
-      totalQtyReceive: json["totalQtyReceive"] ?? "",
+      totalQtyReceive: json["totalQtyReceive"] ?? 0,
       totalWeightGrossWithdraw:
           json["totalWeightGrossWithdraw"].toDouble() ?? 00.00,
       totalWeightNetWithdraw:
@@ -97,7 +97,7 @@ class WithdrawDetail {
       status: json["status"] ?? "",
       created: DateTime.parse(json["created"]),
       updated: DateTime.parse(json["updated"]),
-      version: json["__v"] ?? "",
+      version: json["__v"] ?? 0,
     );
   }
 
@@ -178,9 +178,9 @@ class Product {
       brand: json["brand"] ?? "",
       size: json["size"] ?? "",
       flavour: json["flavour"] ?? "",
-      qty: json["qty"] ?? "",
+      qty: json["qty"] ?? 0,
       unit: json["unit"] ?? "",
-      qtyPcs: json["qtyPcs"] ?? "",
+      qtyPcs: json["qtyPcs"] ?? 0,
       price: json["price"].toDouble() ?? 00.00,
       netTotal: json["netTotal"].toDouble() ?? 00.00,
       weightGross: json["weightGross"].toDouble() ?? 0.00,
