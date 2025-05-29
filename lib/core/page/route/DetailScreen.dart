@@ -320,7 +320,7 @@ class _DetailScreenState extends State<DetailScreen> {
             options: Options(
               headers: {
                 "Content-Type": "multipart/form-data",
-                'x-channel': 'cash',
+                'x-channel': 'credit',
               },
             ),
           );
@@ -387,7 +387,7 @@ class _DetailScreenState extends State<DetailScreen> {
           options: Options(
             headers: {
               "Content-Type": "multipart/form-data",
-              'x-channel': 'cash',
+              'x-channel': 'credit',
             },
           ),
         );

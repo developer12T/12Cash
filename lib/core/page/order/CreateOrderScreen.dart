@@ -290,7 +290,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
-            'x-channel': 'cash',
+            'x-channel': 'credit',
           },
         ),
       );

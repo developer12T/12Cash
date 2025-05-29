@@ -13,6 +13,7 @@ import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
 import 'package:_12sale_app/core/page/order/OrderINRouteScreen.dart';
 import 'package:_12sale_app/core/page/store/EditStoreDataScreen.dart';
+import 'package:_12sale_app/core/page/store/OrderStoreScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
@@ -145,7 +146,7 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
         options: Options(
           headers: {
             "Content-Type": "application/json",
-            'x-channel': 'cash',
+            'x-channel': 'credit',
           },
         ),
       );
@@ -565,17 +566,28 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                     ],
                                   ),
                                 ),
-                                BudgetCard(
-                                  title: 'Total Sales',
-                                  icon: Icons.attach_money,
-                                  color: Colors.green,
-                                  storeId: widget.store.storeId,
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OrderStoreScreen(
+                                          storeId: widget.store.storeId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: BudgetCard(
+                                    title: 'Total Sales',
+                                    icon: Icons.attach_money,
+                                    color: Colors.green,
+                                    storeId: widget.store.storeId,
+                                  ),
                                 ),
                                 // Row(
                                 //   mainAxisAlignment:
                                 //       MainAxisAlignment.spaceEvenly,
                                 //   children: [
-
                                 //     // Container(
                                 //     //   padding:
                                 //     //       EdgeInsets.symmetric(vertical: 35),
