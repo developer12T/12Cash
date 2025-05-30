@@ -228,7 +228,7 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
-            'x-channel': 'credit',
+            'x-channel': 'cash',
           },
         ),
       );
@@ -286,7 +286,7 @@ class _EditStoreDataScreenState extends State<EditStoreDataScreen> {
         options: Options(
           headers: {
             "Content-Type": "application/json",
-            'x-channel': 'credit',
+            'x-channel': 'cash',
           },
         ),
       );

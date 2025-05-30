@@ -51,7 +51,7 @@ class PromotionListItem {
   String? proId;
   String? proName;
   String? proType;
-  final int qty;
+  int qty;
   PromotionListItem({
     required this.id,
     required this.name,

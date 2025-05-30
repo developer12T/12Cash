@@ -311,7 +311,11 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        // print("getRoute: ${response.data['data']}");
+
+        print("routeVisits: ${response.data}");
+        print("User.area: ${User.area}");
+        print("period: ${period}");
+        print("getRoute: ${response.data['data']}");
         if (mounted) {
           setState(() {
             routeVisits =

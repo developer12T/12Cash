@@ -468,6 +468,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
         method: 'POST',
         body: {
           "type": "sale",
+          "period": "${period}",
+          "area": "${User.area}",
           "group": selectedGroups,
           "brand": selectedBrands,
           "size": selectedSizes,

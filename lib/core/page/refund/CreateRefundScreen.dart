@@ -203,7 +203,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
-            'x-channel': 'credit',
+            'x-channel': 'cash',
           },
         ),
       );

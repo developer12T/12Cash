@@ -331,7 +331,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
-            'x-channel': 'credit',
+            'x-channel': 'cash',
           },
         ),
       );

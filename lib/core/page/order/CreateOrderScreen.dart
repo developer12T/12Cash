@@ -290,7 +290,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         options: Options(
           headers: {
             "Content-Type": "multipart/form-data",
-            'x-channel': 'credit',
+            'x-channel': 'cash',
           },
         ),
       );
@@ -2324,39 +2324,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                       "รายการโปรโมชั่นที่สามารถเปลี่ยนได้",
                                       style: Styles.black18(context),
                                     ),
-                                    // DropdownMenu<GroupPromotion>(
-                                    //   onSelected: (value) {
-                                    //     if (value != null) {
-                                    //       print(value.group);
-                                    //       setModalState(() {
-                                    //         filteredPromotion = cartlist
-                                    //             .where((store) =>
-                                    //                 // store.name
-                                    //                 //     .contains(value!.group) &&
-                                    //                 // store.name
-                                    //                 //     .contains(value!.size))
-                                    //                 store.name.contains(value.size
-                                    //                     .replaceAll(" ", "")
-                                    //                     .toLowerCase()))
-                                    //             .toList();
-                                    //       });
-                                    //     }
-                                    //   },
-                                    //   textStyle: Styles.black18(context),
-                                    //   dropdownMenuEntries: groupPromotion
-                                    //       .map<DropdownMenuEntry<GroupPromotion>>(
-                                    //           (GroupPromotion value) {
-                                    //     return DropdownMenuEntry<GroupPromotion>(
-                                    //         value: value,
-                                    //         label:
-                                    //             "${value.group} ${value.size}");
-                                    //   }).toList(),
-                                    //   // dropdownMenuEntries: groupPromotion,
-                                    // )
                                     SizedBox(
                                       width: 16,
                                     ),
-
                                     Expanded(
                                       child: DropdownSearch<GroupPromotion>(
                                         dropdownButtonProps:
@@ -2786,64 +2756,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                         ),
                                                                       );
                                                                     }
-
-                                                                    if (promotionListChange
-                                                                        .isEmpty) {
-                                                                      // print(listPromotions
-                                                                      //     .length);
-                                                                      // print(listPromotionsMock
-                                                                      //     .length);
-                                                                      // promotionListChange
-                                                                      //     .addAll(
-                                                                      //   List.from(
-                                                                      //       listPromotions),
-                                                                      // );
-
-                                                                      // promotionListChange
-                                                                      //     .add(
-                                                                      //   PromotionList(
-                                                                      //       proId:
-                                                                      //           proId,
-                                                                      //       proName:
-                                                                      //           proName,
-                                                                      //       proType:
-                                                                      //           proType,
-                                                                      //       discount:
-                                                                      //           discount,
-                                                                      //       listPromotion: listPromotionsMock
-                                                                      //           .where((item) => item.proId == proId)
-                                                                      //           .toList()),
-                                                                      // );
-
-                                                                      // promotionListChange.removeWhere(
-                                                                      //     (item) =>
-                                                                      //         item.proId ==
-                                                                      //         proId);
-                                                                      // promotionListChange
-                                                                      //     .add(
-                                                                      //   PromotionList(
-                                                                      //       proId:
-                                                                      //           proId,
-                                                                      //       discount:
-                                                                      //           0,
-                                                                      //       proName:
-                                                                      //           proName,
-                                                                      //       proType:
-                                                                      //           proType,
-                                                                      //       listPromotion: listPromotionsMock
-                                                                      //           .where((item) => item.proId == proId)
-                                                                      //           .toList()),
-                                                                      // );
-                                                                    }
                                                                   },
                                                                 );
-                                                                // Uncomment if needed to refresh cart details
-                                                                // await _getTotalCart(setModalState);
-
-                                                                // Close modal if cart is empty
-                                                                // if (cartlist.isEmpty) {
-                                                                //   Navigator.pop(context);
-                                                                // }
                                                               },
                                                               style:
                                                                   ElevatedButton

@@ -44,7 +44,7 @@ class ApiService {
         headers: headers ??
             {
               'Content-Type': 'application/json',
-              'x-channel': 'credit',
+              'x-channel': 'cash',
             },
       );
 
