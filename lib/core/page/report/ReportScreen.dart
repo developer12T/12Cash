@@ -181,24 +181,27 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                   ),
                 )
               : refundOrders.isNotEmpty
-                  ? LoadingSkeletonizer(
-                      loading: _loadingRefund,
-                      child: ListView.builder(
-                        // controller: _scrollController,
-                        itemCount: refundOrders.length,
-                        itemBuilder: (context, index) {
-                          return RefundCard(
-                            item: refundOrders[index],
-                            onDetailsPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => RefundDetailScreen(
-                                      orderId: refundOrders[index].orderId),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                  ? RefreshIndicator(
+                      onRefresh: () => _getRefundOrder(),
+                      child: LoadingSkeletonizer(
+                        loading: _loadingRefund,
+                        child: ListView.builder(
+                          // controller: _scrollController,
+                          itemCount: refundOrders.length,
+                          itemBuilder: (context, index) {
+                            return RefundCard(
+                              item: refundOrders[index],
+                              onDetailsPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => RefundDetailScreen(
+                                        orderId: refundOrders[index].orderId),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     )
                   : Row(

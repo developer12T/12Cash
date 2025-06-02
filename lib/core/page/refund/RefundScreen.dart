@@ -246,6 +246,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
         method: 'POST',
         body: {
           "type": isSelect == 1 ? "refund" : "sale",
+          "area": User.area,
+          "period": "${period}",
           "group": selectedGroups,
           "brand": selectedBrands,
           "size": selectedSizes,
@@ -261,12 +263,10 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
         // setState(() {});
 
         Timer(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            setState(() {
-              productList = data.map((item) => Product.fromJson(item)).toList();
-              _loadingProduct = false;
-            });
-          }
+          setState(() {
+            productList = data.map((item) => Product.fromJson(item)).toList();
+            _loadingProduct = false;
+          });
         });
       }
     } catch (e) {

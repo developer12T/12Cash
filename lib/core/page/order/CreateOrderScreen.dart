@@ -2214,6 +2214,58 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                               MainAxisAlignment
                                                                   .end,
                                                           children: [
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                setModalState(
+                                                                    () {
+                                                                  if (totalChangeList
+                                                                              .firstWhere((item) =>
+                                                                                  item.proId ==
+                                                                                  proId)
+                                                                              .total +
+                                                                          1 <
+                                                                      totalChangeList
+                                                                          .firstWhere((item) =>
+                                                                              item.proId ==
+                                                                              proId)
+                                                                          .totalShow) {
+                                                                    filteredItems[
+                                                                            index]
+                                                                        .qty--;
+
+                                                                    totalChangeList
+                                                                        .firstWhere((item) =>
+                                                                            item.proId ==
+                                                                            proId)
+                                                                        .total += 1;
+                                                                  }
+                                                                });
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.remove,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
+                                                            ),
                                                             Container(
                                                               padding:
                                                                   EdgeInsets
@@ -2242,6 +2294,53 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   context,
                                                                 ),
                                                               ),
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                setModalState(
+                                                                    () {
+                                                                  if (totalChangeList
+                                                                          .firstWhere((item) =>
+                                                                              item.proId ==
+                                                                              proId)
+                                                                          .total >
+                                                                      0) {
+                                                                    filteredItems[
+                                                                            index]
+                                                                        .qty++;
+
+                                                                    totalChangeList
+                                                                        .firstWhere((item) =>
+                                                                            item.proId ==
+                                                                            proId)
+                                                                        .total -= 1;
+                                                                  }
+                                                                });
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.add,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
                                                             ),
                                                             IconButton(
                                                               onPressed: () {
@@ -2550,11 +2649,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                         .qty--;
                                                                   }
                                                                 });
-
-                                                                // await _reduceCart(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState);
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2612,14 +2706,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             ElevatedButton(
                                                               onPressed:
                                                                   () async {
-                                                                // await _addCartDu(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState);
-                                                                // setState(() {
-                                                                //   itemQuantities[
-                                                                //       index]++;
-                                                                // });
                                                                 if (cartlist[
                                                                             index]
                                                                         .qty <
@@ -2697,64 +2783,110 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                       print(
                                                                           "cartlist[index] ${cartlist[index].qty}");
 
-                                                                      listPromotionsMock
-                                                                          .add(
-                                                                        PromotionListItem(
-                                                                          proId:
-                                                                              proId,
-                                                                          proName:
-                                                                              proName,
-                                                                          id: cartlist[index]
-                                                                              .id,
-                                                                          name:
-                                                                              cartlist[index].name,
-                                                                          unit: listPromotions.isNotEmpty
-                                                                              ? listPromotions[0].unit
-                                                                              : '',
-                                                                          brand:
-                                                                              cartlist[index].brand,
-                                                                          flavour:
-                                                                              cartlist[index].flavour,
-                                                                          group:
-                                                                              cartlist[index].group,
-                                                                          qty: cartlist[index]
-                                                                              .qty,
-                                                                          size:
-                                                                              cartlist[index].size,
-                                                                          unitName: listPromotions.isNotEmpty
-                                                                              ? listPromotions[0].unitName
-                                                                              : '',
-                                                                        ),
-                                                                      );
-                                                                      listPromotions
-                                                                          .add(
-                                                                        PromotionListItem(
-                                                                          proId:
-                                                                              proId,
-                                                                          proName:
-                                                                              proName,
-                                                                          id: cartlist[index]
-                                                                              .id,
-                                                                          name:
-                                                                              cartlist[index].name,
-                                                                          unit: listPromotions.isNotEmpty
-                                                                              ? listPromotions[0].unit
-                                                                              : '',
-                                                                          brand:
-                                                                              cartlist[index].brand,
-                                                                          flavour:
-                                                                              cartlist[index].flavour,
-                                                                          group:
-                                                                              cartlist[index].group,
-                                                                          qty: cartlist[index]
-                                                                              .qty,
-                                                                          size:
-                                                                              cartlist[index].size,
-                                                                          unitName: listPromotions.isNotEmpty
-                                                                              ? listPromotions[0].unitName
-                                                                              : '',
-                                                                        ),
-                                                                      );
+                                                                      if (listPromotionsMock
+                                                                          .isNotEmpty) {
+                                                                        if (listPromotionsMock.any((item) =>
+                                                                            item.id ==
+                                                                            cartlist[index].id)) {
+                                                                          listPromotionsMock
+                                                                              .firstWhere((item) => item.id == cartlist[index].id)
+                                                                              .qty += cartlist[index].qty;
+
+                                                                          listPromotions
+                                                                              .firstWhere((item) => item.id == cartlist[index].id)
+                                                                              .qty += cartlist[index].qty;
+                                                                        } else {
+                                                                          listPromotionsMock
+                                                                              .add(
+                                                                            PromotionListItem(
+                                                                              proId: proId,
+                                                                              proName: proName,
+                                                                              id: cartlist[index].id,
+                                                                              name: cartlist[index].name,
+                                                                              unit: listPromotions.isNotEmpty ? listPromotions[0].unit : '',
+                                                                              brand: cartlist[index].brand,
+                                                                              flavour: cartlist[index].flavour,
+                                                                              group: cartlist[index].group,
+                                                                              qty: cartlist[index].qty,
+                                                                              size: cartlist[index].size,
+                                                                              unitName: listPromotions.isNotEmpty ? listPromotions[0].unitName : '',
+                                                                            ),
+                                                                          );
+                                                                          listPromotions
+                                                                              .add(
+                                                                            PromotionListItem(
+                                                                              proId: proId,
+                                                                              proName: proName,
+                                                                              id: cartlist[index].id,
+                                                                              name: cartlist[index].name,
+                                                                              unit: listPromotions.isNotEmpty ? listPromotions[0].unit : '',
+                                                                              brand: cartlist[index].brand,
+                                                                              flavour: cartlist[index].flavour,
+                                                                              group: cartlist[index].group,
+                                                                              qty: cartlist[index].qty,
+                                                                              size: cartlist[index].size,
+                                                                              unitName: listPromotions.isNotEmpty ? listPromotions[0].unitName : '',
+                                                                            ),
+                                                                          );
+                                                                        }
+                                                                      } else {
+                                                                        listPromotionsMock
+                                                                            .add(
+                                                                          PromotionListItem(
+                                                                            proId:
+                                                                                proId,
+                                                                            proName:
+                                                                                proName,
+                                                                            id: cartlist[index].id,
+                                                                            name:
+                                                                                cartlist[index].name,
+                                                                            unit: listPromotions.isNotEmpty
+                                                                                ? listPromotions[0].unit
+                                                                                : '',
+                                                                            brand:
+                                                                                cartlist[index].brand,
+                                                                            flavour:
+                                                                                cartlist[index].flavour,
+                                                                            group:
+                                                                                cartlist[index].group,
+                                                                            qty:
+                                                                                cartlist[index].qty,
+                                                                            size:
+                                                                                cartlist[index].size,
+                                                                            unitName: listPromotions.isNotEmpty
+                                                                                ? listPromotions[0].unitName
+                                                                                : '',
+                                                                          ),
+                                                                        );
+                                                                        listPromotions
+                                                                            .add(
+                                                                          PromotionListItem(
+                                                                            proId:
+                                                                                proId,
+                                                                            proName:
+                                                                                proName,
+                                                                            id: cartlist[index].id,
+                                                                            name:
+                                                                                cartlist[index].name,
+                                                                            unit: listPromotions.isNotEmpty
+                                                                                ? listPromotions[0].unit
+                                                                                : '',
+                                                                            brand:
+                                                                                cartlist[index].brand,
+                                                                            flavour:
+                                                                                cartlist[index].flavour,
+                                                                            group:
+                                                                                cartlist[index].group,
+                                                                            qty:
+                                                                                cartlist[index].qty,
+                                                                            size:
+                                                                                cartlist[index].size,
+                                                                            unitName: listPromotions.isNotEmpty
+                                                                                ? listPromotions[0].unitName
+                                                                                : '',
+                                                                          ),
+                                                                        );
+                                                                      }
                                                                     }
                                                                   },
                                                                 );

@@ -212,28 +212,28 @@ class _DetailScreenState extends State<DetailScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data['data'];
-      // print("getRoute: ${response.data['data']}");
-      if (mounted) {
-        setState(() {
-          storeDetail =
-              data.isNotEmpty ? DetailStoreVisit.fromJson(data[0]) : null;
-          status = storeDetail?.listStore[0].status ?? "0";
-          statusCheck = int.tryParse(status) ?? 0;
-          String inputString = storeDetail?.listStore[0].date ?? "0";
-          print("inputString $inputString");
-          if (inputString != "0") {
-            DateTime inputDate = DateTime.parse(inputString);
-            dateCheck = inputDate.add(Duration(hours: 7));
-            // limitDate = dateCheck?.add(Duration(days: 1));
+      print("statusCheck: ${response.data['data']}");
 
-            // if (DateTime.now().isBefore(dateCheck!)) {
-            //   print('✅ Valid: limitDate is still before $dateCheck.');
-            // } else {
-            //   print('❌ Invalid: limitDate passed $dateCheck.');
-            // }
-          }
-        });
-      }
+      setState(() {
+        storeDetail =
+            data.isNotEmpty ? DetailStoreVisit.fromJson(data[0]) : null;
+        status = storeDetail?.listStore[0].status ?? "0";
+        statusCheck = int.tryParse(status) ?? 0;
+        String inputString = storeDetail?.listStore[0].date ?? "0";
+        print("inputString $inputString");
+        if (inputString != "0") {
+          DateTime inputDate = DateTime.parse(inputString);
+          dateCheck = inputDate.add(Duration(hours: 7));
+          // limitDate = dateCheck?.add(Duration(days: 1));
+
+          // if (DateTime.now().isBefore(dateCheck!)) {
+          //   print('✅ Valid: limitDate is still before $dateCheck.');
+          // } else {
+          //   print('❌ Invalid: limitDate passed $dateCheck.');
+          // }
+        }
+      });
+      // print("statusCheck $statusCheck");
       print("dateCheck $dateCheck");
       print("DateTime.now() ${DateTime.now()}");
 
