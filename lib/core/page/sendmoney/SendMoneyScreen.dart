@@ -2,9 +2,13 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld2.dart';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:dartx/dartx.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:toastification/toastification.dart';
 
 class SendMoneyScreen extends StatefulWidget {
   const SendMoneyScreen({super.key});
@@ -15,6 +19,67 @@ class SendMoneyScreen extends StatefulWidget {
 
 class _SendMoneyScreenState extends State<SendMoneyScreen> {
   String storeImagePath = "";
+  double sendMoney = 0;
+  double totalMoney = 0;
+  String status = "";
+  String date =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}${DateFormat('dd').format(DateTime.now())}";
+  TextEditingController countController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _getSendmoney();
+  }
+
+  bool isDouble(String input) {
+    return double.tryParse(input) != null;
+  }
+
+  Future<void> _addSendMoney(sendMoney) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/sendmoney/addSendMoney',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "date": "${date}",
+          "sendMoney": sendMoney,
+        },
+      );
+    } catch (e) {
+      print("Error _addSendMoney: $e");
+    }
+  }
+
+  Future<void> _getSendmoney() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/sendmoney/getSendMoney',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "date": "${date}",
+        },
+      );
+      print("Response: $response");
+      if (response.statusCode == 200) {
+        setState(() {
+          sendMoney = response.data['sendmoney'].toDouble();
+          totalMoney = response.data['sendmoney'].toDouble();
+          status = response.data['status'];
+          countController = TextEditingController(text: sendMoney.toString());
+        });
+      }
+    } catch (e) {
+      print("Error getSendmoney: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,13 +104,51 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             SizedBox(
               height: 16,
             ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                // padding: const EdgeInsets.all(8),
+                elevation: 0, // Disable shadow
+                shadowColor: Colors.transparent, // Ensure no shadow color
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero, side: BorderSide.none),
+              ),
+              onPressed: () {
+                setState(() {
+                  // count = 1;
+                });
+                _showCountSheet(
+                  context,
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.grey,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                width: 200,
+                height: 75,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(totalMoney)}",
+                      style: Styles.headerGreen32(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             Text(
-              "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(10000)}",
+              "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)}",
               style: Styles.headerGreen32(context),
               textAlign: TextAlign.end,
             ),
             Text(
-              "สถานะ : ยังไม่ส่งเงิน",
+              "สถานะ : $status",
               style: Styles.headerRed24(context),
               textAlign: TextAlign.end,
             ),
@@ -59,9 +162,6 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
               onImageSelected: (String imagePath) async {
                 // await uploadFormDataWithDio(imagePath, 'store', context);
               },
-            ),
-            SizedBox(
-              height: 16,
             ),
             SizedBox(
               height: 16,
@@ -89,6 +189,144 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
           ],
         ),
       )),
+    );
+  }
+
+  void _showCountSheet(
+    BuildContext context,
+  ) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    // double screenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Text('ใส่จำนวน', style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            autofocus: true,
+                            style: Styles.black18(context),
+                            controller: countController,
+                            maxLines: 1,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                  width: 1,
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.all(16),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(8),
+                                    elevation: 0, // Disable shadow
+                                    shadowColor: Colors
+                                        .transparent, // Ensure no shadow color
+                                    backgroundColor: Styles.primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        side: BorderSide.none),
+                                  ),
+                                  onPressed: () {
+                                    if (isDouble(countController.text)) {
+                                      // if(countController.text.toDouble())
+                                      setState(() {
+                                        double countD =
+                                            countController.text.toDouble();
+                                        totalMoney = countD.toDouble();
+                                      });
+                                      Navigator.pop(context);
+                                    } else {
+                                      toastification.show(
+                                        autoCloseDuration:
+                                            const Duration(seconds: 5),
+                                        context: context,
+                                        primaryColor: Colors.red,
+                                        type: ToastificationType.error,
+                                        style: ToastificationStyle.flatColored,
+                                        title: Text(
+                                          "กรุณาใส่จำนวนให้ถูกต้อง",
+                                          style: Styles.red18(context),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Text(
+                                    "ตกลง",
+                                    style: Styles.white18(context),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
     );
   }
 }

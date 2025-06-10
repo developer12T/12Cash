@@ -4,12 +4,14 @@ class PromotionChangeList {
   final String? proId;
   final String? proName;
   final String? proType;
+  final int? proQty;
   final List<PromotionListItem> promotionListItem;
 
   PromotionChangeList({
     required this.proId,
     required this.proName,
     required this.proType,
+    required this.proQty,
     required this.promotionListItem,
   });
 
@@ -18,6 +20,7 @@ class PromotionChangeList {
       proId: json['proId'], //  field name
       proName: json['proName'], //  field name
       proType: json['proType'], //  field name
+      proQty: json['proQty'], //  field name
       promotionListItem: (json['promotionListItem'] as List<dynamic>?)
               ?.map((unit) => PromotionListItem.fromJson(unit))
               .toList() ??
@@ -30,6 +33,7 @@ class PromotionChangeList {
       'proId': proId,
       'proName': proName,
       'proType': proType,
+      'proQty': proQty,
       "promotionListItem":
           promotionListItem.map((item) => item.toJson()).toList(),
     };

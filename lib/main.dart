@@ -30,6 +30,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:upgrader/upgrader.dart';
 
 void main() async {
   try {
@@ -374,7 +375,15 @@ class _MyAppState extends State<MyApp> {
           overlayColor: Styles.primaryColor.withOpacity(0.8),
           child: MaterialApp(
             routes: {
-              '/': (context) => AuthCheck(),
+              '/': (context) => UpgradeAlert(
+                    dialogStyle: UpgradeDialogStyle.material,
+                    showIgnore: false,
+                    showLater: false,
+                    upgrader: Upgrader(
+                      debugLogging: true,
+                    ),
+                    child: AuthCheck(),
+                  ),
               // '/': (context) => CreateOrderScreen(
               //       storeId: "V10160027",
               //       storeName: "ร้านเพชรไทยคำ",

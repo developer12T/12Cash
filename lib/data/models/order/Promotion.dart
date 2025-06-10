@@ -2,6 +2,7 @@ class PromotionList {
   final String? proId;
   final String? proName;
   final String? proType;
+  final int? proQty;
   final double discount;
   final List<PromotionListItem> listPromotion;
 
@@ -9,6 +10,7 @@ class PromotionList {
     required this.proId,
     required this.proName,
     required this.proType,
+    required this.proQty,
     required this.discount,
     required this.listPromotion,
   });
@@ -23,6 +25,7 @@ class PromotionList {
               .toList() ??
           [], // ✅ Default to empty list if null
       proType: json['proType'], //  field name
+      proQty: json['proQty'], //  field name
       discount: (json['discount'] as num).toDouble(), //  it's double
     );
   }
@@ -33,6 +36,7 @@ class PromotionList {
       'proId': proId,
       'proName': proName,
       'proType': proType,
+      'proQty': proQty,
       'discount': discount,
       'listProduct': listPromotion.map((item) => item.toJson()).toList(),
     };

@@ -285,7 +285,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       );
       var response = await dio.post(
         '${ApiService.apiHost}/api/cash/order/addSlip',
-        // 'http://192.168.44.57:8006/api/cash/order/addSlip',
         data: formData,
         options: Options(
           headers: {
@@ -393,12 +392,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           }
         }
       }
-
-      // setState(() {
-      //   itemQuantities = List.filled(
-      //       itemProductChange.length, 1); // Initialize quantities to 1
-      // });
-
       print("Change Promtion Product $itemProductChange");
     } catch (e) {
       print("Error $e");
@@ -477,6 +470,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
             proId: proList.proId,
             proName: proList.proName,
             proType: proList.proType,
+            proQty: proList.proQty,
             discount: discount,
             listPromotion: listPromotions
                 .where((item) => item.proId == proList.proId)
@@ -494,8 +488,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         body: {
           "type": "sale",
           "area": "${User.area}",
-          "period":
-              "${widget.routeId == "" ? "" : widget.routeId?.substring(0, 5)}",
+          "period": "${period}",
           "storeId": "${widget.storeId}",
           "routeId": "${widget.routeId}",
           "note": "${noteController.text}",
@@ -603,6 +596,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'][0]['listProduct'];
         final List<dynamic> data2 = response.data['data'][0]['listPromotion'];
+        print("data2 $data2");
         setState(() {
           if (cartList.length == 0) {
             cartList = data.map((item) => CartList.fromJson(item)).toList();
@@ -640,6 +634,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                   proId: promotion.proId,
                   proName: promotion.proName,
                   proType: promotion.proType,
+                  proQty: promotion.proQty,
                   promotionListItem: listPromotions),
             );
           }

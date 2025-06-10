@@ -1686,8 +1686,6 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                               );
                                             },
                                             child: Container(
-                                              // padding: EdgeInsets.all(4),
-                                              // margin: EdgeInsets.all(4),
                                               decoration: BoxDecoration(
                                                 border: Border.all(
                                                   color: Colors.grey,
@@ -2241,7 +2239,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
     BuildContext context,
   ) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    // double screenHeight = MediaQuery.of(context).size.height;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allow full height and scrolling
