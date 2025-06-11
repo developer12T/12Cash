@@ -112,30 +112,30 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final socketService = Provider.of<SocketService>(context);
+    // final socketService = Provider.of<SocketService>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (socketService.latestMessage != latestMessage) {
-        context.loaderOverlay.show();
-        _getProduct().then((_) {
-          Timer(Duration(seconds: 3), () {
-            context.loaderOverlay.hide();
-          });
-        });
+      // if (socketService.latestMessage != latestMessage) {
+      //   context.loaderOverlay.show();
+      //   _getProduct().then((_) {
+      //     Timer(Duration(seconds: 3), () {
+      //       context.loaderOverlay.hide();
+      //     });
+      //   });
 
-        toastification.show(
-          context: context,
-          title: Text(
-            socketService.latestMessage,
-            style: Styles.green18(context),
-          ),
-          style: ToastificationStyle.flatColored,
-          primaryColor: Colors.green,
-          autoCloseDuration: Duration(seconds: 5),
-        );
-        setState(() {
-          latestMessage = socketService.latestMessage;
-        });
-      }
+      //   toastification.show(
+      //     context: context,
+      //     title: Text(
+      //       socketService.latestMessage,
+      //       style: Styles.green18(context),
+      //     ),
+      //     style: ToastificationStyle.flatColored,
+      //     primaryColor: Colors.green,
+      //     autoCloseDuration: Duration(seconds: 5),
+      //   );
+      //   setState(() {
+      //     latestMessage = socketService.latestMessage;
+      //   });
+      // }
     });
     // Register this screen as a route-aware widget
     final ModalRoute? route = ModalRoute.of(context);

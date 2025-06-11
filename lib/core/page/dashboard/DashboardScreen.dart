@@ -21,6 +21,7 @@ import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
 import 'package:_12sale_app/core/page/sendmoney/SendMoneyScreen.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
 import 'package:_12sale_app/core/page/stock/StockScreen.dart';
+import 'package:_12sale_app/core/page/stock/StockScreenTest.dart';
 import 'package:_12sale_app/core/page/withdraw/WithDrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Shipping.dart';
@@ -243,7 +244,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         onTap3: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => StockScreen(),
+              builder: (context) => StockScreenTest(),
             ),
           );
         },

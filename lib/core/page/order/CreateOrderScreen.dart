@@ -501,7 +501,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         },
       );
       if (response.statusCode == 200) {
-        await _addStockMovement(response.data['data']['orderId']);
+        // await _addStockMovement(response.data['data']['orderId']);
         if (isSelectCheckout == "QR Payment") {
           await uploadImageSlip(response.data['data']['orderId']);
           toastification.show(

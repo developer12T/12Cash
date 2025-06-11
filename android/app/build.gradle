@@ -6,11 +6,9 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-}
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     namespace = "com.onetwotrading.onetwocashapp"
@@ -34,7 +32,7 @@ android {
         applicationId = "com.onetwotrading.onetwocashapp"
         minSdk = 21  // Ensure minSdk is at least 21
         targetSdk = 34
-        versionCode = 2
+        versionCode = 3
         versionName = "1.0.0"
         multiDexEnabled = true  // ✅ Enable MultiDex if not already enabled
     }
@@ -50,10 +48,10 @@ android {
 
     buildTypes {
         release {
-            // signingConfig signingConfigs.release
-            // minifyEnabled false
-            // shrinkResources false
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            // signingConfig = signingConfigs.debug
         }
     }
 }

@@ -350,6 +350,25 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
               (route) => route.isFirst,
             );
+
+            // Navigator.pushAndRemoveUntil(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => HomeScreen(
+            //       index: 1,
+            //     ),
+            //   ),
+            //   (route) => route.isFirst,
+            // );
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => ShopRouteScreen(
+            //       route: widget.route,
+            //       routeId: widget.routeId,
+            //     ),
+            //   ),
+            // );
           }
         }
       }
@@ -406,6 +425,7 @@ class _DetailScreenState extends State<DetailScreen> {
             statusCheck = 2;
             storeDetail?.listStore[0].status = '2';
           });
+          context.loaderOverlay.show();
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
@@ -1109,9 +1129,8 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                               DialogButton(
                                 onPressed: () async {
-                                  context.loaderOverlay.show();
                                   await checkInStoreAndSell(context);
-                                  context.loaderOverlay.hide();
+                                  // context.loaderOverlay.hide();
                                 },
                                 color: Styles.successButtonColor,
                                 child: Text(

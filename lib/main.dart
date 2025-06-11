@@ -34,8 +34,8 @@ import 'package:upgrader/upgrader.dart';
 
 void main() async {
   try {
-    SocketService socketService = SocketService();
-    socketService.connect();
+    // SocketService socketService = SocketService();
+    // socketService.connect();
     // tz.initializeTimeZones();
     // // Configure the HTTP client to use a proxy
     // final client = HttpClient()
@@ -102,7 +102,7 @@ void main() async {
               ChangeNotifierProvider(create: (_) => RouteVisitFilterLocal()),
               ChangeNotifierProvider(create: (_) => StoreLocal()),
               ChangeNotifierProvider(create: (_) => RefundfilterLocal()),
-              ChangeNotifierProvider(create: (_) => SocketService()),
+              // ChangeNotifierProvider(create: (_) => SocketService()),
             ],
             child: MyApp(),
           ),

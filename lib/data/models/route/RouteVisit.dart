@@ -33,22 +33,21 @@ class RouteVisit {
     this.listStore,
   });
 
-  // Factory method to parse JSON into RouteVisit
   factory RouteVisit.fromJson(Map<String, dynamic> json) {
     return RouteVisit(
-      id: json['id'],
-      period: json['period'],
-      area: json['area'],
-      day: json['day'],
-      storeAll: json['storeAll'],
-      storePending: json['storePending'],
-      storeSell: json['storeSell'],
-      storeCheckInNotSell: json['storeCheckInNotSell'],
-      storeNotSell: json['storeNotSell'],
-      storeTotal: json['storeTotal'],
-      percentComplete: (json['percentComplete'] as num).toDouble(),
-      percentEffective: (json['percentEffective'] as num).toDouble(),
-      percentVisit: (json['percentVisit'] as num).toDouble(),
+      id: json['id'] ?? '',
+      period: json['period'] ?? '',
+      area: json['area'] ?? '',
+      day: json['day'] ?? '',
+      storeAll: (json['storeAll'] ?? 0) as int,
+      storePending: (json['storePending'] ?? 0) as int,
+      storeSell: (json['storeSell'] ?? 0) as int,
+      storeCheckInNotSell: (json['storeCheckInNotSell'] ?? 0) as int,
+      storeNotSell: (json['storeNotSell'] ?? 0) as int,
+      storeTotal: (json['storeTotal'] ?? 0) as int,
+      percentComplete: (json['percentComplete'] ?? 0).toDouble(),
+      percentEffective: (json['percentEffective'] ?? 0).toDouble(),
+      percentVisit: (json['percentVisit'] ?? 0).toDouble(),
       listStore: (json['listStore'] as List?)
               ?.map((store) => ListStore.fromJson(store))
               .toList() ??
@@ -56,7 +55,6 @@ class RouteVisit {
     );
   }
 
-  // Method to convert object back to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld2.dart';
+import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:dartx/dartx.dart';
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -36,8 +40,40 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
     return double.tryParse(input) != null;
   }
 
+  Future<void> uploadImageSendmoney() async {
+    try {
+      Dio dio = Dio();
+      final MultipartFile imageFile =
+          await MultipartFile.fromFile(storeImagePath);
+      var formData = FormData.fromMap(
+        {
+          'sendmoneyImage': imageFile,
+          'area': "${User.area}",
+          "date": "${date}"
+        },
+      );
+
+      var response = await dio.post(
+        '${ApiService.apiHost}/api/cash/sendmoney/addSendMoneyImage',
+        data: formData,
+        options: Options(
+          headers: {
+            "Content-Type": "multipart/form-data",
+            'x-channel': 'cash',
+          },
+        ),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print("Image uploaded successfully ${response.data}");
+      }
+    } catch (e) {
+      print("Error uploadImageSendmoney: $e");
+    }
+  }
+
   Future<void> _addSendMoney(sendMoney) async {
     try {
+      print(sendMoney);
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
@@ -46,9 +82,45 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         body: {
           "area": "${User.area}",
           "date": "${date}",
-          "sendMoney": sendMoney,
+          "sendmoney": double.parse(sendMoney),
         },
       );
+      if (response.statusCode == 200) {
+        await _getSendmoney();
+        await uploadImageSendmoney();
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ส่งเงินสําเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(
+              index: 0,
+            ),
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.red,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "เกิดข้อผิดพลาด",
+            style: Styles.green18(context),
+          ),
+        );
+      }
     } catch (e) {
       print("Error _addSendMoney: $e");
     }
@@ -149,7 +221,9 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             ),
             Text(
               "สถานะ : $status",
-              style: Styles.headerRed24(context),
+              style: status == 'ส่งเงินครบ'
+                  ? Styles.headerGreen24(context)
+                  : Styles.headerRed24(context),
               textAlign: TextAlign.end,
             ),
             SizedBox(
@@ -160,17 +234,37 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
               imagePath: storeImagePath != "" ? storeImagePath : null,
               label: "ใบเงินฝาก",
               onImageSelected: (String imagePath) async {
-                // await uploadFormDataWithDio(imagePath, 'store', context);
+                setState(() {
+                  storeImagePath = imagePath;
+                });
               },
             ),
             SizedBox(
               height: 16,
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                if (status != "ส่งเงินครบ") {
+                  if (storeImagePath != '') {
+                    _addSendMoney(countController.text);
+                  } else {
+                    toastification.show(
+                      autoCloseDuration: const Duration(seconds: 5),
+                      context: context,
+                      primaryColor: Colors.red,
+                      type: ToastificationType.error,
+                      style: ToastificationStyle.flatColored,
+                      title: Text(
+                        "กรุณาถ่ายรูปการส่งเงิน",
+                        style: Styles.red18(context),
+                      ),
+                    );
+                  }
+                }
+              },
               child: Text(
                 "กดเพื่อส่งเงิน",
-                style: "dw" == "dw"
+                style: status != "ส่งเงินครบ"
                     ? Styles.pirmary18(context)
                     : Styles.grey18(context),
               ),
@@ -180,7 +274,9 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                   side: BorderSide(
-                    color: "dw" == "dw" ? Styles.primaryColor : Colors.grey,
+                    color: status != "ส่งเงินครบ"
+                        ? Styles.primaryColor
+                        : Colors.grey,
                     width: 1,
                   ),
                 ),

@@ -1,3 +1,6 @@
+upload-key.jks
+upload_certificate.pem
+
 # Miscellaneous
 *.class
 *.log

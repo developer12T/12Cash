@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiException implements Exception {
@@ -26,6 +27,22 @@ class ApiService {
   // Init function to load .env file asynchronously
   Future<void> init() async {
     await dotenv.load(fileName: ".env");
+
+    // ✅ Set default headers
+    dio.options.headers = {
+      'Accept': 'application/json',
+      // 'User-Agent': 'PostmanRuntime/7.32.3',
+      'Content-Type': 'application/json',
+      'x-channel': 'cash',
+    };
+
+    // ✅ Allow all SSL certificates (for debug only!)
+    // ignore: deprecated_member_use
+    (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+        (client) {
+      client.badCertificateCallback = (cert, host, port) => true;
+      return client;
+    };
   }
 
   Future<dynamic> request({
@@ -38,11 +55,17 @@ class ApiService {
     try {
       String baseUrl = dotenv.env['API_URL'] ?? 'https://default.host.com';
       String url = '$baseUrl/$endpoint';
+      print("➡️ Requesting: $url");
+      print("➡️ Method: $method");
+      print("➡️ Params: $queryParams");
+      print("➡️ Body: $body");
 
       Options options = Options(
         method: method,
         headers: headers ??
             {
+              'Accept': 'application/json',
+              'User-Agent': 'PostmanRuntime/7.32.3',
               'Content-Type': 'application/json',
               'x-channel': 'cash',
             },

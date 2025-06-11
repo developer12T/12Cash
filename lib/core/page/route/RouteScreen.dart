@@ -34,6 +34,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
@@ -287,18 +288,6 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
     }
   }
 
-  Future<void> _loadSaleRoute() async {
-    String jsonSaleRoute = await rootBundle.loadString('data/sale_route.json');
-    List<dynamic> jsonData = jsonDecode(jsonSaleRoute);
-
-    setState(() {
-      _routes = jsonData
-          .map((data) => SaleRoute.fromJson(data as Map<String, dynamic>))
-          .toList();
-    });
-    await saveToStorage('saleRoutes', _routes);
-  }
-
   Future<void> _getRouteVisit() async {
     try {
       ApiService apiService = ApiService();
@@ -322,11 +311,12 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
                 data.map((item) => RouteVisit.fromJson(item)).toList();
             _loadingRouteVisit = false;
           });
+          context.loaderOverlay.hide();
         }
         print("getRoute: $routeVisits");
       }
     } catch (e) {
-      print("Error occurred: $e");
+      print("Error occurred: _getRouteVisit $e");
     }
   }
 
