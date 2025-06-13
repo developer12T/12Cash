@@ -272,7 +272,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             ], // Room IDs ที่เชื่อมต่อกับ bot นี้
             "message": [
               "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
-              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บ&color=yellow"
             ],
             "employeeId": "20250008",
             "isAdminNotification": true
@@ -285,7 +285,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             ], // Room IDs ที่เชื่อมต่อกับ bot นี้
             "message": [
               "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
-              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บ&color=yellow"
             ],
             "employeeId": "20250011",
             "isAdminNotification": true
@@ -298,7 +298,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             ], // Room IDs ที่เชื่อมต่อกับ bot นี้
             "message": [
               "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
-              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บ&color=yellow"
             ],
             "employeeId": "20250012",
             "isAdminNotification": true
@@ -312,7 +312,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             ], // Room IDs ที่เชื่อมต่อกับ bot นี้
             "message": [
               "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
-              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บ&color=yellow"
             ],
             "employeeId": "20250013",
             "isAdminNotification": true
@@ -325,7 +325,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             ], // Room IDs ที่เชื่อมต่อกับ bot นี้
             "message": [
               "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
-              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บ&color=yellow"
             ],
             "employeeId": "20250010",
             "isAdminNotification": true
@@ -338,7 +338,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             ], // Room IDs ที่เชื่อมต่อกับ bot นี้
             "message": [
               "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
-              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บ&color=yellow"
             ],
             "employeeId": "20250009",
             "isAdminNotification": true
