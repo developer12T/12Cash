@@ -31,7 +31,7 @@ class ApiService {
     // ✅ Set default headers
     dio.options.headers = {
       'Accept': 'application/json',
-      // 'User-Agent': 'PostmanRuntime/7.32.3',
+      'User-Agent': 'PostmanRuntime/7.32.3',
       'Content-Type': 'application/json',
       'x-channel': 'cash',
     };
@@ -105,41 +105,57 @@ class ApiService {
       throw ApiException('Unexpected error: $e');
     }
   }
-  // Future<dynamic> requestMongoDB({
-  //   required String endpoint,
-  //   String method = 'GET',
-  //   Map<String, dynamic>? queryParams,
-  //   Map<String, dynamic>? body,
-  //   Map<String, String>? headers,
-  // }) async {
-  //   try {
-  //     String baseUrl = "http://192.168.44.116:3030"; // Load base URL from .env
-  //     String url = '$baseUrl/$endpoint'; // Construct the full URL
 
-  //     Options options = Options(
-  //       method: method,
-  //       headers: headers ??
-  //           {
-  //             'Content-Type': 'application/json',
-  //           },
-  //     );
+  Future<dynamic> request2({
+    required String endpoint,
+    String method = 'GET',
+    Map<String, dynamic>? queryParams,
+    dynamic body, // ✅ <-- was Map<String, dynamic>?
+    Map<String, String>? headers,
+  }) async {
+    try {
+      String url = '$apiHost/$endpoint';
 
-  //     Response response;
+      Options options = Options(
+        method: method,
+        headers: headers ?? dio.options.headers,
+      );
 
-  //     // Handle GET and POST requests
-  //     if (method == 'GET') {
-  //       response =
-  //           await dio.get(url, queryParameters: queryParams, options: options);
-  //     } else {
-  //       response = await dio.post(url,
-  //           data: body, queryParameters: queryParams, options: options);
-  //     }
+      Response response;
 
-  //     print('Response: ${response.data}');
-  //     return response.data; // Return the response data
-  //   } catch (e) {
-  //     print('Error occurred: $e');
-  //     return null; // Return null or handle errors based on your need
-  //   }
-  // }
+      switch (method.toUpperCase()) {
+        case 'GET':
+          response = await dio.get(url,
+              queryParameters: queryParams, options: options);
+          break;
+        case 'POST':
+          response = await dio.post(url,
+              data: body, queryParameters: queryParams, options: options);
+          break;
+        case 'PATCH':
+          response = await dio.patch(url,
+              data: body, queryParameters: queryParams, options: options);
+          break;
+        default:
+          throw ApiException('Unsupported HTTP method: $method');
+      }
+
+      return response;
+    } on DioException catch (dioError) {
+      int? statusCode = dioError.response?.statusCode;
+      String errorMessage = dioError.message ?? 'Unknown Dio error';
+
+      if (statusCode == 400) {
+        errorMessage = 'Bad Request';
+      } else if (statusCode == 401) {
+        errorMessage = 'Unauthorized';
+      } else if (statusCode == 500) {
+        errorMessage = 'Server error';
+      }
+
+      throw ApiException(errorMessage, statusCode);
+    } catch (e) {
+      throw ApiException('Unexpected error: $e');
+    }
+  }
 }

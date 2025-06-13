@@ -99,6 +99,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             style: Styles.green18(context),
           ),
         );
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(

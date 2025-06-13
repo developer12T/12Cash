@@ -289,6 +289,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
               style: Styles.green18(context),
             ),
           );
+          // Future.delayed(Duration(milliseconds: 3000));
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(

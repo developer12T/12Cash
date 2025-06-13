@@ -261,9 +261,9 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
     // Initialize Dio
 
     HttpClient client = new HttpClient();
-    client.findProxy = HttpClient.findProxyFromEnvironment;
+    client.findProxy = await HttpClient.findProxyFromEnvironment;
     print(client);
-    Dio dio = Dio();
+    Dio dio = await Dio();
     String jsonData = '''
 {
       "name": "${_storeData.name}",
@@ -322,19 +322,31 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 
       print(formData);
       print(imageList);
+      final apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request2(
+        endpoint: 'api/cash/store/addStore',
+        method: 'POST',
+        body: formData,
+        headers: {
+          'x-channel': 'cash',
+          'Content-Type': 'multipart/form-data',
+        },
+      );
 
       // client.findProxy = HttpClient.findProxyFromEnvironment;
 
-      var response = await dio.post(
-        '${ApiService.apiHost}/api/cash/store/addStore',
-        data: formData,
-        options: Options(
-          headers: {
-            "Content-Type": "multipart/form-data",
-            'x-channel': 'cash',
-          },
-        ),
-      );
+      // var response = await dio.post(
+      //   '${ApiService.apiHost}/api/cash/store/addStore',
+      //   data: formData,
+      //   options: Options(
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //       'x-channel': 'cash',
+      //     },
+      //   ),
+      // );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         print("Image uploaded successfully ${response.data}");
@@ -374,6 +386,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
             ),
           );
           context.loaderOverlay.hide();
+          // Future.delayed(Duration(milliseconds: 3000));
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen(index: 2)),

@@ -414,7 +414,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
         totalCart = 00.00;
         cartList = [];
       });
-      print("Error $e");
+      print("Error _getCart $e");
     }
   }
 
@@ -1810,8 +1810,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                         .show();
                                                     await _addCart(product);
                                                     await _getCart();
-                                                    await _updateStock(product,
-                                                        setModalState, "OUT");
+                                                    // await _updateStock(product,
+                                                    //     setModalState, "OUT");
                                                     context.loaderOverlay
                                                         .hide();
                                                   } else {

@@ -340,6 +340,7 @@ class _DetailScreenState extends State<DetailScreen> {
               statusCheck = 3;
               storeDetail?.listStore[0].status = '3';
             });
+            // await Future.delayed(Duration(milliseconds: 3000));
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
@@ -426,6 +427,7 @@ class _DetailScreenState extends State<DetailScreen> {
             storeDetail?.listStore[0].status = '2';
           });
           context.loaderOverlay.show();
+          // await Future.delayed(Duration(milliseconds: 3000));
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
