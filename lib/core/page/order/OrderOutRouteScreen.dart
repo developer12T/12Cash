@@ -83,7 +83,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   double totalCart = 0.00;
 
   int stockQty = 0;
-  String lotStock = "";
+  // String lotStock = "";
 
   List<Store> storeList = [];
   final ScrollController _cartScrollController = ScrollController();
@@ -319,12 +319,12 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
         setModalState(
           () {
             stockQty = response.data['data']['qty'].toInt();
-            lotStock = response.data['data']['lot'];
+            // lotStock = response.data['data']['lot'];
           },
         );
         setState(() {
           stockQty = response.data['data']['qty'].toInt();
-          lotStock = response.data['data']['lot'];
+          // lotStock = response.data['data']['lot'];
         });
       }
     } catch (e) {
@@ -432,7 +432,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
           "id": "${product.id}",
           "qty": count,
           "unit": "${selectedUnit}",
-          "lot": "${lotStock}"
+          // "lot": "${lotStock}"
         },
       );
       // print("Response add Cart: ${response.data['data']['listProduct']}");
@@ -1171,7 +1171,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                           price = 0.00;
                                                           count = 1;
                                                           total = 0.00;
-                                                          lotStock = '';
+                                                          // lotStock = '';
                                                           stockQty = 0;
                                                         });
 
@@ -1198,7 +1198,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                             price = 0.00;
                                                             count = 1;
                                                             total = 0.00;
-                                                            lotStock = '';
+                                                            // lotStock = '';
                                                             stockQty = 0;
                                                           });
                                                           _showProductSheet(

@@ -79,7 +79,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
   double totalCart = 0.00;
 
   int stockQty = 0;
-  String lotStock = "";
+  // String lotStock = "";
 
   String selectedStore = "กรุณาเลือกร้านค้า";
   String selectedStoreId = "";
@@ -193,12 +193,12 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
         setModalState(
           () {
             stockQty = response.data['data']['qty'].toInt();
-            lotStock = response.data['data']['lot'];
+            // lotStock = response.data['data']['lot'];
           },
         );
         setState(() {
           stockQty = response.data['data']['qty'].toInt();
-          lotStock = response.data['data']['lot'];
+          // lotStock = response.data['data']['lot'];
         });
       }
     } catch (e) {
@@ -335,7 +335,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
           "id": "${product.id}",
           "qty": count,
           "unit": "${selectedUnit}",
-          "lot": "${lotStock}"
+          // "lot": "${lotStock}"
         },
       );
       print("Response add Cart: ${response.data['data']['listProduct']}");
@@ -1142,7 +1142,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                             price = 0.00;
                                                             count = 1;
                                                             total = 0.00;
-                                                            lotStock = '';
+                                                            // lotStock = '';
                                                             stockQty = 0;
                                                           });
 
@@ -1169,7 +1169,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                               price = 0.00;
                                                               count = 1;
                                                               total = 0.00;
-                                                              lotStock = '';
+                                                              // lotStock = '';
                                                               stockQty = 0;
                                                             });
                                                             _showProductSheet(

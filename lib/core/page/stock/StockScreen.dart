@@ -66,7 +66,7 @@ class _StockScreenState extends State<StockScreen> {
   int _isSelectedGridView = 1;
 
   int stockQty = 0;
-  String lotStock = "";
+  // String lotStock = "";
 
   final int paperWidth = 69;
   final int paperWidthHeader = 76;
@@ -1077,7 +1077,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                                                     price = 0.00;
                                                     count = 1;
                                                     total = 0.00;
-                                                    lotStock = '';
+                                                    // lotStock = '';
                                                     stockQty = 0;
                                                   });
 
@@ -1101,7 +1101,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                                                       price = 0.00;
                                                       count = 1;
                                                       total = 0.00;
-                                                      lotStock = '';
+                                                      // lotStock = '';
                                                       stockQty = 0;
                                                     });
                                                     // _showProductSheet(

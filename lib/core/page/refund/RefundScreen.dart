@@ -91,7 +91,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
   TextEditingController countController = TextEditingController();
 
   int stockQty = 0;
-  String lotStock = "";
+  // String lotStock = "";
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
@@ -147,12 +147,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
         setModalState(
           () {
             stockQty = response.data['data']['qty'].toInt();
-            lotStock = response.data['data']['lot'];
+            // lotStock = response.data['data']['lot'];
           },
         );
         setState(() {
           stockQty = response.data['data']['qty'].toInt();
-          lotStock = response.data['data']['lot'];
+          // lotStock = response.data['data']['lot'];
         });
       }
     } catch (e) {
@@ -174,7 +174,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           "id": "${product.id}",
           "qty": 1,
           "unit": "${selectedUnit}",
-          "lot": "${lotStock}"
+          // "lot": "${lotStock}"
         },
       );
       print("Response add Cart: ${response.statusCode}");

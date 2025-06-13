@@ -257,6 +257,124 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
     }
   }
 
+  Future<void> sentNoitfytoBot(storeName) async {
+    try {
+      Dio dio = Dio();
+      final String apiUrl =
+          "https://apps.onetwotrading.co.th/12chat/api/messages/send";
+      var botData = {};
+
+      switch (User.zone) {
+        case "BE":
+          botData = {
+            "roomId": [
+              "684bcc9e90a3287657d67ced"
+            ], // Room IDs ที่เชื่อมต่อกับ bot นี้
+            "message": [
+              "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+            ],
+            "employeeId": "20250008",
+            "isAdminNotification": true
+          };
+          break;
+        case "CT":
+          botData = {
+            "roomId": [
+              "684bdd1390a3287657d6efa1"
+            ], // Room IDs ที่เชื่อมต่อกับ bot นี้
+            "message": [
+              "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+            ],
+            "employeeId": "20250011",
+            "isAdminNotification": true
+          };
+          break;
+        case "SH":
+          botData = {
+            "roomId": [
+              "684bd38890a3287657d6db36"
+            ], // Room IDs ที่เชื่อมต่อกับ bot นี้
+            "message": [
+              "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+            ],
+            "employeeId": "20250012",
+            "isAdminNotification": true
+          };
+
+          break;
+        case "NS":
+          botData = {
+            "roomId": [
+              "684bda5790a3287657d6ef1a"
+            ], // Room IDs ที่เชื่อมต่อกับ bot นี้
+            "message": [
+              "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+            ],
+            "employeeId": "20250013",
+            "isAdminNotification": true
+          };
+          break;
+        case "NE":
+          botData = {
+            "roomId": [
+              "684bd9a090a3287657d6ed26"
+            ], // Room IDs ที่เชื่อมต่อกับ bot นี้
+            "message": [
+              "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+            ],
+            "employeeId": "20250010",
+            "isAdminNotification": true
+          };
+          break;
+        case "NH":
+          botData = {
+            "roomId": [
+              "684bcdb090a3287657d68951"
+            ], // Room IDs ที่เชื่อมต่อกับ bot นี้
+            "message": [
+              "มีการเพิ่มร้านใหม่ ชื่อ '$storeName' จากเขต '${User.area}' โดย '${User.fullName}'",
+              "https://apps.onetwotrading.co.th/suppervisor/approve/#status=ไปที่หน้าเว็บcolor=yellow"
+            ],
+            "employeeId": "20250009",
+            "isAdminNotification": true
+          };
+          break;
+
+        default:
+      }
+
+      final response = await dio.post(
+        apiUrl,
+        data: botData,
+        options: Options(
+          headers: {
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "store.processtimeline_screen.toasting_success".tr(),
+            style: Styles.black18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error sentNotifytoBot $e");
+    }
+  }
+
   Future<void> addStore() async {
     // Initialize Dio
 
@@ -374,6 +492,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           );
           context.loaderOverlay.hide();
         } else if (response.data['message'] == 'Store added successfully') {
+          await sentNoitfytoBot(_storeData.name);
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),
             context: context,
