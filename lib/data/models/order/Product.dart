@@ -8,8 +8,8 @@ class Product {
   final String size;
   final String flavour;
   final String type;
-  final String weightGross;
-  final String weightNet;
+  final double weightGross;
+  final double weightNet;
   final String statusSale;
   final String statusWithdraw;
   final String statusRefund;
@@ -50,8 +50,8 @@ class Product {
       size: json['size'] ?? '',
       flavour: json['flavour'] ?? '',
       type: json['type'] ?? '',
-      weightGross: json['weightGross'] ?? '',
-      weightNet: json['weightNet'] ?? '',
+      weightGross: (json['weightGross'] as num?)?.toDouble() ?? 0.0,
+      weightNet: (json['weightNet'] as num?)?.toDouble() ?? 0.0,
       statusSale: json['statusSale'] ?? '',
       statusWithdraw: json['statusWithdraw'] ?? '',
       statusRefund: json['statusRefund'] ?? '',
@@ -115,8 +115,8 @@ class Product {
 class Unit {
   final String name;
   final String unit;
-  final String factor;
-  final String price;
+  final int factor;
+  final double price;
   final int? qty;
 
   Unit({
@@ -132,8 +132,10 @@ class Unit {
     return Unit(
       unit: json['unit'] ?? '',
       name: json['name'] ?? '',
-      factor: json['factor'] ?? '',
-      price: json['price'].toString(),
+      factor: json['factor'] ?? 0,
+      price: json['price'] != null
+          ? (json['price'] as num).toDouble()
+          : 0.0, // ✅ ใช้ num เพื่อรองรับทั้ง int และ double
       qty: json['qty'] ?? 0,
     );
   }

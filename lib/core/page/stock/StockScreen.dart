@@ -380,10 +380,6 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
           style: Styles.red18(context),
         ),
       );
-      // print("Printer is disconnected ($connectionStatus)");
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text("Printer is not connected")),
-      // );
     }
   }
 

@@ -34,7 +34,7 @@ class _ProductSheetState extends State<ProductSheet> {
     if (widget.product.listUnit.isNotEmpty) {
       selectedSize = widget.product.listUnit.first.name;
       selectedUnit = widget.product.listUnit.first.unit;
-      price = double.parse(widget.product.listUnit.first.price);
+      price = widget.product.listUnit.first.price;
       total = price * count;
     }
   }
@@ -213,7 +213,7 @@ class _ProductSheetState extends State<ProductSheet> {
                       setState(() {
                         selectedSize = data.name;
                         selectedUnit = data.unit;
-                        price = double.parse(data.price);
+                        price = data.price;
                         total = price * count;
                       });
                     },

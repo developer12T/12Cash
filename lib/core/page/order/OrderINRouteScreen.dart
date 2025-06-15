@@ -481,7 +481,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
       if (response.statusCode == 200) {
         final List<dynamic> dataGroup = response.data['data']['group'];
 
-        print("_getFliter: ${response.data['data']}");
+        // print("_getFliter: ${response.data['data']['group']['group']}");
         if (mounted) {
           setState(() {
             groupList = List<String>.from(dataGroup);
@@ -1526,8 +1526,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                               child: ElevatedButton(
                                                 onPressed: () async {
                                                   setModalState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    price = data.price;
                                                   });
 
                                                   setModalState(
@@ -1538,8 +1537,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                     },
                                                   );
                                                   setState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    price = data.price;
                                                     selectedSize = data.name;
                                                     selectedUnit = data.unit;
                                                     total = price * count;

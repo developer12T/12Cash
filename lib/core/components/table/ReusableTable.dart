@@ -1,5 +1,5 @@
-import 'package:_12sale_app/core/styles/style.dart';
 import 'package:flutter/material.dart';
+import 'package:_12sale_app/core/styles/style.dart';
 
 class ReusableTable extends StatelessWidget {
   final List<String> columns;
@@ -13,25 +13,88 @@ class ReusableTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      // scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: columns
-            .map((column) =>
-                DataColumn(label: Text(column, style: Styles.black18(context))))
-            .toList(),
-        rows: rows
-            .map(
-              (row) => DataRow(
-                cells: row
-                    .map((cell) => DataCell(Text(
-                          cell,
-                          style: Styles.black18(context),
-                        )))
-                    .toList(),
+    final verticalController = ScrollController();
+    final horizontalController = ScrollController();
+
+    return Scrollbar(
+      controller: horizontalController,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: horizontalController,
+        scrollDirection: Axis.horizontal,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Sticky Header Row
+            Container(
+              child: Row(
+                children: columns.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final column = entry.value;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Styles.primaryColor,
+                      border:
+                          Border.all(color: Colors.black), // Border added here
+                    ),
+                    width: index == 0
+                        ? MediaQuery.of(context).size.width * 0.35
+                        : MediaQuery.of(context).size.width * 0.15,
+                    padding: const EdgeInsets.all(8),
+                    alignment: Alignment.center,
+                    child: Text(
+                      column,
+                      style: Styles.white18(context)
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  );
+                }).toList(),
               ),
-            )
-            .toList(),
+            ),
+            const Divider(height: 1, color: Colors.black12),
+
+            // Scrollable Body Rows
+            Expanded(
+              child: Scrollbar(
+                controller: verticalController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: verticalController,
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    children: rows.map((row) {
+                      return Row(
+                        children: row.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final cell = entry.value;
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Colors.black), // Border added here
+                            ),
+                            width: index == 0
+                                ? MediaQuery.of(context).size.width * 0.35
+                                : MediaQuery.of(context).size.width * 0.15,
+                            height: 95,
+                            padding: const EdgeInsets.all(8),
+                            alignment: Alignment.center,
+                            child: Text(
+                              cell,
+                              style: Styles.black18(context),
+                              maxLines: index == 0 ? 3 : 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

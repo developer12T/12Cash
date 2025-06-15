@@ -79,6 +79,8 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
   List<RefundItem> listRefund = [];
 
   List<RefundModel> refundList = [];
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   late TextEditingController noteController;
 
@@ -260,11 +262,14 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
         method: 'POST',
         body: {
           "type": "refund",
-          "area": "${User.area}",
-          "storeId": "${widget.storeId}",
-          "note": "${noteController.text}",
-          "latitude": "$latitude",
-          "longitude": "$longitude",
+          "period": "$period",
+          "area": User.area,
+          "storeId": widget.storeId ?? "",
+          "note": noteController.text.trim().isEmpty
+              ? "-"
+              : noteController.text.trim(),
+          "latitude": latitude?.toString(),
+          "longitude": longitude?.toString(),
           "shipping": "test",
           "payment": "cash"
         },
@@ -325,6 +330,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
       //           )),
       // );
     } catch (e) {
+      context.loaderOverlay.hide();
       print("Error $e");
     }
   }

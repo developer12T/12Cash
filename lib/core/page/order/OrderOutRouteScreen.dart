@@ -9,6 +9,7 @@ import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
 import 'package:_12sale_app/core/components/modal_sheet/ProductSheet.dart';
 import 'package:_12sale_app/core/components/search/ProductSearch.dart';
+import 'package:_12sale_app/core/components/search/StoreBottomSheet.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
@@ -512,7 +513,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
         // final List<dynamic> dataBrand = response.data['data'][0]['brand'];
         // final List<dynamic> dataSize = response.data['data'][0]['size'];
         // final List<dynamic> dataFlavour = response.data['data'][0]['flavour'];
-        print("_getFliter: ${response.data['data']}");
+        print("_getFliter: ${response.data['data']['group']}");
         if (mounted) {
           setState(() {
             groupList = List<String>.from(dataGroup);
@@ -521,13 +522,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
             // flavourList = List<String>.from(dataFlavour);
           });
         }
-        // Timer(const Duration(milliseconds: 500), () {
-        //   if (mounted) {
-        //     setState(() {
-        //       _loadingAllStore = false;
-        //     });
-        //   }
-        // });
+
         print("groupList: $groupList");
         // print("listStore: ${data.length}");
       }
@@ -679,7 +674,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 8,
                   ),
                   BoxShadowCustom(
@@ -694,12 +689,12 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                               Expanded(
                                 child: Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.store,
                                       color: Styles.primaryColor,
                                       size: 30,
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 8,
                                     ),
                                     Expanded(
@@ -1570,8 +1565,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                               child: ElevatedButton(
                                                 onPressed: () async {
                                                   setModalState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    price = data.price;
                                                   });
 
                                                   setModalState(
@@ -1582,8 +1576,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                     },
                                                   );
                                                   setState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    price = data.price;
                                                     selectedSize = data.name;
                                                     selectedUnit = data.unit;
                                                     total = price * count;
@@ -2284,299 +2277,29 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
 
   void _showAddressSheet(BuildContext context) {
     TextEditingController searchController = TextEditingController();
-    List<Store> filteredStores = List.from(storeList); // Copy of storeList
+    List<Store> filteredStores = List.from(storeList);
     double screenWidth = MediaQuery.of(context).size.width;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return DraggableScrollableSheet(
-              expand: false,
-              initialChildSize: 0.8,
-              minChildSize: 0.4,
-              maxChildSize: 0.9,
-              builder: (context, scrollController) {
-                return Container(
-                  width: screenWidth * 0.95,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Styles.primaryColor,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
-                          ),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.store,
-                                  color: Colors.white,
-                                  size: 30,
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text('เลือกร้านค้า',
-                                    style: Styles.white24(context)),
-                              ],
-                            ),
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.close, color: Colors.white),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Search Bar
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: TextField(
-                          autofocus: true,
-                          style: Styles.black18(context),
-                          controller: searchController,
-                          onChanged: (query) {
-                            setModalState(() {
-                              filteredStores = storeList
-                                  .where((store) =>
-                                      store.name
-                                          .toLowerCase()
-                                          .contains(query.toLowerCase()) ||
-                                      store.address
-                                          .toLowerCase()
-                                          .contains(query.toLowerCase()) ||
-                                      store.province
-                                          .toLowerCase()
-                                          .contains(query.toLowerCase()) ||
-                                      store.tel
-                                          .toLowerCase()
-                                          .contains(query.toLowerCase()) ||
-                                      store.typeName
-                                          .toLowerCase()
-                                          .contains(query.toLowerCase()))
-                                  .toList();
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: "ค้นหาสินค้า...",
-                            hintStyle: Styles.grey18(context),
-                            prefixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.0),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                      ),
+      builder: (_) {
+        return StoreBottomSheet(
+          storeList: storeList,
+          selectedStoreId: selectedStoreId,
+          onStoreSelected: (Store selected) async {
+            setState(() {
+              selectedStoreId = selected.storeId;
+              selectedStore = selected.name;
+              selectedStoreTel = selected.tel;
+              selectedStoreShopType = selected.typeName;
+              selectedStoreAddress =
+                  "${selected.address} ${selected.district} ${selected.subDistrict} ${selected.province} ${selected.postCode}";
+            });
 
-                      // Store List
-                      Expanded(
-                        child: Container(
-                          color: Colors.white,
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: Scrollbar(
-                                  controller: _storeScrollController,
-                                  thickness: 10,
-                                  thumbVisibility: true,
-                                  trackVisibility: true,
-                                  radius: Radius.circular(16),
-                                  child: ListView.builder(
-                                    controller: _storeScrollController,
-                                    itemCount: filteredStores.length,
-                                    itemBuilder: (context, index) {
-                                      return Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: ElevatedButton(
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8),
-                                                      elevation: 0,
-                                                      shadowColor:
-                                                          Colors.transparent,
-                                                      backgroundColor:
-                                                          Colors.white,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.zero,
-                                                        side: BorderSide.none,
-                                                      ),
-                                                    ),
-                                                    onPressed: () async {
-                                                      setModalState(() {
-                                                        selectedStoreId =
-                                                            filteredStores[
-                                                                    index]
-                                                                .storeId;
-                                                      });
-                                                      setState(() {
-                                                        selectedStoreId =
-                                                            filteredStores[
-                                                                    index]
-                                                                .storeId;
-                                                        selectedStore =
-                                                            filteredStores[
-                                                                    index]
-                                                                .name;
-
-                                                        selectedStore =
-                                                            filteredStores[
-                                                                    index]
-                                                                .name;
-                                                        selectedStoreId =
-                                                            filteredStores[
-                                                                    index]
-                                                                .storeId;
-
-                                                        selectedStoreTel =
-                                                            filteredStores[
-                                                                    index]
-                                                                .tel;
-                                                        selectedStoreShopType =
-                                                            filteredStores[
-                                                                    index]
-                                                                .typeName;
-                                                        selectedStoreAddress =
-                                                            "${filteredStores[index].address} ${filteredStores[index].district} ${filteredStores[index].subDistrict} ${filteredStores[index].province} ${filteredStores[index].postCode}";
-                                                      });
-                                                      // ฟไ _getCart();
-                                                      await _getCart();
-                                                    },
-                                                    child: Column(
-                                                      children: [
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Expanded(
-                                                              child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                    filteredStores[
-                                                                            index]
-                                                                        .typeName,
-                                                                    style: Styles
-                                                                        .black18(
-                                                                            context),
-                                                                  ),
-                                                                  filteredStores[index]
-                                                                              .name !=
-                                                                          ''
-                                                                      ? Text(
-                                                                          filteredStores[index]
-                                                                              .name,
-                                                                          style:
-                                                                              Styles.black18(context),
-                                                                        )
-                                                                      : SizedBox(),
-                                                                  filteredStores[index]
-                                                                              .tel !=
-                                                                          ''
-                                                                      ? Text(
-                                                                          filteredStores[index]
-                                                                              .tel,
-                                                                          style:
-                                                                              Styles.black18(context),
-                                                                        )
-                                                                      : SizedBox(),
-                                                                  filteredStores[index]
-                                                                              .address !=
-                                                                          ""
-                                                                      ? Row(
-                                                                          children: [
-                                                                            Expanded(
-                                                                              child: Text(
-                                                                                "${filteredStores[index].address} ${filteredStores[index].district} ${filteredStores[index].subDistrict}  ${filteredStores[index].province} ${filteredStores[index].postCode}",
-                                                                                style: Styles.black18(context),
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        )
-                                                                      : SizedBox(),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            selectedStoreId ==
-                                                                    filteredStores[
-                                                                            index]
-                                                                        .storeId
-                                                                ? Icon(
-                                                                    Icons
-                                                                        .check_circle_outline_rounded,
-                                                                    color: Styles
-                                                                        .success,
-                                                                    size: 25,
-                                                                  )
-                                                                : Icon(
-                                                                    Icons
-                                                                        .keyboard_arrow_right_sharp,
-                                                                    color: Colors
-                                                                        .grey,
-                                                                    size: 25,
-                                                                  )
-                                                          ],
-                                                        ),
-                                                        Divider(
-                                                          color:
-                                                              Colors.grey[200],
-                                                          thickness: 1,
-                                                          indent: 16,
-                                                          endIndent: 16,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
+            await _getCart(); // call your logic here
           },
         );
       },

@@ -1846,8 +1846,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                 onPressed: () {
                                                   setModalState(
                                                     () {
-                                                      price = double.parse(
-                                                          data.price);
+                                                      price = data.price;
                                                     },
                                                   );
                                                   print(data.unit);
@@ -1860,8 +1859,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                     },
                                                   );
                                                   setState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    price = data.price;
                                                     selectedSize = data.name;
                                                     selectedUnit = data.unit;
                                                     total = price * count;

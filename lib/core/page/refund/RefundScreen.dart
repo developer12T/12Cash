@@ -2100,8 +2100,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               child: ElevatedButton(
                                                 onPressed: () async {
                                                   setModalState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    price = data.price;
                                                   });
 
                                                   setModalState(
@@ -2112,8 +2111,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                     },
                                                   );
                                                   setState(() {
-                                                    price = double.parse(
-                                                        data.price);
+                                                    price = data.price;
                                                     selectedSize = data.name;
                                                     selectedUnit = data.unit;
                                                     total = price * count;

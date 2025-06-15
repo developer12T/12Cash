@@ -64,8 +64,6 @@ class ApiService {
         method: method,
         headers: headers ??
             {
-              'Accept': 'application/json',
-              'User-Agent': 'PostmanRuntime/7.32.3',
               'Content-Type': 'application/json',
               'x-channel': 'cash',
             },

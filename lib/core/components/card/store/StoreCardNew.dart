@@ -44,19 +44,19 @@ class StoreCartNew extends StatelessWidget {
                     padding: EdgeInsets.all(4),
                     // height: screenWidth / ,
                     decoration: BoxDecoration(
-                      color: item.policyConsent.status == 'Agree'
+                      color: item.status == '10'
                           ? Styles.warningTextColor
-                          : item.policyConsent.status == 'Reject'
+                          : item.status == '90'
                               ? Styles.failTextColor
-                              : Styles.warningTextColor,
+                              : Styles.successTextColor,
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: Text(
-                      item.policyConsent.status == 'Agree'
+                      item.status == '10'
                           ? 'store.store_card_new.pendding'.tr()
-                          : item.policyConsent.status == 'Reject'
+                          : item.status == '90'
                               ? 'store.store_card_new.reject'.tr()
-                              : 'store.store_card_new.pendding'.tr(),
+                              : 'อนุมัติ',
                       style: Styles.white18(context),
                       textAlign: TextAlign.center,
                     ),

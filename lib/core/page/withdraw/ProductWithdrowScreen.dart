@@ -255,21 +255,25 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
   }
 
   Future<void> _getFliter() async {
-    ApiService apiService = ApiService();
-    await apiService.init();
-    var response = await apiService.request(
-      endpoint: 'api/cash/product/filter',
-      method: 'POST',
-    );
-    if (response.statusCode == 200) {
-      final List<dynamic> dataGroup = response.data['data']['group'];
-      print("_getFliter: ${response.data['data']}");
-      if (mounted) {
-        setState(() {
-          groupList = List<String>.from(dataGroup);
-        });
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/product/filter',
+        method: 'POST',
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> dataGroup = response.data['data']['group'];
+        print("_getFliter: ${response.data['data']}");
+        if (mounted) {
+          setState(() {
+            groupList = List<String>.from(dataGroup);
+          });
+        }
+        print("groupList: $groupList");
       }
-      print("groupList: $groupList");
+    } catch (e) {
+      print("Error getFliter: $e");
     }
   }
 
