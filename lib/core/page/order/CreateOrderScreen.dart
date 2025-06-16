@@ -728,6 +728,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           method: 'POST',
           body: {
             "area": "${User.area}",
+            "period": "${period}",
             "unit": "${product.unit}",
             "productId": "${product.id}",
             "qty": "${product.qty.toInt()}",

@@ -49,6 +49,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   String note = '';
   String orderId = '';
   String status = '';
+
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 //  Map<String, dynamic> itemPr = [];
 
   @override
@@ -117,6 +120,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           method: 'POST',
           body: {
             "area": "${User.area}",
+            "period": "${period}",
             "productId": "${item.id}",
             "qty": item.qty,
             "unit": "${item.unit}",

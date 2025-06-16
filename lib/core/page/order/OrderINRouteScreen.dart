@@ -404,6 +404,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
           method: 'POST',
           body: {
             "area": "${User.area}",
+            "period": "${period}",
             "unit": "${product.unit}",
             "productId": "${product.id}",
             "qty": "${product.qty.toInt()}",
