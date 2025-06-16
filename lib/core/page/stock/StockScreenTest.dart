@@ -133,9 +133,11 @@ class _StockScreenTestState extends State<StockScreenTest> {
                   "productName": item["productName"],
                   "listUnit": [
                     {
-                      "name": "PCS",
-                      "qty":
-                          pcsUnit["balance"], // ใช้ค่า balance เป็นจำนวนคงเหลือ
+                      "unit": "PCS",
+                      "stock": pcsUnit["stock"] ?? 0,
+                      "stockIn": pcsUnit["stockIn"] ?? 0,
+                      "stockOut": pcsUnit["stockOut"] ?? 0,
+                      "balance": pcsUnit["balance"] ?? 0,
                     }
                   ]
                 };
@@ -248,15 +250,14 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
     return left + ' ' * space + right;
   }
 
-  String formatFixedWidthRow2(
-    String num,
-    String itemName,
-    String id,
-    List<Map<String, dynamic>> listUnit,
-  ) {
+  String formatFixedWidthRow2(String num, String itemName, String stock,
+      String stockIn, String stockOut, String balance) {
     const int numWidth = 3;
-    const int nameWidth = 30;
-    const int itemCodeWidth = 12;
+    const int nameWidth = 35;
+    const int stockWidth = 5;
+    const int stockInWidth = 5;
+    const int stockOutWidth = 5;
+    const int balanceWidth = 5;
 
     List<String> wrapText(String text, int width) {
       List<String> lines = [];
@@ -267,94 +268,85 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
       return lines;
     }
 
-    int _getNoOfUpperLowerChars(String text) {
-      // Optional helper for spacing adjustments (can be customized)
-      return 0; // keep simple unless needed
-    }
-
-    // Format unit summary
-    String formatUnitSummary(List<Map<String, dynamic>> listUnit) {
-      return listUnit.map((unit) => "${unit['qty']} ${unit['name']}").join('/');
-    }
-
     List<String> itemNameLines = wrapText(itemName, nameWidth);
+
+    // Ensure all wrapped lines are properly padded
     itemNameLines = itemNameLines.map((line) {
       return line.padRight(nameWidth + _getNoOfUpperLowerChars(line));
     }).toList();
-
-    String unitSummary = formatUnitSummary(listUnit);
     String formattedNum = num.padRight(numWidth);
-    String formattedItemCode = id.padRight(itemCodeWidth);
+    String formattedStock = stock.padLeft(stockWidth);
+    String formattedStockIn = stockIn.padLeft(stockInWidth);
+    String formattedStockOut = stockOut.padLeft(stockOutWidth);
+    String formattedBalance = balance.padLeft(balanceWidth);
 
     StringBuffer rowBuffer = StringBuffer();
     for (int i = 0; i < itemNameLines.length; i++) {
       if (i == 0) {
         rowBuffer.write(formattedNum);
-        rowBuffer.write(formattedItemCode);
-      } else {
-        rowBuffer.write(''.padRight(itemCodeWidth + numWidth));
+      }
+      if (i > 0) {
+        rowBuffer.write(''.padRight(numWidth));
       }
 
       rowBuffer.write(itemNameLines[i]);
 
       if (i == 0) {
-        rowBuffer.write('    $unitSummary\n');
+        // First line includes all columns
+        rowBuffer.write(
+            '   $formattedStock $formattedStockIn $formattedStockOut $formattedBalance \n');
       } else {
-        rowBuffer.write('\n');
+        // Subsequent lines only contain the wrapped item name
+
+        // rowBuffer.write('\n');
       }
     }
+
     return rowBuffer.toString();
   }
 
   Future<void> printBodyBill(Map<String, dynamic> data) async {
     // พิมพ์หัวตาราง
-    await printBill("รายการสินค้า".padRight(30) +
-        "STOCK".padRight(8) +
-        "IN".padRight(6) +
-        "OUT".padRight(6) +
-        "BAL");
+    //     await printBill('รายการสินค้า'.padRight(nameWidth) +
+    //         'STOCK'.padLeft(colWidth) +
+    //         'IN'.padLeft(colWidth) +
+    //         'OUT'.padLeft(colWidth) +
+    //         'BAL'.padLeft(colWidth));
+    //     await printBill('-' * (nameWidth + colWidth * 4));
+    await printBill(
+        "รายการสินค้า${' ' * (32)}STOCK${' ' * (4)}IN${' ' * (3)}OUT${' ' * (3)}BAL");
+    final items = (data['items'] as List).asMap().entries.where((entry) {
+      var list = entry.value['listUnit'] as List;
+      return list.any((u) => u['unit'] == 'PCS');
+    })
+        // .take(10)
+        .map((entry) {
+      int index = entry.key;
+      var item = entry.value;
+      String itemName = item['productName'];
 
-    await printBill("-" * 69);
+      var pcsUnit =
+          (item['listUnit'] as List).firstWhere((u) => u['unit'] == 'PCS');
 
-    String items = (data['items'] as List)
-        .map((item) {
-          String productName = item['productName'];
-          String productId = item['productId'];
-
-          // ดึงเฉพาะ unit ที่เป็น PCS
-          final pcsUnit = (item['listUnit'] as List).firstWhere(
-            (unit) => unit['unit'] == 'PCS',
-            orElse: () => null,
-          );
-
-          // ถ้าไม่มี PCS unit → ข้าม
-          if (pcsUnit == null) return '';
-
-          final stock = pcsUnit['stock'].toString().padRight(8);
-          final stockIn = pcsUnit['stockIn'].toString().padRight(6);
-          final stockOut = pcsUnit['stockOut'].toString().padRight(6);
-          final balance = pcsUnit['balance'].toString().padRight(6);
-
-          return [
-            productName.length > 30
-                ? productName.substring(0, 30)
-                : productName.padRight(30),
-            stock,
-            stockIn,
-            stockOut,
-            balance,
-          ].join();
-        })
-        .where((line) => line.isNotEmpty)
-        .join('\n');
-
-    Uint8List encodedItems = await CharsetConverter.encode('TIS-620', items);
-    await PrintBluetoothThermal.writeBytes(List<int>.from(encodedItems));
+      return formatFixedWidthRow2(
+        "${index + 1}",
+        itemName,
+        pcsUnit['stock'].toString(),
+        pcsUnit['stockIn'].toString(),
+        pcsUnit['stockOut'].toString(),
+        pcsUnit['balance'].toString(),
+      );
+    }).join('\n');
+    print(
+        "รายการสินค้า${' ' * (32)}STOCK${' ' * (4)}IN${' ' * (3)}OUT${' ' * (3)}BAL");
+    print(items);
+    Uint8List encoded = await CharsetConverter.encode('TIS-620', items);
+    await PrintBluetoothThermal.writeBytes(List<int>.from(encoded));
 
     // Footer
     String footer = '''
-  ${leftRightText('', '\n\n\n', 61)}
-  ''';
+${leftRightText('', '\n\n\n', 61)}
+''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
   }
@@ -402,6 +394,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                 ),
                 onPressed: () async {
                   if (!_loadingProduct) {
+                    // await printBodyBill(receiptData);
                     await printTest();
                   }
                 },

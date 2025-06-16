@@ -344,6 +344,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
           method: 'POST',
           body: {
             "area": "${User.area}",
+            "period": "${period}",
             "unit": "${selectedUnit}",
             "productId": "${product.id}",
             "qty": count,
@@ -1803,8 +1804,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                         .show();
                                                     await _addCart(product);
                                                     await _getCart();
-                                                    // await _updateStock(product,
-                                                    //     setModalState, "OUT");
+                                                    await _updateStock(product,
+                                                        setModalState, "OUT");
                                                     context.loaderOverlay
                                                         .hide();
                                                   } else {
