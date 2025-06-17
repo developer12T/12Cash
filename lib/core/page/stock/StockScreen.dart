@@ -595,7 +595,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
-        child: AppbarCustom(title: " สต๊อก", icon: Icons.settings_sharp),
+        child: AppbarCustom(title: " สต๊อก", icon: Icons.warehouse),
       ),
       persistentFooterButtons: [
         Row(

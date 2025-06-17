@@ -186,7 +186,6 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                       child: LoadingSkeletonizer(
                         loading: _loadingRefund,
                         child: ListView.builder(
-                          // controller: _scrollController,
                           itemCount: refundOrders.length,
                           itemBuilder: (context, index) {
                             return RefundCard(

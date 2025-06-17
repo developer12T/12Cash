@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
+import 'package:_12sale_app/core/components/search/DropdownSearchGroup.dart';
 import 'package:_12sale_app/core/components/table/ReusableTable.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
@@ -12,6 +14,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:toastification/toastification.dart';
+
+import '../../../data/models/option/Group.dart';
 
 class StockScreenTest extends StatefulWidget {
   const StockScreenTest({super.key});
@@ -49,18 +53,6 @@ class _StockScreenTestState extends State<StockScreenTest> {
   static const String encoding = 'TIS-620';
 
   final Map<String, dynamic> receiptData = {
-    "customer": {
-      "customercode": "",
-      "customername": "",
-      "address1": "",
-      "address2": "",
-      "address3": "",
-      "postCode": "",
-      "taxno": "",
-      "salecode": ""
-    },
-    "CUOR": "",
-    "OAORDT": "",
     "items": [
       // {
       //   "name": "ผงทำซุปน้ำข้น ฟ้าไทย 75g x10x8",
@@ -84,19 +76,38 @@ class _StockScreenTestState extends State<StockScreenTest> {
       //   ],
       // }
     ],
-    "totaltext": "0.00",
-    "ex_vat": "0.00",
-    "vat": "0.00",
-    "discount": "0.00",
-    "discountProduct": "0.00",
-    "total": "0.00",
-    "OBSMCD": ""
   };
 
   @override
   void initState() {
     super.initState();
     _getStockQty();
+  }
+
+  Future<List<Group>> getShoptype(String filter) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+        endpoint: 'api/cash/order/getGroup',
+        method: 'GET',
+      );
+      var rawList = response.data['data'] as List<dynamic>;
+      // print(data);
+      // var data = response.data['data'] as List<dynamic>;
+
+      List<Group> groups = rawList
+          .where(
+              (e) => e['groupCode'] != null) // Optional: ensure code is present
+          .map((e) => Group.fromJson(e))
+          .toList();
+
+      return groups;
+    } catch (e) {
+      print("Error occurred: $e");
+      return [];
+    }
   }
 
   Future<void> _getStockQty() async {
@@ -112,7 +123,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
       if (response.statusCode == 200 && mounted) {
         final List<dynamic> data = response.data['data'];
-        final allowedUnits = ['CTN', 'PCS'];
+        // final allowedUnits = ['CTN', 'PCS'];
 
         final fetchedStocks = (response.data['data'] as List)
             .map((item) => Stock.fromJson(item))
@@ -147,21 +158,55 @@ class _StockScreenTestState extends State<StockScreenTest> {
         });
 
         final fetchedRows = fetchedStocks.map<List<String>>((item) {
-          final unitMap = <String, Map<String, int>>{};
+          // final unitMap = <String, Map<String, int>>{};
+          final unitList = <Unit>[];
+          // for (var unit in item.listUnit) {
+          //   // if (allowedUnits.contains(unit.unit)) {
+          //   unitMap[unit.unit] = {
+          //     'stock': unit.stock,
+          //     'stockIn': unit.stockIn,
+          //     'stockOut': unit.stockOut,
+          //     'balance': unit.balance,
+          //   };
+          //   // }
+          // }
+
           for (var unit in item.listUnit) {
-            if (allowedUnits.contains(unit.unit)) {
-              unitMap[unit.unit] = {
-                'stock': unit.stock,
-                'stockIn': unit.stockIn,
-                'stockOut': unit.stockOut,
-                'balance': unit.balance,
+            unitList.add(Unit(
+              unit: unit.unit,
+              unitName: unit.unitName,
+              stock: unit.stock,
+              stockIn: unit.stockIn,
+              stockOut: unit.stockOut,
+              balance: unit.balance,
+            ));
+          }
+          // print("unitMap $unitMap");
+
+          // String joinField(String field) {
+          //   return unitMap.entries.map((entry) {
+          //     final unit = entry.key;
+          //     final value = entry.value[field]?.toString() ?? '0';
+          //     return '$unit: $value';
+          //   }).join('\n');
+          // }
+
+          String joinField(String field) {
+            return unitList.map((u) {
+              final value = switch (field) {
+                'stock' => u.stock,
+                'stockIn' => u.stockIn,
+                'stockOut' => u.stockOut,
+                'balance' => u.balance,
+                _ => 0,
               };
-            }
+              return '$value ${u.unitName}';
+            }).join('\n');
           }
 
-          String joinField(String field) => allowedUnits
-              .map((unit) => unitMap[unit]?[field]?.toString() ?? '0')
-              .join('/');
+          // String joinField(String field) => allowedUnits
+          //     .map((unit) => unitMap[unit]?[field]?.toString() ?? '0')
+          //     .join('/');
 
           return [
             item.productName,
@@ -378,7 +423,7 @@ ${leftRightText('', '\n\n\n', 61)}
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
-        child: AppbarCustom(title: " สต๊อก", icon: Icons.settings_sharp),
+        child: AppbarCustom(title: " สต๊อก", icon: Icons.warehouse),
       ),
       persistentFooterButtons: [
         Row(
@@ -405,7 +450,7 @@ ${leftRightText('', '\n\n\n', 61)}
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.print_rounded,
                             color: Colors.white,
                             size: 25,
@@ -431,7 +476,62 @@ ${leftRightText('', '\n\n\n', 61)}
               ? const Center(child: CircularProgressIndicator())
               : rows.isEmpty
                   ? const Center(child: Text('ไม่มีข้อมูล'))
-                  : ReusableTable(columns: columns, rows: rows),
+                  : Column(
+                      children: [
+                        DropdownSearchCustom<Group>(
+                          label: 'เลือกกลุ่ม',
+                          titleText: "เลือกกลุ่ม",
+                          fetchItems: (filter) => getShoptype(filter),
+                          onChanged: (Group? selected) async {
+                            if (selected != null) {
+                              // selectedShoptype = ShopType(
+                              //   id: selected.id,
+                              //   name: selected.name,
+                              //   descript: selected.descript,
+                              //   status: selected.status,
+                              // );
+                              // setState(() {
+                              //   widget.initialSelectedShoptype =
+                              //       selectedShoptype;
+                              //   // Update the storeData fields
+                              //   _storeData = _storeData?.copyWithDynamicField(
+                              //       'typeName', selected.name);
+                              //   _storeData = _storeData?.copyWithDynamicField(
+                              //       'type', selected.id);
+                              // });
+                              // _saveStoreToStorage();
+                            }
+                          },
+                          itemAsString: (Group data) => data.group,
+                          itemBuilder: (context, item, isSelected) {
+                            return Column(
+                              children: [
+                                ListTile(
+                                  title: Text(
+                                    "${item.group}",
+                                    style: Styles.black18(context),
+                                  ),
+                                  selected: isSelected,
+                                ),
+                                Divider(
+                                  color: Colors
+                                      .grey[200], // Color of the divider line
+                                  thickness: 1, // Thickness of the line
+                                  indent:
+                                      16, // Left padding for the divider line
+                                  endIndent:
+                                      16, // Right padding for the divider line
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: ReusableTable(columns: columns, rows: rows),
+                        ),
+                      ],
+                    ),
         ),
       ),
     );

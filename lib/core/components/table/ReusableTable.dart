@@ -1,3 +1,4 @@
+import 'package:_12sale_app/core/page/stock/StockDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 
@@ -63,30 +64,42 @@ class ReusableTable extends StatelessWidget {
                   scrollDirection: Axis.vertical,
                   child: Column(
                     children: rows.map((row) {
-                      return Row(
-                        children: row.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final cell = entry.value;
-
-                          return Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Colors.black), // Border added here
-                            ),
-                            width: index == 0
-                                ? MediaQuery.of(context).size.width * 0.35
-                                : MediaQuery.of(context).size.width * 0.15,
-                            height: 95,
-                            padding: const EdgeInsets.all(8),
-                            alignment: Alignment.center,
-                            child: Text(
-                              cell,
-                              style: Styles.black18(context),
-                              maxLines: index == 0 ? 3 : 1,
-                              overflow: TextOverflow.ellipsis,
+                      return GestureDetector(
+                        onTap: () {
+                          // Replace this with navigation logic
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StockDetail(
+                                  itemCode: row[0]), // row[0] = productId
                             ),
                           );
-                        }).toList(),
+                        },
+                        child: Row(
+                          children: row.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final cell = entry.value;
+
+                            return Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.black), // Border added here
+                              ),
+                              width: index == 0
+                                  ? MediaQuery.of(context).size.width * 0.35
+                                  : MediaQuery.of(context).size.width * 0.15,
+                              height: 95,
+                              padding: const EdgeInsets.all(8),
+                              alignment: Alignment.center,
+                              child: Text(
+                                cell,
+                                style: Styles.black18(context),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       );
                     }).toList(),
                   ),

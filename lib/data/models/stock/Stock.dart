@@ -30,6 +30,7 @@ class Stock {
 
 class Unit {
   final String unit;
+  final String unitName;
   final int stock;
   final int stockIn;
   final int stockOut;
@@ -37,6 +38,7 @@ class Unit {
 
   Unit({
     required this.unit,
+    required this.unitName,
     required this.stock,
     required this.stockIn,
     required this.stockOut,
@@ -46,6 +48,7 @@ class Unit {
   factory Unit.fromJson(Map<String, dynamic> json) {
     return Unit(
       unit: json['unit'] ?? '',
+      unitName: json['unitName'] ?? '',
       stock: json['stock'] ?? 0,
       stockIn: json['stockIn'] ?? 0,
       stockOut: json['stockOut'] ?? 0,
@@ -56,6 +59,7 @@ class Unit {
   Map<String, dynamic> toJson() {
     return {
       'unit': unit,
+      'unitName': unitName,
       'stock': stock,
       'stockIn': stockIn,
       'stockOut': stockOut,
