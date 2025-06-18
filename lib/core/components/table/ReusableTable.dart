@@ -5,11 +5,13 @@ import 'package:_12sale_app/core/styles/style.dart';
 class ReusableTable extends StatelessWidget {
   final List<String> columns;
   final List<List<String>> rows;
+  final List<List<String>> itemCodes;
 
   const ReusableTable({
     super.key,
     required this.columns,
     required this.rows,
+    required this.itemCodes,
   });
 
   @override
@@ -71,7 +73,8 @@ class ReusableTable extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => StockDetail(
-                                  itemCode: row[0]), // row[0] = productId
+                                itemCode: itemCodes[rows.indexOf(row)][0],
+                              ), // row[0] = productId
                             ),
                           );
                         },

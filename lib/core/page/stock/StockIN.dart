@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 class StockIN extends StatefulWidget {
   final InOutGroup stockIN;
+
   const StockIN({
     super.key,
     required this.stockIN,
@@ -23,32 +24,36 @@ class StockIN extends StatefulWidget {
 class _StockINState extends State<StockIN> {
   @override
   Widget build(BuildContext context) {
+    final withdrawList = widget.stockIN.withdraw ?? [];
+    final refundList = widget.stockIN.refund ?? [];
+    final withdrawStock = widget.stockIN.withdrawStock ?? [];
+    final refundStock = widget.stockIN.refundStock ?? [];
+    final summaryStock = widget.stockIN.summaryStock ?? [];
+    final stock = widget.stockIN.stock ?? [];
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: AppbarCustom(title: " Stock-IN", icon: Icons.warehouse),
       ),
       body: Container(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Withdraw",
-              style: Styles.black20(context),
-              textAlign: TextAlign.start,
-            ),
+            Text("Withdraw", style: Styles.black20(context)),
             Expanded(
               child: ListView.builder(
-                itemCount: widget.stockIN.withdraw?.length,
+                itemCount: withdrawList.length,
                 itemBuilder: (context, index) {
+                  final withdraw = withdrawList[index];
                   return WithDrawCard(
-                    item: widget.stockIN.withdraw![index],
+                    item: withdraw,
                     onDetailsPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => WithdrawDetailScreen(
-                              orderId: widget.stockIN.withdraw?[index].orderId),
+                          builder: (context) =>
+                              WithdrawDetailScreen(orderId: withdraw.orderId),
                         ),
                       );
                     },
@@ -56,25 +61,20 @@ class _StockINState extends State<StockIN> {
                 },
               ),
             ),
-            const SizedBox(
-              height: 8,
-            ),
-            Text(
-              "Refund",
-              style: Styles.black20(context),
-              textAlign: TextAlign.start,
-            ),
+            const SizedBox(height: 8),
+            Text("Refund", style: Styles.black20(context)),
             Expanded(
               child: ListView.builder(
-                itemCount: widget.stockIN.refund?.length,
+                itemCount: refundList.length,
                 itemBuilder: (context, index) {
+                  final refund = refundList[index];
                   return RefundCard(
-                    item: widget.stockIN.refund![index],
+                    item: refund,
                     onDetailsPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => RefundDetailScreen(
-                              orderId: widget.stockIN.refund?[index].orderId),
+                          builder: (context) =>
+                              RefundDetailScreen(orderId: refund.orderId),
                         ),
                       );
                     },
@@ -82,9 +82,7 @@ class _StockINState extends State<StockIN> {
                 },
               ),
             ),
-            const SizedBox(
-              height: 8,
-            ),
+            const SizedBox(height: 8),
             BoxShadowCustom(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -92,97 +90,21 @@ class _StockINState extends State<StockIN> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          "Stock-IN",
-                          style: Styles.headerBlack24(context),
-                          textAlign: TextAlign.center,
-                        ),
+                        Text("Stock-IN", style: Styles.headerBlack24(context)),
                       ],
                     ),
+                    _buildInfoRow("ยอดยกมา", stock),
+                    _buildInfoRow("เบิกระหว่างทริป", withdrawStock),
+                    _buildInfoRow("รับคืนดี", refundStock),
+                    _buildInfoRow("รวมรับเข้า", summaryStock),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Text("มูลค่ารับเข้า", style: Styles.black18(context)),
                         Text(
-                          'ยอดยกมา',
+                          NumberFormat.currency(locale: 'th_TH', symbol: '฿')
+                              .format(widget.stockIN.summaryStockInOut ?? 0),
                           style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          widget.stockIN.withdrawStock
-                              // .where((u) => u.qty != 0)
-                              .map((u) => '${u.qty} ${u.unit}')
-                              .join(' '),
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'เบิกระหว่างทริป',
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          widget.stockIN.withdrawStock
-                              // .where((u) => u.qty != 0)
-                              .map((u) => '${u.qty} ${u.unit}')
-                              .join(' '),
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'รับคืนดี',
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          widget.stockIN.withdrawStock
-                              // .where((u) => u.qty != 0)
-                              .map((u) => '${u.qty} ${u.unit}')
-                              .join(' '),
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'รวมรับเข้า',
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          widget.stockIN.withdrawStock
-                              // .where((u) => u.qty != 0)
-                              .map((u) => '${u.qty} ${u.unit}')
-                              .join(' '),
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'มูลค่ารับเข้า',
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(widget.stockIN.summary)}",
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
                         ),
                       ],
                     )
@@ -193,6 +115,17 @@ class _StockINState extends State<StockIN> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, List<UnitQty> unitList) {
+    final text = unitList.map((u) => '${u.qty} ${u.unitName}').join(' ');
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: Styles.black18(context)),
+        Text(text, style: Styles.black18(context)),
+      ],
     );
   }
 }

@@ -1,19 +1,19 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/page/stock/StockIN.dart';
 import 'package:_12sale_app/core/page/stock/StockOUT.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/stock/StockDetail.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class StockDetail extends StatefulWidget {
   final String itemCode;
-  StockDetail({
-    super.key,
-    required this.itemCode,
-  });
+  const StockDetail({super.key, required this.itemCode});
 
   @override
   State<StockDetail> createState() => _StockDetailState();
@@ -22,164 +22,49 @@ class StockDetail extends StatefulWidget {
 class _StockDetailState extends State<StockDetail> {
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
-
-  late final StockDetailData stockDetailData;
-
-  var data = {
-    "productId": "10010101034",
-    "productName": "ผงปรุงรสหมู ฟ้าไทย 75g x10x8",
-    "STOCK": {
-      "stock": [
-        {"unit": "CTN", "qty": 4},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 7}
-      ],
-      "date": "datetime"
-    },
-    "IN": {
-      "stock": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "withdrawStock": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "withdraw": [
-        {
-          "area": "SH224",
-          "orderId": "W680662401",
-          "orderType": "T04",
-          "orderTypeName": "รับของเอง",
-          "sendDate": "2025-06-11",
-          "total": 4,
-          "status": "pending"
-        },
-        {
-          "area": "SH224",
-          "orderId": "W680662402",
-          "orderType": "T04",
-          "orderTypeName": "รับของเอง",
-          "sendDate": "2025-06-16",
-          "total": 3,
-          "status": "pending"
-        }
-      ],
-      "refundStock": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "refund": [
-        {
-          "orderId": "6806936240001",
-          "storeId": "C9400001",
-          "storeName": "คุณยุพดี  ศรีไตรรัตน์ชัย",
-          "storeAddress": "79/61  ถ.ยะรัง  ต.อาเนาะรู  อ.เมือง  จ.ปัตตานี",
-          "totalChange": "45.00",
-          "totalRefund": "90.00",
-          "total": "-45.00",
-          "status": "pending"
-        },
-        {
-          "orderId": "6806936240002",
-          "storeId": "C9400001",
-          "storeName": "คุณยุพดี  ศรีไตรรัตน์ชัย",
-          "storeAddress": "79/61  ถ.ยะรัง  ต.อาเนาะรู  อ.เมือง  จ.ปัตตานี",
-          "totalChange": "246.00",
-          "totalRefund": "492.00",
-          "total": "-246.00",
-          "status": "pending"
-        }
-      ],
-      "summaryStock": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "summary": 1000
-    },
-    "OUT": {
-      "orderStock": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "order": [
-        {
-          "orderId": "6806136240002",
-          "storeId": "VS21900047",
-          "storeName": "อะดำผักสด",
-          "storeAddress": "1 ถ.- ต.ปัตตานี  อ.เมือง จ.ปัตตานี",
-          "createAt": "2025-06-11T06:33:21.023Z",
-          "total": 1080,
-          "status": "pending",
-          "createdAt": "2025-06-11T06:33:21.023Z"
-        },
-        {
-          "orderId": "6806136240003",
-          "storeId": "C9400001",
-          "storeName": "คุณยุพดี  ศรีไตรรัตน์ชัย",
-          "storeAddress": "79/61  ถ.ยะรัง  ต.อาเนาะรู  อ.เมือง  จ.ปัตตานี",
-          "createAt": "2025-06-13T07:54:02.853Z",
-          "total": 1620,
-          "status": "pending",
-          "createdAt": "2025-06-13T07:54:02.853Z"
-        }
-      ],
-      "promotionStock": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "change": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "refund": [
-        {
-          "orderId": "6806936240001",
-          "storeId": "C9400001",
-          "storeName": "คุณยุพดี  ศรีไตรรัตน์ชัย",
-          "storeAddress": "79/61  ถ.ยะรัง  ต.อาเนาะรู  อ.เมือง  จ.ปัตตานี",
-          "totalChange": "45.00",
-          "totalRefund": "90.00",
-          "total": "-45.00",
-          "status": "pending"
-        },
-        {
-          "orderId": "6806936240002",
-          "storeId": "C9400001",
-          "storeName": "คุณยุพดี  ศรีไตรรัตน์ชัย",
-          "storeAddress": "79/61  ถ.ยะรัง  ต.อาเนาะรู  อ.เมือง  จ.ปัตตานี",
-          "totalChange": "246.00",
-          "totalRefund": "492.00",
-          "total": "-246.00",
-          "status": "pending"
-        }
-      ],
-      "summaryStock": [
-        {"unit": "CTN", "qty": 0},
-        {"unit": "BAG", "qty": 0},
-        {"unit": "PCS", "qty": 0}
-      ],
-      "summary": 1000
-    },
-    "BALANCE": [
-      {"unit": "CTN", "qty": 10},
-      {"unit": "BAG", "qty": 6},
-      {"unit": "PCS", "qty": 0}
-    ],
-    "summary": 1000
-  };
+  StockDetailData? stockDetailData;
 
   @override
   void initState() {
     super.initState();
-    stockDetailData = StockDetailData.fromJson(data); // ✅ Parse mock data
+    _getStockDetail();
+  }
+
+  Future<void> _getStockDetail() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/stock/getStockQtyDetail',
+        method: 'POST',
+        body: {
+          "area": User.area,
+          "productId": widget.itemCode,
+          "period": period,
+        },
+      );
+      if (response.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            stockDetailData = StockDetailData.fromJson(response.data['data']);
+          });
+        }
+      }
+    } catch (e) {
+      print("Error _getStockDetail: $e");
+    }
+  }
+
+  String formatUnitList(List<UnitQty>? list) {
+    final filtered = list?.where((u) => u.qty != 0).toList() ?? [];
+    return filtered.isEmpty
+        ? 'ไม่มี' // fallback if null or no quantity > 0
+        : filtered.map((u) => '${u.qty} ${u.unitName}').join(' ');
+  }
+
+  String formatCurrency(double? amount) {
+    return NumberFormat.currency(locale: 'th_TH', symbol: '฿')
+        .format(amount ?? 0);
   }
 
   @override
@@ -190,405 +75,177 @@ class _StockDetailState extends State<StockDetail> {
         child: AppbarCustom(
             title: " รายละเอียดสินค้าของ $period", icon: Icons.warehouse),
       ),
-      body: Container(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            BoxShadowCustom(
-              child: Padding(
+      body: LoadingSkeletonizer(
+        loading: stockDetailData == null,
+        child: stockDetailData == null
+            ? Container()
+            : Container(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          "${stockDetailData.productName}",
-                          style: Styles.headerBlack24(context),
-                          textAlign: TextAlign.center,
+                    BoxShadowCustom(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  stockDetailData?.productName ?? '',
+                                  style: Styles.headerBlack24(context),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "รหัสสินค้า ${stockDetailData?.productId ?? ''}",
+                                  style: Styles.headerBlack18(context),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Stock",
+                                  style: Styles.black18(context),
+                                ),
+                                Text(
+                                  "${formatDate(stockDetailData?.stock.date)}",
+                                  style: Styles.black18(context),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("ยอดยกมา", style: Styles.black18(context)),
+                                Text(
+                                  formatUnitList(stockDetailData?.stock.stock),
+                                  style: Styles.black18(context),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          "รหัสสินค้า ${stockDetailData.productId}",
-                          style: Styles.headerBlack18(context),
-                          textAlign: TextAlign.center,
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StockIN(stockIN: stockDetailData!.inData),
+                          ),
+                        );
+                      },
+                      child: BoxShadowCustom(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Row(children: [
+                                Text("Stock In", style: Styles.black18(context))
+                              ]),
+                              buildRow(
+                                  'ยอดยกมา',
+                                  formatUnitList(
+                                      stockDetailData?.inData.stock)),
+                              buildRow(
+                                  'เบิกระหว่างทริป',
+                                  formatUnitList(
+                                      stockDetailData?.inData.withdrawStock)),
+                              buildRow(
+                                  'รับคืนดี',
+                                  formatUnitList(
+                                      stockDetailData?.inData.refundStock)),
+                              buildRow(
+                                  'รวมรับเข้า',
+                                  formatUnitList(
+                                      stockDetailData?.inData.summaryStock)),
+                              buildRow(
+                                  'มูลค่ารับเข้า',
+                                  formatCurrency(
+                                      stockDetailData?.inData.summaryStockIn)),
+                            ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          "Stock",
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  StockOUT(stockOut: stockDetailData!.outData),
+                            ),
+                          );
+                        },
+                        child: BoxShadowCustom(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                Row(children: [
+                                  Text("Stock Out",
+                                      style: Styles.black18(context))
+                                ]),
+                                buildRow(
+                                    'ขาย',
+                                    formatUnitList(
+                                        stockDetailData?.outData.orderStock)),
+                                buildRow(
+                                    'แถม',
+                                    formatUnitList(stockDetailData
+                                        ?.outData.promotionStock)),
+                                buildRow(
+                                    'เปลี่ยน',
+                                    formatUnitList(
+                                        stockDetailData?.outData.change)),
+                                // buildRow(
+                                //     'ค่าตั้ง',
+                                //     formatUnitList(
+                                //         stockDetailData?.outData.refund)),
+                                buildRow(
+                                    'รวม',
+                                    formatUnitList(
+                                        stockDetailData?.outData.summaryStock)),
+                                const Spacer(),
+                                buildRow(
+                                    'รวมมูลค่าขาย',
+                                    formatCurrency(
+                                        stockDetailData?.outData.orderSum)),
+                                buildRow(
+                                    'รวมมูลค่าแถม',
+                                    formatCurrency(
+                                        stockDetailData?.outData.promotionSum)),
+                                buildRow(
+                                    'รวมมูลเปลี่ยน',
+                                    formatCurrency(
+                                        stockDetailData?.outData.changeSum)),
+                                // buildRow(
+                                //     'รวมมูลค่าตั้งร้านโชว์',
+                                //     formatCurrency(
+                                //         stockDetailData?.outData.refundSum)),
+                                buildRow(
+                                    'รวมมูลค่าสินค้าออก',
+                                    formatCurrency(stockDetailData
+                                        ?.outData.summaryStockInOut)),
+                              ],
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "ยอดยกมา",
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          stockDetailData
-                              .outData
-                              .orderStock
-                              // .where((u) => u.qty != 0)
-                              !
-                              .map((u) => '${u.qty} ${u.unit}')
-                              .join(' '),
-                          style: Styles.black18(context),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StockIN(
-                        stockIN: stockDetailData.inData), // row[0] = productId
-                  ),
-                );
-              },
-              child: BoxShadowCustom(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "Stock In",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'ยอดยกมา',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData.inData.withdrawStock
-                                // .where((u) => u.qty != 0)
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'เบิกระหว่างทริป',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData.inData.withdrawStock
-                                // .where((u) => u.qty != 0)
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รับคืนดี',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData.inData.withdrawStock
-                                // .where((u) => u.qty != 0)
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รวมรับเข้า',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData.inData.withdrawStock
-                                // .where((u) => u.qty != 0)
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'มูลค่ารับเข้า',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(stockDetailData.inData.summary)}",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-            Expanded(
-                child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StockOUT(
-                        stockOut:
-                            stockDetailData.outData), // row[0] = productId
-                  ),
-                );
-              },
-              child: BoxShadowCustom(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "Stock Out",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'ขาย',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData
-                                .outData
-                                .orderStock
-                                // .where((u) => u.qty != 0)
-                                !
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'แถม',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData
-                                .outData
-                                .orderStock
-                                // .where((u) => u.qty != 0)
-                                !
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'เปลี่ยน',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData
-                                .outData
-                                .orderStock
-                                // .where((u) => u.qty != 0)
-                                !
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'ค่าตั้ง',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData
-                                .outData
-                                .orderStock
-                                // .where((u) => u.qty != 0)
-                                !
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รวม',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            stockDetailData
-                                .outData
-                                .orderStock
-                                // .where((u) => u.qty != 0)
-                                !
-                                .map((u) => '${u.qty} ${u.unit}')
-                                .join(' '),
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: SizedBox(),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รวมมูลค่าขาย',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(stockDetailData.inData.summary)}",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รวมมูลค่าแถม',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(stockDetailData.inData.summary)}",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รวมมูลเปลี่ยน',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(stockDetailData.inData.summary)}",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รวมมูลค่าตั้งร้านโชว์',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(stockDetailData.inData.summary)}",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'รวมมูลค่าสินค้าออก',
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(stockDetailData.inData.summary)}",
-                            style: Styles.black18(context),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ))
-          ],
-        ),
       ),
       persistentFooterButtons: [
         Column(
@@ -596,35 +253,26 @@ class _StockDetailState extends State<StockDetail> {
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        backgroundColor: Styles.success,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      backgroundColor: Styles.success,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onPressed: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Balance",
-                              style: Styles.headerWhite18(context),
-                            ),
-                            Text(
-                              stockDetailData.balance
-                                  .where((u) => u.qty != 0)
-                                  .map((u) => '${u.qty} ${u.unit}')
-                                  .join(' '),
-                              style: Styles.headerWhite18(context),
-                            )
-                          ],
-                        ),
+                    ),
+                    onPressed: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Balance", style: Styles.headerWhite18(context)),
+                          Text(
+                            formatUnitList(stockDetailData?.balance),
+                            style: Styles.headerWhite18(context),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -634,31 +282,27 @@ class _StockDetailState extends State<StockDetail> {
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        backgroundColor: Styles.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      backgroundColor: Styles.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onPressed: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "รวมราคา ",
-                              style: Styles.headerWhite18(context),
-                            ),
-                            Text(
-                                "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(stockDetailData.summary)} บาท",
-                                style: Styles.headerWhite18(context))
-                          ],
-                        ),
+                    ),
+                    onPressed: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("รวมราคา ",
+                              style: Styles.headerWhite18(context)),
+                          Text(
+                            "${formatCurrency(stockDetailData?.summary)} บาท",
+                            style: Styles.headerWhite18(context),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -667,6 +311,27 @@ class _StockDetailState extends State<StockDetail> {
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  String formatDate(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return '-';
+    try {
+      final date =
+          DateTime.parse(isoString).toLocal(); // convert to local timezone
+      return DateFormat('dd/MM/yyyy').format(date);
+    } catch (e) {
+      return '-';
+    }
+  }
+
+  Widget buildRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: Styles.black18(context)),
+        Text(value, style: Styles.black18(context)),
       ],
     );
   }

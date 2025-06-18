@@ -65,12 +65,17 @@ class InOutGroup {
   final List<RefundOrder>? refund;
   final List<UnitQty> summaryStock;
   final double summary;
-
-  // OUT-only fields
   final List<UnitQty>? orderStock;
   final List<Orders>? order;
   final List<UnitQty>? promotionStock;
   final List<UnitQty>? change;
+
+  // เพิ่ม field ใหม่
+  final double? summaryStockIn;
+  final double? orderSum;
+  final double? promotionSum;
+  final double? changeSum;
+  final double? summaryStockInOut;
 
   InOutGroup({
     required this.stock,
@@ -84,14 +89,25 @@ class InOutGroup {
     this.order,
     this.promotionStock,
     this.change,
+    this.summaryStockIn,
+    this.orderSum,
+    this.changeSum,
+    this.promotionSum,
+    this.summaryStockInOut,
   });
 
   factory InOutGroup.fromJson(Map<String, dynamic> json) {
+    final rawStock = json['stock'];
+    final stockList = (rawStock is Map && rawStock['stock'] is List)
+        ? (rawStock['stock'] as List<dynamic>)
+            .map((e) => UnitQty.fromJson(e))
+            .toList()
+        : (rawStock is List)
+            ? rawStock.map((e) => UnitQty.fromJson(e)).toList()
+            : <UnitQty>[];
+
     return InOutGroup(
-      stock: (json['stock'] as List<dynamic>?)
-              ?.map((e) => UnitQty.fromJson(e))
-              .toList() ??
-          [],
+      stock: stockList,
       withdrawStock: (json['withdrawStock'] as List<dynamic>?)
               ?.map((e) => UnitQty.fromJson(e))
               .toList() ??
@@ -123,23 +139,31 @@ class InOutGroup {
       change: (json['change'] as List<dynamic>?)
           ?.map((e) => UnitQty.fromJson(e))
           .toList(),
+      summaryStockIn: (json['summaryStockIn'] as num?)?.toDouble(),
+      orderSum: (json['orderSum'] as num?)?.toDouble(),
+      changeSum: (json['changeSum'] as num?)?.toDouble(),
+      promotionSum: (json['promotionSum'] as num?)?.toDouble(),
+      summaryStockInOut: (json['summaryStockInOut'] as num?)?.toDouble(),
     );
   }
 }
 
 class UnitQty {
   final String unit;
+  final String? unitName;
   final int qty;
 
   UnitQty({
     required this.unit,
     required this.qty,
+    this.unitName,
   });
 
   factory UnitQty.fromJson(Map<String, dynamic> json) {
     return UnitQty(
       unit: json['unit'] ?? '',
       qty: json['qty'] ?? 0,
+      unitName: json['unitName'], // optional
     );
   }
 }
