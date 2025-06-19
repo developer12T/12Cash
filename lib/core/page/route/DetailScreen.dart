@@ -554,7 +554,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               children: [
                                 MenuButton(
                                   icon: Icons.add_shopping_cart_rounded,
-                                  label: "ขาย",
+                                  label: "เช็คอิน/ขาย",
                                   color:
                                       (statusCheck == 1 || statusCheck == 0) &&
                                               DateTime.now().isBefore(dateCheck)
@@ -579,10 +579,10 @@ class _DetailScreenState extends State<DetailScreen> {
                                     }
                                   },
                                 ),
-                                Text(
-                                  'ทดสอบระบบ',
-                                  style: Styles.black12(context),
-                                )
+                                // Text(
+                                //   'ทดสอบระบบ',
+                                //   style: Styles.black12(context),
+                                // )
                               ],
                             ),
                           ],

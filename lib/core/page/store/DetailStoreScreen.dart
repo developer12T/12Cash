@@ -524,10 +524,10 @@ class _DetailStoreScreenState extends State<DetailStoreScreen> {
                                               );
                                             },
                                           ),
-                                          Text(
-                                            'ทดสอบระบบ',
-                                            style: Styles.black12(context),
-                                          ),
+                                          // Text(
+                                          //   'ทดสอบระบบ',
+                                          //   style: Styles.black12(context),
+                                          // ),
                                         ],
                                       ),
                                     ],

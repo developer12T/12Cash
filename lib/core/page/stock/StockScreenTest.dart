@@ -315,7 +315,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
   Future<void> printHeaderBill(String typeBill) async {
     String header = '''
-${centerText('รายการ Stock ณ วันที่ ${DateTime.now().toString().substring(0, 10)}', 69)}
+${centerText('รายการ Stock ณ วันที่ ${DateTime.now().toString().substring(0, 10)} เขต ${User.area}', 69)}
 ''';
     Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
