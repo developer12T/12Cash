@@ -82,16 +82,24 @@ class _OrderMenuListCardState extends State<OrderMenuListCard> {
                                       style: Styles.headerBlack24(context),
                                       overflow: TextOverflow
                                           .ellipsis, // Truncate if too long
-                                      maxLines: 1, // Restrict to 1 line
+                                      maxLines: 2, // Restrict to 1 line
                                       softWrap: false, // Avoid wrapping
                                     ),
                                   ),
                                 ],
                               ),
+                              // Row(
+                              //   children: [
+                              //     Text(
+                              //       'กลุ่ม${widget.product.group} แบรนด์${widget.product.brand}',
+                              //       style: Styles.grey18(context),
+                              //     ),
+                              //   ],
+                              // ),
                               Row(
                                 children: [
                                   Text(
-                                    '${widget.product.group} | ${widget.product.brand}',
+                                    'รส${widget.product.flavour} ขนาด ${widget.product.size}',
                                     style: Styles.grey18(context),
                                   ),
                                 ],
@@ -99,7 +107,7 @@ class _OrderMenuListCardState extends State<OrderMenuListCard> {
                               Row(
                                 children: [
                                   Text(
-                                    '${widget.product.flavour} | ${widget.product.size}',
+                                    'น้ำหนักสุทธิ ${widget.product.weightNet} กรัม น้ำหนักรวม ${widget.product.weightGross} กรัม',
                                     style: Styles.grey18(context),
                                   ),
                                 ],
@@ -107,15 +115,7 @@ class _OrderMenuListCardState extends State<OrderMenuListCard> {
                               Row(
                                 children: [
                                   Text(
-                                    'Net ${widget.product.weightNet} | Gross ${widget.product.weightGross}',
-                                    style: Styles.grey18(context),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    '${widget.product.type}',
+                                    'คงเหลือ ${widget.product.qtyPcs} ชิ้น',
                                     style: Styles.grey18(context),
                                   ),
                                 ],

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/chart/SummarybyMonth.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
@@ -34,6 +35,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -272,13 +274,41 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  Future<MultipartFile> compressImages(File image) async {
+    final targetPath =
+        image.path.replaceAll(RegExp(r'\.(jpg|jpeg|png)$'), '_compressed.jpg');
+    var result = await FlutterImageCompress.compressAndGetFile(
+      image.absolute.path,
+      targetPath,
+      quality: 80,
+      minWidth: 1024,
+      minHeight: 1024,
+    );
+    File finalFile;
+    if (result == null) {
+      finalFile = image;
+    } else if (result is XFile) {
+      finalFile = File(result.path);
+    } else {
+      finalFile = result as File;
+    }
+    return await MultipartFile.fromFile(finalFile.path);
+  }
+
   Future<void> checkInStore(BuildContext context) async {
     try {
       await fetchLocation();
       print('selectedCause ${selectedCause == 'เลือกเหตุผล'}');
       Dio dio = Dio();
-      MultipartFile? imageFile;
-      imageFile = await MultipartFile.fromFile(checkinImagePath!);
+      // MultipartFile? imageFile;
+      File imageFile = File(checkinImagePath!);
+
+      // ใช้ฟังก์ชัน compressImages ที่เราสร้าง
+      MultipartFile compressedFile = await compressImages(imageFile);
+
+      // imageFile = await MultipartFile.fromFile(checkinImagePath!);
+      // convert = await compressImages(imageFile!);
+
       if (selectedCause == 'เลือกเหตุผล') {
         Navigator.of(context).pop();
         toastification.show(
@@ -305,7 +335,7 @@ class _DetailScreenState extends State<DetailScreen> {
               'routeId': storeDetail?.id,
               'storeId': widget.customerNo,
               'note': note,
-              'checkInImage': imageFile,
+              'checkInImage': compressedFile,
               // "note":
               //     noteController.text != "" ? noteController.text : selectedCause,
               // "checkInImage": imageFile,

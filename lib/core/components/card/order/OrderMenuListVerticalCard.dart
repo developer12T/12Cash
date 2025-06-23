@@ -68,7 +68,7 @@ class _OrderMenuListVerticalCardState extends State<OrderMenuListVerticalCard> {
                     children: [
                       Expanded(
                         child: Text(
-                          "${widget.item.name}",
+                          widget.item.name,
                           style: Styles.headerBlack24(context),
                           // overflow:
                           //     TextOverflow.ellipsis, // Truncate if too long
@@ -82,7 +82,7 @@ class _OrderMenuListVerticalCardState extends State<OrderMenuListVerticalCard> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        '${widget.item.group} ${widget.item.brand}',
+                        'คงเหลือ ${widget.item.qtyPcs} ชิ้น',
                         style: Styles.grey18(context),
                       ),
                     ],
@@ -91,7 +91,7 @@ class _OrderMenuListVerticalCardState extends State<OrderMenuListVerticalCard> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        '${widget.item.size} รส${widget.item.flavour}',
+                        'รส${widget.item.flavour} ขนาด ${widget.item.size}',
                         style: Styles.grey18(context),
                       ),
                     ],

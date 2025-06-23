@@ -307,24 +307,24 @@ class _StockScreenState extends State<StockScreen> {
         final List<dynamic> data = response.data['data'];
         if (mounted) {
           setState(() {
-            productList = data.map((item) => Product.fromJson(item)).toList();
-            filteredProductList = List.from(productList);
-            receiptData["items"] = productList
-                .map((item) => {
-                      "name": item.name,
-                      "id": item.id,
-                      "qty": item.totalQtyPcs.toString(),
-                      "qtyCTN": item.totalQtyCtn.toString(),
-                      "listUnit": item.listUnit
-                          .map((unit) => {
-                                "name": unit.name,
-                                "unit": unit.unit,
-                                "qty": unit
-                                    .qty, // or unit.price, depending on what qty should represent
-                              })
-                          .toList(),
-                    })
-                .toList();
+            // productList = data.map((item) => Product.fromJson(item)).toList();
+            // filteredProductList = List.from(productList);
+            // receiptData["items"] = productList
+            //     .map((item) => {
+            //           "name": item.name,
+            //           "id": item.id,
+            //           "qty": item.totalQtyPcs.toString(),
+            //           "qtyCTN": item.totalQtyCtn.toString(),
+            //           "listUnit": item.listUnit
+            //               .map((unit) => {
+            //                     "name": unit.name,
+            //                     "unit": unit.unit,
+            //                     "qty": unit
+            //                         .qty, // or unit.price, depending on what qty should represent
+            //                   })
+            //               .toList(),
+            //         })
+            //     .toList();
           });
           // print("receiptData: ${receiptData["items"]}");
 

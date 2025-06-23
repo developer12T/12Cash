@@ -174,7 +174,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
               "ยอดส่งเงินประจำวันที่ ${DateFormat('d MMMM yyyy', 'dashboard.lange'.tr()).format(DateTime.now())}",
               style: Styles.black24(context),
             ),
-            SizedBox(
+            const SizedBox(
               height: 16,
             ),
             ElevatedButton(

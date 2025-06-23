@@ -777,61 +777,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                               children: [
                                 Expanded(
                                   flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: TextField(
-                                      autofocus: true,
-                                      style: Styles.black18(context),
-                                      controller: searchController,
-                                      onChanged: (query) {
-                                        if (query != "") {
-                                          setState(() {
-                                            filteredProductList = productList
-                                                .where((item) =>
-                                                    item.name
-                                                        .toLowerCase()
-                                                        .contains(query
-                                                            .toLowerCase()) ||
-                                                    item.brand.toLowerCase().contains(
-                                                        query.toLowerCase()) ||
-                                                    item.group
-                                                        .toLowerCase()
-                                                        .contains(query
-                                                            .toLowerCase()) ||
-                                                    item.flavour
-                                                        .toLowerCase()
-                                                        .contains(query
-                                                            .toLowerCase()) ||
-                                                    item.id.toLowerCase().contains(
-                                                        query.toLowerCase()) ||
-                                                    item.size
-                                                        .toLowerCase()
-                                                        .contains(
-                                                            query.toLowerCase()))
-                                                .toList();
-                                          });
-                                        } else {
-                                          setState(() {
-                                            filteredProductList = productList;
-                                          });
-                                        }
-                                      },
-                                      decoration: InputDecoration(
-                                        hintText: "ค้นหาร้านค้า...",
-                                        hintStyle: Styles.grey18(context),
-                                        prefixIcon: Icon(Icons.search),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16.0),
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 1,
                                   child: SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
@@ -1135,8 +1080,67 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                 ),
                               ],
                             ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: TextField(
+                                      autofocus: true,
+                                      style: Styles.black18(context),
+                                      controller: searchController,
+                                      onChanged: (query) {
+                                        if (query != "") {
+                                          setState(() {
+                                            filteredProductList = productList
+                                                .where((item) =>
+                                                    item.name
+                                                        .toLowerCase()
+                                                        .contains(query
+                                                            .toLowerCase()) ||
+                                                    item.brand.toLowerCase().contains(
+                                                        query.toLowerCase()) ||
+                                                    item.group
+                                                        .toLowerCase()
+                                                        .contains(query
+                                                            .toLowerCase()) ||
+                                                    item.flavour
+                                                        .toLowerCase()
+                                                        .contains(query
+                                                            .toLowerCase()) ||
+                                                    item.id.toLowerCase().contains(
+                                                        query.toLowerCase()) ||
+                                                    item.size
+                                                        .toLowerCase()
+                                                        .contains(
+                                                            query.toLowerCase()))
+                                                .toList();
+                                          });
+                                        } else {
+                                          setState(() {
+                                            filteredProductList = productList;
+                                          });
+                                        }
+                                      },
+                                      decoration: InputDecoration(
+                                        hintText: "ค้นหาสินค้า...",
+                                        hintStyle: Styles.grey18(context),
+                                        prefixIcon: Icon(Icons.search),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                             SizedBox(
-                              height: 16,
+                              height: 8,
                             ),
                             _isGridView
                                 ? Expanded(
