@@ -952,7 +952,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                                                       : selectedGroups
                                                           .join(', '),
                                                   style: selectedGroups.isEmpty
-                                                      ? Styles.grey18(context)
+                                                      ? Styles.black18(context)
                                                       : Styles.pirmary18(
                                                           context),
                                                   overflow: TextOverflow
@@ -982,7 +982,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                                                       : selectedBrands
                                                           .join(', '),
                                                   style: selectedBrands.isEmpty
-                                                      ? Styles.grey18(context)
+                                                      ? Styles.black18(context)
                                                       : Styles.pirmary18(
                                                           context),
                                                   overflow: TextOverflow
@@ -1012,7 +1012,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                                                       : selectedSizes
                                                           .join(', '),
                                                   style: selectedSizes.isEmpty
-                                                      ? Styles.grey18(context)
+                                                      ? Styles.black18(context)
                                                       : Styles.pirmary18(
                                                           context),
                                                   overflow: TextOverflow
@@ -1044,7 +1044,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                                                           .join(', '),
                                                   style: selectedFlavours
                                                           .isEmpty
-                                                      ? Styles.grey18(context)
+                                                      ? Styles.black18(context)
                                                       : Styles.pirmary18(
                                                           context),
                                                   overflow: TextOverflow
@@ -1074,7 +1074,8 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                                                 openIcon: false,
                                                 Text(
                                                   'ล้างตัวเลือก',
-                                                  style: Styles.grey18(context),
+                                                  style:
+                                                      Styles.black18(context),
                                                 ),
                                                 110,
                                               ),

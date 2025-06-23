@@ -808,7 +808,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                                             ? 'กลุ่ม'
                                             : selectedGroups.join(', '),
                                         style: selectedGroups.isEmpty
-                                            ? Styles.grey18(context)
+                                            ? Styles.black18(context)
                                             : Styles.pirmary18(context),
                                         overflow: TextOverflow
                                             .ellipsis, // Truncate if too long
@@ -859,7 +859,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                                             ? 'แบรนด์'
                                             : selectedBrands.join(', '),
                                         style: selectedBrands.isEmpty
-                                            ? Styles.grey18(context)
+                                            ? Styles.black18(context)
                                             : Styles.pirmary18(context),
                                         overflow: TextOverflow
                                             .ellipsis, // Truncate if too long
@@ -909,7 +909,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                                             ? 'ขนาด'
                                             : selectedSizes.join(', '),
                                         style: selectedSizes.isEmpty
-                                            ? Styles.grey18(context)
+                                            ? Styles.black18(context)
                                             : Styles.pirmary18(context),
                                         overflow: TextOverflow
                                             .ellipsis, // Truncate if too long
@@ -955,7 +955,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                                             ? 'รสชาติ'
                                             : selectedFlavours.join(', '),
                                         style: selectedFlavours.isEmpty
-                                            ? Styles.grey18(context)
+                                            ? Styles.black18(context)
                                             : Styles.pirmary18(context),
                                         overflow: TextOverflow
                                             .ellipsis, // Truncate if too long
@@ -979,7 +979,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
                                       openIcon: false,
                                       child: Text(
                                         'ล้างตัวเลือก',
-                                        style: Styles.grey18(context),
+                                        style: Styles.black18(context),
                                       ),
                                       width: 110,
                                     ),

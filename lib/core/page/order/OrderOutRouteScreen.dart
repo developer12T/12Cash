@@ -826,7 +826,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                   ? 'กลุ่ม'
                                                   : selectedGroups.join(', '),
                                               style: selectedGroups.isEmpty
-                                                  ? Styles.grey18(context)
+                                                  ? Styles.black18(context)
                                                   : Styles.pirmary18(context),
                                               overflow: TextOverflow
                                                   .ellipsis, // Truncate if too long
@@ -882,7 +882,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                   ? 'แบรนด์'
                                                   : selectedBrands.join(', '),
                                               style: selectedBrands.isEmpty
-                                                  ? Styles.grey18(context)
+                                                  ? Styles.black18(context)
                                                   : Styles.pirmary18(context),
                                               overflow: TextOverflow
                                                   .ellipsis, // Truncate if too long
@@ -936,7 +936,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                   ? 'ขนาด'
                                                   : selectedSizes.join(', '),
                                               style: selectedSizes.isEmpty
-                                                  ? Styles.grey18(context)
+                                                  ? Styles.black18(context)
                                                   : Styles.pirmary18(context),
                                               overflow: TextOverflow
                                                   .ellipsis, // Truncate if too long
@@ -987,7 +987,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                   ? 'รสชาติ'
                                                   : selectedFlavours.join(', '),
                                               style: selectedFlavours.isEmpty
-                                                  ? Styles.grey18(context)
+                                                  ? Styles.black18(context)
                                                   : Styles.pirmary18(context),
                                               overflow: TextOverflow
                                                   .ellipsis, // Truncate if too long

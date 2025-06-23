@@ -905,7 +905,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               ? 'กลุ่ม'
                                               : selectedGroups.join(', '),
                                           style: selectedGroups.isEmpty
-                                              ? Styles.grey18(context)
+                                              ? Styles.black18(context)
                                               : Styles.pirmary18(context),
                                           overflow: TextOverflow
                                               .ellipsis, // Truncate if too long
@@ -958,7 +958,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               ? 'แบรนด์'
                                               : selectedBrands.join(', '),
                                           style: selectedBrands.isEmpty
-                                              ? Styles.grey18(context)
+                                              ? Styles.black18(context)
                                               : Styles.pirmary18(context),
                                           overflow: TextOverflow
                                               .ellipsis, // Truncate if too long
@@ -1010,7 +1010,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               ? 'ขนาด'
                                               : selectedSizes.join(', '),
                                           style: selectedSizes.isEmpty
-                                              ? Styles.grey18(context)
+                                              ? Styles.black18(context)
                                               : Styles.pirmary18(context),
                                           overflow: TextOverflow
                                               .ellipsis, // Truncate if too long
@@ -1058,7 +1058,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               ? 'รสชาติ'
                                               : selectedFlavours.join(', '),
                                           style: selectedFlavours.isEmpty
-                                              ? Styles.grey18(context)
+                                              ? Styles.black18(context)
                                               : Styles.pirmary18(context),
                                           overflow: TextOverflow
                                               .ellipsis, // Truncate if too long
@@ -1083,7 +1083,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         openIcon: false,
                                         child: Text(
                                           'ล้างตัวเลือก',
-                                          style: Styles.grey18(context),
+                                          style: Styles.black18(context),
                                         ),
                                         width: 110,
                                       ),
