@@ -588,9 +588,9 @@ ${centerText('($typeBill)', 69)}
 
     String footer = '''
     \n\n
-    ${leftRightText('ลงชื่อพนักงานขาย ${data['OBSMCD']}', '', 70)}
+    ${leftRightText('ลงชื่อพนักงานขาย ${data['OBSMCD']}', '', 70)}\n\n
     ${leftRightText('', '.........................', 58)}
-    ${leftRightText('', 'ลายเซ็นลูกค้า', 55)}
+    ${leftRightText('', 'ลายเซ็นลูกค้า', 55)}\n\n
     ${leftRightText('.........................', '', 58)}
     ${leftRightText('    ลายเซ็น Supervisor\n\n\n', '', 55)}
     ''';

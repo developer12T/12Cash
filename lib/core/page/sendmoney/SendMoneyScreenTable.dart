@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld2.dart';
 import 'package:_12sale_app/core/components/table/ReusableTable.dart';
+import 'package:_12sale_app/core/components/table/SendmoneyTable.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
@@ -62,11 +63,12 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
         final mappedRows = fetchedStocks
             .map((e) => [
                   e.date,
-                  e.summary.toString(),
-                  e.summary.toString(),
                   e.status,
+                  e.sendmoney.toString(),
+                  e.summary.toString(),
                   e.good.toString(),
                   e.damaged.toString(),
+                  e.change.toString(),
                 ])
             .toList();
 
@@ -75,7 +77,7 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
         });
       }
     } catch (e) {
-      print("Error getSendmoney: $e");
+      print("Error _getSendmoneyTable: $e");
     }
   }
 
@@ -83,9 +85,9 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
   Widget build(BuildContext context) {
     final columns = [
       'วันที่',
+      'สถานะ',
       'ส่งเงิน',
       'รวม',
-      'สถานะ',
       'คืนดี',
       'คืนเสี่ย',
       'เปลี่ยน'
@@ -106,7 +108,7 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              child: ReusableTable(
+              child: SendmoneyTableShow(
                 columns: columns,
                 rows: filteredRows,
               ),

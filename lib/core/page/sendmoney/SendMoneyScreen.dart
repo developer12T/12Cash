@@ -15,7 +15,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toastification/toastification.dart';
 
 class SendMoneyScreen extends StatefulWidget {
-  const SendMoneyScreen({super.key});
+  final String date;
+  final DateTime dateTime;
+
+  const SendMoneyScreen({
+    super.key,
+    required this.date,
+    required this.dateTime,
+  });
 
   @override
   State<SendMoneyScreen> createState() => _SendMoneyScreenState();
@@ -26,8 +33,9 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   double sendMoney = 0;
   double totalMoney = 0;
   String status = "";
-  String date =
-      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}${DateFormat('dd').format(DateTime.now())}";
+
+  // String date =
+  //     "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}${DateFormat('dd').format(DateTime.now())}";
   TextEditingController countController = TextEditingController();
 
   @override
@@ -40,6 +48,19 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
     return double.tryParse(input) != null;
   }
 
+  /// Upload an image of the store to the server and save it as a sendmoney image
+  ///
+  /// This function will upload the image file at [storeImagePath] to the server
+  /// and save it as a sendmoney image for the current date and area.
+  ///
+  /// The image file should be a valid image file.
+  ///
+  /// The function will return a [Future] that completes with a [Response] object
+  /// if the upload is successful, or a [DioError] object if the upload fails.
+  ///
+  /// The response object will contain the uploaded image file's ID if the upload
+  /// is successful.
+  ///
   Future<void> uploadImageSendmoney() async {
     try {
       Dio dio = Dio();
@@ -49,7 +70,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         {
           'sendmoneyImage': imageFile,
           'area': "${User.area}",
-          "date": "${date}"
+          "date": "${widget.date}",
         },
       );
 
@@ -81,7 +102,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         method: 'POST',
         body: {
           "area": "${User.area}",
-          "date": "${date}",
+          "date": "${widget.date}",
           "sendmoney": double.parse(sendMoney),
         },
       );
@@ -136,7 +157,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         method: 'POST',
         body: {
           "area": "${User.area}",
-          "date": "${date}",
+          "date": "${widget.date}",
         },
       );
       print("Response: $response");
@@ -171,7 +192,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "ยอดส่งเงินประจำวันที่ ${DateFormat('d MMMM yyyy', 'dashboard.lange'.tr()).format(DateTime.now())}",
+              "ยอดส่งเงินประจำวันที่ ${DateFormat('d MMMM yyyy', 'dashboard.lange'.tr()).format(widget.dateTime)}",
               style: Styles.black24(context),
             ),
             const SizedBox(

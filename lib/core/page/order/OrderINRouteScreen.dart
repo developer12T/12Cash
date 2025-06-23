@@ -424,6 +424,37 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
     }
   }
 
+  Future<void> _updateStock3(
+      CartList product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "period": "${period}",
+            "unit": "${product.unit}",
+            "productId": "${product.id}",
+            "qty": 1,
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
+  }
+
   Future<void> _getProduct() async {
     try {
       ApiService apiService = ApiService();
@@ -2019,6 +2050,12 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                                         .qty--;
                                                                   }
                                                                 });
+                                                                await _updateStock3(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState,
+                                                                    'IN');
+
                                                                 await _reduceCart(
                                                                     cartlist[
                                                                         index],
@@ -2091,6 +2128,11 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                                           index]
                                                                       .qty++;
                                                                 });
+                                                                await _updateStock3(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState,
+                                                                    'OUT');
                                                               },
                                                               style:
                                                                   ElevatedButton

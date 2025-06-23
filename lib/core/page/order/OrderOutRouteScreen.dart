@@ -1410,6 +1410,37 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     );
   }
 
+  Future<void> _updateStock3(
+      CartList product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "period": "${period}",
+            "unit": "${product.unit}",
+            "productId": "${product.id}",
+            "qty": 1,
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
+  }
+
   void _showProductSheet(BuildContext context, Product product) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -2070,6 +2101,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
+                                                                await _updateStock3(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState,
+                                                                    'IN');
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2131,6 +2167,12 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
+
+                                                                await _updateStock3(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState,
+                                                                    'OUT');
 
                                                                 setModalState(
                                                                     () {

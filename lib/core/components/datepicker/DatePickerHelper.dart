@@ -13,7 +13,7 @@ class DatePickerHelper {
       context: context,
       initialDate: initialDate ?? DateTime.now(),
       firstDate: DateTime(DateTime.now().year),
-      lastDate: DateTime(DateTime.now().year + 3),
+      lastDate: DateTime(DateTime.now().year - 2),
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       builder: (BuildContext context, Widget? child) {
         return Theme(

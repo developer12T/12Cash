@@ -1,14 +1,18 @@
 class SendmoneyTable {
   final String date;
+  final double sendmoney;
   final double summary;
   final String status;
+  final double change;
   final double good;
   final double damaged;
 
   SendmoneyTable({
     required this.date,
+    required this.sendmoney,
     required this.summary,
     required this.status,
+    required this.change,
     required this.good,
     required this.damaged,
   });
@@ -17,7 +21,9 @@ class SendmoneyTable {
   factory SendmoneyTable.fromJson(Map<String, dynamic> json) {
     return SendmoneyTable(
       date: json['date'] ?? '',
+      sendmoney: (json['sendmoney'] as num?)?.toDouble() ?? 0.0,
       summary: (json['summary'] as num?)?.toDouble() ?? 0.0,
+      change: (json['change'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] ?? '',
       good: (json['good'] as num?)?.toDouble() ?? 0.0,
       damaged: (json['damaged'] as num?)?.toDouble() ?? 0.0,
@@ -29,7 +35,9 @@ class SendmoneyTable {
     return {
       'date': date,
       'summary': summary,
+      'sendmoney': sendmoney,
       'status': status,
+      'change': change,
       'good': good,
       'damaged': damaged,
     };

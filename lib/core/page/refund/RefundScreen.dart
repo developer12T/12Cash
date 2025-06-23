@@ -160,6 +160,37 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     }
   }
 
+  Future<void> _updateStock3(
+      ListSaleProduct product, StateSetter setModalState, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+          endpoint: 'api/cash/cart/updateStock',
+          method: 'POST',
+          body: {
+            "area": "${User.area}",
+            "period": "${period}",
+            "unit": "${product.unit}",
+            "productId": "${product.id}",
+            "qty": 1,
+            "type": type
+          });
+
+      if (response.statusCode == 200) {
+        setModalState(
+          () {
+            stockQty -= count.toInt();
+          },
+        );
+      }
+      print(response.data['data']);
+    } catch (e) {
+      print("Error in _updateStock $e");
+    }
+  }
+
   Future<void> _addCart(Product product) async {
     try {
       ApiService apiService = ApiService();
@@ -2631,6 +2662,14 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                           [
                                                                           index],
                                                                       setModalState);
+
+                                                                  await _updateStock3(
+                                                                      cartList[
+                                                                              "items"]
+                                                                          [
+                                                                          index],
+                                                                      setModalState,
+                                                                      'IN');
                                                                 }
                                                               },
                                                               style:
@@ -2701,6 +2740,13 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                             "items"]
                                                                         [index],
                                                                     setModalState);
+
+                                                                await _updateStock3(
+                                                                    cartList[
+                                                                            "items"]
+                                                                        [index],
+                                                                    setModalState,
+                                                                    'OUT');
                                                               },
                                                               style:
                                                                   ElevatedButton

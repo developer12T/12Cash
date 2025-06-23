@@ -807,10 +807,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     await printBetween('ภาษีมูลค่าเพิ่ม 7%', totalRefundVat);
     await printBetween('จำนวนเงินรวมสุทธิ', totalRefund);
     await printBetween("", "($totalText)");
-    String footer = '''
+    String footer = '''\n\n
     ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
-    ${leftRightText('', 'ลายเซ็นลูกค้า\n', 61)}
-    ''';
+    ${leftRightText('', 'ลายเซ็นลูกค้า', 61)}
+    \n\n\n''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
   }

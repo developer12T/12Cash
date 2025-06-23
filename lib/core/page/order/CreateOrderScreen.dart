@@ -1335,7 +1335,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   ElevatedButton(
                                                                     onPressed:
                                                                         () async {
-                                                                      await _addCartDu(
+                                                                      await _reduceCart(
                                                                           cartList[
                                                                               index]);
 
