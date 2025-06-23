@@ -7,15 +7,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class IconButtonWithLabelOld extends StatefulWidget {
-  String? imagePath;
+  final String? imagePath;
   final IconData icon;
   final String label;
   final TextStyle? labelStyle;
   final Color backgroundColor;
   final double borderRadius;
   final EdgeInsetsGeometry padding;
-  final Function(String imagePath)? onImageSelected; // Callback for image path
-  bool checkNetwork;
+  final Function(String imagePath)? onImageSelected;
+  final bool checkNetwork;
+
   IconButtonWithLabelOld({
     super.key,
     required this.icon,
@@ -25,7 +26,7 @@ class IconButtonWithLabelOld extends StatefulWidget {
     this.backgroundColor = Colors.blue,
     this.borderRadius = 8.0,
     this.padding = const EdgeInsets.symmetric(vertical: 16),
-    this.onImageSelected, // Optional parameter for callback
+    this.onImageSelected,
     this.checkNetwork = false,
   });
 
@@ -34,27 +35,27 @@ class IconButtonWithLabelOld extends StatefulWidget {
 }
 
 class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
-  late CameraController _cameraController;
+  CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
-  // String? imagePath;
+  String? imagePath;
 
   @override
   void initState() {
     super.initState();
+    imagePath = widget.imagePath;
     _initializeCamera();
   }
 
   Future<void> _initializeCamera() async {
     try {
       final cameras = await availableCameras();
-      // print("cameras.length:${cameras.length}");
       if (cameras.isNotEmpty) {
         final firstCamera = cameras.first;
         _cameraController = CameraController(
           firstCamera,
           ResolutionPreset.max,
         );
-        _initializeControllerFuture = _cameraController.initialize();
+        _initializeControllerFuture = _cameraController!.initialize();
         await _initializeControllerFuture;
       } else {
         print("No cameras available");
@@ -66,25 +67,28 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
 
   @override
   void dispose() {
-    _cameraController.dispose();
+    _cameraController?.dispose();
     super.dispose();
   }
 
   Future<void> openCamera(BuildContext context) async {
+    if (_initializeControllerFuture == null) {
+      // ป้องกันกรณี widget initState ยังไม่เสร็จ
+      return;
+    }
     await _initializeControllerFuture;
+    if (_cameraController == null) return;
+    if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CameraPreviewScreen(
-          cameraController: _cameraController,
-          onImageCaptured: (
-            String imagePath,
-          ) {
+          cameraController: _cameraController!,
+          onImageCaptured: (String path) {
             setState(() {
-              widget.imagePath = imagePath;
+              imagePath = path;
             });
-            // Notify parent widget via callback
             if (widget.onImageSelected != null) {
-              widget.onImageSelected!(imagePath);
+              widget.onImageSelected!(path);
             }
           },
         ),
@@ -104,14 +108,13 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
             onPressed: () => openCamera(context),
             style: ElevatedButton.styleFrom(
               padding: widget.padding,
-              backgroundColor: widget.imagePath == null
-                  ? Colors.grey[400]
-                  : Styles.primaryColor,
+              backgroundColor:
+                  imagePath == null ? Colors.grey[400] : Styles.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.borderRadius),
               ),
             ),
-            child: widget.imagePath == null
+            child: imagePath == null
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -123,15 +126,16 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
                     ],
                   )
                 : ClipRRect(
+                    borderRadius: BorderRadius.circular(widget.borderRadius),
                     child: widget.checkNetwork == false
                         ? Image.file(
-                            File(widget.imagePath!),
+                            File(imagePath!),
                             width: screenWidth / 4,
                             height: screenWidth / 4,
                             fit: BoxFit.cover,
                           )
                         : Image.network(
-                            widget.imagePath!,
+                            imagePath!,
                             width: screenWidth / 4,
                             height: screenWidth / 4,
                             fit: BoxFit.cover,
@@ -150,7 +154,7 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
         ),
         Text(
           widget.label,
-          style: Styles.black18(context),
+          style: widget.labelStyle ?? Styles.black18(context),
         ),
       ],
     );

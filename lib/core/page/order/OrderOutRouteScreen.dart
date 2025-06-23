@@ -2412,6 +2412,13 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                       count = countController.text.toDouble();
                                       total = price * count;
                                     });
+
+                                    setModalState(
+                                      () {
+                                        count = countController.text.toDouble();
+                                        total = price * count;
+                                      },
+                                    );
                                     Navigator.pop(context);
                                   },
                                   child: Text(

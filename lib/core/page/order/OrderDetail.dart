@@ -692,7 +692,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     await printBetween('จำนวนเงินรวมสุทธิ', totalCurrency);
     await printBetween("", "($totalText)");
     String footer = '''
-    ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
+    ${leftRightText('\n\nผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
     ${leftRightText('', 'ลายเซ็นลูกค้า\n\n\n', 61)}
     ''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
@@ -780,6 +780,34 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     if (connectionStatus) {
       // await printHeaderSeparator();
       await printHeaderBill('บิลเงินสด/ใบกำกับภาษี');
+      await printBodyBill(receiptData);
+      // await printHeaderSeparator();
+      // await printHeaderBill('ใบลดหนี้');
+      // await printBodyBill(receiptData);
+    } else {
+      toastification.show(
+        autoCloseDuration: const Duration(seconds: 5),
+        context: context,
+        primaryColor: Colors.red,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: Text(
+          "ยังไม่ได้เชื่อมต่อเครื่องปริ้น",
+          style: Styles.red18(context),
+        ),
+      );
+      // print("Printer is disconnected ($connectionStatus)");
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Printer is not connected")),
+      // );
+    }
+  }
+
+  Future<void> printTestCopy() async {
+    bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
+    if (connectionStatus) {
+      // await printHeaderSeparator();
+      await printHeaderBill('สำเนาบิลเงินสด/ใบกำกับภาษี');
       await printBodyBill(receiptData);
       // await printHeaderSeparator();
       // await printHeaderBill('ใบลดหนี้');
@@ -1548,24 +1576,58 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
       persistentFooterButtons: [
         Row(
           children: [
+            Container(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  backgroundColor:
+                      User.connectPrinter ? Styles.success : Styles.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  if (!User.connectPrinter) {
+                    _connectToPrinter(User.devicePrinter);
+                  } else {
+                    _disconnectPrinter();
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.print_rounded,
+                            color: Colors.white,
+                            size: 25,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
             Expanded(
               child: Container(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    backgroundColor:
-                        User.connectPrinter ? Styles.success : Styles.grey,
+                    backgroundColor: Styles.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    if (!User.connectPrinter) {
-                      _connectToPrinter(User.devicePrinter);
-                    } else {
-                      _disconnectPrinter();
-                    }
+                  onPressed: () async {
+                    await printTest();
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -1580,7 +1642,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               size: 25,
                             ),
                             Text(
-                              " ${User.connectPrinter ? "เชื่อมต่อแล้ว" : "ยังไม่ได้เชื่อมต่อ"}",
+                              " พิมพ์ใบสั่งซื้อ",
                               style: Styles.headerWhite18(context),
                             ),
                           ],
@@ -1606,7 +1668,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                     ),
                   ),
                   onPressed: () async {
-                    await printTest();
+                    await printTestCopy();
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -1621,7 +1683,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               size: 25,
                             ),
                             Text(
-                              " พิมพ์ใบสั่งซื้อ",
+                              " พิมพ์สำเนา",
                               style: Styles.headerWhite18(context),
                             ),
                           ],

@@ -1719,6 +1719,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                 count = count;
                                                 total = price * count;
                                               });
+
                                               print("total${total}");
                                             },
                                             style: ElevatedButton.styleFrom(
@@ -2341,6 +2342,14 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                         count = countD.toInt();
                                         total = price * count;
                                       });
+                                      setModalState(
+                                        () {
+                                          double countD =
+                                              countController.text.toDouble();
+                                          count = countD.toInt();
+                                          total = price * count;
+                                        },
+                                      );
                                       Navigator.pop(context);
                                     } else {
                                       toastification.show(

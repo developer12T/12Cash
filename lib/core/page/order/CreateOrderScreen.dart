@@ -1373,13 +1373,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   ElevatedButton(
                                                                     onPressed:
                                                                         () async {
-                                                                      await _deleteCart(
-                                                                          cartList[
-                                                                              index]);
                                                                       await _updateStock2(
                                                                           cartList[
                                                                               index],
                                                                           "IN");
+                                                                      await _deleteCart(
+                                                                          cartList[
+                                                                              index]);
+
                                                                       setState(
                                                                         () {
                                                                           cartList.removeWhere((item) =>

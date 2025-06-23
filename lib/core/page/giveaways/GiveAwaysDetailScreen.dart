@@ -587,7 +587,7 @@ ${centerText('($typeBill)', 69)}
     await printBetween("", "($totalText)");
 
     String footer = '''
-    \n
+    \n\n
     ${leftRightText('ลงชื่อพนักงานขาย ${data['OBSMCD']}', '', 70)}
     ${leftRightText('', '.........................', 58)}
     ${leftRightText('', 'ลายเซ็นลูกค้า', 55)}

@@ -31,7 +31,7 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timelines/timelines.dart';
 import 'package:toastification/toastification.dart';
-
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import '../../../data/service/apiService.dart';
 
 const kTileHeight = 50.0;
@@ -375,13 +375,46 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
     }
   }
 
-  Future<void> addStore() async {
-    // Initialize Dio
+  Future<List<MultipartFile>> compressImages(List<File> images) async {
+    List<MultipartFile> compressed = [];
+    for (File img in images) {
+      final targetPath = img.path.replaceAll('.jpg', '_compressed.jpg');
+      var result = await FlutterImageCompress.compressAndGetFile(
+        img.absolute.path,
+        targetPath,
+        quality: 80,
+        minWidth: 1024,
+        minHeight: 1024,
+      );
+      late File finalFile;
+      if (result == null) {
+        finalFile = img;
+      } else if (result is XFile) {
+        finalFile = File(result.path);
+      } else {
+        finalFile = result as File;
+      }
+      compressed.add(await MultipartFile.fromFile(finalFile.path));
+    }
+    return compressed;
+  }
 
-    HttpClient client = new HttpClient();
-    client.findProxy = await HttpClient.findProxyFromEnvironment;
-    print(client);
-    Dio dio = await Dio();
+  // Helper รองรับทั้ง XFile, File หรือ path String
+  File getFileFromItem(dynamic item) {
+    if (item is File) {
+      return item;
+    } else if (item is XFile) {
+      return File(item.path);
+    } else if (item is String) {
+      return File(item);
+    } else if (item.path != null) {
+      // สำหรับโมเดลเช่น ImageItem ที่มี .path
+      return File(item.path);
+    }
+    throw Exception("Invalid image item type: ${item.runtimeType}");
+  }
+
+  Future<void> addStore() async {
     String jsonData = '''
 {
       "name": "${_storeData.name}",
@@ -421,14 +454,22 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 ''';
 
     try {
-      List<MultipartFile> imageList = [];
-      for (var value in _storeData.imageList) {
-        imageList.add(
-          await MultipartFile.fromFile(
-            value.path,
-          ),
-        );
-      }
+      // 1. ดึง path แล้วแปลงเป็น File
+      List<File> fileList = _storeData.imageList
+          .map<File>((item) => getFileFromItem(item))
+          .toList();
+      // 2. ใช้ compressImages ได้เลย
+      List<MultipartFile> imageList = await compressImages(fileList);
+
+      // List<MultipartFile> imageList = [];
+
+      // for (var value in _storeData.imageList) {
+      //   imageList.add(
+      //     await MultipartFile.fromFile(
+      //       value.path,
+      //     ),
+      //   );
+      // }
 
       print((_storeData.imageList.any((item) => item.type == 'person')));
       String type =
