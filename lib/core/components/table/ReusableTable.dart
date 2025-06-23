@@ -6,12 +6,16 @@ class ReusableTable extends StatelessWidget {
   final List<String> columns;
   final List<List<String>> rows;
   final List<List<String>>? itemCodes;
+  final List<String>? footer; // Add this
+  final List<String>? footer2; // Add this
 
   const ReusableTable({
     super.key,
     required this.columns,
     required this.rows,
     this.itemCodes,
+    this.footer, // Add this
+    this.footer2, // Add this
   });
 
   @override
@@ -109,6 +113,63 @@ class ReusableTable extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Freeze Footer
+            if (footer != null)
+              Container(
+                color: Colors.grey[200],
+                child: Row(
+                  children: footer!.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final cell = entry.value;
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                      ),
+                      width: index == 0
+                          ? MediaQuery.of(context).size.width * 0.35
+                          : MediaQuery.of(context).size.width * 0.15,
+                      height: 56,
+                      padding: const EdgeInsets.all(8),
+                      alignment: Alignment.center,
+                      child: Text(
+                        cell,
+                        style: Styles.black18(context)
+                            .copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            if (footer2 != null)
+              Container(
+                color: Colors.grey[200],
+                child: Row(
+                  children: footer2!.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final cell = entry.value;
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                      ),
+                      width: index == 0
+                          ? MediaQuery.of(context).size.width * 0.35
+                          : MediaQuery.of(context).size.width * 0.15,
+                      height: 56,
+                      alignment: Alignment.center,
+                      child: Text(
+                        cell,
+                        style: Styles.black18(context)
+                            .copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
           ],
         ),
       ),

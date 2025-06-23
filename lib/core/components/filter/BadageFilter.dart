@@ -125,14 +125,14 @@ class BadageFilter {
                   data,
                   style: isSelected
                       ? Styles.pirmary18(context)
-                      : Styles.grey18(context),
+                      : Styles.black18(context),
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.0),
                 ),
                 selected: isSelected,
                 side: BorderSide(
-                  color: isSelected ? Styles.primaryColor : Colors.grey,
+                  color: isSelected ? Styles.primaryColor : Colors.black,
                   width: 1.5,
                 ),
                 backgroundColor: Colors.white,
@@ -172,7 +172,7 @@ class BadageFilter {
               },
               text: 'ล้างข้อมูล',
               blackGroundColor: Styles.secondaryColor,
-              textStyle: Styles.white18(context),
+              textStyle: Styles.black18(context),
             ),
           ),
           SizedBox(width: 10),
@@ -214,7 +214,7 @@ Widget badgeFilter({
       height: 50,
       decoration: BoxDecoration(
         border: Border.all(
-          color: isSelected ? Styles.primaryColor : Colors.grey,
+          color: isSelected ? Styles.primaryColor : Colors.black,
           width: 1,
         ),
         borderRadius: BorderRadius.circular(16),
@@ -234,7 +234,7 @@ Widget badgeFilter({
                 const SizedBox(width: 8),
                 Icon(
                   Icons.arrow_drop_down_rounded,
-                  color: isSelected ? Styles.primaryColor : Colors.grey,
+                  color: isSelected ? Styles.primaryColor : Colors.black,
                 ),
               ],
             ],

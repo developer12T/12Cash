@@ -30,6 +30,8 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
   List<Stock> stocks = [];
   List<List<String>> rows = [];
+  List<String> footerTable = [];
+  List<String> footerTable2 = [];
   Group? selectedGroup;
   List<List<String>> filteredRows = [];
   bool isLoading = true;
@@ -125,6 +127,24 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
       if (response.statusCode == 200 && mounted) {
         final List<dynamic> data = response.data['data'];
+        setState(() {
+          footerTable = [
+            'รวมจำนวน (PCS)',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockInPcs']}',
+            '${response.data['summaryStockOutPcs']}',
+            '${response.data['summaryStockBalPcs']}'
+          ];
+
+          footerTable2 = [
+            'รวมจำนวนเงิน (บาท)',
+            '${response.data['summaryStock']}',
+            '${response.data['summaryStockIn']}',
+            '${response.data['summaryStockOut']}',
+            '${response.data['summaryStockBal']}'
+          ];
+        });
+
         // final allowedUnits = ['CTN', 'PCS'];
 
         final fetchedStocks = (response.data['data'] as List)
@@ -609,7 +629,6 @@ ${leftRightText('', '\n\n\n', 61)}
   @override
   Widget build(BuildContext context) {
     final columns = ['ชื่อ', 'STOCK', 'IN', 'OUT', 'BAL'];
-
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
@@ -749,6 +768,8 @@ ${leftRightText('', '\n\n\n', 61)}
                                 .map((stock) =>
                                     [stock.productId]) // เก็บแค่ productId
                                 .toList(),
+                            footer: footerTable,
+                            footer2: footerTable2,
                           ),
                         ),
                       ],
