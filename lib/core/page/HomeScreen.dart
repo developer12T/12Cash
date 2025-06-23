@@ -183,28 +183,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-  //   final socketService = Provider.of<SocketService>(context);
+    final socketService = Provider.of<SocketService>(context);
 
-  //   // Listen for updates and show toast
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     if (socketService.latestMessage != '') {
-  //       toastification.show(
-  //         context: context,
-  //         title: Text(
-  //           socketService.latestMessage,
-  //           style: Styles.green18(context),
-  //         ),
-  //         style: ToastificationStyle.flatColored,
-  //         primaryColor: Colors.green,
-  //         autoCloseDuration: Duration(seconds: 5),
-  //       );
-  //     }
-  //   });
-  // }
+    // Listen for updates and show toast
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (socketService.latestMessage != '') {
+        toastification.show(
+          context: context,
+          title: Text(
+            socketService.latestMessage,
+            style: Styles.green18(context),
+          ),
+          style: ToastificationStyle.flatColored,
+          primaryColor: Colors.green,
+          autoCloseDuration: Duration(seconds: 5),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

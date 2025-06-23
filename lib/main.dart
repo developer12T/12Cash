@@ -24,7 +24,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -34,8 +34,8 @@ import 'package:upgrader/upgrader.dart';
 
 void main() async {
   try {
-    // SocketService socketService = SocketService();
-    // socketService.connect();
+    SocketService socketService = SocketService();
+    socketService.connect();
     // tz.initializeTimeZones();
     // // Configure the HTTP client to use a proxy
     // final client = HttpClient()
@@ -102,7 +102,7 @@ void main() async {
               ChangeNotifierProvider(create: (_) => RouteVisitFilterLocal()),
               ChangeNotifierProvider(create: (_) => StoreLocal()),
               ChangeNotifierProvider(create: (_) => RefundfilterLocal()),
-              // ChangeNotifierProvider(create: (_) => SocketService()),
+              ChangeNotifierProvider(create: (_) => SocketService()),
             ],
             child: MyApp(),
           ),
