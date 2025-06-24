@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld2.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/sendmoney/SendMoneyScreenTable.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
@@ -12,6 +13,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:toastification/toastification.dart';
 
 class SendMoneyScreen extends StatefulWidget {
@@ -31,7 +33,9 @@ class SendMoneyScreen extends StatefulWidget {
 class _SendMoneyScreenState extends State<SendMoneyScreen> {
   String storeImagePath = "";
   double sendMoney = 0;
-  double totalMoney = 0;
+  double different = 0;
+  double money = 0;
+  double summary = 0;
   String status = "";
 
   // String date =
@@ -95,6 +99,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   Future<void> _addSendMoney(sendMoney) async {
     try {
       print(sendMoney);
+      context.loaderOverlay.show();
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
@@ -120,13 +125,11 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             style: Styles.green18(context),
           ),
         );
-
+        context.loaderOverlay.hide();
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(
-              index: 0,
-            ),
+            builder: (context) => SendMoneyScreenTable(),
           ),
           (route) => route.isFirst,
         );
@@ -142,9 +145,11 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             style: Styles.green18(context),
           ),
         );
+        context.loaderOverlay.hide();
       }
     } catch (e) {
       print("Error _addSendMoney: $e");
+      context.loaderOverlay.hide();
     }
   }
 
@@ -163,10 +168,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
       print("Response: $response");
       if (response.statusCode == 200) {
         setState(() {
-          sendMoney = response.data['sendmoney'].toDouble();
-          totalMoney = response.data['alreadySent'].toDouble();
+          sendMoney = response.data['sendmoney'].toDouble().abs();
+          different = response.data['different'].toDouble().abs();
+          money = response.data['different'].toDouble().abs();
+          summary = response.data['summary'].toDouble().abs();
           status = response.data['status'];
-          countController = TextEditingController(text: sendMoney.toString());
+          countController = TextEditingController(text: different.toString());
         });
       }
     } catch (e) {
@@ -229,22 +236,66 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(totalMoney)}",
+                      "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(money)}",
                       style: Styles.headerGreen32(context),
                     ),
                   ],
                 ),
               ),
             ),
-            Text(
-              "เงินที่ส่ง ${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)}",
-              style: Styles.headerGreen32(context),
-              textAlign: TextAlign.end,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "ยอดที่ต้องส่ง",
+                    style: Styles.headerRed24(context),
+                    textAlign: TextAlign.end,
+                  ),
+                  Text(
+                    '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(different)} บาท',
+                    style: Styles.headerRed24(context),
+                    textAlign: TextAlign.end,
+                  ),
+                ],
+              ),
             ),
-            Text(
-              "ยอดรวม ${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)}",
-              style: Styles.headerGreen32(context),
-              textAlign: TextAlign.end,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "ยอดที่ส่งแล้ว",
+                    style: Styles.headerGreen24(context),
+                    textAlign: TextAlign.end,
+                  ),
+                  Text(
+                    '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)} บาท',
+                    style: Styles.headerGreen24(context),
+                    textAlign: TextAlign.end,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "ยอดรวม",
+                    style: Styles.headerGreen24(context),
+                    textAlign: TextAlign.end,
+                  ),
+                  Text(
+                    '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(summary)} บาท',
+                    style: Styles.headerGreen24(context),
+                    textAlign: TextAlign.end,
+                  ),
+                ],
+              ),
             ),
             Text(
               "สถานะ : $status",
@@ -414,7 +465,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                                       setState(() {
                                         double countD =
                                             countController.text.toDouble();
-                                        totalMoney = countD.toDouble();
+                                        money = countD.toDouble();
                                       });
                                       Navigator.pop(context);
                                     } else {

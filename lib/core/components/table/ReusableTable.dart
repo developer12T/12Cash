@@ -143,6 +143,7 @@ class ReusableTable extends StatelessWidget {
                   }).toList(),
                 ),
               ),
+
             if (footer2 != null)
               Container(
                 color: Colors.grey[200],

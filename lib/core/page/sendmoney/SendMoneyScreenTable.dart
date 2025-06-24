@@ -34,6 +34,7 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
   TextEditingController countController = TextEditingController();
   List<List<String>> filteredRows = [];
   List<List<String>> rows = [];
+  List<String> footerTable = [];
 
   @override
   void initState() {
@@ -55,6 +56,15 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
       );
       print("Response: $response");
       if (response.statusCode == 200) {
+        footerTable = [
+          '',
+          'รวมจำนวนเงิน',
+          '${response.data['sumSendMoney']}',
+          '${response.data['sumSummary']}',
+          '${response.data['sumGood']}',
+          '${response.data['sumDamaged']}',
+          '${response.data['sumChange']}'
+        ];
         final fetchedStocks = (response.data['data'] as List)
             .map((item) => SendmoneyTable.fromJson(item))
             .toList();
@@ -111,6 +121,7 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
               child: SendmoneyTableShow(
                 columns: columns,
                 rows: filteredRows,
+                footer: footerTable,
               ),
             ),
           ],

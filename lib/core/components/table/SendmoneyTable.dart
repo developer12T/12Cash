@@ -8,12 +8,14 @@ class SendmoneyTableShow extends StatelessWidget {
   final List<String> columns;
   final List<List<String>> rows;
   final List<List<String>>? itemCodes;
+  final List<String>? footer; // Add this
 
   const SendmoneyTableShow({
     super.key,
     required this.columns,
     required this.rows,
     this.itemCodes,
+    this.footer, // Add this
   });
 
   @override
@@ -57,7 +59,6 @@ class SendmoneyTableShow extends StatelessWidget {
               ),
             ),
             const Divider(height: 1, color: Colors.black12),
-
             // Scrollable Body Rows
             Expanded(
               child: Scrollbar(
@@ -94,7 +95,9 @@ class SendmoneyTableShow extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: index == 1
                                     ? cell != 'ยังส่งเงินไม่ครบ'
-                                        ? Colors.green
+                                        ? cell == 'วันนี้ไม่มียอดต้องส่ง'
+                                            ? Colors.amber[600]
+                                            : Colors.green
                                         : Colors.red
                                     : Colors.white,
                                 border: Border.all(
@@ -137,6 +140,35 @@ class SendmoneyTableShow extends StatelessWidget {
                 ),
               ),
             ),
+            // Freeze Footer
+            if (footer != null)
+              Container(
+                color: Colors.grey[200],
+                child: Row(
+                  children: footer!.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final cell = entry.value;
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                      ),
+                      width: index == 0
+                          ? MediaQuery.of(context).size.width * 0.25
+                          : MediaQuery.of(context).size.width * 0.25,
+                      height: 56,
+                      padding: const EdgeInsets.all(8),
+                      alignment: Alignment.center,
+                      child: Text(
+                        cell,
+                        style: Styles.black18(context)
+                            .copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
           ],
         ),
       ),
