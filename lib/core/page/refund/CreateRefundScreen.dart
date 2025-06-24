@@ -973,7 +973,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   child: Image.network(
-                                                    'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                    'https://apps.onetwotrading.co.th/images/products/${listRefund[index].id}.webp',
                                                     width: screenWidth / 8,
                                                     height: screenWidth / 8,
                                                     fit: BoxFit.cover,
@@ -1327,7 +1327,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 child: Image.network(
-                                                  'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                  'https://apps.onetwotrading.co.th/images/products/${listProduct[index].id}.webp',
                                                   width: screenWidth / 8,
                                                   height: screenWidth / 8,
                                                   fit: BoxFit.cover,
@@ -1642,7 +1642,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                 //                         BorderRadius.circular(
                                 //                             8),
                                 //                     child: Image.network(
-                                //                       'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                //                       'https://apps.onetwotrading.co.th/images/products/${widget.product.id}.webp',
                                 //                       width: screenWidth / 8,
                                 //                       height: screenWidth / 8,
                                 //                       fit: BoxFit.cover,
@@ -1851,7 +1851,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                               //   borderRadius:
                                               //       BorderRadius.circular(8),
                                               //   child: Image.network(
-                                              //     'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                              //     'https://apps.onetwotrading.co.th/images/products/${widget.product.id}.webp',
                                               //     width: screenWidth / 15,
                                               //     height: screenWidth / 15,
                                               //     fit: BoxFit.cover,

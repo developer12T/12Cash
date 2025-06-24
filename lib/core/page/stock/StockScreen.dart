@@ -1339,7 +1339,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
   //                                   ClipRRect(
   //                                     borderRadius: BorderRadius.circular(8),
   //                                     child: Image.network(
-  //                                       'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+  //                                       'https://apps.onetwotrading.co.th/images/products/${widget.product.id}.webp',
   //                                       width: screenWidth / 4,
   //                                       height: screenWidth / 4,
   //                                       fit: BoxFit.cover,

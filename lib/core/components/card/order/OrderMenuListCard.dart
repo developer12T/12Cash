@@ -52,7 +52,7 @@ class _OrderMenuListCardState extends State<OrderMenuListCard> {
                           borderRadius: BorderRadius.circular(
                               8), // Optional: Add rounded corners
                           child: Image.network(
-                            'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                            'https://apps.onetwotrading.co.th/images/products/${widget.product.id}.webp',
                             width: screenWidth / 4,
                             height: screenWidth / 4,
                             fit: BoxFit.cover,

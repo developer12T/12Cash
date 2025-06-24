@@ -206,7 +206,7 @@ class _ProductSearchState extends State<ProductSearch> {
                 borderRadius:
                     BorderRadius.circular(8), // Optional: Add rounded corners
                 child: Image.network(
-                  'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                  'https://apps.onetwotrading.co.th/images/products/${item.id}.webp',
                   width: screenWidth / 4,
                   // height: screenWidth / 3,
                   fit: BoxFit.cover,

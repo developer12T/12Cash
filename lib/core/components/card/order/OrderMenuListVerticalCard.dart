@@ -44,7 +44,7 @@ class _OrderMenuListVerticalCardState extends State<OrderMenuListVerticalCard> {
               borderRadius:
                   BorderRadius.circular(8), // Optional: Add rounded corners
               child: Image.network(
-                'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                'https://apps.onetwotrading.co.th/images/products/${widget.item.id}.webp',
                 width: screenWidth / 3,
                 height: screenWidth / 3,
                 fit: BoxFit.cover,

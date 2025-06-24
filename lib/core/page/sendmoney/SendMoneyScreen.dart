@@ -164,7 +164,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
       if (response.statusCode == 200) {
         setState(() {
           sendMoney = response.data['sendmoney'].toDouble();
-          totalMoney = response.data['sendmoney'].toDouble();
+          totalMoney = response.data['alreadySent'].toDouble();
           status = response.data['status'];
           countController = TextEditingController(text: sendMoney.toString());
         });
@@ -237,7 +237,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
               ),
             ),
             Text(
-              "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)}",
+              "เงินที่ส่ง ${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)}",
+              style: Styles.headerGreen32(context),
+              textAlign: TextAlign.end,
+            ),
+            Text(
+              "ยอดรวม ${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)}",
               style: Styles.headerGreen32(context),
               textAlign: TextAlign.end,
             ),

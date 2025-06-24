@@ -977,7 +977,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   child: Image.network(
-                                                    'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                    'https://apps.onetwotrading.co.th/images/products/${listProduct[index].id}.webp',
                                                     width: screenWidth / 8,
                                                     height: screenWidth / 8,
                                                     fit: BoxFit.cover,
@@ -1138,7 +1138,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                         BorderRadius.circular(
                                                             8),
                                                     child: Image.network(
-                                                      'https://jobbkk.com/upload/employer/0D/53D/03153D/images/202045.webp',
+                                                      'https://apps.onetwotrading.co.th/images/products/${listProduct[innerIndex].id}.webp',
                                                       width: screenWidth / 8,
                                                       height: screenWidth / 8,
                                                       fit: BoxFit.cover,
