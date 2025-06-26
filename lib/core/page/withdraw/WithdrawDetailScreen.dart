@@ -225,7 +225,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                         BorderRadius.circular(
                                                             8),
                                                     child: Image.network(
-                                                      'https://apps.onetwotrading.co.th/images/products/${withdrawDetail[index].listProduct[innerIndex].id}.webp',
+                                                      '${ApiService.apiHost}/images/products/${withdrawDetail[index].listProduct[innerIndex].id}.webp',
                                                       width: screenWidth / 8,
                                                       height: screenWidth / 8,
                                                       fit: BoxFit.cover,

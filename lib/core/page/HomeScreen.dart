@@ -192,16 +192,16 @@ class _HomeScreenState extends State<HomeScreen> {
     // Listen for updates and show toast
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (socketService.latestMessage != '') {
-        toastification.show(
-          context: context,
-          title: Text(
-            socketService.latestMessage,
-            style: Styles.green18(context),
-          ),
-          style: ToastificationStyle.flatColored,
-          primaryColor: Colors.green,
-          autoCloseDuration: Duration(seconds: 5),
-        );
+        // toastification.show(
+        //   context: context,
+        //   title: Text(
+        //     socketService.latestMessage,
+        //     style: Styles.green18(context),
+        //   ),
+        //   style: ToastificationStyle.flatColored,
+        //   primaryColor: Colors.green,
+        //   autoCloseDuration: Duration(seconds: 5),
+        // );
       }
     });
   }

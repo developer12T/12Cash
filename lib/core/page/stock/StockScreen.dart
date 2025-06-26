@@ -1339,7 +1339,7 @@ ${centerText('รายการ Stock ณ วันที่ ${DateTime.now().t
   //                                   ClipRRect(
   //                                     borderRadius: BorderRadius.circular(8),
   //                                     child: Image.network(
-  //                                       'https://apps.onetwotrading.co.th/images/products/${widget.product.id}.webp',
+  //                                       '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
   //                                       width: screenWidth / 4,
   //                                       height: screenWidth / 4,
   //                                       fit: BoxFit.cover,

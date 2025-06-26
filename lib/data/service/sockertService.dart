@@ -1,3 +1,4 @@
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:flutter/foundation.dart'; // For ChangeNotifier
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -10,7 +11,7 @@ class SocketService with ChangeNotifier {
   }
 
   void connect() {
-    socket = IO.io('https://apps.onetwotrading.co.th', <String, dynamic>{
+    socket = IO.io('${ApiService.apiHost}', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
       'path': '/socket.io',

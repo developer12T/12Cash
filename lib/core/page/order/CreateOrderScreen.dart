@@ -1170,7 +1170,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                         BorderRadius.circular(
                                                             8),
                                                     child: Image.network(
-                                                      'https://apps.onetwotrading.co.th/images/products/${cartList[index].id}.webp',
+                                                      '${ApiService.apiHost}/images/products/${cartList[index].id}.webp',
                                                       width: screenWidth / 8,
                                                       height: screenWidth / 8,
                                                       fit: BoxFit.cover,
@@ -1515,7 +1515,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                           BorderRadius.circular(
                                                               8),
                                                       child: Image.network(
-                                                        'https://apps.onetwotrading.co.th/images/products/${listPromotions[innerIndex].id}.webp',
+                                                        '${ApiService.apiHost}/images/products/${listPromotions[innerIndex].id}.webp',
                                                         width: screenWidth / 8,
                                                         height: screenWidth / 8,
                                                         fit: BoxFit.cover,
@@ -1776,7 +1776,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                 //   borderRadius:
                                                 //       BorderRadius.circular(8),
                                                 //   child: Image.network(
-                                                //     'https://apps.onetwotrading.co.th/images/products/${widget.product.id}.webp',
+                                                //     '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
                                                 //     width: screenWidth / 15,
                                                 //     height: screenWidth / 15,
                                                 //     fit: BoxFit.cover,
@@ -2141,7 +2141,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: Image.network(
-                                                'https://apps.onetwotrading.co.th/images/products/${listPromotionsMock[index].id}.webp',
+                                                '${ApiService.apiHost}/images/products/${listPromotionsMock[index].id}.webp',
                                                 width: screenWidth / 8,
                                                 height: screenWidth / 8,
                                                 fit: BoxFit.cover,
@@ -2561,7 +2561,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: Image.network(
-                                                'https://apps.onetwotrading.co.th/images/products/${filteredPromotion[index].id}.webp',
+                                                '${ApiService.apiHost}/images/products/${filteredPromotion[index].id}.webp',
                                                 width: screenWidth / 8,
                                                 height: screenWidth / 8,
                                                 fit: BoxFit.cover,

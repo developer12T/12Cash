@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/order/Product.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
@@ -52,7 +53,7 @@ class _ProductStockCardState extends State<ProductStockCard> {
                           borderRadius: BorderRadius.circular(
                               8), // Optional: Add rounded corners
                           child: Image.network(
-                            'https://apps.onetwotrading.co.th/images/products/${widget.product.id}.webp',
+                            '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
                             width: screenWidth / 4,
                             height: screenWidth / 4,
                             fit: BoxFit.cover,

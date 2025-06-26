@@ -1507,7 +1507,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(
-                                        'https://apps.onetwotrading.co.th/images/products/${product.id}.webp',
+                                        '${ApiService.apiHost}/images/products/${product.id}.webp',
                                         width: screenWidth / 4,
                                         height: screenWidth / 4,
                                         fit: BoxFit.cover,
@@ -1993,7 +1993,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: Image.network(
-                                                'https://apps.onetwotrading.co.th/images/products/${cartlist[index].id}.webp',
+                                                '${ApiService.apiHost}/images/products/${cartlist[index].id}.webp',
                                                 width: screenWidth / 8,
                                                 height: screenWidth / 8,
                                                 fit: BoxFit.cover,

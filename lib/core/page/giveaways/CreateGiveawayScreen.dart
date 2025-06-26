@@ -854,7 +854,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 child: Image.network(
-                                                  'https://apps.onetwotrading.co.th/images/products/${cartList[index].id}.webp',
+                                                  '${ApiService.apiHost}/images/products/${cartList[index].id}.webp',
                                                   width: screenWidth / 8,
                                                   height: screenWidth / 8,
                                                   fit: BoxFit.cover,

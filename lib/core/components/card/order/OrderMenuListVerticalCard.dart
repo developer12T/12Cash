@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/order/Product.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -44,16 +45,24 @@ class _OrderMenuListVerticalCardState extends State<OrderMenuListVerticalCard> {
               borderRadius:
                   BorderRadius.circular(8), // Optional: Add rounded corners
               child: Image.network(
-                'https://apps.onetwotrading.co.th/images/products/${widget.item.id}.webp',
+                '${ApiService.apiHost}/images/products/${widget.item.id}.webp',
                 width: screenWidth / 3,
                 height: screenWidth / 3,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Center(
-                    child: Icon(
-                      Icons.error,
-                      color: Colors.red,
-                      size: 50,
+                  return Container(
+                    width: screenWidth / 3,
+                    height: screenWidth / 3,
+                    color: Colors.grey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.hide_image, color: Colors.white, size: 50),
+                        Text(
+                          "ไม่มีภาพ",
+                          style: Styles.white18(context),
+                        )
+                      ],
                     ),
                   );
                 },
