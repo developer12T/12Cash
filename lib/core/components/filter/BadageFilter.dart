@@ -124,19 +124,15 @@ class BadageFilter {
                 label: Text(
                   data,
                   style: isSelected
-                      ? Styles.pirmary18(context)
-                      : Styles.black18(context),
+                      ? Styles.white18(context)
+                      : Styles.white18(context),
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.0),
                 ),
                 selected: isSelected,
-                side: BorderSide(
-                  color: isSelected ? Styles.primaryColor : Colors.black,
-                  width: 1.5,
-                ),
-                backgroundColor: Colors.white,
-                selectedColor: Colors.white,
+                backgroundColor: Colors.black,
+                selectedColor: Styles.success,
                 onSelected: (selected) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (context.mounted) {

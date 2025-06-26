@@ -89,7 +89,7 @@ class _OrderMenuListCardState extends State<OrderMenuListCard> {
                                   Expanded(
                                     child: Text(
                                       '${widget.product.name}',
-                                      style: Styles.headerBlack24(context),
+                                      style: Styles.headerBlack20(context),
                                       overflow: TextOverflow
                                           .ellipsis, // Truncate if too long
                                       maxLines: 2, // Restrict to 1 line
@@ -98,14 +98,14 @@ class _OrderMenuListCardState extends State<OrderMenuListCard> {
                                   ),
                                 ],
                               ),
-                              // Row(
-                              //   children: [
-                              //     Text(
-                              //       'กลุ่ม${widget.product.group} แบรนด์${widget.product.brand}',
-                              //       style: Styles.grey18(context),
-                              //     ),
-                              //   ],
-                              // ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${widget.product.id}',
+                                    style: Styles.grey18(context),
+                                  ),
+                                ],
+                              ),
                               Row(
                                 children: [
                                   Text(

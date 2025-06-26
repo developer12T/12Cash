@@ -111,9 +111,14 @@ class _MenuDashboardState extends State<MenuDashboard> {
                         size: 60,
                         color: Styles.primaryColorIcons,
                       ),
-                      Text(
-                        widget.title_2,
-                        style: Styles.black24(context),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.title_2,
+                            style: Styles.black18(context),
+                          ),
+                        ],
                       )
                     ],
                   ),

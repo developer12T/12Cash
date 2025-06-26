@@ -69,6 +69,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
   bool _isGridView = false;
   int _isSelectedGridView = 1;
 
+  int stockQty = 0;
+
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _storeScrollController = ScrollController();
   final ScrollController _giveTypeScrollController = ScrollController();
@@ -572,6 +577,10 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
     }
   }
 
+  bool isInteger(String input) {
+    return int.tryParse(input) != null;
+  }
+
   Future<void> _clearFilter() async {
     setState(() {
       selectedBrands = [];
@@ -582,6 +591,46 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
       sizeList = [];
       flavourList = [];
     });
+  }
+
+  Future<void> _getQty(Product product, StateSetter setModalState) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/stock/get',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "period": "${period}",
+          "unit": "${selectedUnit}",
+          "productId": "${product.id}",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print(response.data['data']);
+        setModalState(
+          () {
+            stockQty = response.data['data']['qty'].toInt();
+            // lotStock = response.data['data']['lot'];
+          },
+        );
+        setState(() {
+          stockQty = response.data['data']['qty'].toInt();
+          // lotStock = response.data['data']['lot'];
+        });
+      }
+    } catch (e) {
+      print({
+        "area": "${User.area}",
+        "period": "${period}",
+        "unit": "${selectedUnit}",
+        "id": "${product.id}",
+      });
+
+      print("Error in _getQty $e");
+    }
   }
 
   @override
@@ -733,7 +782,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                           Row(
                             children: [
                               Expanded(
-                                flex: 3,
+                                flex: 4,
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
@@ -980,7 +1029,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     SizedBox(
-                                      width: 10,
+                                      width: 5,
                                     ),
                                     CustomSlidingSegmentedControl<int>(
                                       initialValue: 1,
@@ -1369,11 +1418,24 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error,
                                                     stackTrace) {
-                                                  return const Center(
-                                                    child: Icon(
-                                                      Icons.error,
-                                                      color: Colors.red,
-                                                      size: 50,
+                                                  return Container(
+                                                    width: screenWidth / 8,
+                                                    height: screenWidth / 8,
+                                                    color: Colors.grey,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(Icons.hide_image,
+                                                            color: Colors.white,
+                                                            size: 30),
+                                                        Text(
+                                                          "ไม่มีภาพ",
+                                                          style: Styles.white18(
+                                                              context),
+                                                        )
+                                                      ],
                                                     ),
                                                   );
                                                 },
@@ -1750,11 +1812,23 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return const Center(
-                                            child: Icon(
-                                              Icons.error,
-                                              color: Colors.red,
-                                              size: 50,
+                                          return Container(
+                                            width: screenWidth / 4,
+                                            height: screenWidth / 4,
+                                            color: Colors.grey,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.hide_image,
+                                                    color: Colors.white,
+                                                    size: 50),
+                                                Text(
+                                                  "ไม่มีภาพ",
+                                                  style:
+                                                      Styles.white18(context),
+                                                )
+                                              ],
                                             ),
                                           );
                                         },
@@ -1828,12 +1902,6 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                 ),
                                 Row(
                                   children: [
-                                    Text('คงเหลือ',
-                                        style: Styles.black18(context)),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
                                     Expanded(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
@@ -1843,7 +1911,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                             return Container(
                                               margin: EdgeInsets.all(8),
                                               child: ElevatedButton(
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   setModalState(
                                                     () {
                                                       price = data.price;
@@ -1864,6 +1932,13 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                     selectedUnit = data.unit;
                                                     total = price * count;
                                                   });
+
+                                                  context.loaderOverlay.show();
+                                                  // print(selectedUnit);
+                                                  // print(selectedSize);
+                                                  await _getQty(
+                                                      product, setModalState);
+                                                  context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   padding: const EdgeInsets
@@ -1895,6 +1970,13 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                           }).toList(), // ✅ Ensure .toList() is here
                                         ),
                                       ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            'คงเหลือ ${stockQty} ${selectedSize}',
+                                            style: Styles.black18(context)),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -2056,7 +2138,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                 print(
                                                     "selectedSize $selectedSize");
                                                 if (selectedSize != "" &&
-                                                    isStoreId != "") {
+                                                    isStoreId != "" &&
+                                                    stockQty > 0 &&
+                                                    stockQty >= count) {
                                                   await _addCart(product);
                                                   await _getCart();
                                                 } else {
@@ -2544,25 +2628,16 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                         isGiveTypeVal =
                                                             "${filter[index].giveId}";
                                                       });
-                                                      // if (isGiveTypeVal !=
-                                                      //     filter[index]
-                                                      //         .giveId) {
-                                                      //   setState(() {
-                                                      //     selectedBrands = [];
-                                                      //     selectedGroups = [];
-                                                      //     selectedSizes = [];
-                                                      //     selectedFlavours = [];
-                                                      //     brandList = [];
-                                                      //     sizeList = [];
-                                                      //     flavourList = [];
-                                                      //   });
-                                                      // }
+                                                      context.loaderOverlay
+                                                          .show();
                                                       await _getStore();
                                                       await _getProductFilter();
                                                       print(
                                                           "groupList: $groupList");
                                                       await _getProduct(
                                                           groupList);
+                                                      context.loaderOverlay
+                                                          .hide();
                                                     },
                                                     child: Column(
                                                       children: [
@@ -2741,11 +2816,21 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                         side: BorderSide.none),
                                   ),
                                   onPressed: () {
-                                    if (countController.text.toInt() > 0) {
+                                    if (isInteger(countController.text)) {
                                       setState(() {
-                                        count = countController.text.toInt();
+                                        double countD =
+                                            countController.text.toDouble();
+                                        count = countD.toInt();
                                         total = price * count;
                                       });
+                                      setModalState(
+                                        () {
+                                          double countD =
+                                              countController.text.toDouble();
+                                          count = countD.toInt();
+                                          total = price * count;
+                                        },
+                                      );
                                       Navigator.pop(context);
                                     } else {
                                       toastification.show(

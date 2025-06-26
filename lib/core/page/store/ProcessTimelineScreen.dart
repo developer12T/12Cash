@@ -62,6 +62,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       ShopType(id: '', name: '', descript: '', status: '');
   List<dynamic> imageList = [];
   List<Store> duplicateStores = [];
+
   Location initialSelectedLocation = Location(
       id: '',
       amphoe: '',
@@ -578,12 +579,39 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
     ];
 
     double screenWidth = MediaQuery.of(context).size.width;
-    return ToastificationConfigProvider(
-      config: const ToastificationConfig(
-        // alignment: Alignment.center,
-        itemWidth: 1000,
-        // animationDuration: Duration(milliseconds: 500),
-      ),
+    return LoaderOverlay(
+      overlayWidgetBuilder: (dynamic progress) {
+        return Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "กำลังตรวจสอบข้อมูล...",
+                  style: Styles.white18(context),
+                ),
+                if (progress != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    progress!,
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+      overlayColor: Styles.primaryColor.withOpacity(0.8),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: PreferredSize(
@@ -904,7 +932,27 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
                                         context); // Handle cancel logic
                                   },
                                   onSubmit: () {
-                                    context.loaderOverlay.show();
+                                    context.loaderOverlay.show(
+                                      widgetBuilder: (progress) {
+                                        return Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const CircularProgressIndicator(
+                                              color: Styles.white,
+                                            ),
+                                            Text(
+                                              "กำลังตรวจสอบร้านค้าซ้ำ...",
+                                              style: Styles.white18(context),
+                                            ),
+                                            // SizedBox(
+                                            //   height: 50,
+                                            // ),
+                                            if (progress != null) Text(progress)
+                                          ],
+                                        );
+                                      },
+                                    );
                                     addStore(); // Handle submit logic
                                   },
                                   cancelText:

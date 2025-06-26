@@ -1315,11 +1315,26 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error,
                                                       stackTrace) {
-                                                    return const Center(
-                                                      child: Icon(
-                                                        Icons.error,
-                                                        color: Colors.red,
-                                                        size: 50,
+                                                    return Container(
+                                                      width: screenWidth / 8,
+                                                      height: screenWidth / 8,
+                                                      color: Colors.grey,
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(Icons.hide_image,
+                                                              color:
+                                                                  Colors.white,
+                                                              size: 30),
+                                                          Text(
+                                                            "ไม่มีภาพ",
+                                                            style:
+                                                                Styles.white18(
+                                                                    context),
+                                                          )
+                                                        ],
                                                       ),
                                                     );
                                                   },
@@ -1485,11 +1500,28 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                     fit: BoxFit.cover,
                                                     errorBuilder: (context,
                                                         error, stackTrace) {
-                                                      return const Center(
-                                                        child: Icon(
-                                                          Icons.error,
-                                                          color: Colors.red,
-                                                          size: 50,
+                                                      return Container(
+                                                        width: screenWidth / 8,
+                                                        height: screenWidth / 8,
+                                                        color: Colors.grey,
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Icon(
+                                                                Icons
+                                                                    .hide_image,
+                                                                color: Colors
+                                                                    .white,
+                                                                size: 30),
+                                                            Text(
+                                                              "ไม่มีภาพ",
+                                                              style: Styles
+                                                                  .white18(
+                                                                      context),
+                                                            )
+                                                          ],
                                                         ),
                                                       );
                                                     },

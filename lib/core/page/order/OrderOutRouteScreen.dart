@@ -776,7 +776,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                             Row(
                               children: [
                                 Expanded(
-                                  flex: 2,
+                                  flex: 4,
                                   child: SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
@@ -835,62 +835,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                             ),
                                             width: selectedGroups.isEmpty
                                                 ? 85
-                                                : 120,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            BadageFilter.showFilterSheet(
-                                              context: context,
-                                              title: 'เลือกแบรนด์',
-                                              title2: 'แบรนด์',
-                                              itemList: brandList,
-                                              selectedItems: selectedBrands,
-                                              onItemSelected: (data, selected) {
-                                                if (selected) {
-                                                  selectedBrands.add(data);
-                                                } else {
-                                                  selectedBrands.remove(data);
-                                                }
-                                                _getFliterBrand();
-                                              },
-                                              onClear: () {
-                                                selectedBrands.clear();
-                                                selectedSizes.clear();
-                                                selectedFlavours.clear();
-                                                brandList.clear();
-                                                sizeList.clear();
-                                                flavourList.clear();
-                                                context.loaderOverlay.show();
-                                                _getProduct().then((_) =>
-                                                    Timer(Duration(seconds: 3),
-                                                        () {
-                                                      context.loaderOverlay
-                                                          .hide();
-                                                    }));
-                                              },
-                                              onSearch: _getProduct,
-                                            );
-                                          },
-                                          child: badgeFilter(
-                                            isSelected:
-                                                selectedBrands.isNotEmpty
-                                                    ? true
-                                                    : false,
-                                            child: Text(
-                                              selectedBrands.isEmpty
-                                                  ? 'แบรนด์'
-                                                  : selectedBrands.join(', '),
-                                              style: selectedBrands.isEmpty
-                                                  ? Styles.black18(context)
-                                                  : Styles.pirmary18(context),
-                                              overflow: TextOverflow
-                                                  .ellipsis, // Truncate if too long
-                                              maxLines: 1, // Restrict to 1 line
-                                              softWrap: false, // Avoid wrapping
-                                            ),
-                                            width: selectedBrands.isEmpty
-                                                ? 120
                                                 : 120,
                                           ),
                                         ),
@@ -1027,7 +971,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       SizedBox(
-                                        width: 10,
+                                        width: 5,
                                       ),
                                       CustomSlidingSegmentedControl<int>(
                                         initialValue: 1,
@@ -1513,11 +1457,23 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return const Center(
-                                            child: Icon(
-                                              Icons.error,
-                                              color: Colors.red,
-                                              size: 50,
+                                          return Container(
+                                            width: screenWidth / 4,
+                                            height: screenWidth / 4,
+                                            color: Colors.grey,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.hide_image,
+                                                    color: Colors.white,
+                                                    size: 50),
+                                                Text(
+                                                  "ไม่มีภาพ",
+                                                  style:
+                                                      Styles.white18(context),
+                                                )
+                                              ],
                                             ),
                                           );
                                         },
@@ -1538,7 +1494,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                   child: Text(
                                                     product.name,
                                                     style:
-                                                        Styles.black24(context),
+                                                        Styles.black20(context),
                                                     softWrap: true,
                                                     maxLines: 2,
                                                     overflow:
@@ -1550,7 +1506,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                             Row(
                                               children: [
                                                 Text(
-                                                  'กลุ่ม : ${product.group}',
+                                                  'รหัสสินค้า : ${product.id}',
                                                   style:
                                                       Styles.black16(context),
                                                 ),
@@ -1563,12 +1519,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                   style:
                                                       Styles.black16(context),
                                                 ),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
                                                 Text(
-                                                  'ขนาด : ${product.size}',
+                                                  'กลุ่ม : ${product.group}',
                                                   style:
                                                       Styles.black16(context),
                                                 ),
@@ -1578,6 +1530,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                               children: [
                                                 Text(
                                                   'รสชาติ : ${product.flavour}',
+                                                  style:
+                                                      Styles.black16(context),
+                                                ),
+                                                Text(
+                                                  'ขนาด : ${product.size}',
                                                   style:
                                                       Styles.black16(context),
                                                 ),
@@ -1999,11 +1956,24 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error,
                                                     stackTrace) {
-                                                  return const Center(
-                                                    child: Icon(
-                                                      Icons.error,
-                                                      color: Colors.red,
-                                                      size: 50,
+                                                  return Container(
+                                                    width: screenWidth / 8,
+                                                    height: screenWidth / 8,
+                                                    color: Colors.grey,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(Icons.hide_image,
+                                                            color: Colors.white,
+                                                            size: 30),
+                                                        Text(
+                                                          "ไม่มีภาพ",
+                                                          style: Styles.white18(
+                                                              context),
+                                                        )
+                                                      ],
                                                     ),
                                                   );
                                                 },

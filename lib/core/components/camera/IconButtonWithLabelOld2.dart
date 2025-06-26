@@ -99,8 +99,8 @@ class _IconButtonWithLabelOld2State extends State<IconButtonWithLabelOld2> {
     return Column(
       children: [
         SizedBox(
-          width: screenWidth / 1.5,
-          height: screenWidth / 1.5,
+          width: screenWidth / 2,
+          height: screenWidth / 2,
           child: ElevatedButton(
             onPressed: () => openCamera(context),
             style: ElevatedButton.styleFrom(

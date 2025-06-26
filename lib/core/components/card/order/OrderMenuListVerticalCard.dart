@@ -78,7 +78,7 @@ class _OrderMenuListVerticalCardState extends State<OrderMenuListVerticalCard> {
                       Expanded(
                         child: Text(
                           widget.item.name,
-                          style: Styles.headerBlack24(context),
+                          style: Styles.headerBlack20(context),
                           // overflow:
                           //     TextOverflow.ellipsis, // Truncate if too long
                           maxLines: 2, // Restrict to 1 line

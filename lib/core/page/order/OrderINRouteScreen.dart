@@ -102,7 +102,6 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
     _getFliter();
     _getProduct();
     _getCart();
-    // _futureProducts = fetchFilteredProducts(); // Fetch products
   }
 
   @override
@@ -767,7 +766,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                               Row(
                                 children: [
                                   Expanded(
-                                    flex: 1,
+                                    flex: 4,
                                     child: SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
                                       child: Row(
@@ -1030,7 +1029,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         SizedBox(
-                                          width: 10,
+                                          width: 5,
                                         ),
                                         CustomSlidingSegmentedControl<int>(
                                           initialValue: 1,
@@ -1478,11 +1477,23 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return const Center(
-                                            child: Icon(
-                                              Icons.error,
-                                              color: Colors.red,
-                                              size: 50,
+                                          return Container(
+                                            width: screenWidth / 4,
+                                            height: screenWidth / 4,
+                                            color: Colors.grey,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.hide_image,
+                                                    color: Colors.white,
+                                                    size: 50),
+                                                Text(
+                                                  "ไม่มีภาพ",
+                                                  style:
+                                                      Styles.white18(context),
+                                                )
+                                              ],
                                             ),
                                           );
                                         },
@@ -1952,11 +1963,24 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error,
                                                     stackTrace) {
-                                                  return const Center(
-                                                    child: Icon(
-                                                      Icons.error,
-                                                      color: Colors.red,
-                                                      size: 50,
+                                                  return Container(
+                                                    width: screenWidth / 8,
+                                                    height: screenWidth / 8,
+                                                    color: Colors.grey,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(Icons.hide_image,
+                                                            color: Colors.white,
+                                                            size: 30),
+                                                        Text(
+                                                          "ไม่มีภาพ",
+                                                          style: Styles.white18(
+                                                              context),
+                                                        )
+                                                      ],
                                                     ),
                                                   );
                                                 },

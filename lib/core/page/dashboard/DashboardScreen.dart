@@ -231,7 +231,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             ),
           );
         },
-        title_2: "ส่งเงิน",
+        title_2: "รายงานขาย/ส่งเงิน",
         icon_2: FontAwesomeIcons.moneyBillTransfer,
         onTap2: () {
           Navigator.of(context).push(
@@ -273,25 +273,6 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             MaterialPageRoute(builder: (context) => const SettingScreen()),
           );
         },
-      ),
-      MenuDashboard(
-        title_1: "ทดสอบ Noti",
-        icon_1: Icons.notifications_active,
-        onTap1: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => NotificationScreen()),
-          );
-        },
-        title_2: "dashboard.menu.send_money".tr(),
-        icon_2: Icons.payments,
-        title_3: "dashboard.menu.mall".tr(),
-        icon_3: Icons.shopping_bag,
-        title_4: "dashboard.menu.credit_limit".tr(),
-        icon_4: Icons.credit_card,
-        title_5: "dashboard.menu.warehouse".tr(),
-        icon_5: Icons.warehouse,
-        title_6: "dashboard.menu.more".tr(),
-        icon_6: Icons.more_horiz,
       ),
     ];
     selectedLanguageCode = context.locale.toString().split("_")[0];

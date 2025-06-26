@@ -34,8 +34,6 @@ import 'package:upgrader/upgrader.dart';
 
 void main() async {
   try {
-    SocketService socketService = SocketService();
-    socketService.connect();
     // tz.initializeTimeZones();
     // // Configure the HTTP client to use a proxy
     // final client = HttpClient()
@@ -65,7 +63,6 @@ void main() async {
     await initializeDateFormatting('th', null);
     await dotenv.load(fileName: ".env");
     await ScreenUtil.ensureScreenSize();
-    await availableCameras();
     // final hasPermissions = await FlutterBackground.initialize(
     //   androidConfig: const FlutterBackgroundAndroidConfig(
     //     notificationTitle: "Background Service",
@@ -81,6 +78,8 @@ void main() async {
     // Initialize port for communication between TaskHandler and UI.
     // FlutterForegroundTask.initCommunicationPort();
     await LocationService().initialize();
+    SocketService socketService = SocketService();
+    socketService.connect();
   } on CameraException catch (e) {
     _logError(e.code, e.description);
   }
@@ -358,7 +357,7 @@ class _MyAppState extends State<MyApp> {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(
+                const CircularProgressIndicator(
                   color: Styles.white,
                 ),
                 Text(

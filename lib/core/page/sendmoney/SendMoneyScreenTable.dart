@@ -15,6 +15,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:toastification/toastification.dart';
 
 class SendMoneyScreenTable extends StatefulWidget {
@@ -48,6 +49,7 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
 
   Future<void> _getSendmoneyTable() async {
     try {
+      context.loaderOverlay.show();
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
@@ -59,11 +61,11 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
         footerTable = [
           '',
           'รวมจำนวนเงิน',
-          '${response.data['sumSendMoney']}',
           '${response.data['sumSummary']}',
           '${response.data['sumGood']}',
           '${response.data['sumDamaged']}',
-          '${response.data['sumChange']}'
+          '${response.data['sumChange']}',
+          '${response.data['sumSendMoney']}',
         ];
         final fetchedStocks = (response.data['data'] as List)
             .map((item) => SendmoneyTable.fromJson(item))
@@ -74,20 +76,22 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
             .map((e) => [
                   e.date,
                   e.status,
-                  e.sendmoney.toString(),
                   e.summary.toString(),
                   e.good.toString(),
                   e.damaged.toString(),
                   e.change.toString(),
+                  e.sendmoney.toString(),
                 ])
             .toList();
 
         setState(() {
           filteredRows = mappedRows;
         });
+        context.loaderOverlay.hide();
       }
     } catch (e) {
       print("Error _getSendmoneyTable: $e");
+      context.loaderOverlay.hide();
     }
   }
 
@@ -96,11 +100,11 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
     final columns = [
       'วันที่',
       'สถานะ',
-      'ส่งเงิน',
-      'รวม',
+      'ยอดรวม',
       'คืนดี',
       'คืนเสี่ย',
-      'เปลี่ยน'
+      'เปลี่ยน',
+      'ส่งเงิน',
     ];
     return Scaffold(
       appBar: PreferredSize(

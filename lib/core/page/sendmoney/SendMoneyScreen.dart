@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld2.dart';
+import 'package:_12sale_app/core/components/table/ReusableTable.dart';
+import 'package:_12sale_app/core/components/table/SaleReportTable.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/sendmoney/SendMoneyScreenTable.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/models/sendmoney/SaleReport.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
@@ -38,6 +41,8 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   double summary = 0;
   String status = "";
 
+  List<List<String>> rows = [];
+
   // String date =
   //     "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}${DateFormat('dd').format(DateTime.now())}";
   TextEditingController countController = TextEditingController();
@@ -45,26 +50,73 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   @override
   void initState() {
     super.initState();
+
     _getSendmoney();
+    _getSaleReport();
   }
 
   bool isDouble(String input) {
     return double.tryParse(input) != null;
   }
 
-  /// Upload an image of the store to the server and save it as a sendmoney image
-  ///
-  /// This function will upload the image file at [storeImagePath] to the server
-  /// and save it as a sendmoney image for the current date and area.
-  ///
-  /// The image file should be a valid image file.
-  ///
-  /// The function will return a [Future] that completes with a [Response] object
-  /// if the upload is successful, or a [DioError] object if the upload fails.
-  ///
-  /// The response object will contain the uploaded image file's ID if the upload
-  /// is successful.
-  ///
+  Future<void> _getSaleReport() async {
+    try {
+      context.loaderOverlay.show();
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/order/saleReport?area=${User.area}&date=${widget.date}&type=sale',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        final fetchedStocks = (response.data['data'] as List)
+            .map((item) => SaleReport.fromJson(item))
+            .toList();
+
+        // Map เป็น List<List<String>>
+        final mappedRows = fetchedStocks
+            .map((e) => [
+                  e.orderId,
+                  e.storeId,
+                  e.saleName,
+                  e.total.toString(),
+                  e.paymentMethod,
+                ])
+            .toList();
+
+        setState(() {
+          rows = mappedRows;
+        });
+      }
+
+      // final fetchedStocks = (response.data['data'] as List)
+      //     .map((item) => SendmoneyTable.fromJson(item))
+      //     .toList();
+
+      // // Map เป็น List<List<String>>
+      // final mappedRows = fetchedStocks
+      //     .map((e) => [
+      //           e.date,
+      //           e.status,
+      //           e.sendmoney.toString(),
+      //           e.summary.toString(),
+      //           e.good.toString(),
+      //           e.damaged.toString(),
+      //           e.change.toString(),
+      //         ])
+      //     .toList();
+
+      // setState(() {
+      //   filteredRows = mappedRows;
+      // });
+      context.loaderOverlay.hide();
+    } catch (e) {
+      print("Error _getSaleReport: $e");
+      context.loaderOverlay.hide();
+    }
+  }
+
   Future<void> uploadImageSendmoney() async {
     try {
       Dio dio = Dio();
@@ -183,6 +235,9 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    final columns = ['เลขออเดอร์', 'รหัสร้าน', 'ชื่อร้าน', 'รวม', 'ช่องทาง'];
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
@@ -191,178 +246,196 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
           icon: Icons.payments_rounded,
         ),
       ),
-      body: Center(
-          child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "ยอดส่งเงินประจำวันที่ ${DateFormat('d MMMM yyyy', 'dashboard.lange'.tr()).format(widget.dateTime)}",
-              style: Styles.black24(context),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                // padding: const EdgeInsets.all(8),
-                elevation: 0, // Disable shadow
-                shadowColor: Colors.transparent, // Ensure no shadow color
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero, side: BorderSide.none),
-              ),
-              onPressed: () {
-                setState(() {
-                  // count = 1;
-                });
-                _showCountSheet(
-                  context,
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.grey,
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                width: 200,
-                height: 75,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(money)}",
-                      style: Styles.headerGreen32(context),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "ยอดที่ต้องส่ง",
-                    style: Styles.headerRed24(context),
-                    textAlign: TextAlign.end,
-                  ),
-                  Text(
-                    '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(different)} บาท',
-                    style: Styles.headerRed24(context),
-                    textAlign: TextAlign.end,
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "ยอดที่ส่งแล้ว",
-                    style: Styles.headerGreen24(context),
-                    textAlign: TextAlign.end,
-                  ),
-                  Text(
-                    '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)} บาท',
-                    style: Styles.headerGreen24(context),
-                    textAlign: TextAlign.end,
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "ยอดรวม",
-                    style: Styles.headerGreen24(context),
-                    textAlign: TextAlign.end,
-                  ),
-                  Text(
-                    '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(summary)} บาท',
-                    style: Styles.headerGreen24(context),
-                    textAlign: TextAlign.end,
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              "สถานะ : $status",
-              style: status == 'ส่งเงินครบ'
-                  ? Styles.headerGreen24(context)
-                  : Styles.headerRed24(context),
-              textAlign: TextAlign.end,
-            ),
-            SizedBox(
-              height: 16,
-            ),
-            IconButtonWithLabelOld2(
-              icon: Icons.photo_camera,
-              imagePath: storeImagePath != "" ? storeImagePath : null,
-              label: "ใบเงินฝาก",
-              onImageSelected: (String imagePath) async {
-                setState(() {
-                  storeImagePath = imagePath;
-                });
-              },
-            ),
-            SizedBox(
-              height: 16,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (status != "ส่งเงินครบ") {
-                  if (storeImagePath != '') {
-                    _addSendMoney(countController.text);
-                  } else {
-                    toastification.show(
-                      autoCloseDuration: const Duration(seconds: 5),
-                      context: context,
-                      primaryColor: Colors.red,
-                      type: ToastificationType.error,
-                      style: ToastificationStyle.flatColored,
-                      title: Text(
-                        "กรุณาถ่ายรูปการส่งเงิน",
-                        style: Styles.red18(context),
+      body: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Text(
+                        "ยอดส่งเงินประจำวันที่ ${DateFormat('d MMMM yyyy', 'dashboard.lange'.tr()).format(widget.dateTime)}",
+                        style: Styles.black24(context),
                       ),
-                    );
-                  }
-                }
-              },
-              child: Text(
-                "กดเพื่อส่งเงิน",
-                style: status != "ส่งเงินครบ"
-                    ? Styles.pirmary18(context)
-                    : Styles.grey18(context),
-              ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(
-                    color: status != "ส่งเงินครบ"
-                        ? Styles.primaryColor
-                        : Colors.grey,
-                    width: 1,
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          // padding: const EdgeInsets.all(8),
+                          elevation: 0, // Disable shadow
+                          shadowColor:
+                              Colors.transparent, // Ensure no shadow color
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero,
+                              side: BorderSide.none),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            // count = 1;
+                          });
+                          _showCountSheet(
+                            context,
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          width: 200,
+                          height: 75,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(money)}",
+                                style: Styles.headerGreen32(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "ยอดที่ต้องส่ง",
+                              style: Styles.headerRed24(context),
+                              textAlign: TextAlign.end,
+                            ),
+                            Text(
+                              '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(different)} บาท',
+                              style: Styles.headerRed24(context),
+                              textAlign: TextAlign.end,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "ยอดที่ส่งแล้ว",
+                              style: Styles.headerGreen24(context),
+                              textAlign: TextAlign.end,
+                            ),
+                            Text(
+                              '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(sendMoney)} บาท',
+                              style: Styles.headerGreen24(context),
+                              textAlign: TextAlign.end,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "ยอดรวม",
+                              style: Styles.headerGreen24(context),
+                              textAlign: TextAlign.end,
+                            ),
+                            Text(
+                              '${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(summary)} บาท',
+                              style: Styles.headerGreen24(context),
+                              textAlign: TextAlign.end,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        "สถานะ : $status",
+                        style: status == 'ส่งเงินครบ'
+                            ? Styles.headerGreen24(context)
+                            : Styles.headerRed24(context),
+                        textAlign: TextAlign.end,
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      IconButtonWithLabelOld2(
+                        icon: Icons.photo_camera,
+                        imagePath: storeImagePath != "" ? storeImagePath : null,
+                        label: "ใบเงินฝาก",
+                        onImageSelected: (String imagePath) async {
+                          setState(() {
+                            storeImagePath = imagePath;
+                          });
+                        },
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (status != "ส่งเงินครบ") {
+                            if (storeImagePath != '') {
+                              _addSendMoney(countController.text);
+                            } else {
+                              toastification.show(
+                                autoCloseDuration: const Duration(seconds: 5),
+                                context: context,
+                                primaryColor: Colors.red,
+                                type: ToastificationType.error,
+                                style: ToastificationStyle.flatColored,
+                                title: Text(
+                                  "กรุณาถ่ายรูปการส่งเงิน",
+                                  style: Styles.red18(context),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        // ignore: sort_child_properties_last
+                        child: Text(
+                          "กดเพื่อส่งเงิน",
+                          style: status != "ส่งเงินครบ"
+                              ? Styles.pirmary18(context)
+                              : Styles.grey18(context),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(16),
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: status != "ส่งเงินครบ"
+                                  ? Styles.primaryColor
+                                  : Colors.grey,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      Container(
+                          height: screenHeight * 0.5,
+                          width: screenWidth,
+                          child: SaleReportTable(columns: columns, rows: rows))
+                    ],
                   ),
                 ),
               ),
-            )
-          ],
-        ),
-      )),
+            ],
+          ),
+        );
+      }),
     );
   }
 

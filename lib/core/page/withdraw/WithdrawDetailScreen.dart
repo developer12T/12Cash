@@ -1,5 +1,6 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
+import 'package:_12sale_app/core/page/stock/InitialTripStockReport.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/withdraw/WithdrawDetail2.dart';
 // import 'package:_12sale_app/data/models/withdraw/WithdrawDetail.dart';
@@ -69,6 +70,44 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
           icon: Icons.local_shipping_outlined,
         ),
       ),
+      persistentFooterButtons: [
+        Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      backgroundColor: Styles.fail,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => InitialTripStockReport(),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("แจ้งรับของไม่ครบ",
+                              style: Styles.headerWhite18(context)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
       body: ListView(
         children: [
           Container(
@@ -231,11 +270,30 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                                       fit: BoxFit.cover,
                                                       errorBuilder: (context,
                                                           error, stackTrace) {
-                                                        return const Center(
-                                                          child: Icon(
-                                                            Icons.error,
-                                                            color: Colors.red,
-                                                            size: 50,
+                                                        return Container(
+                                                          width:
+                                                              screenWidth / 8,
+                                                          height:
+                                                              screenWidth / 8,
+                                                          color: Colors.grey,
+                                                          child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Icon(
+                                                                  Icons
+                                                                      .hide_image,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 30),
+                                                              Text(
+                                                                "ไม่มีภาพ",
+                                                                style: Styles
+                                                                    .white18(
+                                                                        context),
+                                                              )
+                                                            ],
                                                           ),
                                                         );
                                                       },

@@ -5,6 +5,7 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchGroup.dart';
 import 'package:_12sale_app/core/components/table/ReusableTable.dart';
+import 'package:_12sale_app/core/page/stock/InitialTripStockReport.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/stock/Stock.dart';
@@ -635,45 +636,81 @@ ${leftRightText('', '\n\n\n', 61)}
         child: AppbarCustom(title: " สต๊อก", icon: Icons.warehouse),
       ),
       persistentFooterButtons: [
-        Row(
+        Column(
           children: [
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  backgroundColor: Styles.primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      backgroundColor: Styles.fail,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => InitialTripStockReport(),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("แจ้งเหตุ Stock ต้นทริปได้รับไม่ครบ",
+                              style: Styles.headerWhite18(context)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                onPressed: () async {
-                  if (!_loadingProduct) {
-                    // await printBodyBill(receiptData);
-                    await printTest();
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      backgroundColor: Styles.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () async {
+                      if (!_loadingProduct) {
+                        // await printBodyBill(receiptData);
+                        await printTest();
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
-                            Icons.print_rounded,
-                            color: Colors.white,
-                            size: 25,
-                          ),
-                          Text(
-                            " พิมพ์ Stock",
-                            style: Styles.headerWhite18(context),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.print_rounded,
+                                color: Colors.white,
+                                size: 25,
+                              ),
+                              Text(
+                                " พิมพ์ Stock",
+                                style: Styles.headerWhite18(context),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
