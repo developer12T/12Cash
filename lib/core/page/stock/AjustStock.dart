@@ -8,7 +8,9 @@ import 'package:_12sale_app/core/components/filter/BadageFilter.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/models/order/Cart.dart';
 import 'package:_12sale_app/data/models/order/Product.dart';
+import 'package:_12sale_app/data/models/withdraw/Shipping.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:dartx/dartx.dart';
@@ -16,16 +18,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
 
-class InitialTripStockReport extends StatefulWidget {
-  const InitialTripStockReport({super.key});
+class AjustStock extends StatefulWidget {
+  const AjustStock({super.key});
 
   @override
-  State<InitialTripStockReport> createState() => _InitialTripStockReportState();
+  State<AjustStock> createState() => _AjustStockState();
 }
 
-class _InitialTripStockReportState extends State<InitialTripStockReport> {
+class _AjustStockState extends State<AjustStock> {
   List<Product> productList = [];
   List<Product> filteredProductList = [];
 
@@ -51,6 +54,7 @@ class _InitialTripStockReportState extends State<InitialTripStockReport> {
   double price = 0;
   double total = 0.00;
   double totalCart = 0.00;
+  int isSelect = 1;
 
   int stockQty = 0;
 
@@ -60,6 +64,21 @@ class _InitialTripStockReportState extends State<InitialTripStockReport> {
 
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+
+  String isShippingId = '';
+  final ScrollController _shippingScrollController = ScrollController();
+  List<ShippingData> shippingList = [];
+  String casue = '';
+
+  List<String> causeAdd = [
+    'ขึ้นส่งรับมาไม่ครบ',
+    'สินค้าหายระหว่างทาง',
+    'คีย์ StocK ผิด',
+  ];
+
+  List<String> causeReduce = [
+    'คี StocK ผิด',
+  ];
 
   void initState() {
     super.initState();
@@ -285,6 +304,130 @@ class _InitialTripStockReportState extends State<InitialTripStockReport> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            CustomSlidingSegmentedControl<int>(
+              initialValue: 1,
+              isStretch: true,
+              children: {
+                1: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      FontAwesomeIcons.minus,
+                      color: isSelect == 1
+                          ? Styles.primaryColorIcons
+                          : Styles.white,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'ขอลด stock',
+                      style: isSelect == 1
+                          ? Styles.headerPirmary18(context)
+                          : Styles.headerWhite18(context),
+                    )
+                  ],
+                ),
+                2: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add,
+                      color: isSelect == 2
+                          ? Styles.primaryColorIcons
+                          : Styles.white,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'ขอเพิ่ม stock',
+                      style: isSelect == 2
+                          ? Styles.headerPirmary18(context)
+                          : Styles.headerWhite18(context),
+                    ),
+                  ],
+                )
+              },
+              onValueChanged: (v) async {
+                setState(() {
+                  isSelect = v;
+                });
+                if (v == 1) {
+                  // await _getDetail(status: "pending");
+                } else {
+                  // await _getDetail(status: "history");
+                }
+              },
+              decoration: BoxDecoration(
+                color: Styles.grey,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              thumbDecoration: BoxDecoration(
+                color: Styles.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              duration: const Duration(milliseconds: 300),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        elevation: 0, // Disable shadow
+                        shadowColor:
+                            Colors.transparent, // Ensure no shadow color
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero, // No rounded corners
+                          side: BorderSide.none, // Remove border
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.pending,
+                                    color: Colors.black,
+                                    size: 30,
+                                  ),
+                                  Text(
+                                    casue != "" ? casue : " เลือกเหตุผล",
+                                    style: Styles.grey18(context),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [],
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.black,
+                                size: 20,
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                      onPressed: () {
+                        _showAddressSheet(context);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
             Expanded(
               child: BoxShadowCustom(
                 child: Column(
@@ -1177,6 +1320,659 @@ class _InitialTripStockReportState extends State<InitialTripStockReport> {
                         ),
                       ),
                     ),
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
+    );
+  }
+
+  void _showCartSheet(BuildContext context, List<CartList> cartlist) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              Text('ตะกร้าสินค้าที่เลือก',
+                                  style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              // _getCart();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: screenHeight * 0.9,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                  child: Scrollbar(
+                                // controller: _cartScrollController,
+                                thickness: 10,
+                                thumbVisibility: true,
+                                trackVisibility: true,
+                                radius: Radius.circular(16),
+                                child: ListView.builder(
+                                  // controller: _cartScrollController,
+                                  itemCount: cartlist.length,
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.network(
+                                                '${ApiService.apiHost}/images/products/${cartlist[index].id}.webp',
+                                                width: screenWidth / 8,
+                                                height: screenWidth / 8,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return Container(
+                                                    width: screenWidth / 8,
+                                                    height: screenWidth / 8,
+                                                    color: Colors.grey,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(Icons.hide_image,
+                                                            color: Colors.white,
+                                                            size: 30),
+                                                        Text(
+                                                          "ไม่มีภาพ",
+                                                          style: Styles.white18(
+                                                              context),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            cartlist[index]
+                                                                .name,
+                                                            style:
+                                                                Styles.black16(
+                                                                    context),
+                                                            softWrap: true,
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .visible,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'id : ${cartlist[index].id}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'จำนวน : ${cartlist[index].qty.toStringAsFixed(0)} ${cartlist[index].unit}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'ราคา : ${cartlist[index].price}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                setModalState(
+                                                                    () {
+                                                                  if (cartlist[
+                                                                              index]
+                                                                          .qty >
+                                                                      1) {
+                                                                    cartlist[
+                                                                            index]
+                                                                        .qty--;
+                                                                  }
+                                                                });
+                                                                // await _updateStock3(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState,
+                                                                //     'IN');
+
+                                                                // await _reduceCart(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.remove,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
+                                                            ),
+                                                            Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(4),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                border:
+                                                                    Border.all(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  width: 1,
+                                                                ),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            16),
+                                                              ),
+                                                              width: 75,
+                                                              child: Text(
+                                                                '${cartlist[index].qty.toStringAsFixed(0)}',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: Styles
+                                                                    .black18(
+                                                                  context,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                // await _reduceCart(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+
+                                                                // setModalState(
+                                                                //     () {
+                                                                //   cartlist[
+                                                                //           index]
+                                                                //       .qty++;
+                                                                // });
+                                                                // await _updateStock3(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState,
+                                                                //     'OUT');
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.add,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                // await _deleteCart(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+                                                                // await _updateStock2(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState,
+                                                                //     "IN");
+
+                                                                // setModalState(
+                                                                //   () {
+                                                                //     cartList.removeWhere((item) => (item.id ==
+                                                                //             cartlist[index]
+                                                                //                 .id &&
+                                                                //         item.unit ==
+                                                                //             cartlist[index].unit));
+                                                                //   },
+                                                                // );
+                                                                // await _getTotalCart(
+                                                                //     setModalState);
+
+                                                                // if (cartList
+                                                                //         .length ==
+                                                                //     0) {
+                                                                //   Navigator.pop(
+                                                                //       context);
+                                                                // }
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .red,
+                                                                      width: 1),
+                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.delete,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.red,
+                                                              ), // Example
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            // Container(
+                                            //   color: Colors.red,
+                                            //   width: 50,
+                                            //   height: 100,
+                                            //   child: Center(
+                                            //     child: Icon(
+                                            //       Icons.delete,
+                                            //       color: Colors.white,
+                                            //       size: 25,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          ],
+                                        ),
+                                        Divider(
+                                          color: Colors.grey[200],
+                                          thickness: 1,
+                                          indent: 16,
+                                          endIndent: 16,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ))
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      color: Styles.primaryColor,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("ยอดรวม", style: Styles.white24(context)),
+                            Text(
+                                "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalCart)} บาท",
+                                style: Styles.white24(context)),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
+    );
+  }
+
+  void _showAddressSheet(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.pending,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              Text(' เลือกเหตุผลที่ขอปรับ Stock',
+                                  style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        child: Column(
+                          children: [
+                            Expanded(
+                                child: Scrollbar(
+                              // controller: _shippingScrollController,
+                              thickness: 10,
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              radius: Radius.circular(16),
+                              child: ListView.builder(
+                                // controller: _shippingScrollController,
+                                itemCount: isSelect == 1
+                                    ? causeAdd.length
+                                    : causeReduce.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+
+                                                  elevation:
+                                                      0, // Disable shadow
+                                                  shadowColor: Colors
+                                                      .transparent, // Ensure no shadow color
+                                                  backgroundColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.zero,
+                                                      side: BorderSide.none),
+                                                ),
+                                                onPressed: () {
+                                                  if (isSelect == 1) {
+                                                    setModalState(() {
+                                                      isShippingId =
+                                                          causeAdd[index];
+                                                    });
+                                                  } else {
+                                                    setModalState(() {
+                                                      isShippingId =
+                                                          causeReduce[index];
+                                                    });
+                                                  }
+
+                                                  if (isSelect == 1) {
+                                                    setState(() {
+                                                      casue = causeAdd[index];
+                                                    });
+                                                  } else {
+                                                    setState(() {
+                                                      casue =
+                                                          causeReduce[index];
+                                                    });
+                                                  }
+                                                },
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              isSelect == 1
+                                                                  ? Text(
+                                                                      causeAdd[
+                                                                          index],
+                                                                      style: Styles
+                                                                          .black18(
+                                                                              context),
+                                                                    )
+                                                                  : Text(
+                                                                      causeReduce[
+                                                                          index],
+                                                                      style: Styles
+                                                                          .black18(
+                                                                              context)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        isSelect == 1
+                                                            ? isShippingId ==
+                                                                    causeAdd[
+                                                                        index]
+                                                                ? Icon(
+                                                                    Icons
+                                                                        .check_circle_outline_rounded,
+                                                                    color: Styles
+                                                                        .success,
+                                                                    size: 25,
+                                                                  )
+                                                                : Icon(
+                                                                    Icons
+                                                                        .keyboard_arrow_right_sharp,
+                                                                    color: Colors
+                                                                        .grey,
+                                                                    size: 25,
+                                                                  )
+                                                            : isShippingId ==
+                                                                    causeReduce[
+                                                                        index]
+                                                                ? Icon(
+                                                                    Icons
+                                                                        .check_circle_outline_rounded,
+                                                                    color: Styles
+                                                                        .success,
+                                                                    size: 25,
+                                                                  )
+                                                                : Icon(
+                                                                    Icons
+                                                                        .keyboard_arrow_right_sharp,
+                                                                    color: Colors
+                                                                        .grey,
+                                                                    size: 25,
+                                                                  )
+                                                      ],
+                                                    ),
+                                                    Divider(
+                                                      color: Colors.grey[200],
+                                                      thickness: 1,
+                                                      indent: 16,
+                                                      endIndent: 16,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ))
+                          ],
+                        ),
+                      ),
+                    )
                   ],
                 ),
               );

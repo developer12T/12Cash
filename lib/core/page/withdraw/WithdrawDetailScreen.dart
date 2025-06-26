@@ -1,6 +1,6 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/page/stock/InitialTripStockReport.dart';
+import 'package:_12sale_app/core/page/stock/AjustStock.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/withdraw/WithdrawDetail2.dart';
 // import 'package:_12sale_app/data/models/withdraw/WithdrawDetail.dart';
@@ -87,7 +87,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => InitialTripStockReport(),
+                          builder: (context) => AjustStock(),
                         ),
                       );
                     },
@@ -96,7 +96,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("แจ้งรับของไม่ครบ",
+                          Text("ขอปรับ stock สินค้า",
                               style: Styles.headerWhite18(context)),
                         ],
                       ),

@@ -5,7 +5,7 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchGroup.dart';
 import 'package:_12sale_app/core/components/table/ReusableTable.dart';
-import 'package:_12sale_app/core/page/stock/InitialTripStockReport.dart';
+import 'package:_12sale_app/core/page/stock/AjustStock.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/stock/Stock.dart';
@@ -652,7 +652,7 @@ ${leftRightText('', '\n\n\n', 61)}
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => InitialTripStockReport(),
+                          builder: (context) => AjustStock(),
                         ),
                       );
                     },
@@ -661,7 +661,7 @@ ${leftRightText('', '\n\n\n', 61)}
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("แจ้งเหตุ Stock ต้นทริปได้รับไม่ครบ",
+                          Text("ขอปรับ Stock สินค้า",
                               style: Styles.headerWhite18(context)),
                         ],
                       ),
