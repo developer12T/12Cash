@@ -59,9 +59,11 @@ class _BudgetCardState extends State<BudgetCard> {
       }
     } catch (e) {
       print("Error on getDataSummaryChoince is $e");
-      setState(() {
-        totalSale = 0.0;
-      });
+      if (mounted) {
+        setState(() {
+          totalSale = 0.0;
+        });
+      }
     }
   }
 

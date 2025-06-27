@@ -418,6 +418,7 @@ class _DetailScreenState extends State<DetailScreen> {
       Dio dio = Dio();
       MultipartFile? imageFile;
       imageFile = await MultipartFile.fromFile(checkinSellImagePath!);
+
       if (checkinSellImagePath != null) {
         var formData = FormData.fromMap(
           {
@@ -943,6 +944,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                       onPressed: () async {
                                         context.loaderOverlay.show();
                                         await checkInStore(context);
+                                        context.loaderOverlay.hide();
                                       },
                                       color: Styles.successButtonColor,
                                       child: Text(
@@ -1161,8 +1163,9 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                               DialogButton(
                                 onPressed: () async {
+                                  context.loaderOverlay.show();
                                   await checkInStoreAndSell(context);
-                                  // context.loaderOverlay.hide();
+                                  context.loaderOverlay.hide();
                                 },
                                 color: Styles.successButtonColor,
                                 child: Text(
