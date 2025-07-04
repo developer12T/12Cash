@@ -52,6 +52,7 @@ void main() async {
     // Initialize the locale data for Thai lanqguage
     // Ensure the app is always in portrait mode
     WidgetsFlutterBinding.ensureInitialized();
+    await Upgrader.clearSavedSettings();
 
     await availableCameras();
     await EasyLocalization.ensureInitialized();
@@ -374,20 +375,7 @@ class _MyAppState extends State<MyApp> {
           overlayColor: Styles.primaryColor.withOpacity(0.8),
           child: MaterialApp(
             routes: {
-              '/': (context) => UpgradeAlert(
-                    dialogStyle: UpgradeDialogStyle.material,
-                    showIgnore: false,
-                    showLater: false,
-                    upgrader: Upgrader(
-                      debugLogging: true,
-                    ),
-                    child: AuthCheck(),
-                  ),
-              // '/': (context) => CreateOrderScreen(
-              //       storeId: "V10160027",
-              //       storeName: "ร้านเพชรไทยคำ",
-              //       storeAddress: "ตลาดคลองขวาง เขตบางแค จ.กรุงเทพฯ",
-              //     ),
+              '/': (context) => AuthCheck(),
               '/route': (context) => const HomeScreen(
                     index: 1,
                   ),
@@ -533,20 +521,57 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class AuthCheck extends StatefulWidget {
-  const AuthCheck({super.key});
+  const AuthCheck({Key? key}) : super(key: key);
 
   @override
   State<AuthCheck> createState() => _AuthCheckState();
 }
 
-class _AuthCheckState extends State<AuthCheck> {
+class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
   bool userAvailable = false;
   late SharedPreferences sharedPreferences;
+  late Upgrader _upgrader;
+  bool _checkedUpgrade = false;
 
   @override
   void initState() {
     super.initState();
-    getUserData();
+    WidgetsBinding.instance.addObserver(this);
+    _upgrader = Upgrader(debugLogging: true);
+    // ตรวจสอบอัปเดตครั้งแรก
+    _initUpgrade();
+  }
+
+  Future<void> _initUpgrade() async {
+    await _upgrader.initialize();
+    // ถ้าไม่มีอัปเดต -> preload user data
+    if (!_upgrader.shouldDisplayUpgrade()) {
+      setState(() {
+        _checkedUpgrade = true;
+      });
+      getUserData();
+    }
+    // ถ้ามีอัปเดต MyUpgradeAlert จะ popup เอง และบล็อก user ไว้
+    // ไม่ต้อง preload user data ตอนนี้!
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      await _upgrader.initialize();
+      if (!_upgrader.shouldDisplayUpgrade()) {
+        setState(() {
+          _checkedUpgrade = true;
+        });
+        getUserData();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> getUserData() async {
@@ -603,7 +628,16 @@ class _AuthCheckState extends State<AuthCheck> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    // ... ใช้ MyUpgradeAlert หรืออะไรก็ได้ตามปกติ
+    // แต่ที่สำคัญ: ต้องมี didChangeAppLifecycleState
+    // เพื่อกัน user กลับเข้ามาแบบไม่อัปเดต!
+    return MyUpgradeAlert(
+      upgrader: _upgrader,
+      child: buildSplash(context, MediaQuery.of(context).size.width),
+    );
+  }
+
+  Widget buildSplash(BuildContext context, double screenWidth) {
     return Scaffold(
       backgroundColor: Styles.primaryColor,
       body: Center(
@@ -642,6 +676,95 @@ class _AuthCheckState extends State<AuthCheck> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class MyUpgradeAlert extends UpgradeAlert {
+  MyUpgradeAlert({
+    Key? key,
+    Upgrader? upgrader,
+    Widget? child,
+  }) : super(
+          key: key,
+          upgrader: upgrader,
+          child: child,
+          barrierDismissible: false,
+          showIgnore: false,
+          showLater: false,
+        );
+
+  @override
+  MyUpgradeAlertState createState() => MyUpgradeAlertState();
+}
+
+class MyUpgradeAlertState extends UpgradeAlertState {
+  @override
+  void showTheDialog({
+    Key? key,
+    required BuildContext context,
+    required String? title,
+    required String message,
+    required String? releaseNotes,
+    required bool barrierDismissible,
+    required UpgraderMessages messages,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          key: key,
+          title: Text(
+            '🛠️⬆️ พบอัปเดตใหม่',
+            style: Styles.headerBlack24(context),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  message,
+                  style: Styles.black18(context),
+                ),
+                if (releaseNotes != null && releaseNotes.isNotEmpty) ...[
+                  SizedBox(height: 8),
+                  Text(
+                    releaseNotes,
+                    style: Styles.black18(context),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            // ถ้าอยากมีปุ่มข้าม/ภายหลังให้เปิด comment ด้านล่าง
+            // if (widget.showLater)
+            //   TextButton(
+            //     child: Text(messages.laterButtonLabel),
+            //     onPressed: () {
+            //       onUserLater(context, true);
+            //     },
+            //   ),
+            // if (widget.showIgnore)
+            //   TextButton(
+            //     child: Text(messages.ignoreButtonLabel),
+            //     onPressed: () {
+            //       onUserIgnored(context, true);
+            //     },
+            //   ),
+            TextButton(
+              child: Text(
+                "อัปเดต",
+                style: Styles.black18(context),
+              ),
+              onPressed: () {
+                // เรียก onUserUpdated ของ Upgrader เพื่อ handle เปิด Store
+                onUserUpdated(context, !widget.upgrader.blocked());
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

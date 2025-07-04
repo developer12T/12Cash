@@ -18,6 +18,7 @@ import 'package:_12sale_app/core/page/notification/NotificationScreen.dart';
 import 'package:_12sale_app/core/page/3D_canvas/Ractangle3D.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/page/printer/PrinterScreen.dart';
+import 'package:_12sale_app/core/page/report/CheckInReport.dart';
 import 'package:_12sale_app/core/page/sendmoney/SendMoneyScreen.dart';
 import 'package:_12sale_app/core/page/sendmoney/SendMoneyScreenTable.dart';
 import 'package:_12sale_app/core/page/setting/SettingScreen.dart';
@@ -42,6 +43,7 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../components/table/TestGridTable.dart';
 import 'package:timezone/standalone.dart' as tz;
@@ -69,6 +71,18 @@ class _DashboardscreenState extends State<Dashboardscreen> {
 
   List<FlSpot> spots = [];
   bool isLoading = true;
+
+  final Map<String, dynamic> data = {
+    "status": 200,
+    "message": "sucess",
+    "visit": 1.5714,
+    "effective": 0,
+    "totalStoreAll": 986,
+    "totalStorePending": 975,
+    "totalStoreSell": 0,
+    "totalStoreNotSell": 2,
+    "totalStoreCheckInNotSell": 9
+  };
 
   Future<void> getDataSummaryChoince(String type) async {
     try {
@@ -274,6 +288,49 @@ class _DashboardscreenState extends State<Dashboardscreen> {
           );
         },
       ),
+      MenuDashboard(
+        title_1: "ประกาศข่าวสาร",
+        icon_1: Icons.campaign_outlined,
+        onTap1: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WithDrawScreen(),
+            ),
+          );
+        },
+        title_2: "คู่มือการใช้งาน",
+        icon_2: Icons.book,
+        onTap2: () async {
+          try {
+            final url =
+                Uri.parse('https://apps.onetwotrading.co.th/sale/manual');
+            await launchUrl(
+              url,
+              mode: LaunchMode.externalApplication,
+            );
+          } catch (e) {
+            print('❌ Error launching URL: $e');
+          }
+        },
+        title_3: "เข้าเยี่ยม",
+        icon_3: Icons.route_outlined,
+        onTap3: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const CheckinReport(),
+            ),
+          );
+        },
+        title_4: "กำลังพัฒนา",
+        icon_4: Icons.build_circle_outlined,
+        onTap4: () {},
+        title_5: "กำลังพัฒนา",
+        icon_5: Icons.build_circle_outlined,
+        onTap5: () {},
+        title_6: "กำลังพัฒนา",
+        icon_6: Icons.build_circle_outlined,
+        onTap6: () {},
+      ),
     ];
     selectedLanguageCode = context.locale.toString().split("_")[0];
     double screenWidth = MediaQuery.of(context).size.width;
@@ -283,7 +340,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         // width: screenWidth / 1.5,
         child: Column(
           children: [
-            BudgetCard(
+            const BudgetCard(
               title: 'Total Sales',
               icon: Icons.attach_money,
               color: Colors.green,
@@ -298,6 +355,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                       spots: spots,
                     ),
                   ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: menuList.asMap().entries.map((entry) {
@@ -394,19 +452,14 @@ class _DashboardscreenState extends State<Dashboardscreen> {
     // return Container(height: 500, width: 400, child: LineChartSample());
   }
 
-  Widget _buildStatusBadge(String status, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2), // Light background color
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Text(
-        status,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
+  Widget _buildStatCard(String label, String value) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 4,
+      child: ListTile(
+        title: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+        trailing: Text(value,
+            style: TextStyle(fontSize: 18, color: Colors.blueAccent)),
       ),
     );
   }

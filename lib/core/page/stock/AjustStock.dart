@@ -48,6 +48,7 @@ class _AjustStockState extends State<AjustStock> {
 
   String selectedSize = "";
   String selectedUnit = "";
+  String selectType = "reduce";
   bool _isGridView = false;
   int _isSelectedGridView = 1;
   int count = 1;
@@ -85,6 +86,91 @@ class _AjustStockState extends State<AjustStock> {
     _getFliter();
     _getProduct();
     // _getCart();
+  }
+
+  Future<void> _checkout(Product product, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+    } catch (e) {
+      print("Error _checkout: $e");
+    }
+  }
+
+  Future<void> _getQty(Product product, StateSetter setModalState) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/stock/get',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "period": "${period}",
+          "unit": "${selectedUnit}",
+          "productId": "${product.id}",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print(response.data['data']);
+        setModalState(
+          () {
+            stockQty = response.data['data']['qty'].toInt();
+            // lotStock = response.data['data']['lot'];
+          },
+        );
+        setState(() {
+          stockQty = response.data['data']['qty'].toInt();
+          // lotStock = response.data['data']['lot'];
+        });
+      }
+    } catch (e) {
+      print({
+        "area": "${User.area}",
+        "period": "${period}",
+        "unit": "${selectedUnit}",
+        "id": "${product.id}",
+      });
+
+      print("Error in _getQty $e");
+    }
+  }
+
+  Future<void> _addCart(Product product, String type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+        endpoint: 'api/cash/cart/add',
+        method: 'POST',
+        body: {
+          // sale, withdraw, refund, give, adjuststock
+          "type": "adjuststock",
+          "area": User.area,
+          "id": product.id,
+          "qty": count,
+          "unit": selectedUnit,
+          "action": type, // add,reduce for adjuststock
+        },
+      );
+      if (response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "เพิ่มลงในรายการสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error _addCart: $e");
+    }
   }
 
   Future<void> _getFliter() async {
@@ -350,8 +436,14 @@ class _AjustStockState extends State<AjustStock> {
                   isSelect = v;
                 });
                 if (v == 1) {
+                  setState(() {
+                    selectType = "reduce";
+                  });
                   // await _getDetail(status: "pending");
                 } else {
+                  setState(() {
+                    selectType = "add";
+                  });
                   // await _getDetail(status: "history");
                 }
               },
@@ -1069,8 +1161,8 @@ class _AjustStockState extends State<AjustStock> {
                                                   context.loaderOverlay.show();
                                                   // print(selectedUnit);
                                                   // print(selectedSize);
-                                                  // await _getQty(
-                                                  //     product, setModalState);
+                                                  await _getQty(
+                                                      product, setModalState);
                                                   context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
@@ -1281,13 +1373,13 @@ class _AjustStockState extends State<AjustStock> {
                                                 if (selectedSize != "") {
                                                   context.loaderOverlay.show();
 
-                                                  // await _addCart(product);
+                                                  await _addCart(
+                                                      product, selectType);
                                                   // await _getCart();
 
                                                   // await _updateStock(product,
                                                   //     setModalState, "OUT");
-                                                  // context.loaderOverlay
-                                                  //     .hide();
+                                                  context.loaderOverlay.hide();
                                                 } else {
                                                   toastification.show(
                                                     autoCloseDuration:

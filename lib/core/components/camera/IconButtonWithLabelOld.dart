@@ -38,46 +38,68 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
   CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
   String? imagePath;
+  bool _isInitializingCamera = false;
 
   @override
   void initState() {
     super.initState();
     imagePath = widget.imagePath;
-    _initializeCamera();
+    // *** ไม่ต้อง initialize ที่นี่ ***
   }
 
-  Future<void> _initializeCamera() async {
+  // ปิดกล้องเก่า
+  Future<void> _disposeCamera() async {
+    if (_cameraController != null) {
+      await _cameraController!.dispose();
+      _cameraController = null;
+      _initializeControllerFuture = null;
+    }
+  }
+
+  // เปิดกล้องใหม่ทุกครั้ง
+  Future<bool> _initializeCamera() async {
+    setState(() => _isInitializingCamera = true);
+    await _disposeCamera();
     try {
       final cameras = await availableCameras();
       if (cameras.isNotEmpty) {
-        final firstCamera = cameras.first;
         _cameraController = CameraController(
-          firstCamera,
+          cameras.first,
           ResolutionPreset.max,
         );
         _initializeControllerFuture = _cameraController!.initialize();
         await _initializeControllerFuture;
+        setState(() => _isInitializingCamera = false);
+        return true;
       } else {
-        print("No cameras available");
+        setState(() => _isInitializingCamera = false);
+        return false;
       }
     } catch (e) {
+      setState(() => _isInitializingCamera = false);
       print("Error initializing camera: $e");
+      return false;
     }
   }
 
   @override
   void dispose() {
-    _cameraController?.dispose();
+    _disposeCamera();
     super.dispose();
   }
 
   Future<void> openCamera(BuildContext context) async {
-    if (_initializeControllerFuture == null) {
-      // ป้องกันกรณี widget initState ยังไม่เสร็จ
+    if (_isInitializingCamera) {
+      // กำลังเปิดกล้อง
       return;
     }
-    await _initializeControllerFuture;
-    if (_cameraController == null) return;
+    final ok = await _initializeCamera();
+    if (!ok || _cameraController == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ไม่สามารถเปิดกล้องได้')),
+      );
+      return;
+    }
     if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -105,7 +127,7 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
           width: screenWidth / 4,
           height: screenWidth / 4,
           child: ElevatedButton(
-            onPressed: () => openCamera(context),
+            onPressed: _isInitializingCamera ? null : () => openCamera(context),
             style: ElevatedButton.styleFrom(
               padding: widget.padding,
               backgroundColor:
@@ -114,42 +136,45 @@ class _IconButtonWithLabelOldState extends State<IconButtonWithLabelOld> {
                 borderRadius: BorderRadius.circular(widget.borderRadius),
               ),
             ),
-            child: imagePath == null
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(widget.icon, color: Colors.white, size: 50),
-                      Text(
-                        "gobal.camera_button.button".tr(),
-                        style: Styles.white18(context),
-                      )
-                    ],
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(widget.borderRadius),
-                    child: widget.checkNetwork == false
-                        ? Image.file(
-                            File(imagePath!),
-                            width: screenWidth / 4,
-                            height: screenWidth / 4,
-                            fit: BoxFit.cover,
+            child: _isInitializingCamera
+                ? const CircularProgressIndicator()
+                : imagePath == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(widget.icon, color: Colors.white, size: 50),
+                          Text(
+                            "gobal.camera_button.button".tr(),
+                            style: Styles.white18(context),
                           )
-                        : Image.network(
-                            imagePath!,
-                            width: screenWidth / 4,
-                            height: screenWidth / 4,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Center(
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                  size: 50,
-                                ),
-                              );
-                            },
-                          ),
-                  ),
+                        ],
+                      )
+                    : ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(widget.borderRadius),
+                        child: widget.checkNetwork == false
+                            ? Image.file(
+                                File(imagePath!),
+                                width: screenWidth / 4,
+                                height: screenWidth / 4,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.network(
+                                imagePath!,
+                                width: screenWidth / 4,
+                                height: screenWidth / 4,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Center(
+                                    child: Icon(
+                                      Icons.error,
+                                      color: Colors.red,
+                                      size: 50,
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
           ),
         ),
         Text(
