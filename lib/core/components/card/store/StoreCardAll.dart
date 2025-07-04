@@ -34,9 +34,18 @@ class StoreCartAll extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(
-              item.name,
-              style: Styles.headerBlack24(context),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  item.name,
+                  style: Styles.headerBlack24(context),
+                ),
+                Text(
+                  item.latitude == '0.000000' ? 'ไม่มี lat,long' : '',
+                  style: Styles.black18(context),
+                )
+              ],
             ),
             Text.rich(
               TextSpan(

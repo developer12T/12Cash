@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
@@ -10,6 +11,7 @@ import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/dashboard/DashboardScreen.dart';
 import 'package:_12sale_app/core/page/order/OrderINRouteScreen.dart';
+import 'package:_12sale_app/core/page/store/EditStoreDataScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
@@ -19,6 +21,7 @@ import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/route/DetailStoreVisit.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
+import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +29,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailNewStoreScreen extends StatefulWidget {
   String customerNo;
@@ -193,6 +197,20 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
         });
       }
       print("Error: $e");
+    }
+  }
+
+  void openGoogleMapDirection(double lat, double lng) async {
+    final url = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(
+        url,
+        mode: LaunchMode
+            .externalApplication, // เปิดใน browser หรือแอป Google Maps
+      );
+    } else {
+      throw 'Could not launch $url';
     }
   }
 
@@ -372,6 +390,124 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
                                               : null)
                                           : null,
                                     ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    MenuButton(
+                                      icon: Icons.edit_document,
+                                      label: "แก้ไข",
+                                      // color: Colors.teal,
+                                      color: Styles.warning!,
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditStoreDataScreen(
+                                                    initialSelectedRoute: RouteStore(
+                                                        route: widget
+                                                            .initialSelectedRoute
+                                                            .route),
+                                                    store: widget.store,
+                                                    customerNo:
+                                                        widget.customerNo,
+                                                    customerName:
+                                                        widget.customerName),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    MenuButton(
+                                      icon: widget.store.latitude != "0.000000"
+                                          ? Icons.gps_fixed_rounded
+                                          : Icons.gps_off_rounded,
+                                      label: widget.store.latitude != "0.000000"
+                                          ? "นำทาง"
+                                          : "เช็คอิน",
+                                      color: Styles.primaryColor,
+                                      onPressed: () async {
+                                        if (widget.store.latitude ==
+                                            "0.000000") {
+                                          await fetchLocation();
+                                          AllAlert.checkinAlert(
+                                              context, _checkin);
+                                        } else {
+                                          var storeLatitude =
+                                              widget.store.latitude.toDouble();
+                                          var storeLongitude =
+                                              widget.store.longitude.toDouble();
+                                          openGoogleMapDirection(storeLatitude,
+                                              storeLongitude); // ใส่ lat,lng จุดหมาย
+                                        }
+                                      },
+                                    ),
+                                    widget.store.status == '20'
+                                        ? MenuButton(
+                                            icon:
+                                                Icons.add_shopping_cart_rounded,
+                                            label: "ขาย",
+                                            color: Styles.success!,
+                                            // color: Styles.grey,
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      OrderINRouteScreen(
+                                                    routeId: '',
+                                                    storeDetail:
+                                                        DetailStoreVisit(
+                                                            id: '',
+                                                            period: '',
+                                                            area: '',
+                                                            day: '',
+                                                            listStore: [
+                                                              ListStore(
+                                                                  storeInfo: StoreInfo(
+                                                                      id: '',
+                                                                      storeId:
+                                                                          widget
+                                                                              .customerNo,
+                                                                      name: widget
+                                                                          .customerName,
+                                                                      taxId: widget
+                                                                          .store
+                                                                          .taxId,
+                                                                      tel: widget
+                                                                          .store
+                                                                          .tel,
+                                                                      typeName: widget
+                                                                          .store
+                                                                          .typeName,
+                                                                      address: widget
+                                                                          .store
+                                                                          .address),
+                                                                  note: widget
+                                                                      .store
+                                                                      .note,
+                                                                  status: widget
+                                                                      .store
+                                                                      .status,
+                                                                  statusText:
+                                                                      '',
+                                                                  listOrder: [])
+                                                            ],
+                                                            storeAll: 0,
+                                                            storePending: 0,
+                                                            storeSell: 0,
+                                                            storeNotSell: 0,
+                                                            storeTotal: 0,
+                                                            percentComplete: 0,
+                                                            percentEffective: 0,
+                                                            percentVisit: 0),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          )
+                                        : SizedBox()
                                   ],
                                 ),
                               ],

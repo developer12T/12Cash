@@ -148,6 +148,7 @@ class _AjustStockState extends State<AjustStock> {
         body: {
           // sale, withdraw, refund, give, adjuststock
           "type": "adjuststock",
+          "period": period,
           "area": User.area,
           "id": product.id,
           "qty": count,
@@ -1158,12 +1159,12 @@ class _AjustStockState extends State<AjustStock> {
                                                     selectedUnit = data.unit;
                                                     total = price * count;
                                                   });
-                                                  context.loaderOverlay.show();
+                                                  // context.loaderOverlay.show();
                                                   // print(selectedUnit);
                                                   // print(selectedSize);
                                                   await _getQty(
                                                       product, setModalState);
-                                                  context.loaderOverlay.hide();
+                                                  // context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   padding: const EdgeInsets

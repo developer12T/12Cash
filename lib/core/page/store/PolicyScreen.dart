@@ -281,6 +281,7 @@ class _PolicyScreenState extends State<PolicyScreen> {
                 onChanged: _isCheckboxEnabled
                     ? (value) async {
                         // print("${DateTime.now()}");
+                        await fetchLocation();
                         if (await Permission
                             .locationWhenInUse.serviceStatus.isEnabled) {
                           setState(() {
