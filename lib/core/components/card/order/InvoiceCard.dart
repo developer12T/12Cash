@@ -25,7 +25,7 @@ class InvoiceCard extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     tz.initializeTimeZones();
     final bangkok = tz.getLocation('Asia/Bangkok');
-    final utcTime = item.createAt;
+    final utcTime = item.createdAt;
     final bangkokTime = tz.TZDateTime.from(utcTime, bangkok);
     final formatted = DateFormat('dd/MM/yyyy | HH:mm:ss').format(bangkokTime);
 

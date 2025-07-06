@@ -8,7 +8,7 @@ class Orders {
   final double total;
   final String status;
   final String statusTH;
-  final DateTime createAt;
+  final DateTime createdAt;
   Orders({
     required this.orderId,
     required this.storeId,
@@ -17,7 +17,7 @@ class Orders {
     required this.total,
     required this.status,
     required this.statusTH,
-    required this.createAt,
+    required this.createdAt,
   });
 
   factory Orders.fromJson(Map<String, dynamic> json) {
@@ -33,8 +33,8 @@ class Orders {
               : double.tryParse(json['total']?.toString() ?? '0') ?? 0.0,
       status: json['status'] ?? '',
       statusTH: json['statusTH'] ?? '',
-      createAt: json['createAt'] != null
-          ? DateTime.tryParse(json['createAt']) ?? DateTime.now()
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
           : DateTime.now(),
     );
   }

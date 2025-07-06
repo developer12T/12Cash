@@ -12,6 +12,7 @@ import 'package:_12sale_app/core/components/chart/LineChart.dart';
 import 'package:_12sale_app/core/components/chart/SummarybyMonth.dart';
 import 'package:_12sale_app/core/components/chart/TrendingMusicChart.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/campaign/Campaign.dart';
 import 'package:_12sale_app/core/page/giveaways/GiveAwaysHistoryScreen.dart';
 import 'package:_12sale_app/core/page/giveaways/GiveAwaysScreen.dart';
 import 'package:_12sale_app/core/page/notification/NotificationScreen.dart';
@@ -165,20 +166,20 @@ class _DashboardscreenState extends State<Dashboardscreen> {
     super.dispose();
   }
 
-  void currentLocation() async {
-    try {
-      Position position = await getCurrentLocation();
-      print('Current location: ${position.latitude}, ${position.longitude}');
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
+  // void currentLocation() async {
+  //   try {
+  //     Position position = await getCurrentLocation();
+  //     print('Current location: ${position.latitude}, ${position.longitude}');
+  //   } catch (e) {
+  //     print('Error: $e');
+  //   }
+  // }
 
-  void startLocationUpdates() {
-    _locationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      currentLocation(); // Call your currentLocation function every 5 seconds
-    });
-  }
+  // void startLocationUpdates() {
+  //   _locationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  //     currentLocation(); // Call your currentLocation function every 5 seconds
+  //   });
+  // }
 
   Widget bottomTitleWidgets(
       double value, TitleMeta meta, BuildContext context) {
@@ -294,7 +295,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
         onTap1: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => WithDrawScreen(),
+              builder: (context) => Campaign(),
             ),
           );
         },
