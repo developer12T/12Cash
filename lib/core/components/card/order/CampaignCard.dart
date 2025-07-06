@@ -2,7 +2,10 @@ import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Campaign.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class CampaignCard extends StatefulWidget {
   final CampaignModel item;
@@ -21,6 +24,12 @@ class _CampaignCardState extends State<CampaignCard> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    tz.initializeTimeZones();
+    final bangkok = tz.getLocation('Asia/Bangkok');
+    final utcTime = widget.item.createdAt;
+    final bangkokTime = tz.TZDateTime.from(utcTime, bangkok);
+    final formatted = DateFormat('dd/MM/yyyy | HH:mm:ss').format(bangkokTime);
+
     return GestureDetector(
       onTap: widget.onDetailsPressed,
       child: BoxShadowCustom(
@@ -74,8 +83,8 @@ class _CampaignCardState extends State<CampaignCard> {
                     Expanded(
                         flex: 1,
                         child: Column(
-                          // crossAxisAlignment: CrossAxisAlignment.start,
-                          // mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -95,6 +104,17 @@ class _CampaignCardState extends State<CampaignCard> {
                                     widget.item.des,
                                     style: Styles.black18(context),
                                     maxLines: 3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    formatted,
+                                    style: Styles.black18(context),
                                   ),
                                 ),
                               ],

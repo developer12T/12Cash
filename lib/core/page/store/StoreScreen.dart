@@ -211,6 +211,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -241,6 +242,7 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
                 )
               ],
             ),
+            SizedBox(height: 8),
             // const SizedBox(height: 16), // Add spacing between buttons and list
             _isSelected
                 ? Expanded(
