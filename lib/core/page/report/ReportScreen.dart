@@ -98,14 +98,8 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
   @override
   void initState() {
     super.initState();
-    // _loadStoreData();
     _getOrder();
     _getRefundOrder();
-
-    // _pagingController.addPageRequestListener((pageKey) {
-    //   _fetchPage(pageKey);
-    // });
-    // requestLocation();
   }
 
   @override

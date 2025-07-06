@@ -575,10 +575,6 @@ class _DetailScreenState extends State<DetailScreen> {
                                     }
                                   },
                                 ),
-                                Text(
-                                  '',
-                                  style: Styles.black12(context),
-                                )
                               ],
                             ),
                             Column(
