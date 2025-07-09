@@ -385,7 +385,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
         });
         if (isType == "T04") {
           setState(() {
-            isShippingId = shippingList[0].shippingId;
+            isShippingId = shippingList[0].shippingId!;
           });
         }
       }
@@ -1444,12 +1444,14 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                   setModalState(() {
                                                     isShippingId =
                                                         shippingList[index]
-                                                            .shippingId;
+                                                                .shippingId ??
+                                                            "";
                                                   });
                                                   setState(() {
                                                     nameShipping =
                                                         shippingList[index]
-                                                            .name;
+                                                                .name ??
+                                                            "";
                                                     addressShipping =
                                                         "${shippingList[index].address} ${shippingList[index].district} ${shippingList[index].subDistrict} ${shippingList[index].province} ${shippingList[index].postcode}";
                                                   });
@@ -1469,8 +1471,9 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                             children: [
                                                               Text(
                                                                 shippingList[
-                                                                        index]
-                                                                    .typeNameTH,
+                                                                            index]
+                                                                        .typeNameTH ??
+                                                                    "",
                                                                 style: Styles
                                                                     .black18(
                                                                         context),
@@ -1479,9 +1482,9 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                                           .name !=
                                                                       ''
                                                                   ? Text(
-                                                                      shippingList[
-                                                                              index]
-                                                                          .name,
+                                                                      shippingList[index]
+                                                                              .name ??
+                                                                          "",
                                                                       style: Styles
                                                                           .black18(
                                                                               context),
@@ -1491,9 +1494,9 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                                           .tel !=
                                                                       ''
                                                                   ? Text(
-                                                                      shippingList[
-                                                                              index]
-                                                                          .tel,
+                                                                      shippingList[index]
+                                                                              .tel ??
+                                                                          "",
                                                                       style: Styles
                                                                           .black18(
                                                                               context),

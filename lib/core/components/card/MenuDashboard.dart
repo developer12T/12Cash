@@ -25,6 +25,14 @@ class MenuDashboard extends StatefulWidget {
   final IconData icon_6;
   final String title_6;
   void Function()? onTap6;
+
+  final IconData icon_7;
+  final String title_7;
+  void Function()? onTap7;
+
+  final IconData icon_8;
+  final String title_8;
+  void Function()? onTap8;
   MenuDashboard({
     required this.icon_1,
     required this.title_1,
@@ -44,6 +52,12 @@ class MenuDashboard extends StatefulWidget {
     required this.icon_6,
     required this.title_6,
     this.onTap6,
+    required this.icon_7,
+    required this.title_7,
+    this.onTap7,
+    required this.icon_8,
+    required this.title_8,
+    this.onTap8,
     super.key,
   });
 
@@ -63,11 +77,8 @@ class _MenuDashboardState extends State<MenuDashboard> {
               child: GestureDetector(
                 onTap: widget.onTap1,
                 child: Container(
-                  height: 150,
+                  height: 80,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                    ),
                     border: Border.all(
                       color: Colors.grey[350]!,
                       width: 1.0,
@@ -79,12 +90,12 @@ class _MenuDashboardState extends State<MenuDashboard> {
                     children: [
                       Icon(
                         widget.icon_1,
-                        size: 60,
+                        size: 40,
                         color: Styles.primaryColorIcons,
                       ),
                       Text(
                         widget.title_1,
-                        style: Styles.black24(context),
+                        style: Styles.black16(context),
                       )
                     ],
                   ),
@@ -95,45 +106,36 @@ class _MenuDashboardState extends State<MenuDashboard> {
               child: GestureDetector(
                 onTap: widget.onTap2,
                 child: Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey[350]!,
-                      width: 1.0,
-                    ),
-                    color: Colors.white,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        widget.icon_2,
-                        size: 60,
-                        color: Styles.primaryColorIcons,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey[350]!,
+                        width: 1.0,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            widget.title_2,
-                            style: Styles.black18(context),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          widget.icon_2,
+                          size: 40,
+                          color: Styles.primaryColorIcons,
+                        ),
+                        Text(
+                          widget.title_2,
+                          style: Styles.black16(context),
+                        )
+                      ],
+                    )),
               ),
             ),
             Expanded(
               child: GestureDetector(
                 onTap: widget.onTap3,
                 child: Container(
-                  height: 150,
+                  height: 80,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(16),
-                    ),
                     border: Border.all(
                       color: Colors.grey[350]!,
                       width: 1.0,
@@ -145,12 +147,46 @@ class _MenuDashboardState extends State<MenuDashboard> {
                     children: [
                       Icon(
                         widget.icon_3,
-                        size: 60,
+                        size: 40,
+                        color: Styles.primaryColorIcons,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.title_3,
+                            style: Styles.black16(context),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: widget.onTap4,
+                child: Container(
+                  height: 80,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey[350]!,
+                      width: 1.0,
+                    ),
+                    color: Colors.white,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        widget.icon_4,
+                        size: 40,
                         color: Styles.primaryColorIcons,
                       ),
                       Text(
-                        widget.title_3,
-                        style: Styles.black24(context),
+                        widget.title_4,
+                        style: Styles.black16(context),
                       )
                     ],
                   ),
@@ -163,14 +199,10 @@ class _MenuDashboardState extends State<MenuDashboard> {
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: widget.onTap4,
+                onTap: widget.onTap5,
                 child: Container(
-                  height: 150,
+                  height: 80,
                   decoration: BoxDecoration(
-                    // color: Colors.amber,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                    ),
                     border: Border.all(
                       color: Colors.grey[350]!,
                       width: 1.0,
@@ -180,36 +212,17 @@ class _MenuDashboardState extends State<MenuDashboard> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Positioned(
-                      //   right: 10,
-                      //   top: 10,
-                      //   child: Container(
-                      //     height: screenWidth / 18,
-                      //     width: screenWidth / 18,
-                      //     decoration: const BoxDecoration(
-                      //       color: Colors.red,
-                      //       borderRadius:
-                      //           BorderRadius.all(Radius.circular(360)),
-                      //     ),
-                      //     child: Center(
-                      //       child: Text(
-                      //         "1",
-                      //         style: Styles.white18(context),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            widget.icon_4,
-                            size: 60,
+                            widget.icon_5,
+                            size: 40,
                             color: Styles.primaryColorIcons,
                           ),
                           Text(
-                            widget.title_4,
-                            style: Styles.black24(context),
+                            widget.title_5,
+                            style: Styles.black16(context),
                           )
                         ],
                       ),
@@ -220,42 +233,10 @@ class _MenuDashboardState extends State<MenuDashboard> {
             ),
             Expanded(
               child: GestureDetector(
-                onTap: widget.onTap5,
-                child: Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey[350]!,
-                      width: 1.0,
-                    ),
-                    color: Colors.white,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        widget.icon_5,
-                        size: 60,
-                        color: Styles.primaryColorIcons,
-                      ),
-                      Text(
-                        widget.title_5,
-                        style: Styles.black24(context),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: GestureDetector(
                 onTap: widget.onTap6,
                 child: Container(
-                  height: 150,
+                  height: 80,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      bottomRight: Radius.circular(16),
-                    ),
                     border: Border.all(
                       color: Colors.grey[350]!,
                       width: 1.0,
@@ -267,12 +248,70 @@ class _MenuDashboardState extends State<MenuDashboard> {
                     children: [
                       Icon(
                         widget.icon_6,
-                        size: 60,
+                        size: 40,
                         color: Styles.primaryColorIcons,
                       ),
                       Text(
                         widget.title_6,
-                        style: Styles.black24(context),
+                        style: Styles.black16(context),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: widget.onTap7,
+                child: Container(
+                  height: 80,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey[350]!,
+                      width: 1.0,
+                    ),
+                    color: Colors.white,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        widget.icon_7,
+                        size: 40,
+                        color: Styles.primaryColorIcons,
+                      ),
+                      Text(
+                        widget.title_7,
+                        style: Styles.black16(context),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: GestureDetector(
+                onTap: widget.onTap8,
+                child: Container(
+                  height: 80,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey[350]!,
+                      width: 1.0,
+                    ),
+                    color: Colors.white,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        widget.icon_8,
+                        size: 40,
+                        color: Styles.primaryColorIcons,
+                      ),
+                      Text(
+                        widget.title_8,
+                        style: Styles.black16(context),
                       )
                     ],
                   ),

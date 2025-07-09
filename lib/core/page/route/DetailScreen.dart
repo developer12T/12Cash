@@ -416,8 +416,11 @@ class _DetailScreenState extends State<DetailScreen> {
     try {
       await fetchLocation();
       Dio dio = Dio();
-      MultipartFile? imageFile;
-      imageFile = await MultipartFile.fromFile(checkinSellImagePath!);
+
+      File imageFile = File(checkinSellImagePath!);
+      MultipartFile compressedFile = await compressImages(imageFile);
+      // MultipartFile? imageFile;
+      // imageFile = await MultipartFile.fromFile(checkinSellImagePath!);
 
       if (checkinSellImagePath != null) {
         var formData = FormData.fromMap(
@@ -425,7 +428,7 @@ class _DetailScreenState extends State<DetailScreen> {
             'routeId': storeDetail?.id,
             'storeId': widget.customerNo,
             'note': "ขายสินค้า",
-            'checkInImage': imageFile,
+            'checkInImage': compressedFile,
             "latitude": latitude,
             "longtitude": longitude
           },

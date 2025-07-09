@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class OrderDetail {
   final String type;
   final String orderId;

@@ -1,14 +1,8 @@
-import 'dart:convert';
-
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
-import 'package:_12sale_app/core/components/button/Button.dart';
 import 'package:_12sale_app/core/components/card/store/DuplicateCard.dart';
 import 'package:_12sale_app/core/components/card/store/StoreCardAll.dart';
-import 'package:_12sale_app/core/components/card/store/StoreCardNew.dart';
 import 'package:_12sale_app/core/page/store/DetailSimilarDtore.dart';
-import 'package:_12sale_app/core/page/store/DetailStoreScreen.dart';
-import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/DuplicateStore.dart';
 import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Store.dart';
@@ -16,6 +10,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// ignore: must_be_immutable
 class CheckStoreDuplicateScreen extends StatefulWidget {
   List<DuplicateStore> stores;
   CheckStoreDuplicateScreen({required this.stores, super.key});
@@ -72,6 +67,7 @@ class _CheckStoreDuplicateScreenState extends State<CheckStoreDuplicateScreen> {
   }
 }
 
+// ignore: must_be_immutable
 class CheckStoreDuplicateScreen2 extends StatefulWidget {
   List<Store> stores;
 

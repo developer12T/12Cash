@@ -82,7 +82,6 @@ class _LoginScreenState extends State<LoginScreen> with RouteAware {
           // Trigger toast only when the `isConnected` state changes
           if (lastConnectedState != isConnected) {
             lastConnectedState = isConnected;
-
             WidgetsBinding.instance.addPostFrameCallback((_) {
               toastification.show(
                 context: context,
@@ -99,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> with RouteAware {
                     ? ToastificationType.success
                     : ToastificationType.error,
                 primaryColor: isConnected ? Colors.green : Colors.red,
+                autoCloseDuration: const Duration(seconds: 3),
               );
             });
           }

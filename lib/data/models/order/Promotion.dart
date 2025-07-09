@@ -56,6 +56,7 @@ class PromotionListItem {
   String? proName;
   String? proType;
   int qty;
+
   PromotionListItem({
     required this.id,
     required this.name,
@@ -71,25 +72,23 @@ class PromotionListItem {
     required this.qty,
   });
 
-  // ✅ Convert JSON to Dart Object
   factory PromotionListItem.fromJson(Map<String, dynamic> json) {
     return PromotionListItem(
-      id: json['id'], //  field name
-      name: json['name'], //  field name
-      group: json['group'], //  field name
-      flavour: json['flavour'], //  field name
-      brand: json['brand'], //  field name
-      size: json['size'], //  field name
-      unit: json['unit'], //  field name
-      unitName: json['unitName'], //  field name
-      proId: json['proId'], //  field name
-      proName: json['proName'], //  field name
-      proType: json['proType'], //  field name
-      qty: json['qty'] as int, //  it's int
+      id: json['id'],
+      name: json['name'],
+      group: json['group'],
+      flavour: json['flavour'],
+      brand: json['brand'],
+      size: json['size'],
+      unit: json['unit'],
+      unitName: json['unitName'],
+      proId: json['proId'],
+      proName: json['proName'],
+      proType: json['proType'],
+      qty: json['qty'] as int,
     );
   }
 
-  // ✅ Convert Dart Object to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -102,7 +101,41 @@ class PromotionListItem {
       'unitName': unitName,
       'proId': proId,
       'proName': proName,
+      'proType': proType,
       'qty': qty,
     };
+  }
+}
+
+// ✅ ต้องอยู่ “นอก class” เท่านั้น
+extension PromotionListItemCopy on PromotionListItem {
+  PromotionListItem copyWith({
+    String? id,
+    String? name,
+    String? group,
+    String? flavour,
+    String? brand,
+    String? size,
+    String? unit,
+    String? unitName,
+    String? proId,
+    String? proName,
+    String? proType,
+    int? qty,
+  }) {
+    return PromotionListItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      group: group ?? this.group,
+      flavour: flavour ?? this.flavour,
+      brand: brand ?? this.brand,
+      size: size ?? this.size,
+      unit: unit ?? this.unit,
+      unitName: unitName ?? this.unitName,
+      proId: proId ?? this.proId,
+      proName: proName ?? this.proName,
+      proType: proType ?? this.proType,
+      qty: qty ?? this.qty,
+    );
   }
 }

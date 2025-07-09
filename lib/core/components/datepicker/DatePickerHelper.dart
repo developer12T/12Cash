@@ -12,8 +12,8 @@ class DatePickerHelper {
       locale: const Locale('th', 'TH'),
       context: context,
       initialDate: initialDate ?? DateTime.now(),
-      firstDate: DateTime(DateTime.now().year - 2),
-      lastDate: DateTime.now(),
+      firstDate: DateTime(DateTime.now().year - 4),
+      lastDate: DateTime(DateTime.now().year + 3),
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       builder: (BuildContext context, Widget? child) {
         return Theme(

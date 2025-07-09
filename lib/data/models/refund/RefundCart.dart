@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class RefundModel {
   final String type;
   final StoreInfoRefund store;

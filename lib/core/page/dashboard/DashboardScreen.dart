@@ -235,104 +235,6 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   List<ShippingModel> shuppingList = [];
 
   Widget build(BuildContext context) {
-    List<Widget> menuList = [
-      MenuDashboard(
-        title_1: "เบิกสินค้า",
-        icon_1: Icons.local_shipping,
-        onTap1: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => WithDrawScreen(),
-            ),
-          );
-        },
-        title_2: "รายงานขาย/ส่งเงิน",
-        icon_2: FontAwesomeIcons.moneyBillTransfer,
-        onTap2: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => SendMoneyScreenTable(),
-            ),
-          );
-        },
-        title_3: "สต๊อกสินค้า",
-        icon_3: Icons.warehouse_rounded,
-        onTap3: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => StockScreenTest(),
-            ),
-          );
-        },
-        title_4: "แจกสินค้า",
-        icon_4: FontAwesomeIcons.gift,
-        onTap4: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => GiveawaysHistoryScreen()),
-          );
-        },
-        title_5: "ตั้งค่าเครื่องปริ้น",
-        icon_5: Icons.print_rounded,
-        onTap5: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ManagePrinterScreen(),
-            ),
-          );
-        },
-        title_6: "ตั้งค่า",
-        icon_6: Icons.settings,
-        onTap6: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const SettingScreen()),
-          );
-        },
-      ),
-      MenuDashboard(
-        title_1: "ประกาศข่าวสาร",
-        icon_1: Icons.campaign_outlined,
-        onTap1: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => Campaign(),
-            ),
-          );
-        },
-        title_2: "คู่มือการใช้งาน",
-        icon_2: Icons.book,
-        onTap2: () async {
-          try {
-            final url =
-                Uri.parse('https://apps.onetwotrading.co.th/sale/manual');
-            await launchUrl(
-              url,
-              mode: LaunchMode.externalApplication,
-            );
-          } catch (e) {
-            print('❌ Error launching URL: $e');
-          }
-        },
-        title_3: "เข้าเยี่ยม",
-        icon_3: Icons.route_outlined,
-        onTap3: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const CheckinReport(),
-            ),
-          );
-        },
-        title_4: "กำลังพัฒนา",
-        icon_4: Icons.build_circle_outlined,
-        onTap4: () {},
-        title_5: "กำลังพัฒนา",
-        icon_5: Icons.build_circle_outlined,
-        onTap5: () {},
-        title_6: "กำลังพัฒนา",
-        icon_6: Icons.build_circle_outlined,
-        onTap6: () {},
-      ),
-    ];
     selectedLanguageCode = context.locale.toString().split("_")[0];
     double screenWidth = MediaQuery.of(context).size.width;
     return Container(
@@ -357,45 +259,157 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                     ),
                   ),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: menuList.asMap().entries.map((entry) {
-                return GestureDetector(
-                  onTap: () => _controller.animateToPage(entry.key),
-                  child: Container(
-                    width: 12.0,
-                    height: 12.0,
-                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: (Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black)
-                          .withOpacity(_current == entry.key ? 0.9 : 0.4),
-                    ),
-                  ),
-                );
-              }).toList(),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: menuList.asMap().entries.map((entry) {
+            //     return GestureDetector(
+            //       onTap: () => _controller.animateToPage(entry.key),
+            //       child: Container(
+            //         width: 12.0,
+            //         height: 12.0,
+            //         margin: const EdgeInsets.symmetric(horizontal: 4.0),
+            //         decoration: BoxDecoration(
+            //           shape: BoxShape.circle,
+            //           color: (Theme.of(context).brightness == Brightness.dark
+            //                   ? Colors.white
+            //                   : Colors.black)
+            //               .withOpacity(_current == entry.key ? 0.9 : 0.4),
+            //         ),
+            //       ),
+            //     );
+            //   }).toList(),
+            // ),
+
+            Column(
+              children: [
+                MenuDashboard(
+                  title_1: "เบิกสินค้า",
+                  icon_1: Icons.local_shipping,
+                  onTap1: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => WithDrawScreen(),
+                      ),
+                    );
+                  },
+                  title_2: "รายงานขาย/ส่งเงิน",
+                  icon_2: FontAwesomeIcons.moneyBillTransfer,
+                  onTap2: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => SendMoneyScreenTable(),
+                      ),
+                    );
+                  },
+                  title_3: "สต๊อกสินค้า",
+                  icon_3: Icons.warehouse_rounded,
+                  onTap3: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => StockScreenTest(),
+                      ),
+                    );
+                  },
+                  title_4: "แจกสินค้า",
+                  icon_4: FontAwesomeIcons.gift,
+                  onTap4: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => GiveawaysHistoryScreen()),
+                    );
+                  },
+                  title_5: "ตั้งค่าเครื่องปริ้น",
+                  icon_5: Icons.print_rounded,
+                  onTap5: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ManagePrinterScreen(),
+                      ),
+                    );
+                  },
+                  title_6: "ตั้งค่า",
+                  icon_6: Icons.settings,
+                  onTap6: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => const SettingScreen()),
+                    );
+                  },
+                  title_7: "ประกาศข่าวสาร",
+                  icon_7: Icons.campaign_outlined,
+                  onTap7: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => const Campaign()),
+                    );
+                  },
+                  title_8: "คู่มือการใช้งาน",
+                  icon_8: Icons.book,
+                  onTap8: () async {
+                    try {
+                      final url = Uri.parse(
+                          'https://apps.onetwotrading.co.th/sale/manual');
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } catch (e) {
+                      print('❌ Error launching URL: $e');
+                    }
+                  },
+                ),
+                // MenuDashboard(
+                //   title_1: "ประกาศข่าวสาร",
+                //   icon_1: Icons.campaign_outlined,
+                //   onTap1: () {
+                //     Navigator.of(context).push(
+                //       MaterialPageRoute(
+                //         builder: (context) => Campaign(),
+                //       ),
+                //     );
+                //   },
+                //   title_2: "คู่มือการใช้งาน",
+                //   icon_2: Icons.book,
+                //   onTap2: () async {
+                //     try {
+                //       final url = Uri.parse(
+                //           'https://apps.onetwotrading.co.th/sale/manual');
+                //       await launchUrl(
+                //         url,
+                //         mode: LaunchMode.externalApplication,
+                //       );
+                //     } catch (e) {
+                //       print('❌ Error launching URL: $e');
+                //     }
+                //   },
+                //   title_3: "เข้าเยี่ยม",
+                //   icon_3: Icons.route_outlined,
+                //   onTap3: () {
+                //     Navigator.of(context).push(
+                //       MaterialPageRoute(
+                //         builder: (context) => const CheckinReport(),
+                //       ),
+                //     );
+                //   },
+                //   title_4: "กำลังพัฒนา",
+                //   icon_4: Icons.build_circle_outlined,
+                //   onTap4: () {},
+                //   title_5: "กำลังพัฒนา",
+                //   icon_5: Icons.build_circle_outlined,
+                //   onTap5: () {},
+                //   title_6: "กำลังพัฒนา",
+                //   icon_6: Icons.build_circle_outlined,
+                //   onTap6: () {},
+                //   title_7: "กำลังพัฒนา",
+                //   icon_7: Icons.build_circle_outlined,
+                //   onTap7: () {},
+                //   title_8: "กำลังพัฒนา",
+                //   icon_8: Icons.build_circle_outlined,
+                //   onTap8: () {},
+                // ),
+              ],
             ),
             SizedBox(height: screenWidth / 37),
-            CarouselSlider(
-              items: menuList.map((item) => item).toList(),
-              carouselController: _controller,
-              options: CarouselOptions(
-                onPageChanged: (index, reason) {
-                  setState(() {
-                    _current = index;
-                  });
-                },
-                pageSnapping: true,
-                // aspectRatio: 2.0,
-                // autoPlay: true,
-                disableCenter: true,
-                enlargeCenterPage: true,
-                viewportFraction: 1.0, // Show one row fully at a time
-              ),
-            ),
-
             // const WeightCudeCard(),
             // SizedBox(height: screenWidth / 25),
             // SizedBox(height: 500, width: 400, child: LineChartSample()),

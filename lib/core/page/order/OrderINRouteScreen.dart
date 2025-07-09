@@ -47,7 +47,6 @@ class OrderINRouteScreen extends StatefulWidget {
 class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
     with RouteAware {
   final Debouncer _debouncer = Debouncer();
-
   final Throttler _throttler = Throttler();
 
   List<Product> productList = [];
@@ -551,13 +550,12 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
         final List<dynamic> dataBrand = response.data['data']['brand'];
         final List<dynamic> dataSize = response.data['data']['size'];
         final List<dynamic> dataFlavour = response.data['data']['flavour'];
-        if (mounted) {
-          setState(() {
-            brandList = List<String>.from(dataBrand);
-            sizeList = List<String>.from(dataSize);
-            flavourList = List<String>.from(dataFlavour);
-          });
-        }
+
+        setState(() {
+          brandList = List<String>.from(dataBrand);
+          sizeList = List<String>.from(dataSize);
+          flavourList = List<String>.from(dataFlavour);
+        });
       }
       if (selectedGroups.length == 0) {
         setState(() {

@@ -14,9 +14,7 @@ android {
     namespace = "com.onetwotrading.onetwocashapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-    compileSdkVersion = 34 // Use at least 31, preferably 33 or higher
-
-
+    compileSdkVersion = 35 // Use at least 31, preferably 33 or higherkkkk[pok[klkk]]
     compileOptions {
         coreLibraryDesugaringEnabled = true  // ✅ Enable desugaring
         sourceCompatibility =  JavaVersion.VERSION_17  // ✅ Use Java 11
@@ -31,9 +29,9 @@ android {
         // multiDexEnabled true
         applicationId = "com.onetwotrading.onetwocashapp"
         minSdk = 21  // Ensure minSdk is at least 21
-        targetSdk = 34
-        versionCode = 8
-        versionName = "1.2.0"
+        targetSdk = 35
+        versionCode = 9
+        versionName = "1.2.1"
         multiDexEnabled = true  // ✅ Enable MultiDex if not already enabled
     }
 
