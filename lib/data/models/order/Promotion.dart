@@ -1,18 +1,20 @@
 class PromotionList {
   final String? proId;
   final String? proName;
+  final String? proCode;
   final String? proType;
   final int? proQty;
   final double discount;
-  final List<PromotionListItem> listPromotion;
+  final List<PromotionListItem> listProduct;
 
   PromotionList({
     required this.proId,
     required this.proName,
+    required this.proCode,
     required this.proType,
     required this.proQty,
     required this.discount,
-    required this.listPromotion,
+    required this.listProduct,
   });
 
   // ✅ Convert JSON to Dart Object
@@ -20,7 +22,8 @@ class PromotionList {
     return PromotionList(
       proId: json['proId'], //  field name
       proName: json['proName'], //  field name
-      listPromotion: (json['listProduct'] as List<dynamic>?)
+      proCode: json['proCode'], //  field name
+      listProduct: (json['listProduct'] as List<dynamic>?)
               ?.map((unit) => PromotionListItem.fromJson(unit))
               .toList() ??
           [], // ✅ Default to empty list if null
@@ -35,10 +38,11 @@ class PromotionList {
     return {
       'proId': proId,
       'proName': proName,
+      'proCode': proCode,
       'proType': proType,
       'proQty': proQty,
       'discount': discount,
-      'listProduct': listPromotion.map((item) => item.toJson()).toList(),
+      'listProduct': listProduct.map((item) => item.toJson()).toList(),
     };
   }
 }
@@ -54,6 +58,7 @@ class PromotionListItem {
   final String unitName;
   String? proId;
   String? proName;
+  String? proCode;
   String? proType;
   int qty;
 
@@ -68,6 +73,7 @@ class PromotionListItem {
     required this.unitName,
     this.proId,
     this.proName,
+    this.proCode,
     this.proType,
     required this.qty,
   });
@@ -84,6 +90,7 @@ class PromotionListItem {
       unitName: json['unitName'],
       proId: json['proId'],
       proName: json['proName'],
+      proCode: json['proCode'],
       proType: json['proType'],
       qty: json['qty'] as int,
     );
@@ -101,6 +108,7 @@ class PromotionListItem {
       'unitName': unitName,
       'proId': proId,
       'proName': proName,
+      'proCode': proCode,
       'proType': proType,
       'qty': qty,
     };
@@ -120,6 +128,7 @@ extension PromotionListItemCopy on PromotionListItem {
     String? unitName,
     String? proId,
     String? proName,
+    String? proCode,
     String? proType,
     int? qty,
   }) {
@@ -134,6 +143,7 @@ extension PromotionListItemCopy on PromotionListItem {
       unitName: unitName ?? this.unitName,
       proId: proId ?? this.proId,
       proName: proName ?? this.proName,
+      proCode: proCode ?? this.proCode,
       proType: proType ?? this.proType,
       qty: qty ?? this.qty,
     );

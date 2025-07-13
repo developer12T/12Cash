@@ -3,6 +3,7 @@ import 'package:_12sale_app/data/models/order/Promotion.dart';
 class PromotionChangeList {
   final String? proId;
   final String? proName;
+  final String? proCode;
   final String? proType;
   final int? proQty;
   final List<PromotionListItem> promotionListItem;
@@ -10,6 +11,7 @@ class PromotionChangeList {
   PromotionChangeList({
     required this.proId,
     required this.proName,
+    required this.proCode,
     required this.proType,
     required this.proQty,
     required this.promotionListItem,
@@ -19,6 +21,7 @@ class PromotionChangeList {
     return PromotionChangeList(
       proId: json['proId'], //  field name
       proName: json['proName'], //  field name
+      proCode: json['proCode'], //  field name
       proType: json['proType'], //  field name
       proQty: json['proQty'], //  field name
       promotionListItem: (json['promotionListItem'] as List<dynamic>?)
@@ -32,6 +35,7 @@ class PromotionChangeList {
     return {
       'proId': proId,
       'proName': proName,
+      'proCode': proCode,
       'proType': proType,
       'proQty': proQty,
       "promotionListItem":

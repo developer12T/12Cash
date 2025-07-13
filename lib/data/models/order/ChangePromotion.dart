@@ -1,3 +1,5 @@
+import 'package:_12sale_app/data/models/order/Promotion.dart';
+
 class ProductGroup {
   final String group;
   final String size;
@@ -128,22 +130,27 @@ class ItemProductChange {
   }
 }
 
-// class ProductList {
-//   final List<ProductGroup> listProduct;
-
-//   ProductList({required this.listProduct});
-
-//   factory ProductList.fromJson(Map<String, dynamic> json) {
-//     return ProductList(
-//       listProduct: (json['listProduct'] as List)
-//           .map((item) => ProductGroup.fromJson(item))
-//           .toList(),
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'listProduct': listProduct.map((item) => item.toJson()).toList(),
-//     };
-//   }
-// }
+extension ItemProductChangeX on ItemProductChange {
+  PromotionListItem toPromotionListItem({
+    String? proId,
+    String? proName,
+    String? proType,
+    String? unit,
+    String? unitName,
+  }) {
+    return PromotionListItem(
+      id: id,
+      name: name,
+      group: group,
+      flavour: flavour,
+      brand: brand,
+      size: size,
+      unit: unit ?? '',
+      unitName: unitName ?? '',
+      proId: proId,
+      proName: proName,
+      proType: proType,
+      qty: qty,
+    );
+  }
+}

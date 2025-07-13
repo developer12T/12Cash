@@ -229,12 +229,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   List<PromotionList> promotionListChange = [];
 
-  String promotionListChangeStatus = '0';
+  int promotionListChangeStatus = 0;
 
   String qrImage = '';
 
   List<PromotionListItem> listPromotions = [];
-  List<PromotionListItem> listPromotionsMock = [];
 
   String unitPromotion = '';
   String unitPromotionText = '';
@@ -336,16 +335,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           // totalChangeList = TotalProductChang.fromJson(data);
           print(totalChangeList);
 
-          // itemProductChange.clear();
-          // for (var changePromotion in listChangePromotions) {
-          //   groupPromotion.add(
-          //     GroupPromotion(
-          //         group: changePromotion.group, size: changePromotion.size),
-          //   );
-          //   for (var itemChange in changePromotion.product) {
-          //     itemProductChange.add(itemChange);
-          //   }
-          // }
+          itemProductChange.clear();
+          for (var changePromotion in listChangePromotions) {
+            groupPromotion.add(
+              GroupPromotion(
+                  group: changePromotion.group, size: changePromotion.size),
+            );
+            for (var itemChange in changePromotion.product) {
+              itemProductChange.add(itemChange);
+            }
+          }
         }
       }
       // setState(() {
@@ -469,18 +468,26 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           PromotionList(
             proId: proList.proId,
             proName: proList.proName,
+            proCode: proList.proCode,
             proType: proList.proType,
             proQty: proList.proQty,
             discount: discount,
-            listPromotion: listPromotions
+            listProduct: listPromotions
                 .where((item) => item.proId == proList.proId)
                 .toList(),
           ),
         );
+        // print("promotionListChange $promotionListChange");
       }
 
       ApiService apiService = ApiService();
-      print("promotionListChange $promotionListChange");
+      // print(
+      //     "promotionListChange: ${promotionListChange.map((e) => e.toJson()).toList()}");
+      // for (var e in promotionListChange) {
+      //   print('PromotionList: ${e.toJson()}');
+      //   // หรือถ้าชอบ format json ให้ import 'dart:convert';
+      //   // print('PromotionList: ${jsonEncode(e.toJson())}');
+      // }
       await apiService.init();
       var response = await apiService.request(
         endpoint: 'api/cash/order/checkout',
@@ -494,7 +501,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           "note": "${noteController.text}",
           "latitude": "$latitude",
           "longitude": "$longitude",
-          "shipping": "test",
+          "shipping": "${widget.storeAddress}",
           "payment": isSelectCheckout == "QR Payment" ? "qr" : "cash",
           "changePromotionStatus": promotionListChangeStatus,
           "listPromotion": promotionListChange,
@@ -547,15 +554,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           );
         }
       }
-
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => OrderDetailScreen(
-      //       orderId: response.data['data']['orderId'],
-      //     ),
-      //   ),
-      // );
     } catch (e) {
       print("Error $e");
     }
@@ -609,7 +607,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
           for (var promotion in promotionList) {
             proIdList.add(promotion.proId);
-            for (var item in promotion.listPromotion) {
+            for (var item in promotion.listProduct) {
               unitPromotion = item.unit;
               unitPromotionText = item.unitName;
               // listPromotions.add(item);
@@ -633,6 +631,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
               PromotionChangeList(
                   proId: promotion.proId,
                   proName: promotion.proName,
+                  proCode: promotion.proCode,
                   proType: promotion.proType,
                   proQty: promotion.proQty,
                   promotionListItem: listPromotions),
@@ -1577,9 +1576,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             children: [
                                                               Expanded(
                                                                 child: Text(
-                                                                  listPromotions[
-                                                                          innerIndex]
-                                                                      .name,
+                                                                  '${listPromotions[innerIndex].proId ?? ""} ${listPromotions[innerIndex].proCode ?? ""}',
                                                                   style: Styles
                                                                       .black16(
                                                                           context),
@@ -1593,25 +1590,27 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                               ),
                                                             ],
                                                           ),
-                                                          // Row(
-                                                          //   children: [
-                                                          //     Expanded(
-                                                          //       child: Text(
-                                                          //         listPromotions[
-                                                          //                 innerIndex]
-                                                          //             .proName,
-                                                          //         style: Styles
-                                                          //             .black16(
-                                                          //                 context),
-                                                          //         softWrap: true,
-                                                          //         maxLines: 2,
-                                                          //         overflow:
-                                                          //             TextOverflow
-                                                          //                 .visible,
-                                                          //       ),
-                                                          //     ),
-                                                          //   ],
-                                                          // ),
+                                                          Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Text(
+                                                                  listPromotions[
+                                                                              innerIndex]
+                                                                          .proName ??
+                                                                      "",
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                  softWrap:
+                                                                      true,
+                                                                  maxLines: 2,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .visible,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
                                                           Row(
                                                             mainAxisAlignment:
                                                                 MainAxisAlignment
@@ -1622,24 +1621,26 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                     CrossAxisAlignment
                                                                         .start,
                                                                 children: [
-                                                                  Row(
-                                                                    children: [
-                                                                      Text(
-                                                                        '${listPromotions[innerIndex].id}',
-                                                                        style: Styles.black16(
+                                                                  Text(
+                                                                    listPromotions[
+                                                                            innerIndex]
+                                                                        .name,
+                                                                    style: Styles
+                                                                        .black16(
                                                                             context),
-                                                                      ),
-                                                                    ],
+                                                                    softWrap:
+                                                                        true,
+                                                                    maxLines: 2,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .visible,
                                                                   ),
-                                                                  // Row(
-                                                                  //   children: [
-                                                                  //     Text(
-                                                                  //       '${listPromotions[innerIndex].group} รส${listPromotions[innerIndex].flavour}',
-                                                                  //       style: Styles.black16(
-                                                                  //           context),
-                                                                  //     ),
-                                                                  //   ],
-                                                                  // ),
+                                                                  Text(
+                                                                    '${listPromotions[innerIndex].id}',
+                                                                    style: Styles
+                                                                        .black16(
+                                                                            context),
+                                                                  ),
                                                                 ],
                                                               ),
                                                               Row(
@@ -1680,33 +1681,101 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                   ElevatedButton(
                                                                     onPressed:
                                                                         () async {
-                                                                      // setState(
-                                                                      //   () {
-                                                                      //     itemQuantities = List.filled(
-                                                                      //         itemProductChange.length,
-                                                                      //         1);
-                                                                      //   },
-                                                                      // );
-
-                                                                      // await _changeTotalProduct();
-
                                                                       await _changeProduct2(
                                                                           listPromotions[innerIndex]
                                                                               .proId);
-                                                                      _showChangePromotionSheet(
-                                                                        context,
-                                                                        itemProductChange,
-                                                                        listPromotions[innerIndex]
-                                                                            .proId,
-                                                                        listPromotions[innerIndex]
-                                                                            .proName,
-                                                                        listPromotions[innerIndex]
-                                                                            .proType,
+
+                                                                      // 2. ใช้ itemProductChange (หรืออะไรก็ตามที่ _changeProduct2 ไป set ให้) เป็นแหล่งข้อมูล
+                                                                      // filter จาก itemProductChange (เป็น ItemProductChange) ให้ได้ proId ที่ต้องการ
+                                                                      List<PromotionListItem> itemsOfPro = itemProductChange
+                                                                          // ถ้าอยาก filter เฉพาะสินค้าของ proId นี้ (ถ้ามี field proId ใน ItemProductChange ด้วย)
+                                                                          // .where((e) => e.proId == listPromotions[innerIndex].proId)
+
+                                                                          // หรือถ้าไม่มี field proId ใน ItemProductChange
+                                                                          // (เช่น ถ้าของเปลี่ยนโปรนี้ทั้งหมดให้เลือกได้หมด ไม่ต้องกรอง)
+                                                                          // ก็ map ได้เลยทุกตัว
+
+                                                                          // --- map เป็น PromotionListItem ด้วย extension ---
+                                                                          .map((e) => e.toPromotionListItem(
+                                                                                proId: listPromotions[innerIndex].proId,
+                                                                                proName: listPromotions[innerIndex].proName,
+                                                                                // เพิ่ม unit/unitName ตาม context ของโปรฯ ที่ใช้อยู่
+                                                                                unit: listPromotions[innerIndex].unit, // หรือใส่ค่าตามจริง
+                                                                                unitName: listPromotions[innerIndex].unitName, // หรือใส่ค่าตามจริง
+                                                                              ))
+                                                                          .toList();
+
+                                                                      // หาค่า totalShow หรือ total ของ proId นั้นๆ
+                                                                      final tc =
+                                                                          totalChangeList
+                                                                              .firstWhere(
+                                                                        (e) =>
+                                                                            e.proId ==
+                                                                            listPromotions[innerIndex].proId,
+                                                                        orElse: () => TotalProductChang(
+                                                                            proId: listPromotions[innerIndex].proId ??
+                                                                                '',
+                                                                            total:
+                                                                                0,
+                                                                            totalShow:
+                                                                                0),
                                                                       );
-                                                                      listPromotions.removeWhere((item) =>
-                                                                          item.proId ==
-                                                                          listPromotions[innerIndex]
-                                                                              .proId);
+                                                                      // ถ้าไม่มีข้อมูลเลย
+                                                                      if (itemsOfPro
+                                                                          .isEmpty) {
+                                                                        ScaffoldMessenger.of(context)
+                                                                            .showSnackBar(
+                                                                          SnackBar(
+                                                                              content: Text('ไม่มีสินค้าเปลี่ยนโปรโมชั่น')),
+                                                                        );
+                                                                        return;
+                                                                      }
+
+                                                                      final int
+                                                                          maxQty =
+                                                                          tc.totalShow; // หรือ tc.total
+
+                                                                      // 3. ระบุจำนวนสูงสุดที่สามารถเลือกได้
+                                                                      // int maxQty = itemsOfPro.fold(
+                                                                      //     0,
+                                                                      //     (a, b) =>
+                                                                      //         a +
+                                                                      //         b.qty);
+
+                                                                      // 4. เปิด Modal ให้เลือก
+                                                                      final result =
+                                                                          await _showChangePromotionSheet(
+                                                                        context:
+                                                                            context,
+                                                                        productList:
+                                                                            itemsOfPro,
+                                                                        unitText: itemsOfPro
+                                                                            .first
+                                                                            .unitName,
+                                                                        proId: itemsOfPro
+                                                                            .first
+                                                                            .proId,
+                                                                        proName: itemsOfPro
+                                                                            .first
+                                                                            .proName,
+                                                                        maxQty:
+                                                                            maxQty,
+                                                                      );
+
+                                                                      // 5. รับค่าที่เปลี่ยนกลับมาแล้วแทนที่ listPromotions เดิม
+                                                                      if (result !=
+                                                                          null) {
+                                                                        setState(
+                                                                            () {
+                                                                          promotionListChangeStatus =
+                                                                              1;
+                                                                          listPromotions.removeWhere((e) =>
+                                                                              e.proId ==
+                                                                              listPromotions[innerIndex].proId);
+                                                                          listPromotions
+                                                                              .addAll(result);
+                                                                        });
+                                                                      }
                                                                     },
                                                                     style: ElevatedButton
                                                                         .styleFrom(
@@ -1806,27 +1875,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                 color: Styles.primaryColorIcons,
                                                 size: 40,
                                               ),
-                                              SizedBox(width: 8),
-                                              // ClipRRect(
-                                              //   borderRadius:
-                                              //       BorderRadius.circular(8),
-                                              //   child: Image.network(
-                                              //     '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
-                                              //     width: screenWidth / 15,
-                                              //     height: screenWidth / 15,
-                                              //     fit: BoxFit.cover,
-                                              //     errorBuilder: (context, error,
-                                              //         stackTrace) {
-                                              //       return const Center(
-                                              //         child: Icon(
-                                              //           Icons.error,
-                                              //           color: Colors.red,
-                                              //           size: 50,
-                                              //         ),
-                                              //       );
-                                              //     },
-                                              //   ),
-                                              // ),
                                               Text(
                                                 isSelectCheckout != ""
                                                     ? isSelectCheckout
@@ -1963,40 +2011,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                           setState(() {
                                             qrImagePath = imagePath;
                                           });
-                                          // await uploadFormDataWithDio(
-                                          //     imagePath, 'store', context);
                                         },
                                       ),
-                                      // MenuButton(
-                                      //   color: Styles.success!,
-                                      //   icon: Icons.upload,
-                                      //   label: "อัพโหลด",
-                                      //   onPressed: () {},
-                                      // )
-                                      // IconButtonWithLabelFixed(
-                                      //   icon: Icons.photo_camera,
-                                      //   // imagePath: storeImagePath != ""
-                                      //   //     ? storeImagePath
-                                      //   //     : null,
-                                      //   label: "ถ่ายภาพการโอน",
-                                      //   onImageSelected:
-                                      //       (String imagePath) async {
-                                      //     // await uploadFormDataWithDio(
-                                      //     //     imagePath, 'store', context);
-                                      //   },
-                                      // ),
-                                      // IconButtonWithLabelFixed(
-                                      //   icon: Icons.photo_camera,
-                                      //   // imagePath: storeImagePath != ""
-                                      //   //     ? storeImagePath
-                                      //   //     : null,
-                                      //   label: "ถ่ายภาพการโอน",
-                                      //   onImageSelected:
-                                      //       (String imagePath) async {
-                                      //     // await uploadFormDataWithDio(
-                                      //     //     imagePath, 'store', context);
-                                      //   },
-                                      // ),
                                     ],
                                   ),
                                 ],
@@ -2014,1035 +2030,34 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     );
   }
 
-  void _showChangePromotionSheet(
-      BuildContext context,
-      List<ItemProductChange> cartlist,
-      String? proId,
-      String? proName,
-      String? proType) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    // double screenHeight = MediaQuery.of(context).size.height;
-    List<ItemProductChange> filteredPromotion = List.from(cartlist);
-    showModalBottomSheet(
+  Future<List<PromotionListItem>?> _showChangePromotionSheet({
+    required BuildContext context,
+    required List<PromotionListItem> productList,
+    required String unitText,
+    String? proId,
+    String? proName,
+    int? maxQty,
+  }) {
+    // สร้าง deep copy เพื่อแก้ไขใน modal
+    List<PromotionListItem> editingList =
+        productList.map((e) => e.copyWith()).toList();
+    List<PromotionListItem> originalList =
+        listPromotions.map((e) => e.copyWith()).toList();
+
+    return showModalBottomSheet<List<PromotionListItem>>(
       context: context,
-      isScrollControlled: true, // Allow full height and scrolling
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 1, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 1,
-            builder: (context, scrollController) {
-              return GestureDetector(
-                onVerticalDragUpdate: (_) {}, // Disable vertical drag
-                child: Container(
-                  width: screenWidth,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Styles.primaryColor,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
-                          ),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.shopping_bag_outlined,
-                                  color: Colors.white,
-                                  size: 30,
-                                ),
-                                // Text('เปลี่ยนโปรโมชั่น $proName',
-                                //     style: Styles.white24(context)),
-                                Text('$proId', style: Styles.white24(context)),
-                              ],
-                            ),
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.close, color: Colors.white),
-                              onPressed: () {
-                                if (totalChangeList
-                                        .firstWhere(
-                                            (item) => item.proId == proId)
-                                        .total ==
-                                    0) {
-                                  Navigator.of(context).pop();
-                                } else {
-                                  toastification.show(
-                                    autoCloseDuration:
-                                        const Duration(seconds: 5),
-                                    context: context,
-                                    primaryColor: Colors.red,
-                                    type: ToastificationType.error,
-                                    style: ToastificationStyle.flatColored,
-                                    title: Text(
-                                      "กรุณาเลือกสินค้าโปรโมทชั่นให้ครบ",
-                                      style: Styles.red18(context),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 16.0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "รายการโปรโมชั่น",
-                                      style: Styles.black18(context),
-                                    ),
-                                    // ElevatedButton(
-                                    //   onPressed: () {
-                                    //     // setModalState(() {
-                                    //     //   listPromotions.clear();
-                                    //     // });
-                                    //     // _getCart();
-                                    //   },
-                                    //   child: Text(
-                                    //     'เลือกใหม่',
-                                    //     style: Styles.black18(context),
-                                    //   ),
-                                    // ),
-                                    // Clear Product Button
-                                    // IconButton(
-                                    //   onPressed: () {
-                                    //     setModalState(() {
-                                    //       if (listPromotionsMock.isNotEmpty) {
-                                    //         listPromotionsMock.removeWhere(
-                                    //             (item) =>
-                                    //                 item.id ==
-                                    //                 cartlist[index].id);
-                                    //         listPromotions =
-                                    //             List.from(listPromotionsMock);
-                                    //       }
-                                    //     });
-                                    //   },
-                                  ],
-                                ),
-                                Divider(
-                                  color: Colors.black,
-                                  indent: 1,
-                                ),
-                                Expanded(
-                                    child: ListView.builder(
-                                  itemCount: listPromotionsMock
-                                      .where((item) => item.proId == proId)
-                                      .length,
-                                  itemBuilder: (context, index) {
-                                    var filteredItems = listPromotionsMock
-                                        .where((item) => item.proId == proId)
-                                        .toList(); // Convert to a list after filtering
-                                    return Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: Image.network(
-                                                '${ApiService.apiHost}/images/products/${listPromotionsMock[index].id}.webp',
-                                                width: screenWidth / 8,
-                                                height: screenWidth / 8,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error,
-                                                    stackTrace) {
-                                                  return Container(
-                                                    width: screenWidth / 8,
-                                                    height: screenWidth / 8,
-                                                    color: Colors.grey,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(Icons.hide_image,
-                                                            color: Colors.white,
-                                                            size: 30),
-                                                        Text(
-                                                          "ไม่มีภาพ",
-                                                          style: Styles.white18(
-                                                              context),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 3,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(16.0),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: Text(
-                                                            filteredItems[index]
-                                                                .name,
-                                                            style:
-                                                                Styles.black16(
-                                                                    context),
-                                                            softWrap: true,
-                                                            maxLines: 2,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .visible,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                  'id : ${filteredItems[index].id}',
-                                                                  style: Styles
-                                                                      .black16(
-                                                                          context),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .end,
-                                                          children: [
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                setModalState(
-                                                                    () {
-                                                                  if (totalChangeList
-                                                                              .firstWhere((item) =>
-                                                                                  item.proId ==
-                                                                                  proId)
-                                                                              .total +
-                                                                          1 <
-                                                                      totalChangeList
-                                                                          .firstWhere((item) =>
-                                                                              item.proId ==
-                                                                              proId)
-                                                                          .totalShow) {
-                                                                    filteredItems[
-                                                                            index]
-                                                                        .qty--;
-
-                                                                    totalChangeList
-                                                                        .firstWhere((item) =>
-                                                                            item.proId ==
-                                                                            proId)
-                                                                        .total += 1;
-                                                                  }
-                                                                });
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                shape:
-                                                                    const CircleBorder(
-                                                                  side: BorderSide(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1),
-                                                                ), // ✅ Makes the button circular
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .white, // Button color
-                                                              ),
-                                                              child: const Icon(
-                                                                Icons.remove,
-                                                                size: 24,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ), // Example
-                                                            ),
-                                                            Container(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(4),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                border:
-                                                                    Border.all(
-                                                                  color: Colors
-                                                                      .grey,
-                                                                  width: 1,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            16),
-                                                              ),
-                                                              width: 75,
-                                                              child: Text(
-                                                                '${filteredItems[index].qty} ${unitPromotionText}',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style: Styles
-                                                                    .black18(
-                                                                  context,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                setModalState(
-                                                                    () {
-                                                                  if (totalChangeList
-                                                                          .firstWhere((item) =>
-                                                                              item.proId ==
-                                                                              proId)
-                                                                          .total >
-                                                                      0) {
-                                                                    filteredItems[
-                                                                            index]
-                                                                        .qty++;
-
-                                                                    totalChangeList
-                                                                        .firstWhere((item) =>
-                                                                            item.proId ==
-                                                                            proId)
-                                                                        .total -= 1;
-                                                                  }
-                                                                });
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                shape:
-                                                                    const CircleBorder(
-                                                                  side: BorderSide(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1),
-                                                                ), // ✅ Makes the button circular
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .white, // Button color
-                                                              ),
-                                                              child: const Icon(
-                                                                Icons.add,
-                                                                size: 24,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ), // Example
-                                                            ),
-                                                            IconButton(
-                                                              onPressed: () {
-                                                                setModalState(
-                                                                  () {
-                                                                    if (filteredItems
-                                                                        .isNotEmpty) {
-                                                                      if (filteredItems
-                                                                              .length >
-                                                                          1) {
-                                                                        totalChangeList
-                                                                            .firstWhere((item) =>
-                                                                                item.proId ==
-                                                                                proId)
-                                                                            .total += filteredItems[
-                                                                                index]
-                                                                            .qty;
-                                                                        listPromotionsMock.removeWhere((item) =>
-                                                                            item.id == filteredItems[index].id &&
-                                                                            item.proId ==
-                                                                                filteredItems[index].proId);
-                                                                      } else {
-                                                                        toastification
-                                                                            .show(
-                                                                          autoCloseDuration:
-                                                                              const Duration(seconds: 5),
-                                                                          context:
-                                                                              context,
-                                                                          primaryColor:
-                                                                              Colors.red,
-                                                                          type:
-                                                                              ToastificationType.error,
-                                                                          style:
-                                                                              ToastificationStyle.flatColored,
-                                                                          title:
-                                                                              Text(
-                                                                            "มีเพียงรายการเดียวไม่สมารถลบได้",
-                                                                            style:
-                                                                                Styles.red18(context),
-                                                                          ),
-                                                                        );
-                                                                      }
-                                                                    }
-                                                                  },
-                                                                );
-                                                              },
-                                                              icon: Icon(
-                                                                FontAwesomeIcons
-                                                                    .trash,
-                                                                color:
-                                                                    Colors.red,
-                                                                size: 24,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Divider(
-                                          color: Colors.grey[200],
-                                          thickness: 1,
-                                          indent: 16,
-                                          endIndent: 16,
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                )),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "รายการโปรโมชั่นที่สามารถเปลี่ยนได้",
-                                      style: Styles.black18(context),
-                                    ),
-                                    SizedBox(
-                                      width: 16,
-                                    ),
-                                    Expanded(
-                                      child: DropdownSearch<GroupPromotion>(
-                                        dropdownButtonProps:
-                                            DropdownButtonProps(
-                                          color: Colors.white,
-                                          icon: Icon(
-                                            Icons.arrow_drop_down,
-                                            size: screenWidth / 20,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
-
-                                        itemAsString: (item) =>
-                                            "${item.group} ${item.size}",
-                                        asyncItems: (filter) =>
-                                            getGroupDropdown(filter),
-                                        // items:(filter, infiniteScrollProps) =>
-                                        dropdownDecoratorProps:
-                                            DropDownDecoratorProps(
-                                          baseStyle: Styles.black18(context),
-                                          dropdownSearchDecoration:
-                                              InputDecoration(
-                                            // fillColor: Colors.white,
-                                            // prefixIcon: widget.icon,
-                                            labelText:
-                                                "เลือกกลุ่มของโปรโมทชั่น",
-                                            labelStyle: Styles.grey18(context),
-                                            hintText: "เลือกกลุ่มของโปรโมทชั่น",
-                                            hintStyle: Styles.grey18(context),
-                                            border: const OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(8)),
-                                              borderSide: BorderSide(
-                                                  color: Colors.grey, width: 1),
-                                            ),
-                                            focusedBorder:
-                                                const OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(8)),
-                                              borderSide: BorderSide(
-                                                  color: Colors.blue,
-                                                  width: 1.5),
-                                            ),
-                                          ),
-                                        ),
-                                        onChanged: (GroupPromotion? data) {
-                                          setModalState(() {
-                                            filteredPromotion = cartlist
-                                                .where((store) =>
-                                                    // store.name
-                                                    //     .contains(value!.group) &&
-                                                    store.name.contains(
-                                                        data!.group) &&
-                                                    store.name.contains(data!
-                                                        .size
-                                                        .replaceAll(" ", "")
-                                                        .toLowerCase()))
-                                                .toList();
-                                          });
-                                        },
-                                        popupProps:
-                                            PopupPropsMultiSelection.dialog(
-                                          constraints: BoxConstraints(
-                                            maxHeight: screenWidth * 0.7,
-                                            maxWidth: screenWidth,
-                                            minHeight: screenWidth * 0.7,
-                                            minWidth: screenWidth,
-                                          ),
-                                          title: Container(
-                                            decoration: const BoxDecoration(
-                                              color: Styles.primaryColor,
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(16),
-                                                topRight: Radius.circular(16),
-                                              ),
-                                            ),
-                                            alignment: Alignment.center,
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 8),
-                                            child: Text(
-                                              "เลือกกลุ่มของโปรโมทชั่น",
-                                              style: Styles.white18(context),
-                                            ),
-                                          ),
-
-                                          // showSearchBox: widget.showSearchBox,
-                                          itemBuilder:
-                                              (context, item, isSelected) {
-                                            return Column(
-                                              children: [
-                                                ListTile(
-                                                  title: Text(
-                                                    "${item.group} ${item.size}",
-                                                    style:
-                                                        Styles.black18(context),
-                                                  ),
-                                                  selected: isSelected,
-                                                ),
-                                                Divider(
-                                                  color: Colors.grey[
-                                                      200], // Color of the divider line
-                                                  thickness:
-                                                      1, // Thickness of the line
-                                                  indent:
-                                                      16, // Left padding for the divider line
-                                                  endIndent:
-                                                      16, // Right padding for the divider line
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                          searchFieldProps: TextFieldProps(
-                                            style: Styles.black18(context),
-                                            autofocus: true,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Divider(
-                                  color: Colors.black,
-                                  indent: 1,
-                                ),
-                                Expanded(
-                                    child: ListView.builder(
-                                  itemCount: filteredPromotion.length,
-                                  itemBuilder: (context, index) {
-                                    return Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: Image.network(
-                                                '${ApiService.apiHost}/images/products/${filteredPromotion[index].id}.webp',
-                                                width: screenWidth / 8,
-                                                height: screenWidth / 8,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error,
-                                                    stackTrace) {
-                                                  return Container(
-                                                    width: screenWidth / 8,
-                                                    height: screenWidth / 8,
-                                                    color: Colors.grey,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(Icons.hide_image,
-                                                            color: Colors.white,
-                                                            size: 30),
-                                                        Text(
-                                                          "ไม่มีภาพ",
-                                                          style: Styles.white18(
-                                                              context),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 3,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(16.0),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: Text(
-                                                            filteredPromotion[
-                                                                    index]
-                                                                .name,
-                                                            style:
-                                                                Styles.black16(
-                                                                    context),
-                                                            softWrap: true,
-                                                            maxLines: 2,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .visible,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                  'id : ${filteredPromotion[index].id}',
-                                                                  style: Styles
-                                                                      .black16(
-                                                                          context),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .end,
-                                                          children: [
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                setModalState(
-                                                                    () {
-                                                                  if (cartlist[
-                                                                              index]
-                                                                          .qty >
-                                                                      1) {
-                                                                    cartlist[
-                                                                            index]
-                                                                        .qty--;
-                                                                  }
-                                                                });
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                shape:
-                                                                    const CircleBorder(
-                                                                  side: BorderSide(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1),
-                                                                ), // ✅ Makes the button circular
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .white, // Button color
-                                                              ),
-                                                              child: const Icon(
-                                                                Icons.remove,
-                                                                size: 24,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ), // Example
-                                                            ),
-                                                            Container(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(4),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                border:
-                                                                    Border.all(
-                                                                  color: Colors
-                                                                      .grey,
-                                                                  width: 1,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            16),
-                                                              ),
-                                                              width: 75,
-                                                              child: Text(
-                                                                '${cartlist[index].qty}',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style: Styles
-                                                                    .black18(
-                                                                  context,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                if (cartlist[
-                                                                            index]
-                                                                        .qty <
-                                                                    totalChangeList
-                                                                        .firstWhere((item) =>
-                                                                            item.proId ==
-                                                                            proId)
-                                                                        .total) {
-                                                                  setModalState(
-                                                                      () {
-                                                                    cartlist[
-                                                                            index]
-                                                                        .qty++;
-                                                                  });
-                                                                }
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                shape:
-                                                                    const CircleBorder(
-                                                                  side: BorderSide(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1),
-                                                                ), // ✅ Makes the button circular
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .white, // Button color
-                                                              ),
-                                                              child: const Icon(
-                                                                Icons.add,
-                                                                size: 24,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ), // Example
-                                                            ),
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                setModalState(
-                                                                  () {
-                                                                    setState(
-                                                                        () {
-                                                                      promotionListChangeStatus =
-                                                                          '1';
-                                                                    });
-                                                                    print(
-                                                                        "promotionListChangeStatus $promotionListChangeStatus");
-                                                                    print(
-                                                                        "proId $proId");
-                                                                    print(
-                                                                        "total $total");
-                                                                    print(
-                                                                        "totalChangeList ${totalChangeList.firstWhere((item) => item.proId == proId).total}");
-
-                                                                    if (totalChangeList
-                                                                            .firstWhere((item) =>
-                                                                                item.proId ==
-                                                                                proId)
-                                                                            .total >=
-                                                                        cartlist[index]
-                                                                            .qty) {
-                                                                      totalChangeList
-                                                                          .firstWhere((item) =>
-                                                                              item.proId ==
-                                                                              proId)
-                                                                          .total -= cartlist[
-                                                                              index]
-                                                                          .qty;
-
-                                                                      print(
-                                                                          "cartlist[index] ${cartlist[index].qty}");
-
-                                                                      if (listPromotionsMock
-                                                                          .isNotEmpty) {
-                                                                        if (listPromotionsMock.any((item) =>
-                                                                            item.id ==
-                                                                            cartlist[index].id)) {
-                                                                          listPromotionsMock
-                                                                              .firstWhere((item) => item.id == cartlist[index].id)
-                                                                              .qty += cartlist[index].qty;
-
-                                                                          listPromotions
-                                                                              .firstWhere((item) => item.id == cartlist[index].id)
-                                                                              .qty += cartlist[index].qty;
-                                                                        } else {
-                                                                          listPromotionsMock
-                                                                              .add(
-                                                                            PromotionListItem(
-                                                                              proId: proId,
-                                                                              proName: proName,
-                                                                              id: cartlist[index].id,
-                                                                              name: cartlist[index].name,
-                                                                              unit: listPromotions.isNotEmpty ? listPromotions[0].unit : '',
-                                                                              brand: cartlist[index].brand,
-                                                                              flavour: cartlist[index].flavour,
-                                                                              group: cartlist[index].group,
-                                                                              qty: cartlist[index].qty,
-                                                                              size: cartlist[index].size,
-                                                                              unitName: listPromotions.isNotEmpty ? listPromotions[0].unitName : '',
-                                                                            ),
-                                                                          );
-                                                                          listPromotions
-                                                                              .add(
-                                                                            PromotionListItem(
-                                                                              proId: proId,
-                                                                              proName: proName,
-                                                                              id: cartlist[index].id,
-                                                                              name: cartlist[index].name,
-                                                                              unit: listPromotions.isNotEmpty ? listPromotions[0].unit : '',
-                                                                              brand: cartlist[index].brand,
-                                                                              flavour: cartlist[index].flavour,
-                                                                              group: cartlist[index].group,
-                                                                              qty: cartlist[index].qty,
-                                                                              size: cartlist[index].size,
-                                                                              unitName: listPromotions.isNotEmpty ? listPromotions[0].unitName : '',
-                                                                            ),
-                                                                          );
-                                                                        }
-                                                                      } else {
-                                                                        listPromotionsMock
-                                                                            .add(
-                                                                          PromotionListItem(
-                                                                            proId:
-                                                                                proId,
-                                                                            proName:
-                                                                                proName,
-                                                                            id: cartlist[index].id,
-                                                                            name:
-                                                                                cartlist[index].name,
-                                                                            unit: listPromotions.isNotEmpty
-                                                                                ? listPromotions[0].unit
-                                                                                : '',
-                                                                            brand:
-                                                                                cartlist[index].brand,
-                                                                            flavour:
-                                                                                cartlist[index].flavour,
-                                                                            group:
-                                                                                cartlist[index].group,
-                                                                            qty:
-                                                                                cartlist[index].qty,
-                                                                            size:
-                                                                                cartlist[index].size,
-                                                                            unitName: listPromotions.isNotEmpty
-                                                                                ? listPromotions[0].unitName
-                                                                                : '',
-                                                                          ),
-                                                                        );
-                                                                        listPromotions
-                                                                            .add(
-                                                                          PromotionListItem(
-                                                                            proId:
-                                                                                proId,
-                                                                            proName:
-                                                                                proName,
-                                                                            id: cartlist[index].id,
-                                                                            name:
-                                                                                cartlist[index].name,
-                                                                            unit: listPromotions.isNotEmpty
-                                                                                ? listPromotions[0].unit
-                                                                                : '',
-                                                                            brand:
-                                                                                cartlist[index].brand,
-                                                                            flavour:
-                                                                                cartlist[index].flavour,
-                                                                            group:
-                                                                                cartlist[index].group,
-                                                                            qty:
-                                                                                cartlist[index].qty,
-                                                                            size:
-                                                                                cartlist[index].size,
-                                                                            unitName: listPromotions.isNotEmpty
-                                                                                ? listPromotions[0].unitName
-                                                                                : '',
-                                                                          ),
-                                                                        );
-                                                                      }
-                                                                    }
-                                                                  },
-                                                                );
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                shape:
-                                                                    CircleBorder(
-                                                                  side: BorderSide(
-                                                                      color: Styles
-                                                                          .warning!,
-                                                                      width: 1),
-                                                                ),
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .white, // Button color
-                                                              ),
-                                                              child: Icon(
-                                                                FontAwesomeIcons
-                                                                    .penToSquare,
-                                                                size: 24,
-                                                                color: Styles
-                                                                    .warning,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            // Container(
-                                            //   color: Colors.red,
-                                            //   width: 50,
-                                            //   height: 100,
-                                            //   child: Center(
-                                            //     child: Icon(
-                                            //       Icons.delete,
-                                            //       color: Colors.white,
-                                            //       size: 25,
-                                            //     ),
-                                            //   ),
-                                            // ),
-                                          ],
-                                        ),
-                                        Divider(
-                                          color: Colors.grey[200],
-                                          thickness: 1,
-                                          indent: 16,
-                                          endIndent: 16,
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                )),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        color: Styles.primaryColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("จำนวนที่เหลือ",
-                                      style: Styles.white24(context)),
-                                  Text(
-                                      "${totalChangeList.firstWhere((item) => item.proId == proId).total} ${unitPromotionText}",
-                                      style: Styles.white24(context)),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("จำนวนที่เลือกได้",
-                                      style: Styles.white24(context)),
-                                  Text(
-                                      "${totalChangeList.firstWhere((item) => item.proId == proId).totalShow} ${unitPromotionText}",
-                                      style: Styles.white24(context)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        });
-      },
+      builder: (context) => _ChangePromotionSheetBody(
+        editingList: editingList,
+        originalList: originalList,
+        unitText: unitText,
+        proName: proName,
+        maxQty: maxQty,
+        proId: proId ?? "",
+      ),
     );
   }
 
@@ -3478,6 +2493,209 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           );
         });
       },
+    );
+  }
+}
+
+// ----- ตัว widget Modal sheet -----
+
+class _ChangePromotionSheetBody extends StatefulWidget {
+  final List<PromotionListItem> editingList;
+  final List<PromotionListItem> originalList;
+  final String unitText;
+  final String? proName;
+  final int? maxQty;
+  final String proId;
+
+  const _ChangePromotionSheetBody({
+    super.key,
+    required this.editingList,
+    required this.originalList,
+    required this.unitText,
+    this.proName,
+    this.maxQty,
+    required this.proId,
+  });
+
+  @override
+  State<_ChangePromotionSheetBody> createState() =>
+      _ChangePromotionSheetBodyState();
+}
+
+class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
+  late List<PromotionListItem> list;
+
+  int get totalQty => widget.originalList
+      .where((el) => el.proId == widget.proId)
+      .fold(0, (prev, el) => prev + (el.qty > 0 ? el.qty : 0));
+
+  @override
+  void initState() {
+    super.initState();
+    list = widget.editingList;
+  }
+
+  void _addQty(int idx) {
+    setState(() {
+      if ((widget.maxQty == null) || (totalQty < widget.maxQty!)) {
+        final item = list[idx];
+        final oriIdx = widget.originalList.indexWhere((e) => e.id == item.id);
+        if (oriIdx != -1) {
+          widget.originalList[oriIdx] = widget.originalList[oriIdx]
+              .copyWith(qty: widget.originalList[oriIdx].qty + 1);
+        } else {
+          widget.originalList.add(item.copyWith(qty: 1));
+        }
+      }
+      // ถ้า totalQty >= maxQty จะเพิ่มไม่ได้
+    });
+  }
+
+  void _removeQty(int idx) {
+    setState(() {
+      final item = list[idx];
+      final oriIdx = widget.originalList.indexWhere((e) => e.id == item.id);
+      if (oriIdx != -1 && widget.originalList[oriIdx].qty > 0) {
+        widget.originalList[oriIdx] = widget.originalList[oriIdx]
+            .copyWith(qty: widget.originalList[oriIdx].qty - 1);
+      }
+      // ไม่ต้อง remove ออกจาก originalList ก็ได้ ให้ qty = 0 ไว้เฉยๆ
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    return SafeArea(
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Column(
+            children: [
+              Text(
+                "เปลี่ยนโปรโมชั่น${widget.proName != null ? ' (${widget.proName})' : ''}",
+                style: Styles.black18(context),
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                child: ListView.separated(
+                  controller: scrollController,
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) => Divider(height: 1),
+                  itemBuilder: (context, idx) {
+                    final item = list[idx];
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 150,
+                          height: 150,
+                          margin: EdgeInsets.only(right: 16),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              '${ApiService.apiHost}/images/products/${item.id}.webp',
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: Colors.grey,
+                                child: Icon(Icons.image_not_supported,
+                                    color: Colors.white, size: 48),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name,
+                                  style: Styles.black18(context),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'id: ${item.id}  (${item.group} ${item.size})',
+                                  style: Styles.black18(context),
+                                ),
+                                SizedBox(height: 12),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.remove),
+                                      onPressed: item.qty > 0
+                                          ? () => _removeQty(idx)
+                                          : null,
+                                    ),
+                                    Container(
+                                      width: 36,
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        '${widget.originalList.firstWhere(
+                                              (promo) => promo.id == item.id,
+                                              orElse: () =>
+                                                  item.copyWith(qty: 0),
+                                            ).qty}',
+                                        style: Styles.black18(context),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.add),
+                                      onPressed: () => _addQty(idx),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              Divider(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "รวมทั้งหมด: $totalQty/${widget.maxQty ?? '-'} ${widget.unitText}",
+                    style: Styles.black18(context),
+                  ),
+                  ElevatedButton.icon(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        (totalQty == (widget.maxQty ?? 0))
+                            ? Styles.success // เลือกครบ ใช้สีเขียว
+                            : Colors.grey.shade400, // เลือกไม่ครบ ใช้สีเทาอ่อน
+                      ),
+                    ),
+                    icon: Icon(Icons.check_circle_outline, color: Colors.white),
+                    label: Text("บันทึก", style: Styles.white18(context)),
+                    onPressed: (totalQty == (widget.maxQty ?? 0))
+                        ? () {
+                            Navigator.pop(
+                              context,
+                              widget.originalList
+                                  .where((e) =>
+                                      e.qty > 0 && e.proId == widget.proId)
+                                  .toList(),
+                            );
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

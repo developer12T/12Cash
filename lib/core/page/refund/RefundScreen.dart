@@ -1427,16 +1427,35 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                     print(cartListData["items"]);
                                     if (cartListData["items"].isNotEmpty &&
                                         listProduct.isNotEmpty) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              CreateRefundScreen(
-                                                  storeId: isStoreId,
-                                                  storeName: nameStore,
-                                                  storeAddress: addressStore),
-                                        ),
-                                      );
+                                      if (double.parse(refundList.isNotEmpty
+                                              ? refundList[0].totalNet
+                                              : "0.00") >
+                                          0) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                CreateRefundScreen(
+                                                    storeId: isStoreId,
+                                                    storeName: nameStore,
+                                                    storeAddress: addressStore),
+                                          ),
+                                        );
+                                      } else {
+                                        toastification.show(
+                                          autoCloseDuration:
+                                              const Duration(seconds: 5),
+                                          context: context,
+                                          primaryColor: Colors.red,
+                                          type: ToastificationType.error,
+                                          style:
+                                              ToastificationStyle.flatColored,
+                                          title: Text(
+                                            "กรุณาเลือกรายการให้ >= 0 บาท",
+                                            style: Styles.red18(context),
+                                          ),
+                                        );
+                                      }
                                     } else {
                                       toastification.show(
                                         autoCloseDuration:

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/chart/SummarybyMonth.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
@@ -29,6 +30,7 @@ import 'package:_12sale_app/data/models/route/Cause.dart';
 import 'package:_12sale_app/data/models/route/DetailStoreVisit.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
+import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -41,17 +43,22 @@ import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailScreen extends StatefulWidget {
   final String customerNo;
   final String routeId;
   final String route;
+  final String latitude;
+  final String longtitude;
 
   DetailScreen({
     super.key,
     required this.customerNo,
     required this.routeId,
     required this.route,
+    this.latitude = '0.000000',
+    this.longtitude = '0.000000',
   });
 
   @override
@@ -63,7 +70,9 @@ class _DetailScreenState extends State<DetailScreen> {
   String? checkinSellImagePath; // Path to store the captured image
   String selectedCause = 'เลือกเหตุผล';
   String latitude = '00.00';
+  String latitudeDirection = '0.000000';
   String longitude = '00.00';
+  String longitudeDirection = '0.000000';
   DetailStoreVisit? storeDetail;
   bool _loadingDetailStore = true;
   double completionPercentage = 220;
@@ -93,6 +102,7 @@ class _DetailScreenState extends State<DetailScreen> {
     _getCauses();
     _getOrder();
     getDataSummary();
+    _getStore();
   }
 
   Future<void> getDataSummary() async {
@@ -202,6 +212,27 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  Future<void> _getStore() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+        endpoint: 'api/cash/store/${widget.customerNo}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        final store = response.data['data'];
+        setState(() {
+          latitudeDirection = store['latitude'];
+          longitudeDirection = store['longtitude'];
+        });
+      }
+    } catch (e) {
+      print("Error _getStore $e");
+    }
+  }
+
   Future<void> _getDetailStore() async {
     ApiService apiService = ApiService();
     await apiService.init();
@@ -274,6 +305,20 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  void openGoogleMapDirection(double lat, double lng) async {
+    final url = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(
+        url,
+        mode: LaunchMode
+            .externalApplication, // เปิดใน browser หรือแอป Google Maps
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   Future<MultipartFile> compressImages(File image) async {
     final targetPath =
         image.path.replaceAll(RegExp(r'\.(jpg|jpeg|png)$'), '_compressed.jpg');
@@ -293,6 +338,73 @@ class _DetailScreenState extends State<DetailScreen> {
       finalFile = result as File;
     }
     return await MultipartFile.fromFile(finalFile.path);
+  }
+
+  Future<void> _checkin() async {
+    await fetchLocation();
+    Dio dio = Dio();
+    final String apiUrl =
+        "${ApiService.apiHost}/api/cash/store/checkIn/${widget.customerNo}";
+    Map<String, dynamic> jsonData = {
+      "latitude": latitude,
+      "longtitude": longitude
+    };
+    print("API latitude ${latitude} longtitude ${longitude}");
+    try {
+      final response = await dio.post(
+        apiUrl,
+        data: jsonData,
+        options: Options(
+          headers: {
+            "Content-Type": "application/json",
+            'x-channel': 'cash',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        // print(response.data['message']);
+        // print(response.data);
+        toastification.show(
+          autoCloseDuration: Duration(seconds: 3),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "เช็คอินสําเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen(index: 2)),
+        );
+      } else {
+        toastification.show(
+          autoCloseDuration: Duration(seconds: 3),
+          context: context,
+          primaryColor: Colors.red,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "เกิดข้อผิดพลาด",
+            style: Styles.red18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      toastification.show(
+        autoCloseDuration: Duration(seconds: 3),
+        context: context,
+        primaryColor: Colors.red,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: Text(
+          "เกิดข้อผิดพลาด",
+          style: Styles.red18(context),
+        ),
+      );
+    }
   }
 
   Future<void> checkInStore(BuildContext context) async {
@@ -558,62 +670,73 @@ class _DetailScreenState extends State<DetailScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Column(
-                              children: [
-                                MenuButton(
-                                  icon: Icons.store_rounded,
-                                  label: "ไม่ซื้อ",
-                                  // color: Styles.success!,
-                                  color: statusCheck > 0
-                                      ? Colors.grey
-                                      : Styles.secondaryColor,
-                                  onPressed: () {
-                                    if (statusCheck <= 0) {
-                                      _showCheckInSheet(context);
-                                      setState(
-                                        () {
-                                          selectedCause = "เลือกเหตุผล";
-                                        },
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
+                            MenuButton(
+                              icon: latitudeDirection != "0.000000"
+                                  ? Icons.gps_fixed_rounded
+                                  : Icons.gps_off_rounded,
+                              label: latitudeDirection != "0.000000"
+                                  ? "นำทาง"
+                                  : "ยังไม่มี",
+                              color: latitudeDirection != "0.000000"
+                                  ? Styles.primaryColor
+                                  : Colors.grey,
+                              onPressed: () async {
+                                if (latitudeDirection == "0.000000") {
+                                  await fetchLocation();
+                                  AllAlert.checkinAlert(context, _checkin);
+                                } else {
+                                  var storeLatitude =
+                                      latitudeDirection.toDouble();
+                                  var storeLongitude =
+                                      longitudeDirection.toDouble();
+                                  openGoogleMapDirection(storeLatitude,
+                                      storeLongitude); // ใส่ lat,lng จุดหมาย
+                                }
+                              },
                             ),
-                            Column(
-                              children: [
-                                MenuButton(
-                                  icon: Icons.add_shopping_cart_rounded,
-                                  label: "เช็คอิน/ขาย",
-                                  color:
-                                      (statusCheck == 1 || statusCheck == 0) &&
-                                              DateTime.now().isBefore(dateCheck)
-                                          ? Styles.success!
-                                          : Colors.grey,
-                                  onPressed: () {
-                                    if (statusCheck == 1) {
-                                      if (DateTime.now().isBefore(dateCheck)) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                OrderINRouteScreen(
-                                              storeDetail: storeDetail,
-                                              routeId: widget.routeId,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    } else if (statusCheck == 0) {
-                                      _showCheckInAndSellSheet(context);
-                                    }
-                                  },
-                                ),
-                                // Text(
-                                //   'ทดสอบระบบ',
-                                //   style: Styles.black12(context),
-                                // )
-                              ],
+                            MenuButton(
+                              icon: Icons.store_rounded,
+                              label: "ไม่ซื้อ",
+                              // color: Styles.success!,
+                              color: statusCheck > 0
+                                  ? Colors.grey
+                                  : Styles.secondaryColor,
+                              onPressed: () {
+                                if (statusCheck <= 0) {
+                                  _showCheckInSheet(context);
+                                  setState(
+                                    () {
+                                      selectedCause = "เลือกเหตุผล";
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                            MenuButton(
+                              icon: Icons.add_shopping_cart_rounded,
+                              label: "เช็คอิน/ขาย",
+                              color: (statusCheck == 1 || statusCheck == 0) &&
+                                      DateTime.now().isBefore(dateCheck)
+                                  ? Styles.success!
+                                  : Colors.grey,
+                              onPressed: () {
+                                if (statusCheck == 1) {
+                                  if (DateTime.now().isBefore(dateCheck)) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            OrderINRouteScreen(
+                                          storeDetail: storeDetail,
+                                          routeId: widget.routeId,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } else if (statusCheck == 0) {
+                                  _showCheckInAndSellSheet(context);
+                                }
+                              },
                             ),
                           ],
                         ),
@@ -689,12 +812,12 @@ class _DetailScreenState extends State<DetailScreen> {
         BuildContext context,
       ) {
         double screenWidth = MediaQuery.of(context).size.width;
-        // double screenWidth = MediaQuery.of(context).size.width;
+        // double screenHeight = MediaQuery.of(context).size.height;
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
           return Container(
             width: screenWidth * 0.9, // Fixed width
-            // height: screenWidth * 0.8,
+            // height: screenHeight * 0.8,
             padding: EdgeInsets.only(
               left: 16.0,
               right: 16.0,
@@ -1066,12 +1189,12 @@ class _DetailScreenState extends State<DetailScreen> {
         BuildContext context,
       ) {
         double screenWidth = MediaQuery.of(context).size.width;
-        // double screenWidth = MediaQuery.of(context).size.width;
+        // double screenHeight = MediaQuery.of(context).size.height;
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
           return Container(
             width: screenWidth * 0.9, // Fixed width
-            // height: screenWidth * 0.8,
+            // height: screenHeight * 0.8,
             padding: EdgeInsets.only(
               left: 16.0,
               right: 16.0,

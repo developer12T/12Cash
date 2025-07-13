@@ -270,7 +270,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
               : noteController.text.trim(),
           "latitude": latitude?.toString(),
           "longitude": longitude?.toString(),
-          "shipping": "test",
+          "shipping": "${widget.storeAddress}",
           "payment": "cash"
         },
       );

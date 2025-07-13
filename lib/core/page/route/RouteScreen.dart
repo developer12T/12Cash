@@ -18,6 +18,7 @@ import 'package:_12sale_app/core/page/store/StoreScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Location.dart';
 import 'package:_12sale_app/data/models/Route.dart';
+import 'package:_12sale_app/data/models/route/DetailStoreVisit.dart';
 import 'package:_12sale_app/data/models/search/RouteVisitFilterLocal.dart';
 import 'package:_12sale_app/data/models/search/SaleRoute.dart';
 // import 'package:_12sale_app/data/models/StoreFilterLocal.dart';

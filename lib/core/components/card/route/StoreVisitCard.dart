@@ -119,6 +119,8 @@ class StoreCard extends StatelessWidget {
               customerNo: store.storeInfo.storeId,
               routeId: routeId,
               route: route,
+              latitude: store.latitude ?? "0.000000",
+              longtitude: store.longtitude ?? "0.000000",
             ),
           ),
         );
