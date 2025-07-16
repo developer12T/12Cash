@@ -16,6 +16,7 @@ import 'package:_12sale_app/data/models/order/Promotion.dart';
 import 'package:_12sale_app/data/models/order/PromotionList.dart';
 import 'package:_12sale_app/data/models/stock/StockMovement.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
 import 'package:dio/dio.dart';
@@ -39,6 +40,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:print_bluetooth_thermal/post_code.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal_windows.dart';
+import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 class CreateOrderScreen extends StatefulWidget {
@@ -63,6 +65,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   final ScrollController _outerController = ScrollController();
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _promotionScrollController = ScrollController();
+
+  late SocketService socketService;
 
   // FocusNode _focusNode = FocusNode();
 
@@ -194,6 +198,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       // Only subscribe if the route is a P ageRoute
       routeObserver.subscribe(this, route);
     }
+    socketService = Provider.of<SocketService>(context, listen: false);
   }
 
   @override
@@ -508,8 +513,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         },
       );
       if (response.statusCode == 200) {
+        socketService.emitEvent('order/checkout', {
+          'message': 'Order added successfully',
+        });
         // await _addStockMovement(response.data['data']['orderId']);
         if (isSelectCheckout == "QR Payment") {
+          socketService.emitEvent('order/checkout', {
+            'message': 'Order added successfully',
+          });
           await uploadImageSlip(response.data['data']['orderId']);
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),

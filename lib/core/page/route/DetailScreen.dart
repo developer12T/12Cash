@@ -30,6 +30,7 @@ import 'package:_12sale_app/data/models/route/Cause.dart';
 import 'package:_12sale_app/data/models/route/DetailStoreVisit.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -41,6 +42,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -92,6 +94,7 @@ class _DetailScreenState extends State<DetailScreen> {
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   List<FlSpot> spots = [];
+  late SocketService socketService;
 
   // String
 
@@ -103,6 +106,12 @@ class _DetailScreenState extends State<DetailScreen> {
     _getOrder();
     getDataSummary();
     _getStore();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    socketService = Provider.of<SocketService>(context, listen: false);
   }
 
   Future<void> getDataSummary() async {
@@ -466,6 +475,9 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
           );
           if (response.statusCode == 201 || response.statusCode == 200) {
+            socketService.emitEvent('route/checkIn', {
+              'message': 'Check In successfully',
+            });
             print("Response API ${response.data}");
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
@@ -556,6 +568,9 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         );
         if (response.statusCode == 201 || response.statusCode == 200) {
+          socketService.emitEvent('route/checkInVisit', {
+            'message': 'Check In successfully',
+          });
           print("Response API ${response.data}");
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),

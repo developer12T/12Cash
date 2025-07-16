@@ -14,6 +14,7 @@ import 'package:_12sale_app/data/models/withdraw/Shipping.dart';
 import 'package:_12sale_app/data/models/withdraw/Type.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -21,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 import '../../../data/models/order/Cart.dart';
@@ -57,6 +59,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
   List<ShippingData> shippingList = [];
 
   final Debouncer _debouncer = Debouncer();
+  late SocketService socketService;
 
   DateTime? _selectedDate;
 
@@ -77,6 +80,12 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
     _typeScrollController.dispose();
     _shippingScrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    socketService = Provider.of<SocketService>(context, listen: false);
   }
 
   String latitude = '';
@@ -279,6 +288,9 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
               "longitude": "${longitude}"
             });
         if (response.statusCode == 200) {
+          socketService.emitEvent('distribution/checkout', {
+            'message': 'Withdraw added successfully',
+          });
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),
             context: context,

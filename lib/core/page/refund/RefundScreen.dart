@@ -203,7 +203,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           "area": "${User.area}",
           "storeId": "${isStoreId}",
           "id": "${product.id}",
-          "qty": 1,
+          "qty": count,
           "unit": "${selectedUnit}",
           // "lot": "${lotStock}"
         },
@@ -351,37 +351,42 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       _debouncer.debounce(
         duration: duration,
         onDebounce: () async {
-          ApiService apiService = ApiService();
-          await apiService.init();
-          var response = await apiService.request(
-            endpoint: 'api/cash/cart/adjust',
-            method: 'PATCH',
-            body: {
-              "type": "refund",
-              "area": "${User.area}",
-              "storeId": "${isStoreId}",
-              "id": "${cart['id']}",
-              "qty": cart['qty'],
-              "unit": "${cart['unit']}",
-              cart['condition'] != null ? "condition" : "${cart['condition']}":
-                  "${cart['condition']}",
-              cart['expireDate'] != null ? "expire" : "${cart['expireDate']}":
-                  "${cart['expireDate']}"
-            },
-          );
-          if (response.statusCode == 200) {
-            await _getTotalCart(setModalState);
-            toastification.show(
-              autoCloseDuration: const Duration(seconds: 5),
-              context: context,
-              primaryColor: Colors.green,
-              type: ToastificationType.success,
-              style: ToastificationStyle.flatColored,
-              title: Text(
-                "แก้ไขข้อมูลสำเร็จ",
-                style: Styles.green18(context),
-              ),
+          try {
+            ApiService apiService = ApiService();
+            await apiService.init();
+            var response = await apiService.request(
+              endpoint: 'api/cash/cart/adjust',
+              method: 'PATCH',
+              body: {
+                "type": "refund",
+                "area": "${User.area}",
+                "storeId": "${isStoreId}",
+                "id": "${cart['id']}",
+                "qty": cart['qty'],
+                "unit": "${cart['unit']}",
+                cart['condition'] != null
+                    ? "condition"
+                    : "${cart['condition']}": "${cart['condition']}",
+                cart['expireDate'] != null ? "expire" : "${cart['expireDate']}":
+                    "${cart['expireDate']}"
+              },
             );
+            if (response.statusCode == 200) {
+              toastification.show(
+                autoCloseDuration: const Duration(seconds: 5),
+                context: context,
+                primaryColor: Colors.green,
+                type: ToastificationType.success,
+                style: ToastificationStyle.flatColored,
+                title: Text(
+                  "แก้ไขข้อมูลสำเร็จ",
+                  style: Styles.green18(context),
+                ),
+              );
+              await _getTotalCart(setModalState);
+            }
+          } catch (e) {
+            print("Error _reduceCart $e");
           }
         },
       );
@@ -430,6 +435,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       }
     } catch (e) {
       setState(() {
+        // totalCart = 00.00;
         refundList = [];
       });
       print("Error $e");
@@ -1429,7 +1435,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                         listProduct.isNotEmpty) {
                                       if (double.parse(refundList.isNotEmpty
                                               ? refundList[0].totalNet
-                                              : "0.00") >
+                                              : "0.00") >=
                                           0) {
                                         Navigator.push(
                                           context,
@@ -2543,7 +2549,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: Image.network(
-                                                '${ApiService.apiHost}/images/products/${cartList[index].id}.webp',
+                                                '${ApiService.apiHost}/images/products/${cartList["items"][index]["id"]}.webp',
                                                 width: screenWidth / 8,
                                                 height: screenWidth / 8,
                                                 fit: BoxFit.cover,
@@ -2720,12 +2726,21 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                       setModalState);
 
                                                                   await _updateStock3(
-                                                                      cartList[
-                                                                              "items"]
-                                                                          [
-                                                                          index],
-                                                                      setModalState,
-                                                                      'IN');
+                                                                    ListSaleProduct.fromJson(
+                                                                        cartList["items"]
+                                                                            [
+                                                                            index]),
+                                                                    setModalState,
+                                                                    'IN',
+                                                                  );
+
+                                                                  // await _updateStock3(
+                                                                  //     cartList[
+                                                                  //             "items"]
+                                                                  //         [
+                                                                  //         index],
+                                                                  //     setModalState,
+                                                                  //     'IN');
                                                                 }
                                                               },
                                                               style:
@@ -2797,12 +2812,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                         [index],
                                                                     setModalState);
 
-                                                                await _updateStock3(
-                                                                    cartList[
-                                                                            "items"]
-                                                                        [index],
-                                                                    setModalState,
-                                                                    'OUT');
+                                                                // await _updateStock3(
+                                                                //     cartList[
+                                                                //             "items"]
+                                                                //         [index],
+                                                                //     setModalState,
+                                                                //     'OUT');
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2859,7 +2874,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                 await _getTotalCart(
                                                                     setModalState);
 
-                                                                if (cartList
+                                                                if (cartList[
+                                                                            "items"]
                                                                         .length ==
                                                                     0) {
                                                                   Navigator.pop(

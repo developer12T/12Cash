@@ -61,11 +61,12 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
         footerTable = [
           '',
           'รวมจำนวนเงิน',
+          '${response.data['sumSendMoney']}',
           '${response.data['sumSummary']}',
+          '${response.data['sumSummaryDif']}',
           '${response.data['sumGood']}',
           '${response.data['sumDamaged']}',
           '${response.data['sumChange']}',
-          '${response.data['sumSendMoney']}',
         ];
         final fetchedStocks = (response.data['data'] as List)
             .map((item) => SendmoneyTable.fromJson(item))
@@ -76,11 +77,12 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
             .map((e) => [
                   e.date,
                   e.status,
+                  e.sendmoney.toString(),
                   e.summary.toString(),
+                  e.diff.toString(),
                   e.good.toString(),
                   e.damaged.toString(),
                   e.change.toString(),
-                  e.sendmoney.toString(),
                 ])
             .toList();
 
@@ -100,11 +102,12 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
     final columns = [
       'วันที่',
       'สถานะ',
-      'ยอดรวม',
+      'ยอดส่งเงิน',
+      'ยอดขาย',
+      'ส่วนต่าง',
       'คืนดี',
       'คืนเสี่ย',
       'เปลี่ยน',
-      'ส่งเงิน',
     ];
     return Scaffold(
       appBar: PreferredSize(

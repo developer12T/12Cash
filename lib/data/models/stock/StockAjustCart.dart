@@ -5,7 +5,7 @@ class StockAjustCart {
   final String brand;
   final String size;
   final String flavour;
-  final int qty;
+  int qty;
   final String unit;
   final String unitName;
   final double price;

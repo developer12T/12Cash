@@ -79,8 +79,7 @@ void main() async {
     // Initialize port for communication between TaskHandler and UI.
     // FlutterForegroundTask.initCommunicationPort();
     await LocationService().initialize();
-    SocketService socketService = SocketService();
-    socketService.connect();
+    SocketService().connect(); // Singleton ใช้แบบนี้
   } on CameraException catch (e) {
     _logError(e.code, e.description);
   }
@@ -196,6 +195,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late Upgrader _upgrader;
   // This widget is the root of your application.
   final ValueNotifier<Object?> _taskDataListenable = ValueNotifier(null);
   // late CameraController _cameraController;
@@ -204,6 +204,9 @@ class _MyAppState extends State<MyApp> {
   final LocationService locationService = LocationService();
   double latitude = 00.00;
   double longitude = 00.00;
+
+  DateTime? _lastVersionCheck;
+  Duration versionCheckCooldown = Duration(minutes: 5);
 
   // Future<void> _requestPermissions() async {
   //   // Android 13+, you need to allow notification permission to display foreground service notification.
@@ -335,6 +338,32 @@ class _MyAppState extends State<MyApp> {
     // });
   }
 
+  void checkForUpdateIfNeeded(BuildContext context) async {
+    final now = DateTime.now();
+    if (_lastVersionCheck == null ||
+        now.difference(_lastVersionCheck!) > versionCheckCooldown) {
+      _lastVersionCheck = now;
+
+      final upgrader = Upgrader();
+      await upgrader.initialize();
+      if (upgrader.shouldDisplayUpgrade()) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => MyUpgradeAlert(upgrader: upgrader),
+        );
+      }
+    }
+  }
+
+  Future<void> _initUpgrade() async {
+    await _upgrader.initialize();
+    // ถ้าไม่มีอัปเดต -> preload user data
+    if (!_upgrader.shouldDisplayUpgrade()) {}
+    // ถ้ามีอัปเดต MyUpgradeAlert จะ popup เอง และบล็อก user ไว้
+    // ไม่ต้อง preload user data ตอนนี้!
+  }
+
   @override
   void dispose() {
     // Remove a callback to receive data sent from the TaskHandler.
@@ -373,63 +402,70 @@ class _MyAppState extends State<MyApp> {
             );
           },
           overlayColor: Styles.primaryColor.withOpacity(0.8),
-          child: MaterialApp(
-            routes: {
-              '/': (context) => AuthCheck(),
-              '/route': (context) => const HomeScreen(
-                    index: 1,
-                  ),
-              '/store': (context) => const HomeScreen(
-                    index: 2,
-                  ),
-              '/manage': (context) => const HomeScreen(
-                    index: 3,
-                  ),
-              '/announce': (context) => const Announce(),
-            },
-            initialRoute: '/',
-            // localizationsDelegates: [
-            //   GlobalWidgetsLocalizations.delegate,
-            //   GlobalMaterialLocalizations.delegate,
-            //   MonthYearPickerLocalizations.delegate,
-            // ],
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
-            navigatorObservers: [routeObserver], // Register RouteObserver here
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              // splashColor: Colors.transparent,
-              // highlightColor: Colors.transparent,
-              // hoverColor: Colors.transparent,
-              // iconTheme: IconThemeData(
-              //   color: Colors.transparent,
-              //   opacity: 0.0,
-              // ),
-              primarySwatch: Colors.blue,
-              extensions: const [
-                SkeletonizerConfigData.dark(),
-              ],
-              textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
-            ),
+          child: Listener(
+            onPointerDown: (_) => checkForUpdateIfNeeded(context),
+            behavior: HitTestBehavior.translucent,
+            child: MaterialApp(
+              routes: {
+                '/': (context) => AuthCheck(),
+                '/route': (context) => const HomeScreen(
+                      index: 1,
+                    ),
+                '/store': (context) => const HomeScreen(
+                      index: 2,
+                    ),
+                '/manage': (context) => const HomeScreen(
+                      index: 3,
+                    ),
+                '/announce': (context) => const Announce(),
+              },
+              initialRoute: '/',
+              // localizationsDelegates: [
+              //   GlobalWidgetsLocalizations.delegate,
+              //   GlobalMaterialLocalizations.delegate,
+              //   MonthYearPickerLocalizations.delegate,
+              // ],
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
+              navigatorObservers: [
+                routeObserver
+              ], // Register RouteObserver here
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                // splashColor: Colors.transparent,
+                // highlightColor: Colors.transparent,
+                // hoverColor: Colors.transparent,
+                // iconTheme: IconThemeData(
+                //   color: Colors.transparent,
+                //   opacity: 0.0,
+                // ),
+                primarySwatch: Colors.blue,
+                extensions: const [
+                  SkeletonizerConfigData.dark(),
+                ],
+                textTheme:
+                    Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
+              ),
 
-            // home: PolylineWithLabels(),
-            // home: SettingsScreen(),
-            // home: const LoginScreen(),
-            // home: const HomeScreen(
-            //   index: 0,
-            // ),
-            // home: NotificationScreen(),
-            // home: HomeScreen2(),
-            // home: CustomBottomNavBar(),
-            // home: BluetoothPrinterScreen4(),
-            // home: AddToCartAnimationPage(),
-            // home: Column(
-            //   children: [
-            //     Expanded(child: _buildCommunicationDataText()),
-            //     _buildServiceControlButtons(),
-            //   ],
-            // ),
+              // home: PolylineWithLabels(),
+              // home: SettingsScreen(),
+              // home: const LoginScreen(),
+              // home: const HomeScreen(
+              //   index: 0,
+              // ),
+              // home: NotificationScreen(),
+              // home: HomeScreen2(),
+              // home: CustomBottomNavBar(),
+              // home: BluetoothPrinterScreen4(),
+              // home: AddToCartAnimationPage(),
+              // home: Column(
+              //   children: [
+              //     Expanded(child: _buildCommunicationDataText()),
+              //     _buildServiceControlButtons(),
+              //   ],
+              // ),
+            ),
           ),
         );
       },

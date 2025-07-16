@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
-import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
+// import 'pack2sale_app/core/components/card/order/OrderMenuListCard.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
 import 'package:_12sale_app/core/components/filter/BadageFilter.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
@@ -25,7 +25,11 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
 
 class AjustStock extends StatefulWidget {
-  const AjustStock({super.key});
+  final String orderId;
+  const AjustStock({
+    super.key,
+    required this.orderId,
+  });
 
   @override
   State<AjustStock> createState() => _AjustStockState();
@@ -75,21 +79,51 @@ class _AjustStockState extends State<AjustStock> {
   List<ShippingData> shippingList = [];
   String casue = '';
 
-  List<String> causeAdd = [
-    'ขึ้นส่งรับมาไม่ครบ',
-    'สินค้าหายระหว่างทาง',
-    'คีย์ StocK ผิด',
-  ];
+  List<String> causeAdd = [];
 
-  List<String> causeReduce = [
-    'คี StocK ผิด',
-  ];
+  List<String> causeReduce = [];
 
   void initState() {
     super.initState();
     _getFliter();
     _getProduct();
     _getCart();
+    _getOption('add');
+    _getOption('reduce');
+  }
+
+  Future<void> _getOption(type) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/manage/option/get?module=ajustStock&type=${type}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        if (type == 'add') {
+          var list = response.data['data']
+              .map<String>((item) => item['name'] as String)
+              .toList();
+
+          setState(() {
+            causeAdd = list;
+          });
+        } else {
+          var list = response.data['data']
+              .map<String>((item) => item['name'] as String)
+              .toList();
+
+          setState(() {
+            causeReduce = list;
+          });
+        }
+      }
+
+      print(causeAdd);
+    } catch (e) {
+      print("Error _getOption: $e");
+    }
   }
 
   Future<void> _checkout() async {
@@ -435,6 +469,18 @@ class _AjustStockState extends State<AjustStock> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                children: [
+                  Text(
+                    "${widget.orderId}",
+                    style: Styles.headerBlack24(context),
+                    textAlign: TextAlign.start,
+                  ),
+                ],
+              ),
+            ),
             CustomSlidingSegmentedControl<int>(
               initialValue: 1,
               isStretch: true,
@@ -987,29 +1033,29 @@ class _AjustStockState extends State<AjustStock> {
                         : Expanded(
                             child: Column(
                               children: [
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: filteredProductList.length,
-                                    itemBuilder: (context, index) {
-                                      return OrderMenuListCard(
-                                        product: filteredProductList[index],
-                                        onTap: () {
-                                          print(filteredProductList[index]);
-                                          setState(() {
-                                            selectedUnit = '';
-                                            selectedSize = '';
-                                            price = 0.00;
-                                            count = 1;
-                                            total = 0.00;
-                                            stockQty = 0;
-                                          });
-                                          _showProductSheet(context,
-                                              filteredProductList[index]);
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
+                                // Expanded(
+                                //   child: ListView.builder(
+                                //     itemCount: filteredProductList.length,
+                                //     itemBuilder: (context, index) {
+                                //       return OrderMenuListCard(
+                                //         product: filteredProductList[index],
+                                //         onTap: () {
+                                //           print(filteredProductList[index]);
+                                //           setState(() {
+                                //             selectedUnit = '';
+                                //             selectedSize = '';
+                                //             price = 0.00;
+                                //             count = 1;
+                                //             total = 0.00;
+                                //             stockQty = 0;
+                                //           });
+                                //           _showProductSheet(context,
+                                //               filteredProductList[index]);
+                                //         },
+                                //       );
+                                //     },
+                                //   ),
+                                // ),
                               ],
                             ),
                           ),
@@ -1561,13 +1607,74 @@ class _AjustStockState extends State<AjustStock> {
     );
   }
 
+  // Future<void> _getTotalCart(StateSetter setModalState) async {
+  //   try {
+  //     ApiService apiService = ApiService();
+  //     await apiService.init();
+  //     var response = await apiService.request(
+  //       endpoint:
+  //           'api/cash/cart/get?type=sale&area=${User.area}&storeId=${widget.storeDetail?.listStore[0].storeInfo.storeId}',
+  //       method: 'GET',
+  //     );
+  //     if (response.statusCode == 200) {
+  //       setState(() {
+  //         totalCart = response.data['data'][0]['total'].toDouble();
+  //       });
+  //       setModalState(
+  //         () {
+  //           totalCart = response.data['data'][0]['total'].toDouble();
+  //         },
+  //       );
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       totalCart = 00.00;
+  //     });
+  //     print("Error _getTotalCart: $e");
+  //   }
+  // }
+
+  // Future<void> _deleteCart(CartList cart, StateSetter setModalState) async {
+  //   try {
+  //     ApiService apiService = ApiService();
+  //     await apiService.init();
+  //     var response = await apiService.request(
+  //       endpoint: 'api/cash/cart/delete',
+  //       method: 'POST',
+  //       body: {
+  //         "type": "sale",
+  //         "area": "${User.area}",
+  //         "storeId": "${widget.storeDetail?.listStore[0].storeInfo.storeId}",
+  //         "id": "${cart.id}",
+  //         "unit": "${cart.unit}"
+  //       },
+  //     );
+  //     if (response.statusCode == 200) {
+  //       await _getTotalCart(setModalState);
+  //       toastification.show(
+  //         autoCloseDuration: const Duration(seconds: 5),
+  //         context: context,
+  //         primaryColor: Colors.green,
+  //         type: ToastificationType.success,
+  //         style: ToastificationStyle.flatColored,
+  //         title: Text(
+  //           "ลบข้อมูลสำเร็จ",
+  //           style: Styles.green18(context),
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print("Error _deleteCart: $e");
+  //   }
+  // }
+
   void _showCartSheet(BuildContext context, List<StockAjustCart> cartlist) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
       builder: (context) {
@@ -1606,7 +1713,7 @@ class _AjustStockState extends State<AjustStock> {
                                 color: Colors.white,
                                 size: 30,
                               ),
-                              Text('รายการสินค้าที่ขอปรับ',
+                              Text(' รายการสินค้าที่ขอปรับ',
                                   style: Styles.white24(context)),
                             ],
                           ),
@@ -1665,7 +1772,8 @@ class _AjustStockState extends State<AjustStock> {
                                                           MainAxisAlignment
                                                               .center,
                                                       children: [
-                                                        Icon(Icons.hide_image,
+                                                        const Icon(
+                                                            Icons.hide_image,
                                                             color: Colors.white,
                                                             size: 30),
                                                         Text(
@@ -1755,6 +1863,192 @@ class _AjustStockState extends State<AjustStock> {
                                                                           context),
                                                                 ),
                                                               ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                setModalState(
+                                                                    () {
+                                                                  if (cartlist[
+                                                                              index]
+                                                                          .qty >
+                                                                      1) {
+                                                                    cartlist[
+                                                                            index]
+                                                                        .qty--;
+                                                                  }
+                                                                });
+
+                                                                // await _updateStock3(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState,
+                                                                //     'IN');
+
+                                                                // await _reduceCart(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.remove,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
+                                                            ),
+                                                            Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(4),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                border:
+                                                                    Border.all(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  width: 1,
+                                                                ),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            16),
+                                                              ),
+                                                              width: 75,
+                                                              child: Text(
+                                                                '${cartlist[index].qty.toStringAsFixed(0)}',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: Styles
+                                                                    .black18(
+                                                                  context,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                // await _reduceCart(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+
+                                                                setModalState(
+                                                                    () {
+                                                                  cartlist[
+                                                                          index]
+                                                                      .qty++;
+                                                                });
+                                                                // await _updateStock3(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState,
+                                                                //     'OUT');
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width: 1),
+                                                                ), // ✅ Makes the button circular
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.add,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ), // Example
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                // await _deleteCart(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState);
+                                                                // await _updateStock2(
+                                                                //     cartlist[
+                                                                //         index],
+                                                                //     setModalState,
+                                                                //     "IN");
+
+                                                                setModalState(
+                                                                  () {
+                                                                    cartList.removeWhere((item) => (item.id ==
+                                                                            cartlist[index]
+                                                                                .id &&
+                                                                        item.unit ==
+                                                                            cartlist[index].unit));
+                                                                  },
+                                                                );
+                                                                // await _getTotalCart(
+                                                                //     setModalState);
+
+                                                                if (cartList
+                                                                        .length ==
+                                                                    0) {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                }
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    const CircleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Colors
+                                                                          .red,
+                                                                      width: 1),
+                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white, // Button color
+                                                              ),
+                                                              child: const Icon(
+                                                                Icons.delete,
+                                                                size: 24,
+                                                                color:
+                                                                    Colors.red,
+                                                              ), // Example
                                                             ),
                                                           ],
                                                         ),

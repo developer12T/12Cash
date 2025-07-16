@@ -110,29 +110,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
-  Future<void> _updateStock() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-      for (var item in listProduct) {
-        var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "productId": "${item.id}",
-            "qty": item.qty,
-            "unit": "${item.unit}",
-            "type": "IN"
-          },
-        );
-      }
-    } catch (e) {
-      print("Error in _updateStock $e");
-    }
-  }
-
   bool _loadOrderDetail = true;
   Future<void> _getOrderDetail() async {
     try {
@@ -257,7 +234,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         },
       );
       if (response.statusCode == 200) {
-        await _updateStock();
+        // await _updateStock();
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,

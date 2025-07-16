@@ -11,12 +11,14 @@ import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/sendmoney/SaleReport.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 class SendMoneyScreen extends StatefulWidget {
@@ -40,6 +42,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   double money = 0;
   double summary = 0;
   String status = "";
+  late SocketService socketService;
 
   List<List<String>> rows = [];
 
@@ -53,6 +56,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
 
     _getSendmoney();
     _getSaleReport();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    socketService = Provider.of<SocketService>(context, listen: false);
   }
 
   bool isDouble(String input) {
@@ -150,7 +159,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
 
   Future<void> _addSendMoney(sendMoney) async {
     try {
-      print(sendMoney);
+      // print(sendMoney);
       context.loaderOverlay.show();
       ApiService apiService = ApiService();
       await apiService.init();
@@ -164,6 +173,9 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         },
       );
       if (response.statusCode == 200) {
+        socketService.emitEvent('sendmoney/addSendMoney', {
+          'message': 'Sendmoney added successfully',
+        });
         await _getSendmoney();
         await uploadImageSendmoney();
         toastification.show(
@@ -359,12 +371,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                       ),
                       Text(
                         "สถานะ : $status",
-                        style: status == 'ส่งเงินครบ'
+                        style: status == 'ส่งเงินแล้ว'
                             ? Styles.headerGreen24(context)
                             : Styles.headerRed24(context),
                         textAlign: TextAlign.end,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 16,
                       ),
                       IconButtonWithLabelOld2(
@@ -377,12 +389,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                           });
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 16,
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          if (status != "ส่งเงินครบ") {
+                          if (status != "ส่งเงินแล้ว") {
                             if (storeImagePath != '') {
                               _addSendMoney(countController.text);
                             } else {
@@ -403,7 +415,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                         // ignore: sort_child_properties_last
                         child: Text(
                           "กดเพื่อส่งเงิน",
-                          style: status != "ส่งเงินครบ"
+                          style: status != "ส่งเงินแล้ว"
                               ? Styles.pirmary18(context)
                               : Styles.grey18(context),
                         ),
@@ -413,7 +425,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                             side: BorderSide(
-                              color: status != "ส่งเงินครบ"
+                              color: status != "ส่งเงินแล้ว"
                                   ? Styles.primaryColor
                                   : Colors.grey,
                               width: 1,
@@ -421,10 +433,10 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 16,
                       ),
-                      Container(
+                      SizedBox(
                           height: screenHeight * 0.5,
                           width: screenWidth,
                           child: SaleReportTable(columns: columns, rows: rows))
@@ -447,7 +459,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
       builder: (context) {
@@ -515,7 +527,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                               contentPadding: EdgeInsets.all(16),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Row(

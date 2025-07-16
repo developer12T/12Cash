@@ -1,5 +1,6 @@
 import 'package:_12sale_app/core/page/sendmoney/SendMoneyScreen.dart';
 import 'package:_12sale_app/core/page/stock/StockDetail.dart';
+import 'package:dartx/dartx.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:_12sale_app/core/styles/style.dart';
@@ -94,12 +95,14 @@ class SendmoneyTableShow extends StatelessWidget {
                             return Container(
                               decoration: BoxDecoration(
                                 color: index == 1
-                                    ? cell != 'ยังส่งเงินไม่ครบ'
-                                        ? cell == 'วันนี้ไม่มียอดต้องส่ง'
-                                            ? Colors.amber[600]
-                                            : Colors.green
-                                        : Colors.red
-                                    : Colors.white,
+                                    ? cell != 'ยังไม่ส่งเงิน'
+                                        ? Colors.green
+                                        : Colors.amber
+                                    : index == 4
+                                        ? cell.toDouble() > 0
+                                            ? Colors.green
+                                            : Colors.red
+                                        : Colors.white,
                                 border: Border.all(
                                     color: Colors.black), // Border added here
                               ),
@@ -111,7 +114,7 @@ class SendmoneyTableShow extends StatelessWidget {
                               alignment: index == 0
                                   ? Alignment.center
                                   : Alignment.centerRight,
-                              child: index == 1
+                              child: index == 1 || index == 4
                                   ? Text(
                                       cell,
                                       style: Styles.white18(context),

@@ -14,6 +14,7 @@ import 'package:_12sale_app/data/models/order/Promotion.dart';
 import 'package:_12sale_app/data/models/refund/RefundCart.dart';
 import 'package:_12sale_app/data/models/stock/StockMovement.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
 import 'package:dio/dio.dart';
@@ -36,6 +37,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:print_bluetooth_thermal/post_code.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal_windows.dart';
+import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 class CreateRefundScreen extends StatefulWidget {
@@ -83,6 +85,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   late TextEditingController noteController;
+  late SocketService socketService;
 
   @override
   void initState() {
@@ -152,6 +155,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
       // Only subscribe if the route is a P ageRoute
       routeObserver.subscribe(this, route);
     }
+    socketService = Provider.of<SocketService>(context, listen: false);
   }
 
   @override
@@ -275,7 +279,13 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
         },
       );
       if (response.statusCode == 200) {
+        socketService.emitEvent('refund/checkout', {
+          'message': 'Refund added successfully',
+        });
         if (isSelectCheckout == "QR Payment") {
+          socketService.emitEvent('refund/checkout', {
+            'message': 'Refund added successfully',
+          });
           await uploadImageSlip(
               response.data['data']['changeOrder']['orderId']);
           toastification.show(

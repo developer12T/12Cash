@@ -2,6 +2,7 @@ class SendmoneyTable {
   final String date;
   final double sendmoney;
   final double summary;
+  final double diff;
   final String status;
   final double change;
   final double good;
@@ -11,6 +12,7 @@ class SendmoneyTable {
     required this.date,
     required this.sendmoney,
     required this.summary,
+    required this.diff,
     required this.status,
     required this.change,
     required this.good,
@@ -23,6 +25,7 @@ class SendmoneyTable {
       date: json['date'] ?? '',
       sendmoney: (json['sendmoney'] as num?)?.toDouble() ?? 0.0,
       summary: (json['summary'] as num?)?.toDouble() ?? 0.0,
+      diff: (json['diff'] as num?)?.toDouble() ?? 0.0,
       change: (json['change'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] ?? '',
       good: (json['good'] as num?)?.toDouble() ?? 0.0,
@@ -35,6 +38,7 @@ class SendmoneyTable {
     return {
       'date': date,
       'summary': summary,
+      'diff': diff,
       'sendmoney': sendmoney,
       'status': status,
       'change': change,

@@ -69,10 +69,9 @@ class WithDrawCard extends StatelessWidget {
                                   child: Container(
                                     width: screenWidth / 6,
                                     padding: EdgeInsets.all(2),
-
-                                    // height: screenWidth / ,
                                     decoration: BoxDecoration(
-                                      color: item.status == 'success'
+                                      color: item.status == 'success' ||
+                                              item.status == 'approved'
                                           ? Styles.success
                                           : item.status == 'canceled'
                                               ? Styles.fail

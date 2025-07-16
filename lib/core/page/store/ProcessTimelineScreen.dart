@@ -17,6 +17,7 @@ import 'package:_12sale_app/data/models/Route.dart';
 import 'package:_12sale_app/data/models/Shoptype.dart';
 import 'package:_12sale_app/data/models/Store.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 // import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -62,6 +64,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       ShopType(id: '', name: '', descript: '', status: '');
   List<dynamic> imageList = [];
   List<Store> duplicateStores = [];
+  late SocketService socketService;
 
   Location initialSelectedLocation = Location(
       id: '',
@@ -71,6 +74,12 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
       districtCode: '',
       province: '',
       provinceCode: '');
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    socketService = Provider.of<SocketService>(context, listen: false);
+  }
 
   @override
   initState() {
@@ -533,6 +542,9 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           );
           context.loaderOverlay.hide();
         } else if (response.data['message'] == 'Store added successfully') {
+          socketService.emitEvent('store/addStore', {
+            'message': 'Store added successfully',
+          });
           await sentNoitfytoBot(_storeData.name);
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),

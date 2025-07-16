@@ -40,6 +40,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -492,9 +493,26 @@ class _DashboardHeaderState extends State<DashboardHeader> {
   late SharedPreferences sharedPreferences;
   DateTime now = DateTime.now();
 
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
+  }
+
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
+
   @override
   void initState() {
     super.initState();
+    _initPackageInfo();
     // setup();
   }
 
@@ -578,38 +596,58 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
                                 children: [
-                                  Container(
-                                    width: screenWidth / 6,
-                                    // margin: EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                        color: Styles.secondaryColor,
-                                        borderRadius: BorderRadius.horizontal(
-                                            right: Radius.circular(50),
-                                            left: Radius.circular(50))),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: screenWidth / 6,
+                                        // margin: EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                            color: Styles.successTextColor,
+                                            borderRadius:
+                                                BorderRadius.horizontal(
+                                                    right: Radius.circular(50),
+                                                    left: Radius.circular(50))),
 
-                                    child: Center(
-                                      child: Text(
-                                        '${User.role.toUpperCase()}',
-                                        style: Styles.headerWhite24(context),
+                                        child: Center(
+                                          child: Text(
+                                            '${User.role.toUpperCase()}',
+                                            style:
+                                                Styles.headerWhite24(context),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: screenWidth / 6,
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 4),
-                                    decoration: const BoxDecoration(
-                                        color: Styles.secondaryColor,
-                                        borderRadius: BorderRadius.horizontal(
-                                            right: Radius.circular(50),
-                                            left: Radius.circular(50))),
-                                    child: Center(
-                                      child: Text(
-                                        '${User.area.toUpperCase()}',
-                                        style: Styles.headerWhite24(context),
+                                      Container(
+                                        width: screenWidth / 6,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        decoration: const BoxDecoration(
+                                            color: Styles.successTextColor,
+                                            borderRadius:
+                                                BorderRadius.horizontal(
+                                                    right: Radius.circular(50),
+                                                    left: Radius.circular(50))),
+                                        child: Center(
+                                          child: Text(
+                                            '${User.area.toUpperCase()}',
+                                            style:
+                                                Styles.headerWhite24(context),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          "เวอร์ชั่น ${_packageInfo.version}",
+                                          style: Styles.white16(context),
+                                        ),
+                                      ],
+                                    ),
+                                  )
                                 ],
                               ),
                             ),
