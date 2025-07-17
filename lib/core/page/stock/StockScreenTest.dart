@@ -5,7 +5,7 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchCustom.dart';
 import 'package:_12sale_app/core/components/search/DropdownSearchGroup.dart';
 import 'package:_12sale_app/core/components/table/ReusableTable.dart';
-import 'package:_12sale_app/core/page/stock/AjustStock.dart';
+import 'package:_12sale_app/core/page/stock/AdjustStock.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/stock/Stock.dart';
@@ -15,7 +15,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:toastification/toastification.dart';
-
 import '../../../data/models/option/Group.dart';
 
 class StockScreenTest extends StatefulWidget {

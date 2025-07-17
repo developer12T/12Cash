@@ -632,6 +632,7 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
           User.salePayer = sharedPreferences.getString('salePayer')!;
           User.tel = sharedPreferences.getString('tel')!;
           User.area = sharedPreferences.getString('area')!;
+          User.typeTruck = sharedPreferences.getString('typeTruck')!;
           User.saleCode = sharedPreferences.getString('saleCode')!;
           User.zone = sharedPreferences.getString('zone')!;
           User.warehouse = sharedPreferences.getString('warehouse')!;

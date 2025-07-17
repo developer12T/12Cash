@@ -85,7 +85,7 @@ class _WaterFilledRectangleState extends State<WaterFilledRectangle>
             );
           },
         ),
-        SizedBox(height: screenWidth / 8),
+        SizedBox(height: 16),
       ],
     );
   }
@@ -335,7 +335,7 @@ class RectanglePainter extends CustomPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text:
-            "Free: ${(fillFreePercentage * 100).toInt()}%\nเบิก: ${(fillWithdrawPercentage * 100).toInt()}%\nคลัง: ${(fillStockPercentage * 100).toInt()}%",
+            "พื้นที่ว่าง: ${(fillFreePercentage * 100).toInt()}%\nเบิก: ${(fillWithdrawPercentage * 100).toInt()}%\nคลัง: ${(fillStockPercentage * 100).toInt()}%",
         style: Styles.black18(context),
       ),
       textDirection: TextDirection.ltr,

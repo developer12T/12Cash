@@ -247,6 +247,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
               ),
             );
             await _getTotalCart(setModalState);
+            await _getProduct();
           }
         },
       );
@@ -1989,8 +1990,6 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                                         index],
                                                                     setModalState,
                                                                     "IN");
-                                                                await _getCart();
-                                                                await _getProduct();
                                                               },
                                                               style:
                                                                   ElevatedButton

@@ -24,18 +24,18 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toastification/toastification.dart';
 
-class AjustStock extends StatefulWidget {
+class AdjustStock extends StatefulWidget {
   final String orderId;
-  const AjustStock({
+  const AdjustStock({
     super.key,
     required this.orderId,
   });
 
   @override
-  State<AjustStock> createState() => _AjustStockState();
+  State<AdjustStock> createState() => _AdjustStockState();
 }
 
-class _AjustStockState extends State<AjustStock> {
+class _AdjustStockState extends State<AdjustStock> {
   List<StockAjustCart> cartList = [];
   List<Product> productList = [];
   List<Product> filteredProductList = [];
@@ -89,7 +89,6 @@ class _AjustStockState extends State<AjustStock> {
     _getProduct();
     _getCart();
     _getOption('add');
-    _getOption('reduce');
   }
 
   Future<void> _getOption(type) async {
@@ -474,79 +473,12 @@ class _AjustStockState extends State<AjustStock> {
               child: Row(
                 children: [
                   Text(
-                    "${widget.orderId}",
+                    "จากใบเบิก ${widget.orderId}",
                     style: Styles.headerBlack24(context),
                     textAlign: TextAlign.start,
                   ),
                 ],
               ),
-            ),
-            CustomSlidingSegmentedControl<int>(
-              initialValue: 1,
-              isStretch: true,
-              children: {
-                1: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      FontAwesomeIcons.minus,
-                      color: isSelect == 1
-                          ? Styles.primaryColorIcons
-                          : Styles.white,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'ขอลด stock',
-                      style: isSelect == 1
-                          ? Styles.headerPirmary18(context)
-                          : Styles.headerWhite18(context),
-                    )
-                  ],
-                ),
-                2: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.add,
-                      color: isSelect == 2
-                          ? Styles.primaryColorIcons
-                          : Styles.white,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'ขอเพิ่ม stock',
-                      style: isSelect == 2
-                          ? Styles.headerPirmary18(context)
-                          : Styles.headerWhite18(context),
-                    ),
-                  ],
-                )
-              },
-              onValueChanged: (v) async {
-                setState(() {
-                  isSelect = v;
-                });
-                if (v == 1) {
-                  setState(() {
-                    selectType = "reduce";
-                  });
-                  // await _getDetail(status: "pending");
-                } else {
-                  setState(() {
-                    selectType = "add";
-                  });
-                  // await _getDetail(status: "history");
-                }
-              },
-              decoration: BoxDecoration(
-                color: Styles.grey,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              thumbDecoration: BoxDecoration(
-                color: Styles.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              duration: const Duration(milliseconds: 300),
             ),
             Row(
               children: [
@@ -560,7 +492,7 @@ class _AjustStockState extends State<AjustStock> {
                         shadowColor:
                             Colors.transparent, // Ensure no shadow color
                         backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.zero, // No rounded corners
                           side: BorderSide.none, // Remove border
                         ),
@@ -1561,9 +1493,6 @@ class _AjustStockState extends State<AjustStock> {
                                                   await _addCart(
                                                       product, selectType);
                                                   await _getCart();
-
-                                                  // await _updateStock(product,
-                                                  //     setModalState, "OUT");
                                                   context.loaderOverlay.hide();
                                                 } else {
                                                   toastification.show(

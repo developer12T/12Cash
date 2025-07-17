@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> with RouteAware {
     sharedPreferences.setString('salePayer', resBody['salePayer']);
     sharedPreferences.setString('tel', resBody['tel']);
     sharedPreferences.setString('area', resBody['area']);
+    sharedPreferences.setString('typeTruck', resBody['typeTruck']);
     sharedPreferences.setString('zone', resBody['zone']);
     sharedPreferences.setString('warehouse', resBody['warehouse']);
     sharedPreferences.setString('role', resBody['role']);
@@ -242,6 +243,8 @@ class _LoginScreenState extends State<LoginScreen> with RouteAware {
                                             sharedPreferences.getString('tel')!;
                                         User.area = sharedPreferences
                                             .getString('area')!;
+                                        User.typeTruck = sharedPreferences
+                                            .getString('typeTruck')!;
                                         User.zone = sharedPreferences
                                             .getString('zone')!;
                                         User.warehouse = sharedPreferences

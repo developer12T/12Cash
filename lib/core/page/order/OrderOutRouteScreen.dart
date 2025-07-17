@@ -246,7 +246,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
           );
           if (response.statusCode == 200) {
             await _getTotalCart(setModalState);
-
+            await _getProduct();
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -2024,7 +2024,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                         index],
                                                                     setModalState,
                                                                     "IN");
-                                                                await _getProduct();
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2082,24 +2081,17 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                             ElevatedButton(
                                                               onPressed:
                                                                   () async {
-                                                                if (cartlist[
-                                                                            index]
-                                                                        .qty <
+                                                                setModalState(
+                                                                    () {
+                                                                  cartlist[
+                                                                          index]
+                                                                      .qty++;
+                                                                });
+                                                                await _reduceCart(
                                                                     cartlist[
-                                                                            index]
-                                                                        .maxQty) {
-                                                                  setModalState(
-                                                                      () {
-                                                                    cartlist[
-                                                                            index]
-                                                                        .qty++;
-                                                                  });
-                                                                  await _reduceCart(
-                                                                      cartlist[
-                                                                          index],
-                                                                      setModalState,
-                                                                      "OUT");
-                                                                }
+                                                                        index],
+                                                                    setModalState,
+                                                                    "OUT");
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2133,7 +2125,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                         index],
                                                                     setModalState);
                                                                 await _getProduct();
-
                                                                 setModalState(
                                                                   () {
                                                                     cartList.removeWhere((item) => (item.id ==

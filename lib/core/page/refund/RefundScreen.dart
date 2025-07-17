@@ -174,11 +174,12 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           "id": "${product.id}",
           "qty": count,
           "unit": "${selectedUnit}",
-          // "lot": "${lotStock}"
+          "typeref": "change"
         },
       );
       print("Response add Cart: ${response.statusCode}");
       if (response.statusCode == 200) {
+        await _getProduct(isSelect);
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,
@@ -296,6 +297,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       );
 
       if (response.statusCode == 200) {
+        await _getTotalCart(setModalState);
+        await _getProduct(isSelect);
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,
@@ -354,8 +357,46 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                 ),
               );
               await _getTotalCart(setModalState);
+              await _getProduct(isSelect);
+            }
+          } on ApiException catch (e) {
+            if (e.statusCode == 409) {
+              toastification.show(
+                autoCloseDuration: const Duration(seconds: 5),
+                context: context,
+                primaryColor: Colors.orange,
+                type: ToastificationType.warning,
+                style: ToastificationStyle.flatColored,
+                title: Text(
+                  "ของในสต๊อกไม่เพียงพอ",
+                  style: Styles.red18(context),
+                ),
+              );
+            } else {
+              toastification.show(
+                autoCloseDuration: const Duration(seconds: 5),
+                context: context,
+                primaryColor: Colors.red,
+                type: ToastificationType.error,
+                style: ToastificationStyle.flatColored,
+                title: Text(
+                  "เกิดข้อผิดพลาด: ${e.message}",
+                  style: Styles.red18(context),
+                ),
+              );
             }
           } catch (e) {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.red,
+              type: ToastificationType.error,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "เกิดข้อผิดพลาด $e",
+                style: Styles.red18(context),
+              ),
+            );
             print("Error _reduceCart $e");
           }
         },
@@ -2337,7 +2378,9 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                         .show();
                                                     await _addCart(product);
                                                     await _getCart();
-
+                                                    setModalState(() {
+                                                      stockQty -= count;
+                                                    });
                                                     context.loaderOverlay
                                                         .hide();
                                                   } else {
@@ -2741,8 +2784,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                         [index],
                                                                     setModalState,
                                                                     "OUT");
-                                                                await _getProduct(
-                                                                    isSelect);
                                                               },
                                                               style:
                                                                   ElevatedButton

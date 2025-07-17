@@ -14,6 +14,7 @@ class User {
   static String warehouse = "";
   static String role = "";
   static String token = '';
+  static String typeTruck = '';
   static double lat = 00.000;
   static double lng = 00.000;
   static BluetoothInfo devicePrinter =
