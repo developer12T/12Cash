@@ -211,7 +211,8 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
     }
   }
 
-  Future<void> _reduceCart(CartList cart, StateSetter setModalState) async {
+  Future<void> _reduceCart(
+      CartList cart, StateSetter setModalState, String stockType) async {
     const duration = Duration(seconds: 1);
     try {
       _debouncer.debounce(
@@ -229,7 +230,8 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                   "${widget.storeDetail?.listStore[0].storeInfo.storeId}",
               "id": "${cart.id}",
               "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "unit": "${cart.unit}",
+              "stockType": stockType
             },
           );
           if (response.statusCode == 200) {
@@ -357,99 +359,6 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
       }
     } catch (e) {
       print("Error addCart: $e");
-    }
-  }
-
-  Future<void> _updateStock(
-      Product product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${selectedUnit}",
-            "productId": "${product.id}",
-            "qty": count,
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
-    } catch (e) {
-      print("Error in _updateStock $e");
-    }
-  }
-
-  Future<void> _updateStock2(
-      CartList product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${product.unit}",
-            "productId": "${product.id}",
-            "qty": "${product.qty.toInt()}",
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
-    } catch (e) {
-      print("Error in _updateStock $e");
-    }
-  }
-
-  Future<void> _updateStock3(
-      CartList product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${product.unit}",
-            "productId": "${product.id}",
-            "qty": 1,
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
-    } catch (e) {
-      print("Error in _updateStock $e");
     }
   }
 
@@ -1801,9 +1710,11 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                     context.loaderOverlay
                                                         .show();
                                                     await _addCart(product);
+                                                    await _getProduct();
                                                     await _getCart();
-                                                    await _updateStock(product,
-                                                        setModalState, "OUT");
+                                                    setModalState(() {
+                                                      stockQty -= count;
+                                                    });
                                                     context.loaderOverlay
                                                         .hide();
                                                   } else {
@@ -2072,16 +1983,14 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                                         .qty--;
                                                                   }
                                                                 });
-                                                                await _updateStock3(
-                                                                    cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    'IN');
 
                                                                 await _reduceCart(
                                                                     cartlist[
                                                                         index],
-                                                                    setModalState);
+                                                                    setModalState,
+                                                                    "IN");
+                                                                await _getCart();
+                                                                await _getProduct();
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2142,19 +2051,16 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                                 await _reduceCart(
                                                                     cartlist[
                                                                         index],
-                                                                    setModalState);
-
+                                                                    setModalState,
+                                                                    "OUT");
+                                                                await _getCart();
+                                                                await _getProduct();
                                                                 setModalState(
                                                                     () {
                                                                   cartlist[
                                                                           index]
                                                                       .qty++;
                                                                 });
-                                                                await _updateStock3(
-                                                                    cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    'OUT');
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2187,11 +2093,6 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
-                                                                await _updateStock2(
-                                                                    cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    "IN");
 
                                                                 setModalState(
                                                                   () {

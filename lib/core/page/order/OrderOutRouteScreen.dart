@@ -78,7 +78,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
 
   // ---------------------------------------------
   String latestMessage = '';
-  double count = 1;
+  int count = 1;
   double price = 0;
   double total = 0.00;
   double totalCart = 0.00;
@@ -221,12 +221,14 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     } catch (e) {}
   }
 
-  Future<void> _reduceCart(CartList cart, StateSetter setModalState) async {
+  Future<void> _reduceCart(
+      CartList cart, StateSetter setModalState, String stockType) async {
     const duration = Duration(seconds: 1);
-    try {
-      _debouncer.debounce(
-        duration: duration,
-        onDebounce: () async {
+
+    _debouncer.debounce(
+      duration: duration,
+      onDebounce: () async {
+        try {
           ApiService apiService = ApiService();
           await apiService.init();
           var response = await apiService.request(
@@ -238,11 +240,13 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
               "storeId": "${selectedStoreId}",
               "id": "${cart.id}",
               "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "unit": "${cart.unit}",
+              "stockType": stockType
             },
           );
           if (response.statusCode == 200) {
             await _getTotalCart(setModalState);
+
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -254,23 +258,60 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                 style: Styles.green18(context),
               ),
             );
+          } else {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.red,
+              type: ToastificationType.error,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "เกิดข้อผิดพลาด",
+                style: Styles.red18(context),
+              ),
+            );
           }
-        },
-      );
-    } catch (e) {
-      toastification.show(
-        autoCloseDuration: const Duration(seconds: 5),
-        context: context,
-        primaryColor: Colors.red,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flatColored,
-        title: Text(
-          "เกิดข้อผิดพลาด $e",
-          style: Styles.red18(context),
-        ),
-      );
-      print("Error $e");
-    }
+        } on ApiException catch (e) {
+          if (e.statusCode == 409) {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.orange,
+              type: ToastificationType.warning,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "ของในสต๊อกไม่เพียงพอ",
+                style: Styles.red18(context),
+              ),
+            );
+          } else {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.red,
+              type: ToastificationType.error,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "เกิดข้อผิดพลาด: ${e.message}",
+                style: Styles.red18(context),
+              ),
+            );
+          }
+        } catch (e) {
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.red,
+            type: ToastificationType.error,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "เกิดข้อผิดพลาด $e",
+              style: Styles.red18(context),
+            ),
+          );
+        }
+      },
+    );
   }
 
   Future<void> _getTotalCart(StateSetter setModalState) async {
@@ -330,68 +371,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
       }
     } catch (e) {
       print("Error in _getQty $e");
-    }
-  }
-
-  Future<void> _updateStock(
-      Product product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${selectedUnit}",
-            "productId": "${product.id}",
-            "qty": count,
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
-    } catch (e) {
-      print("Error in _updateStock $e");
-    }
-  }
-
-  Future<void> _updateStock2(
-      CartList product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${product.unit}",
-            "productId": "${product.id}",
-            "qty": "${product.qty.toInt()}",
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
-    } catch (e) {
-      print("Error in _updateStock $e");
     }
   }
 
@@ -1354,37 +1333,6 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     );
   }
 
-  Future<void> _updateStock3(
-      CartList product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${product.unit}",
-            "productId": "${product.id}",
-            "qty": 1,
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
-    } catch (e) {
-      print("Error in _updateStock $e");
-    }
-  }
-
   void _showProductSheet(BuildContext context, Product product) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -1797,8 +1745,11 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                         .show();
                                                     await _addCart(product);
                                                     await _getCart();
-                                                    await _updateStock(product,
-                                                        setModalState, "OUT");
+                                                    await _getProduct();
+                                                    setModalState(() {
+                                                      stockQty -= count;
+                                                    });
+
                                                     context.loaderOverlay
                                                         .hide();
                                                   } else {
@@ -1864,6 +1815,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   void _showCartSheet(BuildContext context, List<CartList> cartlist) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allow full height and scrolling
@@ -2070,12 +2022,9 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                 await _reduceCart(
                                                                     cartlist[
                                                                         index],
-                                                                    setModalState);
-                                                                await _updateStock3(
-                                                                    cartlist[
-                                                                        index],
                                                                     setModalState,
-                                                                    'IN');
+                                                                    "IN");
+                                                                await _getProduct();
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2133,23 +2082,24 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                             ElevatedButton(
                                                               onPressed:
                                                                   () async {
-                                                                await _reduceCart(
+                                                                if (cartlist[
+                                                                            index]
+                                                                        .qty <
                                                                     cartlist[
-                                                                        index],
-                                                                    setModalState);
-
-                                                                await _updateStock3(
+                                                                            index]
+                                                                        .maxQty) {
+                                                                  setModalState(
+                                                                      () {
                                                                     cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    'OUT');
-
-                                                                setModalState(
-                                                                    () {
-                                                                  cartlist[
-                                                                          index]
-                                                                      .qty++;
-                                                                });
+                                                                            index]
+                                                                        .qty++;
+                                                                  });
+                                                                  await _reduceCart(
+                                                                      cartlist[
+                                                                          index],
+                                                                      setModalState,
+                                                                      "OUT");
+                                                                }
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2182,11 +2132,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
-                                                                await _updateStock2(
-                                                                    cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    "IN");
+                                                                await _getProduct();
+
                                                                 setModalState(
                                                                   () {
                                                                     cartList.removeWhere((item) => (item.id ==
@@ -2425,13 +2372,13 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      count = countController.text.toDouble();
+                                      count = countController.text.toInt();
                                       total = price * count;
                                     });
 
                                     setModalState(
                                       () {
-                                        count = countController.text.toDouble();
+                                        count = countController.text.toInt();
                                         total = price * count;
                                       },
                                     );

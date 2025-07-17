@@ -343,7 +343,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
     }
   }
 
-  Future<void> _reduceCart(CartList cart, StateSetter setModalState) async {
+  Future<void> _reduceCart(
+      CartList cart, StateSetter setModalState, String stockType) async {
     const duration = Duration(seconds: 1);
     try {
       _debouncer.debounce(
@@ -360,7 +361,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
               "storeId": "${isStoreId}",
               "id": "${cart.id}",
               "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "unit": "${cart.unit}",
+              "stockType": stockType
             },
           );
           if (response.statusCode == 200) {
@@ -1532,7 +1534,10 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                 await _reduceCart(
                                                                     cartlist[
                                                                         index],
-                                                                    setModalState);
+                                                                    setModalState,
+                                                                    "IN");
+                                                                await _getProduct(
+                                                                    groupList);
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -1593,7 +1598,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                 await _reduceCart(
                                                                     cartlist[
                                                                         index],
-                                                                    setModalState);
+                                                                    setModalState,
+                                                                    "OUT");
 
                                                                 setModalState(
                                                                     () {
@@ -1601,6 +1607,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                           index]
                                                                       .qty++;
                                                                 });
+                                                                await _getProduct(
+                                                                    groupList);
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2143,6 +2151,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                     stockQty >= count) {
                                                   await _addCart(product);
                                                   await _getCart();
+                                                  await _getProduct(groupList);
                                                 } else {
                                                   toastification.show(
                                                     autoCloseDuration:

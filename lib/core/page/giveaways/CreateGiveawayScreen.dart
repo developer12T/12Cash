@@ -475,7 +475,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
     } catch (e) {}
   }
 
-  Future<void> _reduceCart(CartList cart) async {
+  Future<void> _reduceCart(CartList cart, String stockType) async {
     const duration = Duration(seconds: 1);
     try {
       _debouncer.debounce(
@@ -492,7 +492,8 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
               "storeId": "${widget.storeId}",
               "id": "${cart.id}",
               "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "unit": "${cart.unit}",
+              "stockType": stockType
             },
           );
           if (response.statusCode == 200) {
@@ -524,48 +525,6 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
           style: Styles.red18(context),
         ),
       );
-      print("Error $e");
-    }
-  }
-
-  Future<void> _addCartDu(CartList cart) async {
-    const duration = Duration(seconds: 1);
-    try {
-      _debouncer.debounce(
-        duration: duration,
-        onDebounce: () async {
-          ApiService apiService = ApiService();
-          await apiService.init();
-          var response = await apiService.request(
-            endpoint: 'api/cash/cart/add',
-            method: 'POST',
-            body: {
-              "type": "sale",
-              "area": "${User.area}",
-              "storeId": "${widget.storeId}",
-              "id": "${cart.id}",
-              "qty": cart.qty,
-              "unit": "${cart.unit}"
-            },
-          );
-
-          if (response.statusCode == 200) {
-            await _getCart();
-            toastification.show(
-              autoCloseDuration: const Duration(seconds: 5),
-              context: context,
-              primaryColor: Colors.green,
-              type: ToastificationType.success,
-              style: ToastificationStyle.flatColored,
-              title: Text(
-                "เพิ่มลงในตะกร้าสําเร็จ",
-                style: Styles.green18(context),
-              ),
-            );
-          }
-        },
-      );
-    } catch (e) {
       print("Error $e");
     }
   }
@@ -985,7 +944,8 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                                                                   });
                                                                   await _reduceCart(
                                                                       cartList[
-                                                                          index]);
+                                                                          index],
+                                                                      "IN");
                                                                 },
                                                                 style: ElevatedButton
                                                                     .styleFrom(
@@ -1047,7 +1007,9 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                                                                     () async {
                                                                   await _reduceCart(
                                                                       cartList[
-                                                                          index]);
+                                                                          index],
+                                                                      "OUT");
+
                                                                   setState(() {
                                                                     cartList[
                                                                             index]

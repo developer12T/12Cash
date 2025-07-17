@@ -160,37 +160,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     }
   }
 
-  Future<void> _updateStock3(
-      ListSaleProduct product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${product.unit}",
-            "productId": "${product.id}",
-            "qty": 1,
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
-    } catch (e) {
-      print("Error in _updateStock $e");
-    }
-  }
-
   Future<void> _addCart(Product product) async {
     try {
       ApiService apiService = ApiService();
@@ -344,8 +313,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     }
   }
 
-  Future<void> _reduceCart(
-      Map<String, dynamic> cart, StateSetter setModalState) async {
+  Future<void> _reduceCart(Map<String, dynamic> cart, StateSetter setModalState,
+      String stockType) async {
     const duration = Duration(seconds: 1);
     try {
       _debouncer.debounce(
@@ -368,7 +337,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                     ? "condition"
                     : "${cart['condition']}": "${cart['condition']}",
                 cart['expireDate'] != null ? "expire" : "${cart['expireDate']}":
-                    "${cart['expireDate']}"
+                    "${cart['expireDate']}",
+                "stockType": stockType
               },
             );
             if (response.statusCode == 200) {
@@ -631,37 +601,8 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           flavourList = [];
         });
       }
-    } catch (e) {}
-  }
-
-  Future<void> _updateStock(
-      Product product, StateSetter setModalState, String type) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-          endpoint: 'api/cash/cart/updateStock',
-          method: 'POST',
-          body: {
-            "area": "${User.area}",
-            "period": "${period}",
-            "unit": "${selectedUnit}",
-            "productId": "${product.id}",
-            "qty": count,
-            "type": type
-          });
-
-      if (response.statusCode == 200) {
-        setModalState(
-          () {
-            stockQty -= count.toInt();
-          },
-        );
-      }
-      print(response.data['data']);
     } catch (e) {
-      print("Error in _updateStock $e");
+      print("Error _getFliterGroup $e");
     }
   }
 
@@ -2200,8 +2141,11 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                   context.loaderOverlay.show();
                                                   // print(selectedUnit);
                                                   // print(selectedSize);
+                                                  context.loaderOverlay.show();
                                                   await _getQty(
                                                       product, setModalState);
+                                                  if (!mounted)
+                                                    return; // เพิ่มบรรทัดนี้!
                                                   context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
@@ -2393,8 +2337,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                         .show();
                                                     await _addCart(product);
                                                     await _getCart();
-                                                    await _updateStock(product,
-                                                        setModalState, "OUT");
+
                                                     context.loaderOverlay
                                                         .hide();
                                                   } else {
@@ -2723,24 +2666,10 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                               "items"]
                                                                           [
                                                                           index],
-                                                                      setModalState);
-
-                                                                  await _updateStock3(
-                                                                    ListSaleProduct.fromJson(
-                                                                        cartList["items"]
-                                                                            [
-                                                                            index]),
-                                                                    setModalState,
-                                                                    'IN',
-                                                                  );
-
-                                                                  // await _updateStock3(
-                                                                  //     cartList[
-                                                                  //             "items"]
-                                                                  //         [
-                                                                  //         index],
-                                                                  //     setModalState,
-                                                                  //     'IN');
+                                                                      setModalState,
+                                                                      "IN");
+                                                                  await _getProduct(
+                                                                      isSelect);
                                                                 }
                                                               },
                                                               style:
@@ -2810,14 +2739,10 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                                     cartList[
                                                                             "items"]
                                                                         [index],
-                                                                    setModalState);
-
-                                                                // await _updateStock3(
-                                                                //     cartList[
-                                                                //             "items"]
-                                                                //         [index],
-                                                                //     setModalState,
-                                                                //     'OUT');
+                                                                    setModalState,
+                                                                    "OUT");
+                                                                await _getProduct(
+                                                                    isSelect);
                                                               },
                                                               style:
                                                                   ElevatedButton

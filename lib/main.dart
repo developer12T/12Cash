@@ -64,6 +64,8 @@ void main() async {
     await initializeDateFormatting('th', null);
     await dotenv.load(fileName: ".env");
     await ScreenUtil.ensureScreenSize();
+    // Hide status bar + navigation bar for true fullscreen
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     // final hasPermissions = await FlutterBackground.initialize(
     //   androidConfig: const FlutterBackgroundAndroidConfig(
     //     notificationTitle: "Background Service",

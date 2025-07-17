@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -94,6 +96,10 @@ class ApiService {
         errorMessage = 'Unauthorized. Please log in again.';
       } else if (statusCode == 500) {
         errorMessage = 'Server error. Please try again later.';
+      } else if (statusCode == 404) {
+        errorMessage = 'Not Found';
+      } else if (statusCode == 409) {
+        errorMessage = 'Stock is not enough. Please try again later.';
       }
 
       // Throw a custom exception

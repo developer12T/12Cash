@@ -31,12 +31,13 @@ class _UtilzedDetailState extends State<UtilzedDetail> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   WaterFilledRectangle(
-                    isWithdraw: true,
+                    fillFreePercentage: 0.3,
+                    layoutType: WaterRectLayoutType.threeSection,
                     width: screenWidth / 5,
                     height: screenWidth / 9,
                     depth: screenWidth / 6,
-                    fillStockPercentage: 0.75,
-                    fillWithdrawPercentage: 0.40,
+                    fillStockPercentage: 0.1,
+                    fillWithdrawPercentage: 0.1,
                   ),
                 ],
               ),

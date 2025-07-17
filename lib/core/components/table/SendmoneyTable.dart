@@ -101,7 +101,9 @@ class SendmoneyTableShow extends StatelessWidget {
                                     : index == 4
                                         ? cell.toDouble() > 0
                                             ? Colors.green
-                                            : Colors.red
+                                            : cell.toDouble() == 0
+                                                ? Colors.grey
+                                                : Colors.red
                                         : Colors.white,
                                 border: Border.all(
                                     color: Colors.black), // Border added here

@@ -234,7 +234,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         },
       );
       if (response.statusCode == 200) {
-        // await _updateStock();
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,

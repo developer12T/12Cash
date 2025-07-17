@@ -3,28 +3,32 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class WaterFilledRectangle extends StatefulWidget {
-  final bool isWithdraw;
+  final WaterRectLayoutType layoutType;
   final double width;
   final double height;
   final double depth;
   final double fillStockPercentage;
   final double fillWithdrawPercentage;
+  final double fillFreePercentage; // เพิ่มมาใช้กับสามส่วน
   final Color borderColor;
   final Color stockColor;
   final Color withdrawColor;
+  final Color freeColor;
   final TextStyle? textStyle;
 
   const WaterFilledRectangle({
     Key? key,
-    required this.isWithdraw,
+    required this.layoutType,
     required this.width,
     required this.height,
     required this.depth,
     required this.fillStockPercentage,
     required this.fillWithdrawPercentage,
+    required this.fillFreePercentage,
     this.borderColor = Colors.black,
-    this.stockColor = Colors.green,
-    this.withdrawColor = Colors.red,
+    this.stockColor = Colors.red,
+    this.withdrawColor = Colors.amber,
+    this.freeColor = Colors.green,
     this.textStyle,
   }) : super(key: key);
 
@@ -46,12 +50,6 @@ class _WaterFilledRectangleState extends State<WaterFilledRectangle>
     )..repeat();
   }
 
-  void _rotateRectangle() {
-    setState(() {
-      _rotationAngle += pi / 8; // Increment angle by 22.5 degrees
-    });
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -64,64 +62,64 @@ class _WaterFilledRectangleState extends State<WaterFilledRectangle>
     return Column(
       children: [
         AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return CustomPaint(
-                size: Size(widget.width * 2, widget.height * 2),
-                painter: RectanglePainter(
-                  isWithdraw: widget.isWithdraw,
-                  // angle: _controller.value * 2 * pi,
-                  width: widget.width,
-                  height: widget.height,
-                  depth: widget.depth,
-                  fillStockPercentage: widget.fillStockPercentage,
-                  rotationAngle: _rotationAngle,
-                  // rotationAngle: _controller.value * 2 * pi,
-                  borderColor: widget.borderColor,
-                  stockColor: widget.stockColor.withOpacity(0.5),
-                  withdrawColor: widget.withdrawColor.withOpacity(0.5),
-                  textStyle: widget.textStyle,
-                  context: context,
-                ),
-              );
-            }),
-        SizedBox(
-            height: screenWidth /
-                8), // Add spacing between the rectangle and button
-        // ElevatedButton(
-        //   onPressed: _rotateRectangle,
-        //   child: const Text("Rotate Rectangle"),
-        // ),
+          animation: _controller,
+          builder: (context, child) {
+            return CustomPaint(
+              size: Size(widget.width * 2, widget.height * 2),
+              painter: RectanglePainter(
+                layoutType: widget.layoutType,
+                width: widget.width,
+                height: widget.height,
+                depth: widget.depth,
+                fillStockPercentage: widget.fillStockPercentage,
+                fillWithdrawPercentage: widget.fillWithdrawPercentage,
+                fillFreePercentage: widget.fillFreePercentage,
+                rotationAngle: _rotationAngle,
+                borderColor: widget.borderColor,
+                stockColor: widget.stockColor.withOpacity(0.5),
+                withdrawColor: widget.withdrawColor.withOpacity(0.5),
+                freeColor: widget.freeColor.withOpacity(0.5),
+                textStyle: widget.textStyle,
+                context: context,
+              ),
+            );
+          },
+        ),
+        SizedBox(height: screenWidth / 8),
       ],
     );
   }
 }
 
 class RectanglePainter extends CustomPainter {
-  // final double angle;
-  final bool isWithdraw;
+  final WaterRectLayoutType layoutType;
   final double width;
   final double height;
   final double depth;
   final double fillStockPercentage;
+  final double fillWithdrawPercentage;
+  final double fillFreePercentage;
   final double rotationAngle;
   final Color borderColor;
   final Color stockColor;
   final Color withdrawColor;
+  final Color freeColor;
   final TextStyle? textStyle;
   final BuildContext context;
 
   RectanglePainter({
-    // required this.angle,
-    required this.isWithdraw,
+    required this.layoutType,
     required this.width,
     required this.height,
     required this.depth,
     required this.fillStockPercentage,
+    required this.fillWithdrawPercentage,
+    required this.fillFreePercentage,
     required this.rotationAngle,
     required this.borderColor,
     required this.stockColor,
     required this.withdrawColor,
+    required this.freeColor,
     this.textStyle,
     required this.context,
   });
@@ -144,14 +142,10 @@ class RectanglePainter extends CustomPainter {
       Offset3D(-width, height, -depth),
     ];
 
-    // Apply rotation to each vertex
     final rotatedVertices =
         vertices.map((v) => rotateY(v, rotationAngle)).toList();
-
-    // Perspective projection
     final projected = rotatedVertices.map((v) => project3D(v, size)).toList();
 
-    // Draw edges
     void drawEdge(int i, int j, Color color) {
       paint.color = color;
       canvas.drawLine(projected[i], projected[j], paint);
@@ -169,196 +163,233 @@ class RectanglePainter extends CustomPainter {
       }
     }
 
-    // Draw water
-    // final freeHeight = (height * 2) * (1 - fillStockPercentage);
+    // *** Main logic: draw different layouts ***
+    switch (layoutType) {
+      case WaterRectLayoutType.stockOnly:
+        _drawStockSection(canvas, size, paint);
+        break;
+      case WaterRectLayoutType.withdrawAndStock:
+        _drawWithdrawAndStockSection(canvas, size, paint);
+        break;
+      case WaterRectLayoutType.threeSection:
+        _drawThreeSection(canvas, size, paint);
+        break;
+    }
+  }
 
-    if (isWithdraw) {
-      final freeHeight = (height * 2) * 0.5; // 60
+  // ------------ DRAW LOGICS FOR EACH LAYOUT --------------
 
-      final wateHeight = (height * 2) * 0.5; // 50
+  void _drawStockSection(Canvas canvas, Size size, Paint paint) {
+    // วาดเหมือน logic เดิมใน else { ... }
+    final wateHeight = (height * 2) * fillStockPercentage.clamp(0.0, 1.0);
 
-      final waterVertices = [
-        Offset3D(-width, -height, depth), // Water vertices
-        Offset3D(width, -height, depth), // Water vertices
+    final waterVerticesStock = [
+      Offset3D(-width, height - wateHeight, depth),
+      Offset3D(width, height - wateHeight, depth),
+      Offset3D(width, height, depth),
+      Offset3D(-width, height, depth),
+      Offset3D(-width, height - wateHeight, -depth),
+      Offset3D(width, height - wateHeight, -depth),
+      Offset3D(width, height, -depth),
+      Offset3D(-width, height, -depth),
+    ];
 
-        Offset3D(width, height - freeHeight, depth),
-        Offset3D(-width, height - freeHeight, depth),
+    final rotatedWaterVerticesStock =
+        waterVerticesStock.map((v) => rotateY(v, rotationAngle)).toList();
+    final projectedWaterStock =
+        rotatedWaterVerticesStock.map((v) => project3D(v, size)).toList();
 
-        Offset3D(-width, -height, -depth), // Water vertices
-        Offset3D(width, -height, -depth), // Water vertices
+    final waterFacesStock = [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [0, 1, 5, 4],
+      [3, 2, 6, 7],
+      [0, 3, 7, 4],
+      [1, 2, 6, 5],
+    ];
+    for (final face in waterFacesStock) {
+      final path = Path()
+        ..moveTo(
+            projectedWaterStock[face[0]].dx, projectedWaterStock[face[0]].dy)
+        ..lineTo(
+            projectedWaterStock[face[1]].dx, projectedWaterStock[face[1]].dy)
+        ..lineTo(
+            projectedWaterStock[face[2]].dx, projectedWaterStock[face[2]].dy)
+        ..lineTo(
+            projectedWaterStock[face[3]].dx, projectedWaterStock[face[3]].dy)
+        ..close();
 
-        Offset3D(width, height - freeHeight, -depth),
-        Offset3D(-width, height - freeHeight, -depth),
-      ];
+      paint.style = PaintingStyle.fill;
+      paint.color = stockColor;
+      canvas.drawPath(path, paint);
+    }
 
-      final waterVertices2 = [
-        Offset3D(-width, height - wateHeight, depth), // Water vertices
-        Offset3D(width, height - wateHeight, depth), // Water vertices
+    final percentageText = "${(fillStockPercentage * 100).toInt()}%";
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: "คลัง: $percentageText",
+        style: Styles.black24(context),
+      ),
+      textDirection: TextDirection.ltr,
+    );
 
-        Offset3D(width, height, depth),
-        Offset3D(-width, height, depth),
+    textPainter.layout();
+    final textX = size.width / 2 - textPainter.width / 2;
+    final textY = size.height / 2 + height / 4 - textPainter.height / 2;
+    textPainter.paint(canvas, Offset(textX, textY));
+  }
 
-        Offset3D(-width, height - wateHeight, -depth), // Water vertices
-        Offset3D(width, height - wateHeight, -depth), // Water vertices
+  void _drawWithdrawAndStockSection(Canvas canvas, Size size, Paint paint) {
+    // ใช้ logic เดิมใน if (isWithdraw) { ... }
+    final stockHeight = (height * 2) * fillStockPercentage.clamp(0.0, 1.0);
+    final withdrawHeight =
+        (height * 2) * fillWithdrawPercentage.clamp(0.0, 1.0);
 
-        Offset3D(width, height, -depth),
-        Offset3D(-width, height, -depth),
-      ];
+    // วาด withdraw + วาด stock ซ้อนกัน
+    _drawSection(
+      canvas,
+      size,
+      paint,
+      color: withdrawColor,
+      topY: height - (stockHeight + withdrawHeight),
+      bottomY: height - stockHeight,
+    );
+    _drawSection(
+      canvas,
+      size,
+      paint,
+      color: stockColor,
+      topY: height - stockHeight,
+      bottomY: height,
+    );
 
-      final rotatedWaterVertices =
-          waterVertices.map((v) => rotateY(v, rotationAngle)).toList();
-      final projectedWater =
-          rotatedWaterVertices.map((v) => project3D(v, size)).toList();
+    // Draw label
+    final percentageText = "${(fillStockPercentage * 100).toInt()}%";
+    final percentageText2 =
+        "${((fillStockPercentage + fillWithdrawPercentage) * 100).toInt()}%";
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: "คลัง: $percentageText",
+        style: Styles.black24(context),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    final textPainter2 = TextPainter(
+      text: TextSpan(
+        text: "เบิก + คลัง: $percentageText2",
+        style: Styles.black24(context),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter2.layout();
 
-      final waterFaces = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [0, 1, 5, 4],
-        [3, 2, 6, 7],
-        [0, 3, 7, 4],
-        [1, 2, 6, 5],
-      ];
+    final textX = size.width / 2 - textPainter.width / 2;
+    final textY = size.height / 2 + height / 4 - textPainter.height / 2;
+    textPainter.paint(canvas, Offset(textX, textY + 20));
+    textPainter2.paint(canvas, Offset(textX - 50, textY - 50));
+  }
 
-      final rotatedWaterVertices2 =
-          waterVertices2.map((v) => rotateY(v, rotationAngle)).toList();
-      final projectedWater2 =
-          rotatedWaterVertices2.map((v) => project3D(v, size)).toList();
+  void _drawThreeSection(Canvas canvas, Size size, Paint paint) {
+    // แบ่งสามส่วน: stock, withdraw, free
+    final stockHeight = (height * 2) * fillStockPercentage.clamp(0.0, 1.0);
+    final withdrawHeight =
+        (height * 2) * fillWithdrawPercentage.clamp(0.0, 1.0);
+    final freeHeight = (height * 2) * fillFreePercentage.clamp(0.0, 1.0);
 
-      final waterFaces2 = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [0, 1, 5, 4],
-        [3, 2, 6, 7],
-        [0, 3, 7, 4],
-        [1, 2, 6, 5],
-      ];
+    double currentY = height - (stockHeight + withdrawHeight + freeHeight);
 
-      for (final face in waterFaces) {
-        final path = Path()
-          ..moveTo(projectedWater[face[0]].dx, projectedWater[face[0]].dy)
-          ..lineTo(projectedWater[face[1]].dx, projectedWater[face[1]].dy)
-          ..lineTo(projectedWater[face[2]].dx, projectedWater[face[2]].dy)
-          ..lineTo(projectedWater[face[3]].dx, projectedWater[face[3]].dy)
-          ..close();
+    // วาด free (บนสุด)
+    _drawSection(
+      canvas,
+      size,
+      paint,
+      color: freeColor,
+      topY: currentY,
+      bottomY: currentY + freeHeight,
+    );
+    currentY += freeHeight;
 
-        paint.style = PaintingStyle.fill;
-        paint.color = withdrawColor;
-        canvas.drawPath(path, paint);
-      }
+    // วาด withdraw (กลาง)
+    _drawSection(
+      canvas,
+      size,
+      paint,
+      color: withdrawColor,
+      topY: currentY,
+      bottomY: currentY + withdrawHeight,
+    );
+    currentY += withdrawHeight;
 
-      for (final face in waterFaces2) {
-        final path = Path()
-          ..moveTo(projectedWater2[face[0]].dx, projectedWater2[face[0]].dy)
-          ..lineTo(projectedWater2[face[1]].dx, projectedWater2[face[1]].dy)
-          ..lineTo(projectedWater2[face[2]].dx, projectedWater2[face[2]].dy)
-          ..lineTo(projectedWater2[face[3]].dx, projectedWater2[face[3]].dy)
-          ..close();
+    // วาด stock (ล่างสุด)
+    _drawSection(
+      canvas,
+      size,
+      paint,
+      color: stockColor,
+      topY: currentY,
+      bottomY: currentY + stockHeight,
+    );
 
-        paint.style = PaintingStyle.fill;
-        paint.color = stockColor;
-        canvas.drawPath(path, paint);
-      }
+    // Draw labels
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text:
+            "Free: ${(fillFreePercentage * 100).toInt()}%\nเบิก: ${(fillWithdrawPercentage * 100).toInt()}%\nคลัง: ${(fillStockPercentage * 100).toInt()}%",
+        style: Styles.black18(context),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+    textPainter.layout();
+    final textX = size.width / 2 - textPainter.width / 2;
+    final textY = size.height / 2 - textPainter.height / 2;
+    textPainter.paint(canvas, Offset(textX, textY));
+  }
 
-      // Draw "XX%" text
-      final percentageText = "${(fillStockPercentage * 100).toInt()}%";
-      // final percentageText2 = "${(fillStockPercentage + 0.4 * 100).toInt()}%";
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: "คลัง: $percentageText",
-          style: fillStockPercentage > 0.39
-              ? Styles.black24(context)
-              : Styles.black24(context),
-        ),
-        textDirection: TextDirection.ltr,
-      );
+  void _drawSection(
+    Canvas canvas,
+    Size size,
+    Paint paint, {
+    required Color color,
+    required double topY,
+    required double bottomY,
+  }) {
+    // Helper วาดกล่อง section ย่อย
+    final sectionVertices = [
+      Offset3D(-width, topY, depth),
+      Offset3D(width, topY, depth),
+      Offset3D(width, bottomY, depth),
+      Offset3D(-width, bottomY, depth),
+      Offset3D(-width, topY, -depth),
+      Offset3D(width, topY, -depth),
+      Offset3D(width, bottomY, -depth),
+      Offset3D(-width, bottomY, -depth),
+    ];
 
-      final textPainter2 = TextPainter(
-        text: TextSpan(
-          text: "เบิก + คลัง: 80%",
-          style: fillStockPercentage > 0.39
-              ? Styles.black24(context)
-              : Styles.black24(context),
-        ),
-        textDirection: TextDirection.ltr,
-      );
+    final rotatedSection =
+        sectionVertices.map((v) => rotateY(v, rotationAngle)).toList();
+    final projectedSection =
+        rotatedSection.map((v) => project3D(v, size)).toList();
 
-      textPainter.layout();
-      textPainter2.layout();
-
-      final textX = size.width / 2 - textPainter.width / 2;
-      final textY = size.height / 2 + height / 4 - textPainter.height / 2;
-
-      textPainter.paint(
-        canvas,
-        Offset(textX, textY + 20),
-      );
-      textPainter2.paint(
-        canvas,
-        Offset(textX - 50, textY - 50),
-      );
-    } else {
-      final wateHeight = (height * 2) * fillStockPercentage; // 50
-      final waterVertices2 = [
-        Offset3D(-width, height - wateHeight, depth), // Water vertices
-        Offset3D(width, height - wateHeight, depth), // Water vertices
-
-        Offset3D(width, height, depth),
-        Offset3D(-width, height, depth),
-
-        Offset3D(-width, height - wateHeight, -depth), // Water vertices
-        Offset3D(width, height - wateHeight, -depth), // Water vertices
-
-        Offset3D(width, height, -depth),
-        Offset3D(-width, height, -depth),
-      ];
-      final rotatedWaterVertices2 =
-          waterVertices2.map((v) => rotateY(v, rotationAngle)).toList();
-      final projectedWater2 =
-          rotatedWaterVertices2.map((v) => project3D(v, size)).toList();
-
-      final waterFaces2 = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [0, 1, 5, 4],
-        [3, 2, 6, 7],
-        [0, 3, 7, 4],
-        [1, 2, 6, 5],
-      ];
-      for (final face in waterFaces2) {
-        final path = Path()
-          ..moveTo(projectedWater2[face[0]].dx, projectedWater2[face[0]].dy)
-          ..lineTo(projectedWater2[face[1]].dx, projectedWater2[face[1]].dy)
-          ..lineTo(projectedWater2[face[2]].dx, projectedWater2[face[2]].dy)
-          ..lineTo(projectedWater2[face[3]].dx, projectedWater2[face[3]].dy)
-          ..close();
-
-        paint.style = PaintingStyle.fill;
-        paint.color = stockColor;
-        canvas.drawPath(path, paint);
-      }
-
-      // Draw "XX%" text
-      final percentageText = "${(fillStockPercentage * 100).toInt()}%";
-      // final percentageText2 = "${(fillStockPercentage + 0.4 * 100).toInt()}%";
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: "คลัง: $percentageText",
-          style: fillStockPercentage > 0.39
-              ? Styles.black24(context)
-              : Styles.black24(context),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-
-      textPainter.layout();
-
-      final textX = size.width / 2 - textPainter.width / 2;
-      final textY = size.height / 2 + height / 4 - textPainter.height / 2;
-
-      textPainter.paint(
-        canvas,
-        Offset(textX, textY),
-      );
+    final sectionFaces = [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [0, 1, 5, 4],
+      [3, 2, 6, 7],
+      [0, 3, 7, 4],
+      [1, 2, 6, 5],
+    ];
+    for (final face in sectionFaces) {
+      final path = Path()
+        ..moveTo(projectedSection[face[0]].dx, projectedSection[face[0]].dy)
+        ..lineTo(projectedSection[face[1]].dx, projectedSection[face[1]].dy)
+        ..lineTo(projectedSection[face[2]].dx, projectedSection[face[2]].dy)
+        ..lineTo(projectedSection[face[3]].dx, projectedSection[face[3]].dy)
+        ..close();
+      paint.style = PaintingStyle.fill;
+      paint.color = color;
+      canvas.drawPath(path, paint);
     }
   }
 
@@ -388,4 +419,10 @@ class Offset3D {
   final double x, y, z;
 
   Offset3D(this.x, this.y, this.z);
+}
+
+enum WaterRectLayoutType {
+  stockOnly,
+  withdrawAndStock,
+  threeSection,
 }

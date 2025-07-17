@@ -52,12 +52,13 @@ class _WeightCudeCardState extends State<WeightCudeCard> {
                   // );
                 },
                 child: WaterFilledRectangle(
-                  isWithdraw: true,
+                  layoutType: WaterRectLayoutType.threeSection,
                   width: screenWidth / 5,
                   height: screenWidth / 9,
                   depth: screenWidth / 6,
-                  fillStockPercentage: 0.75,
-                  fillWithdrawPercentage: 0.40,
+                  fillFreePercentage: 0.3,
+                  fillStockPercentage: 0.3,
+                  fillWithdrawPercentage: 0.4,
                 ),
               ),
             ),

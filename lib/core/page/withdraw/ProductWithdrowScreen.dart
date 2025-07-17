@@ -164,7 +164,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
               "area": "${User.area}",
               "id": "${cart.id}",
               "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "unit": "${cart.unit}",
             },
           );
           if (response.statusCode == 200) {

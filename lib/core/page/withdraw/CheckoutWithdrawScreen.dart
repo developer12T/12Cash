@@ -133,7 +133,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
               "area": "${User.area}",
               "id": "${cart.id}",
               "qty": cart.qty,
-              "unit": "${cart.unit}"
+              "unit": "${cart.unit}",
             },
           );
           if (response.statusCode == 200) {
@@ -994,8 +994,9 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                                         }
                                                                       });
                                                                       await _reduceCart(
-                                                                          cartList[
-                                                                              index]);
+                                                                        cartList[
+                                                                            index],
+                                                                      );
                                                                     },
                                                                     style: ElevatedButton
                                                                         .styleFrom(
