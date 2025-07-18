@@ -517,7 +517,7 @@ class _AdjustStockState extends State<AdjustStock> {
                               ),
                             ],
                           ),
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(

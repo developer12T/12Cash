@@ -214,10 +214,11 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
   Future<void> _reduceCart(
       CartList cart, StateSetter setModalState, String stockType) async {
     const duration = Duration(seconds: 1);
-    try {
-      _debouncer.debounce(
-        duration: duration,
-        onDebounce: () async {
+
+    _debouncer.debounce(
+      duration: duration,
+      onDebounce: () async {
+        try {
           ApiService apiService = ApiService();
           await apiService.init();
           var response = await apiService.request(
@@ -226,8 +227,7 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
             body: {
               "type": "sale",
               "area": "${User.area}",
-              "storeId":
-                  "${widget.storeDetail?.listStore[0].storeInfo.storeId}",
+              "storeId": "${selectedStoreId}",
               "id": "${cart.id}",
               "qty": cart.qty,
               "unit": "${cart.unit}",
@@ -235,6 +235,8 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
             },
           );
           if (response.statusCode == 200) {
+            await _getTotalCart(setModalState);
+            await _getProduct();
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -246,25 +248,60 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                 style: Styles.green18(context),
               ),
             );
-            await _getTotalCart(setModalState);
-            await _getProduct();
+          } else {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.red,
+              type: ToastificationType.error,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "เกิดข้อผิดพลาด",
+                style: Styles.red18(context),
+              ),
+            );
           }
-        },
-      );
-    } catch (e) {
-      toastification.show(
-        autoCloseDuration: const Duration(seconds: 5),
-        context: context,
-        primaryColor: Colors.red,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flatColored,
-        title: Text(
-          "เกิดข้อผิดพลาด $e",
-          style: Styles.red18(context),
-        ),
-      );
-      print("Error reduceCart: $e");
-    }
+        } on ApiException catch (e) {
+          if (e.statusCode == 409) {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.orange,
+              type: ToastificationType.warning,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "ของในสต๊อกไม่เพียงพอ",
+                style: Styles.red18(context),
+              ),
+            );
+          } else {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.red,
+              type: ToastificationType.error,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "เกิดข้อผิดพลาด: ${e.message}",
+                style: Styles.red18(context),
+              ),
+            );
+          }
+        } catch (e) {
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.red,
+            type: ToastificationType.error,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "เกิดข้อผิดพลาด $e",
+              style: Styles.red18(context),
+            ),
+          );
+        }
+      },
+    );
   }
 
   Future<void> _getTotalCart(StateSetter setModalState) async {

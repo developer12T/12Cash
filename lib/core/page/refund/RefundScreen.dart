@@ -647,6 +647,10 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     }
   }
 
+  bool isInteger(String input) {
+    return int.tryParse(input) != null;
+  }
+
   Future<void> _getFliterBrand() async {
     try {
       ApiService apiService = ApiService();
@@ -1473,6 +1477,181 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           );
         },
       ),
+    );
+  }
+
+  void _showCountSheet(
+    BuildContext context,
+  ) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    // double screenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              // Icon(
+                              //   Icons.shopping_bag_outlined,
+                              //   color: Colors.white,
+                              //   size: 30,
+                              // ),
+                              Text('ใส่จำนวน', style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _getCart();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            autofocus: true,
+                            style: Styles.black18(context),
+                            controller: countController,
+                            maxLines: 1,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                  width: 1,
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.all(16),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(8),
+                                    elevation: 0, // Disable shadow
+                                    shadowColor: Colors
+                                        .transparent, // Ensure no shadow color
+                                    backgroundColor: Styles.primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        side: BorderSide.none),
+                                  ),
+                                  onPressed: () {
+                                    if (isInteger(countController.text)) {
+                                      setState(() {
+                                        double countD =
+                                            countController.text.toDouble();
+                                        count = countD.toInt();
+                                        total = price * count;
+                                      });
+                                      setModalState(
+                                        () {
+                                          double countD =
+                                              countController.text.toDouble();
+                                          count = countD.toInt();
+                                          total = price * count;
+                                        },
+                                      );
+                                      Navigator.pop(context);
+                                    } else {
+                                      toastification.show(
+                                        autoCloseDuration:
+                                            const Duration(seconds: 5),
+                                        context: context,
+                                        primaryColor: Colors.red,
+                                        type: ToastificationType.error,
+                                        style: ToastificationStyle.flatColored,
+                                        title: Text(
+                                          "กรุณาใส่จำนวนให้ถูกต้อง",
+                                          style: Styles.red18(context),
+                                        ),
+                                      );
+                                    }
+                                    // if (countController.text.isNotEmpty) {
+                                    //   double countD =
+                                    //       countController.text.toDouble();
+                                    //   if (countD > 0) {
+
+                                    //   } else {
+                                    //     toastification.show(
+                                    //       autoCloseDuration:
+                                    //           const Duration(seconds: 5),
+                                    //       context: context,
+                                    //       primaryColor: Colors.red,
+                                    //       type: ToastificationType.error,
+                                    //       style:
+                                    //           ToastificationStyle.flatColored,
+                                    //       title: Text(
+                                    //         "กรุณาใส่จำนวนให้ถูกต้อง",
+                                    //         style: Styles.red18(context),
+                                    //       ),
+                                    //     );
+                                    //   }
+                                    // } else {
+                                    //   Navigator.pop(context);
+                                    // }
+                                  },
+                                  child: Text(
+                                    "ตกลง",
+                                    style: Styles.white18(context),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
     );
   }
 
@@ -2303,22 +2482,29 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               color: Colors.grey,
                                             ), // Example
                                           ),
-                                          Container(
-                                            padding: EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.grey,
-                                                width: 1,
+                                          GestureDetector(
+                                            onTap: () {
+                                              _showCountSheet(
+                                                context,
+                                              );
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.grey,
+                                                  width: 1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
                                               ),
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                            width: 75,
-                                            child: Text(
-                                              '${count}',
-                                              // 'awd',
-                                              textAlign: TextAlign.center,
-                                              style: Styles.black18(context),
+                                              width: 75,
+                                              child: Text(
+                                                '${count}',
+                                                // 'awd',
+                                                textAlign: TextAlign.center,
+                                                style: Styles.black18(context),
+                                              ),
                                             ),
                                           ),
                                           ElevatedButton(
@@ -2960,133 +3146,6 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     );
   }
 
-  void _showCountSheet(
-    BuildContext context,
-  ) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow full height and scrolling
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return DraggableScrollableSheet(
-            expand: false, // Allows dragging but does not expand fully
-            initialChildSize: 0.6, // 60% of screen height
-            minChildSize: 0.4,
-            maxChildSize: 0.9,
-            builder: (context, scrollController) {
-              return Container(
-                width: screenWidth * 0.95,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Styles.primaryColor,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                      ),
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              // Icon(
-                              //   Icons.shopping_bag_outlined,
-                              //   color: Colors.white,
-                              //   size: 30,
-                              // ),
-                              Text('ใส่จำนวน', style: Styles.white24(context)),
-                            ],
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _getCart();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          TextField(
-                            autofocus: true,
-                            style: Styles.black18(context),
-                            controller: countController,
-                            maxLines: 1,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color: Colors.grey[300]!,
-                                  width: 1,
-                                ),
-                              ),
-                              contentPadding: EdgeInsets.all(16),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.all(8),
-                                    elevation: 0, // Disable shadow
-                                    shadowColor: Colors
-                                        .transparent, // Ensure no shadow color
-                                    backgroundColor: Styles.primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                        side: BorderSide.none),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      count = countController.text.toInt();
-                                      total = price * count;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text(
-                                    "ตกลง",
-                                    style: Styles.white18(context),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
-    );
-  }
-
   void _showAddressSheet(BuildContext context) {
     TextEditingController searchController = TextEditingController();
     List<Store> filteredStores = List.from(storeList); // Copy of storeList
@@ -3369,58 +3428,4 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
       },
     );
   }
-
-  // void _showDatePicker(BuildContext context, StateSetter setModalState) async {
-  //   final DateTime? pickedDate = await showDatePicker(
-  //     locale: Locale('th', 'TH'),
-  //     context: context,
-  //     initialDate: DateTime.now(),
-  //     firstDate: DateTime(DateTime.now().year),
-  //     lastDate: DateTime(DateTime.now().year + 3),
-  //     initialEntryMode: DatePickerEntryMode.calendarOnly,
-  //     builder: (BuildContext context, Widget? child) {
-  //       return Theme(
-  //         data: Theme.of(context).copyWith(
-  //           textTheme: TextTheme(
-  //             headlineSmall: Styles.white18(context), // Month & Year in header
-  //             headlineLarge: Styles.white18(context),
-  //             headlineMedium: Styles.white18(context),
-  //             titleMedium: Styles.white18(context), // Selected date
-  //             titleLarge: Styles.white18(context),
-  //             titleSmall: Styles.white18(context),
-  //             bodyMedium: Styles.white18(context), // Day numbers in calendar
-  //             bodyLarge: Styles.white18(context),
-  //             bodySmall: Styles.white18(context),
-  //             labelLarge: Styles.white18(context), // OK / Cancel buttons
-  //             labelMedium: Styles.white18(context),
-  //             labelSmall: Styles.white18(context),
-  //           ),
-  //           colorScheme: const ColorScheme.light(
-  //             surface: Styles.primaryColor,
-
-  //             primary: Styles.white, // Header background color
-  //             onPrimary: Styles.primaryColor, // Header text color
-  //             onSurface: Styles.white, // Body text color
-  //           ),
-  //           textButtonTheme: TextButtonThemeData(
-  //             style: TextButton.styleFrom(
-  //               foregroundColor: Styles.white, // Button text color
-  //             ),
-  //           ),
-  //         ),
-  //         child: child ?? const SizedBox.shrink(),
-  //       );
-  //     },
-  //   );
-
-  //   if (pickedDate != null && pickedDate != _selectedDate) {
-  //     setState(() {
-  //       _selectedDate = pickedDate;
-  //     });
-  //     setModalState(() {
-  //       _selectedDate = pickedDate;
-  //     });
-  //     // widget.onDateSelected(pickedDate);
-  //   }
-  // }
 }

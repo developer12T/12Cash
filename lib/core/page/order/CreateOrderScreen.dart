@@ -766,6 +766,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           }
         },
       );
+    } on ApiException catch (e) {
+      if (e.statusCode == 409) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.orange,
+          type: ToastificationType.warning,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ของในสต๊อกไม่เพียงพอ",
+            style: Styles.red18(context),
+          ),
+        );
+      }
     } catch (e) {
       toastification.show(
         autoCloseDuration: const Duration(seconds: 5),

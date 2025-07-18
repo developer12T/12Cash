@@ -7,6 +7,8 @@ class RefundOrder {
   final double totalRefund;
   final double total;
   final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   RefundOrder({
     required this.orderId,
@@ -17,6 +19,8 @@ class RefundOrder {
     required this.totalRefund,
     required this.total,
     required this.status,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   // Factory method to create an Order object from a JSON map
@@ -30,6 +34,12 @@ class RefundOrder {
       totalRefund: double.tryParse(json['totalRefund'].toString()) ?? 0.0,
       total: double.tryParse(json['total'].toString()) ?? 0.0,
       status: json['status'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt']) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 
@@ -44,6 +54,8 @@ class RefundOrder {
       'totalRefund': totalRefund.toStringAsFixed(2),
       'total': total.toStringAsFixed(2),
       'status': status,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 }

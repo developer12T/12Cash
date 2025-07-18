@@ -17,6 +17,7 @@ import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:charset_converter/charset_converter.dart';
+import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -60,6 +61,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
   final ScrollController _outerController = ScrollController();
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _promotionScrollController = ScrollController();
+  TextEditingController countController = TextEditingController();
 
   String isSelectCheckout = '';
   String qrImagePath = "";
@@ -96,6 +98,10 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
     noteController = TextEditingController();
+  }
+
+  bool isInteger(String input) {
+    return int.tryParse(input) != null;
   }
 
   void _onScroll() {

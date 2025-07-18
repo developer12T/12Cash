@@ -8,9 +8,12 @@ import 'package:_12sale_app/core/components/table/ReusableTable.dart';
 import 'package:_12sale_app/core/page/stock/AdjustStock.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/models/route/Cause.dart';
 import 'package:_12sale_app/data/models/stock/Stock.dart';
+import 'package:_12sale_app/data/models/stock/StockTableNew.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:charset_converter/charset_converter.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
@@ -28,7 +31,8 @@ class _StockScreenTestState extends State<StockScreenTest> {
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
-  List<Stock> stocks = [];
+  List<StockTableNew> stocks = [];
+  List<Cause> causes = [];
   List<List<String>> rows = [];
   List<String> footerTable = [];
   List<String> footerTable2 = [];
@@ -86,6 +90,28 @@ class _StockScreenTestState extends State<StockScreenTest> {
   void initState() {
     super.initState();
     _getStockQty();
+    _getStockQtyNew();
+  }
+
+  Future<List<Cause>> getRefundDropdown(String filter) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/manage/option/get?module=refund&type=option',
+        method: 'GET',
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+        setState(() {
+          causes = data.map((item) => Cause.fromJson(item)).toList();
+        });
+      }
+      return causes;
+    } catch (e) {
+      print("Error _getShoptype: $e");
+      return [];
+    }
   }
 
   Future<List<Group>> getShoptype(String filter) async {
@@ -114,6 +140,108 @@ class _StockScreenTestState extends State<StockScreenTest> {
     }
   }
 
+  Future<void> _getStockQtyNew() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      final response = await apiService.request(
+        endpoint: 'api/cash/stock/getStockQtyNew',
+        method: 'POST',
+        body: {"area": User.area, "period": period},
+      );
+      if (response.statusCode == 200 && mounted) {
+        // setState(() {
+        //   footerTable = [
+        //     'รวมจำนวน (PCS)',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockInPcs']}',
+        //     '${response.data['summaryStockOutPcs']}',
+        //     '${response.data['summaryStockBalPcs']}'
+        //   ];
+
+        //   footerTable2 = [
+        //     'รวมจำนวนเงิน (บาท)',
+        //     '${response.data['summaryStock']}',
+        //     '${response.data['summaryStockIn']}',
+        //     '${response.data['summaryStockOut']}',
+        //     '${response.data['summaryStockBal']}'
+        //   ];
+        // });
+
+        final fetchedStocks = (response.data['data'] as List)
+            .map((item) => StockTableNew.fromJson(item))
+            .toList();
+
+        final fetchedRows = fetchedStocks.map<List<String>>((item) {
+          final unitList = <UnitTableNew>[];
+          for (var unit in item.listUnit) {
+            unitList.add(UnitTableNew(
+              unit: unit.unit,
+              unitName: unit.unitName,
+              stock: unit.stock,
+              withdraw: unit.withdraw,
+              good: unit.good,
+              damaged: unit.damaged,
+              sale: unit.sale,
+              change: unit.change,
+              adjust: unit.adjust,
+              give: unit.give,
+              balance: unit.balance,
+            ));
+          }
+          String joinField(String field) {
+            return unitList.map((u) {
+              final value = switch (field) {
+                'stock' => u.stock,
+                'withdraw' => u.withdraw,
+                'good' => u.good,
+                'damaged' => u.damaged,
+                'sale' => u.sale,
+                'change' => u.change,
+                'adjust' => u.adjust,
+                'give' => u.give,
+                'balance' => u.balance,
+                _ => 0,
+              };
+              return '$value ${u.unitName}';
+            }).join('\n');
+          }
+
+          return [
+            item.productName,
+            joinField('stock'),
+            joinField('withdraw'),
+            joinField('good'),
+            joinField('damaged'),
+            joinField('sale'),
+            joinField('change'),
+            joinField('adjust'),
+            joinField('give'),
+            joinField('balance'),
+          ];
+        }).toList();
+
+        Timer(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() {
+              _loadingProduct = false;
+            });
+          }
+        });
+
+        setState(() {
+          stocks = fetchedStocks;
+          rows = fetchedRows;
+          filteredRows = rows; // Initially show all
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error _getStockQtyNew $e");
+    }
+  }
+
   Future<void> _getStockQty() async {
     try {
       ApiService apiService = ApiService();
@@ -127,29 +255,25 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
       if (response.statusCode == 200 && mounted) {
         final List<dynamic> data = response.data['data'];
-        setState(() {
-          footerTable = [
-            'รวมจำนวน (PCS)',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockInPcs']}',
-            '${response.data['summaryStockOutPcs']}',
-            '${response.data['summaryStockBalPcs']}'
-          ];
+        // setState(() {
+        //   footerTable = [
+        //     'รวมจำนวน (PCS)',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockInPcs']}',
+        //     '${response.data['summaryStockOutPcs']}',
+        //     '${response.data['summaryStockBalPcs']}'
+        //   ];
 
-          footerTable2 = [
-            'รวมจำนวนเงิน (บาท)',
-            '${response.data['summaryStock']}',
-            '${response.data['summaryStockIn']}',
-            '${response.data['summaryStockOut']}',
-            '${response.data['summaryStockBal']}'
-          ];
-        });
+        //   footerTable2 = [
+        //     'รวมจำนวนเงิน (บาท)',
+        //     '${response.data['summaryStock']}',
+        //     '${response.data['summaryStockIn']}',
+        //     '${response.data['summaryStockOut']}',
+        //     '${response.data['summaryStockBal']}'
+        //   ];
+        // });
 
         // final allowedUnits = ['CTN', 'PCS'];
-
-        final fetchedStocks = (response.data['data'] as List)
-            .map((item) => Stock.fromJson(item))
-            .toList();
 
         setState(() {
           receiptData["items"] = data
@@ -206,81 +330,9 @@ class _StockScreenTestState extends State<StockScreenTest> {
         //       .where((e) => e != null)
         //       .toList();
         // });
-
-        final fetchedRows = fetchedStocks.map<List<String>>((item) {
-          // final unitMap = <String, Map<String, int>>{};
-          final unitList = <Unit>[];
-          // for (var unit in item.listUnit) {
-          //   // if (allowedUnits.contains(unit.unit)) {
-          //   unitMap[unit.unit] = {
-          //     'stock': unit.stock,
-          //     'stockIn': unit.stockIn,
-          //     'stockOut': unit.stockOut,
-          //     'balance': unit.balance,
-          //   };
-          //   // }
-          // }
-
-          for (var unit in item.listUnit) {
-            unitList.add(Unit(
-              unit: unit.unit,
-              unitName: unit.unitName,
-              stock: unit.stock,
-              stockIn: unit.stockIn,
-              stockOut: unit.stockOut,
-              balance: unit.balance,
-            ));
-          }
-          // print("unitMap $unitMap");
-
-          // String joinField(String field) {
-          //   return unitMap.entries.map((entry) {
-          //     final unit = entry.key;
-          //     final value = entry.value[field]?.toString() ?? '0';
-          //     return '$unit: $value';
-          //   }).join('\n');
-          // }
-
-          String joinField(String field) {
-            return unitList.map((u) {
-              final value = switch (field) {
-                'stock' => u.stock,
-                'stockIn' => u.stockIn,
-                'stockOut' => u.stockOut,
-                'balance' => u.balance,
-                _ => 0,
-              };
-              return '$value ${u.unitName}';
-            }).join('\n');
-          }
-
-          // String joinField(String field) => allowedUnits
-          //     .map((unit) => unitMap[unit]?[field]?.toString() ?? '0')
-          //     .join('/');
-
-          return [
-            item.productName,
-            joinField('stock'),
-            joinField('stockIn'),
-            joinField('stockOut'),
-            joinField('balance'),
-          ];
-        }).toList();
-
-        Timer(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            setState(() {
-              _loadingProduct = false;
-            });
-          }
-        });
-
-        setState(() {
-          stocks = fetchedStocks;
-          rows = fetchedRows;
-          filteredRows = rows; // Initially show all
-          isLoading = false;
-        });
+        // setState(() {
+        //   stocks = fetchedStocks;
+        // });
       }
     } catch (e) {
       print("Error _getStockQty: $e");
@@ -628,7 +680,19 @@ ${leftRightText('', '\n\n\n', 61)}
 
   @override
   Widget build(BuildContext context) {
-    final columns = ['ชื่อ', 'STOCK', 'IN', 'OUT', 'BAL'];
+    double screenWidth = MediaQuery.of(context).size.width;
+    final columns = [
+      'ชื่อ',
+      'ต้นทริป',
+      'เบิก',
+      'คืนดี',
+      'คืนเสีย',
+      'ขาย',
+      'เปลี่ยน',
+      'ปรับ',
+      'แจก',
+      'คงเหลือ',
+    ];
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
@@ -737,6 +801,108 @@ ${leftRightText('', '\n\n\n', 61)}
                               ),
                             ),
                             SizedBox(width: 8),
+                            Expanded(
+                              child: DropdownSearch<Cause>(
+                                dropdownButtonProps: DropdownButtonProps(
+                                  color: Colors.white,
+                                  icon: Icon(
+                                    Icons.arrow_drop_down,
+                                    size: screenWidth / 20,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+
+                                itemAsString: (item) => item.name,
+                                asyncItems: (filter) =>
+                                    getRefundDropdown(filter),
+
+                                // items:(filter, infiniteScrollProps) =>
+                                dropdownDecoratorProps: DropDownDecoratorProps(
+                                  baseStyle: Styles.black18(context),
+                                  dropdownSearchDecoration: InputDecoration(
+                                    // fillColor: Colors.white,
+                                    // prefixIcon: widget.icon,
+                                    labelText: "เลือกประเภท",
+                                    labelStyle: Styles.grey18(context),
+                                    hintText: "เลือกประเภท",
+                                    hintStyle: Styles.grey18(context),
+                                    border: const OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(8)),
+                                      borderSide: BorderSide(
+                                          color: Colors.grey, width: 1),
+                                    ),
+                                    focusedBorder: const OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(8)),
+                                      borderSide: BorderSide(
+                                          color: Colors.blue, width: 1.5),
+                                    ),
+                                  ),
+                                ),
+                                onChanged: (Cause? data) {
+                                  // noteController.clear();
+                                  // setModalState(
+                                  //   () {
+                                  //     selectedCause = data!.name;
+                                  //   },
+                                  // );
+                                },
+                                popupProps: PopupPropsMultiSelection.dialog(
+                                  constraints: BoxConstraints(
+                                    maxHeight: screenWidth * 0.7,
+                                    maxWidth: screenWidth,
+                                    minHeight: screenWidth * 0.7,
+                                    minWidth: screenWidth,
+                                  ),
+                                  title: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Styles.primaryColor,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(16),
+                                        topRight: Radius.circular(16),
+                                      ),
+                                    ),
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    child: Text(
+                                      "เลือกเหตุผลเช็คอิน",
+                                      style: Styles.white18(context),
+                                    ),
+                                  ),
+
+                                  // showSearchBox: widget.showSearchBox,
+                                  itemBuilder: (context, item, isSelected) {
+                                    return Column(
+                                      children: [
+                                        ListTile(
+                                          title: Text(
+                                            " ${item.name}",
+                                            style: Styles.black18(context),
+                                          ),
+                                          selected: isSelected,
+                                        ),
+                                        Divider(
+                                          color: Colors.grey[
+                                              200], // Color of the divider line
+                                          thickness: 1, // Thickness of the line
+                                          indent:
+                                              16, // Left padding for the divider line
+                                          endIndent:
+                                              16, // Right padding for the divider line
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                  // searchFieldProps: TextFieldProps(
+                                  //   style: Styles.black18(context),
+                                  //   autofocus: true,
+                                  // ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8),
                             TextButton(
                               style: TextButton.styleFrom(
                                 backgroundColor: Styles.primaryColor,
@@ -755,9 +921,9 @@ ${leftRightText('', '\n\n\n', 61)}
                               },
                               child: Text(
                                 "ล้างตัวกรอง",
-                                style: Styles.white24(context),
+                                style: Styles.white16(context),
                               ),
-                            )
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
