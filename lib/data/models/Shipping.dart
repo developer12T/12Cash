@@ -1,56 +1,55 @@
-class ShippingModel {
-  final int coNo;
-  final String customerNo;
-  final String addressID;
-  final String customerName;
-  final String shippingAddress1;
-  final String shippingAddress2;
-  final String shippingAddress3;
-  final String shippingAddress4;
-  final String shippingPhone;
-  ShippingModel({
-    required this.coNo,
-    required this.customerNo,
-    required this.addressID,
-    required this.customerName,
-    required this.shippingAddress1,
-    required this.shippingAddress2,
-    required this.shippingAddress3,
-    required this.shippingAddress4,
-    required this.shippingPhone,
+class Shipping {
+  final String shippingId;
+  final String address;
+  final String district;
+  final String subDistrict;
+  final String province;
+  final String postCode;
+  final String latitude;
+  final String longtitude;
+  final String id;
+  final String isDefault;
+
+  Shipping({
+    required this.shippingId,
+    required this.address,
+    required this.district,
+    required this.subDistrict,
+    required this.province,
+    required this.postCode,
+    required this.latitude,
+    required this.longtitude,
+    required this.id,
+    required this.isDefault,
   });
-  factory ShippingModel.fromJson(Map<String, dynamic> json) {
-    return ShippingModel(
-      coNo: json["coNo"],
-      customerNo: json["customerNo"],
-      addressID: json["addressID"],
-      customerName: json["customerName"],
-      shippingAddress1: json["shippingAddress1"],
-      shippingAddress2: json["shippingAddress2"],
-      shippingAddress3: json["shippingAddress3"],
-      shippingAddress4: json["shippingAddress4"],
-      shippingPhone: json["shippingPhone"],
+
+  factory Shipping.fromJson(Map<String, dynamic> json) {
+    return Shipping(
+      shippingId: json['shippingId'] ?? '',
+      address: json['address'] ?? '',
+      district: json['district'] ?? '',
+      subDistrict: json['subDistrict'] ?? '',
+      province: json['province'] ?? '',
+      postCode: json['postCode'] ?? '',
+      latitude: json['latitude'] ?? '',
+      longtitude: json['longtitude'] ?? '',
+      id: json['_id'] ?? '',
+      isDefault: json['default'] ?? '0',
     );
   }
-  static List<ShippingModel> fromJsonList(List list) {
-    return list.map((item) => ShippingModel.fromJson(item)).toList();
+
+  Map<String, dynamic> toJson() {
+    return {
+      'shippingId': shippingId,
+      'address': address,
+      'district': district,
+      'subDistrict': subDistrict,
+      'province': province,
+      'postCode': postCode,
+      'latitude': latitude,
+      'longtitude': longtitude,
+      '_id': id,
+      'default': isDefault,
+    };
   }
-
-  // String userAsString() {
-  //   return '''#
-  //   ${this.customerNo}
-  //   ${this.addressID}
-  //   ${this.customerName}
-  //   ${this.shippingAddress1}
-  //   ${this.shippingPhone}
-  //   ''';
-  // }
-
-  bool isEqual(ShippingModel model) {
-    return this.customerNo == model.customerNo;
-  }
-
-  @override
-  String toString() =>
-      '$customerNo $addressID $customerName $shippingAddress1 $shippingPhone';
 }

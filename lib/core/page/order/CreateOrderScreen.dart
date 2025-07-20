@@ -43,6 +43,8 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal_windows.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
+import '../../../data/models/Shipping.dart';
+
 class CreateOrderScreen extends StatefulWidget {
   final String? routeId;
   final String? storeName;
@@ -65,6 +67,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   final ScrollController _outerController = ScrollController();
   final ScrollController _cartScrollController = ScrollController();
   final ScrollController _promotionScrollController = ScrollController();
+  final ScrollController _shippingScrollController = ScrollController();
 
   late SocketService socketService;
 
@@ -74,6 +77,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   String qrImagePath = "";
 
   bool _loading = true;
+  String addressShipping = '';
 
   double subtotal = 0;
   double discount = 0;
@@ -89,6 +93,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   bool _isCreateOrderEnabled = false;
 
   late TextEditingController noteController;
+  List<Shipping> shippingList = [];
 
   @override
   void initState() {
@@ -99,6 +104,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
     noteController = TextEditingController();
+    _shippingScrollController.dispose();
+    _getShipping();
     // _focusNode.requestFocus();
     // RawKeyboard.instance.addListener(_handleKey);
   }
@@ -165,30 +172,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
     }
   }
 
-  // Future<List<GroupPromotion>> getRoutesDropdown(String filter) async {
-  //   try {
-  //     // Load the JSON file for districts
-  //     ApiService apiService = ApiService();
-  //     await apiService.init();
-  //     var response = await apiService.request(
-  //       endpoint: 'api/cash/manage/option/get?module=route&type=notSell',
-  //       method: 'GET',
-  //     );
-  //     // Filter and map JSON data to District model based on selected province and filter
-  //     if (response.statusCode == 200 || response.statusCode == 201) {
-  //       final List<dynamic> data = response.data['data'];
-  //       setState(() {
-  //         causes = data.map((item) => Cause.fromJson(item)).toList();
-  //       });
-  //     }
-  //     // Group districts by amphoe
-  //     return causes;
-  //   } catch (e) {
-  //     print("Error occurred: $e");
-  //     return [];
-  //   }
-  // }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -237,6 +220,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
   int promotionListChangeStatus = 0;
 
   String qrImage = '';
+  String isShippingId = '';
 
   List<PromotionListItem> listPromotions = [];
 
@@ -265,13 +249,24 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   // List<int> itemQuantities = []; // Store item quantities for each item
 
-  Future<List<GroupPromotion>> getGroupDropdown(String filter) async {
+  Future<void> _getShipping() async {
     try {
-      // Group districts by amphoe
-      return groupPromotion;
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+          endpoint: 'api/cash/store/getShipping?storeId=${widget.storeId}',
+          method: 'POST',
+          body: {"storeId": "${widget.storeId}"});
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+        print(data);
+        setState(() {
+          shippingList = data.map((item) => Shipping.fromJson(item)).toList();
+        });
+        print(shippingList);
+      }
     } catch (e) {
-      print("Error occurred: $e");
-      return [];
+      print("Error _getShipping $e");
     }
   }
 
@@ -1000,7 +995,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                           )
                                         ],
                                       ),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        // _showAddressSheet(context);
+                                      },
                                     ),
                                   ),
                                 ),
@@ -2316,6 +2313,205 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                     //     ),
                     //   ),
                     // )
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
+    );
+  }
+
+  void _showAddressSheet(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              Text('เลือกวันที่ต้องการรับของ',
+                                  style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        child: Column(
+                          children: [
+                            Expanded(
+                                child: Scrollbar(
+                              controller: _shippingScrollController,
+                              thickness: 10,
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              radius: Radius.circular(16),
+                              child: ListView.builder(
+                                controller: _shippingScrollController,
+                                itemCount: shippingList.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+
+                                                  elevation:
+                                                      0, // Disable shadow
+                                                  shadowColor: Colors
+                                                      .transparent, // Ensure no shadow color
+                                                  backgroundColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.zero,
+                                                      side: BorderSide.none),
+                                                ),
+                                                onPressed: () {
+                                                  setModalState(() {
+                                                    isShippingId =
+                                                        shippingList[index]
+                                                                .shippingId ??
+                                                            "";
+                                                  });
+                                                  setState(() {
+                                                    addressShipping =
+                                                        "${shippingList[index].address} ${shippingList[index].district} ${shippingList[index].subDistrict} ${shippingList[index].province} ${shippingList[index].postCode}";
+                                                  });
+                                                },
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                shippingList[
+                                                                        index]
+                                                                    .shippingId,
+                                                                style: Styles
+                                                                    .black18(
+                                                                        context),
+                                                              ),
+                                                              shippingList[index]
+                                                                          .address !=
+                                                                      ""
+                                                                  ? Row(
+                                                                      children: [
+                                                                        Expanded(
+                                                                          child:
+                                                                              Text(
+                                                                            "${shippingList[index].address} ${shippingList[index].district} ${shippingList[index].subDistrict}  ${shippingList[index].province} ${shippingList[index].postCode}",
+                                                                            style:
+                                                                                Styles.black18(context),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    )
+                                                                  : SizedBox(),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        isShippingId ==
+                                                                shippingList[
+                                                                        index]
+                                                                    .shippingId
+                                                            ? Icon(
+                                                                Icons
+                                                                    .check_circle_outline_rounded,
+                                                                color: Styles
+                                                                    .success,
+                                                                size: 25,
+                                                              )
+                                                            : Icon(
+                                                                Icons
+                                                                    .keyboard_arrow_right_sharp,
+                                                                color:
+                                                                    Colors.grey,
+                                                                size: 25,
+                                                              )
+                                                      ],
+                                                    ),
+                                                    Divider(
+                                                      color: Colors.grey[200],
+                                                      thickness: 1,
+                                                      indent: 16,
+                                                      endIndent: 16,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ))
+                          ],
+                        ),
+                      ),
+                    )
                   ],
                 ),
               );

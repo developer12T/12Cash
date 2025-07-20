@@ -419,6 +419,8 @@ class _DetailScreenState extends State<DetailScreen> {
   Future<void> checkInStore(BuildContext context) async {
     try {
       await fetchLocation();
+      ApiService apiService = ApiService();
+      await apiService.init();
       print('selectedCause ${selectedCause == 'เลือกเหตุผล'}');
       Dio dio = Dio();
       // MultipartFile? imageFile;
@@ -464,16 +466,27 @@ class _DetailScreenState extends State<DetailScreen> {
               "longtitude": longitude
             },
           );
-          var response = await dio.post(
-            '${ApiService.apiHost}/api/cash/route/checkIn',
-            data: formData,
-            options: Options(
-              headers: {
-                "Content-Type": "multipart/form-data",
-                'x-channel': 'cash',
-              },
-            ),
+          // var response = await dio.post(
+          //   '${ApiService.apiHost}/api/cash/route/checkIn',
+          //   data: formData,
+          //   options: Options(
+          //     headers: {
+          //       "Content-Type": "multipart/form-data",
+          //       'x-channel': 'cash',
+          //     },
+          //   ),
+          // );
+
+          var response = await apiService.request2(
+            endpoint: 'api/cash/route/checkIn',
+            method: 'POST',
+            body: formData,
+            headers: {
+              'x-channel': 'cash',
+              'Content-Type': 'multipart/form-data',
+            },
           );
+
           if (response.statusCode == 201 || response.statusCode == 200) {
             socketService.emitEvent('route/checkIn', {
               'message': 'Check In successfully',
@@ -528,11 +541,24 @@ class _DetailScreenState extends State<DetailScreen> {
         }
       }
     } on ApiException catch (e) {
+      if (e.statusCode == 409) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.orange,
+          type: ToastificationType.warning,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ไม่สามารถเช็คอินร้านเดิมได้",
+            style: Styles.red18(context),
+          ),
+        );
+      }
       print('Error in checkInStore: ${e.message}');
-      CustomAlertDialog.showCommonAlert(context, "เกิดข้อผิดพลาด",
-          "${e.message} Status Code: ${e.statusCode}");
+      context.loaderOverlay.hide();
     } catch (e) {
       print('Error checkInStore: $e');
+      context.loaderOverlay.hide();
     }
   }
 
@@ -540,6 +566,9 @@ class _DetailScreenState extends State<DetailScreen> {
     try {
       await fetchLocation();
       Dio dio = Dio();
+
+      ApiService apiService = ApiService();
+      await apiService.init();
 
       File imageFile = File(checkinSellImagePath!);
       MultipartFile compressedFile = await compressImages(imageFile);
@@ -557,15 +586,25 @@ class _DetailScreenState extends State<DetailScreen> {
             "longtitude": longitude
           },
         );
-        var response = await dio.post(
-          '${ApiService.apiHost}/api/cash/route/checkInVisit',
-          data: formData,
-          options: Options(
-            headers: {
-              "Content-Type": "multipart/form-data",
-              'x-channel': 'cash',
-            },
-          ),
+        // var response = await dio.post(
+        //   '${ApiService.apiHost}/api/cash/route/checkInVisit',
+        //   data: formData,
+        //   options: Options(
+        //     headers: {
+        //       "Content-Type": "multipart/form-data",
+        //       'x-channel': 'cash',
+        //     },
+        //   ),
+        // );
+
+        var response = await apiService.request2(
+          endpoint: 'api/cash/route/checkInVisit',
+          method: 'POST',
+          body: formData,
+          headers: {
+            'x-channel': 'cash',
+            'Content-Type': 'multipart/form-data',
+          },
         );
         if (response.statusCode == 201 || response.statusCode == 200) {
           socketService.emitEvent('route/checkInVisit', {
@@ -602,11 +641,24 @@ class _DetailScreenState extends State<DetailScreen> {
         }
       }
     } on ApiException catch (e) {
-      print('Error in checkInStoreAndSell: ${e.message}');
-      CustomAlertDialog.showCommonAlert(context, "เกิดข้อผิดพลาด",
-          "${e.message} Status Code: ${e.statusCode}");
+      if (e.statusCode == 409) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.orange,
+          type: ToastificationType.warning,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ไม่สามารถเช็คอินร้านเดิมได้",
+            style: Styles.red18(context),
+          ),
+        );
+      }
+      print('Error in checkInStore: ${e.message}');
+      context.loaderOverlay.hide();
     } catch (e) {
       print('Error checkInStoreAndSell: $e');
+      context.loaderOverlay.hide();
     }
   }
 

@@ -74,18 +74,6 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   List<FlSpot> spots = [];
   bool isLoading = true;
 
-  final Map<String, dynamic> data = {
-    "status": 200,
-    "message": "sucess",
-    "visit": 1.5714,
-    "effective": 0,
-    "totalStoreAll": 986,
-    "totalStorePending": 975,
-    "totalStoreSell": 0,
-    "totalStoreNotSell": 2,
-    "totalStoreCheckInNotSell": 9
-  };
-
   Future<void> getDataSummaryChoince(String type) async {
     try {
       ApiService apiService = ApiService();
@@ -232,8 +220,6 @@ class _DashboardscreenState extends State<Dashboardscreen> {
       child: text,
     );
   }
-
-  List<ShippingModel> shuppingList = [];
 
   Widget build(BuildContext context) {
     selectedLanguageCode = context.locale.toString().split("_")[0];

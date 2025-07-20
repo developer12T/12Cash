@@ -642,25 +642,31 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
         });
         Timer(
           Duration(seconds: 3),
-          () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreen(
-                index: 0,
+          () {
+            if (!mounted) return; // เช็คก่อน Navigator
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(
+                  index: 0,
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       }
     } else {
       Timer(
         Duration(seconds: 3),
-        () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LoginScreen(),
-          ),
-        ),
+        () {
+          if (!mounted) return; // เช็คก่อน Navigator
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+            ),
+          );
+        },
       );
     }
   }

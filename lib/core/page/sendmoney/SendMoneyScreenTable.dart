@@ -106,7 +106,7 @@ class _SendMoneyScreenTableState extends State<SendMoneyScreenTable> {
       'ยอดขาย',
       'ส่วนต่าง',
       'คืนดี',
-      'คืนเสี่ย',
+      'คืนเสีย',
       'เปลี่ยน',
     ];
     return Scaffold(

@@ -78,7 +78,7 @@ class RefundCard extends StatelessWidget {
                                 Row(
                                   children: [
                                     Text(
-                                      "วันที่เวลา: ${DateFormat('dd/MM/yyyy | HH:mm:ss').format(item.createdAt)}",
+                                      "วันที่เวลา: ${DateFormat('dd/MM/yyyy | HH:mm:ss').format(item.createdAt.add(Duration(hours: 7)))}",
                                       style: Styles.black16(context),
                                     ),
                                   ],

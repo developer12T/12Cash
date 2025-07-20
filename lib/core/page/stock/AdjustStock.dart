@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/button/Button.dart';
+import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
 // import 'pack2sale_app/core/components/card/order/OrderMenuListCard.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
 import 'package:_12sale_app/core/components/filter/BadageFilter.dart';
@@ -19,6 +20,7 @@ import 'package:custom_sliding_segmented_control/custom_sliding_segmented_contro
 import 'package:dartx/dartx.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -36,6 +38,7 @@ class AdjustStock extends StatefulWidget {
 }
 
 class _AdjustStockState extends State<AdjustStock> {
+  final Debouncer _debouncer = Debouncer();
   List<StockAjustCart> cartList = [];
   List<Product> productList = [];
   List<Product> filteredProductList = [];
@@ -75,7 +78,6 @@ class _AdjustStockState extends State<AdjustStock> {
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   String isShippingId = '';
-  final ScrollController _shippingScrollController = ScrollController();
   List<ShippingData> shippingList = [];
   String casue = '';
 
@@ -134,6 +136,7 @@ class _AdjustStockState extends State<AdjustStock> {
         method: 'POST',
         body: {
           "type": "adjuststock",
+          "withdrawId": '${widget.orderId}',
           "area": User.area,
           "period": period,
         },
@@ -225,12 +228,12 @@ class _AdjustStockState extends State<AdjustStock> {
         body: {
           // sale, withdraw, refund, give, adjuststock
           "type": "adjuststock",
-          // "period": period,
+          "period": period,
           "area": User.area,
           "id": product.id,
           "qty": count,
           "unit": selectedUnit,
-          "action": type, // add,reduce for adjuststock
+          "action": "OUT", // add,reduce for adjuststock
         },
       );
       if (response.statusCode == 200) {
@@ -315,10 +318,6 @@ class _AdjustStockState extends State<AdjustStock> {
       }
     } catch (e) {
       print("Error _getProduct: $e");
-      print("Error _getProduct: $selectedGroups");
-      print("Error _getProduct: $selectedBrands");
-      print("Error _getProduct: $selectedSizes");
-      print("Error _getProduct: $selectedFlavours");
     }
   }
 
@@ -504,7 +503,7 @@ class _AdjustStockState extends State<AdjustStock> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.pending,
                                     color: Colors.black,
                                     size: 30,
@@ -900,7 +899,7 @@ class _AdjustStockState extends State<AdjustStock> {
                                                   price = 0.00;
                                                   count = 1;
                                                   total = 0.00;
-                                                  // lotStock = '';
+
                                                   stockQty = 0;
                                                 });
 
@@ -965,29 +964,29 @@ class _AdjustStockState extends State<AdjustStock> {
                         : Expanded(
                             child: Column(
                               children: [
-                                // Expanded(
-                                //   child: ListView.builder(
-                                //     itemCount: filteredProductList.length,
-                                //     itemBuilder: (context, index) {
-                                //       return OrderMenuListCard(
-                                //         product: filteredProductList[index],
-                                //         onTap: () {
-                                //           print(filteredProductList[index]);
-                                //           setState(() {
-                                //             selectedUnit = '';
-                                //             selectedSize = '';
-                                //             price = 0.00;
-                                //             count = 1;
-                                //             total = 0.00;
-                                //             stockQty = 0;
-                                //           });
-                                //           _showProductSheet(context,
-                                //               filteredProductList[index]);
-                                //         },
-                                //       );
-                                //     },
-                                //   ),
-                                // ),
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: filteredProductList.length,
+                                    itemBuilder: (context, index) {
+                                      return OrderMenuListCard(
+                                        product: filteredProductList[index],
+                                        onTap: () {
+                                          print(filteredProductList[index]);
+                                          setState(() {
+                                            selectedUnit = '';
+                                            selectedSize = '';
+                                            price = 0.00;
+                                            count = 1;
+                                            total = 0.00;
+                                            stockQty = 0;
+                                          });
+                                          _showProductSheet(context,
+                                              filteredProductList[index]);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -1060,7 +1059,7 @@ class _AdjustStockState extends State<AdjustStock> {
                       blackGroundColor: Styles.primaryColor,
                       textStyle: Styles.white18(context),
                       onPressed: () {
-                        if (cartList.length > 0) {
+                        if (cartList.length > 0 && casue != '') {
                           _checkout();
                           Navigator.pushReplacement(
                             context,
@@ -1078,7 +1077,7 @@ class _AdjustStockState extends State<AdjustStock> {
                             type: ToastificationType.error,
                             style: ToastificationStyle.flatColored,
                             title: Text(
-                              "กรุณาเลือกรายการสินค้า",
+                              "กรุณาเลือกรายกาและเหตุผล",
                               style: Styles.red18(context),
                             ),
                           );
@@ -1210,6 +1209,15 @@ class _AdjustStockState extends State<AdjustStock> {
                                                     overflow:
                                                         TextOverflow.visible,
                                                   ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  'รหัส : ${product.id}',
+                                                  style:
+                                                      Styles.black16(context),
                                                 ),
                                               ],
                                             ),
@@ -1536,66 +1544,129 @@ class _AdjustStockState extends State<AdjustStock> {
     );
   }
 
-  // Future<void> _getTotalCart(StateSetter setModalState) async {
-  //   try {
-  //     ApiService apiService = ApiService();
-  //     await apiService.init();
-  //     var response = await apiService.request(
-  //       endpoint:
-  //           'api/cash/cart/get?type=sale&area=${User.area}&storeId=${widget.storeDetail?.listStore[0].storeInfo.storeId}',
-  //       method: 'GET',
-  //     );
-  //     if (response.statusCode == 200) {
-  //       setState(() {
-  //         totalCart = response.data['data'][0]['total'].toDouble();
-  //       });
-  //       setModalState(
-  //         () {
-  //           totalCart = response.data['data'][0]['total'].toDouble();
-  //         },
-  //       );
-  //     }
-  //   } catch (e) {
-  //     setState(() {
-  //       totalCart = 00.00;
-  //     });
-  //     print("Error _getTotalCart: $e");
-  //   }
-  // }
+  Future<void> _reduceCart(
+      StockAjustCart cart, StateSetter setModalState) async {
+    const duration = Duration(seconds: 1);
 
-  // Future<void> _deleteCart(CartList cart, StateSetter setModalState) async {
-  //   try {
-  //     ApiService apiService = ApiService();
-  //     await apiService.init();
-  //     var response = await apiService.request(
-  //       endpoint: 'api/cash/cart/delete',
-  //       method: 'POST',
-  //       body: {
-  //         "type": "sale",
-  //         "area": "${User.area}",
-  //         "storeId": "${widget.storeDetail?.listStore[0].storeInfo.storeId}",
-  //         "id": "${cart.id}",
-  //         "unit": "${cart.unit}"
-  //       },
-  //     );
-  //     if (response.statusCode == 200) {
-  //       await _getTotalCart(setModalState);
-  //       toastification.show(
-  //         autoCloseDuration: const Duration(seconds: 5),
-  //         context: context,
-  //         primaryColor: Colors.green,
-  //         type: ToastificationType.success,
-  //         style: ToastificationStyle.flatColored,
-  //         title: Text(
-  //           "ลบข้อมูลสำเร็จ",
-  //           style: Styles.green18(context),
-  //         ),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print("Error _deleteCart: $e");
-  //   }
-  // }
+    _debouncer.debounce(
+      duration: duration,
+      onDebounce: () async {
+        try {
+          ApiService apiService = ApiService();
+          await apiService.init();
+          var response = await apiService.request(
+            endpoint: 'api/cash/cart/adjust',
+            method: 'PATCH',
+            body: {
+              "type": "adjuststock",
+              "area": User.area,
+              "id": cart.id,
+              "qty": cart.qty,
+              "unit": cart.unit,
+              "stockType": "OUT"
+            },
+          );
+          if (response.statusCode == 200) {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.green,
+              type: ToastificationType.success,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "แก้ไขข้อมูลสำเร็จ",
+                style: Styles.green18(context),
+              ),
+            );
+          } else {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.red,
+              type: ToastificationType.error,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "เกิดข้อผิดพลาด",
+                style: Styles.red18(context),
+              ),
+            );
+          }
+        } on ApiException catch (e) {
+          if (e.statusCode == 409) {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.orange,
+              type: ToastificationType.warning,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "ของในสต๊อกไม่เพียงพอ",
+                style: Styles.red18(context),
+              ),
+            );
+          } else {
+            toastification.show(
+              autoCloseDuration: const Duration(seconds: 5),
+              context: context,
+              primaryColor: Colors.red,
+              type: ToastificationType.error,
+              style: ToastificationStyle.flatColored,
+              title: Text(
+                "เกิดข้อผิดพลาด: ${e.message}",
+                style: Styles.red18(context),
+              ),
+            );
+          }
+        } catch (e) {
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.red,
+            type: ToastificationType.error,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "เกิดข้อผิดพลาด $e",
+              style: Styles.red18(context),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Future<void> _deleteCart(
+      StockAjustCart cart, StateSetter setModalState) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/cart/delete',
+        method: 'POST',
+        body: {
+          "type": "adjuststock",
+          "area": "${User.area}",
+          "id": "${cart.id}",
+          "unit": "${cart.unit}"
+        },
+      );
+      if (response.statusCode == 200) {
+        await _getCart();
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ลบข้อมูลสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error _deleteCart: $e");
+    }
+  }
 
   void _showCartSheet(BuildContext context, List<StockAjustCart> cartlist) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -1815,16 +1886,10 @@ class _AdjustStockState extends State<AdjustStock> {
                                                                   }
                                                                 });
 
-                                                                // await _updateStock3(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState,
-                                                                //     'IN');
-
-                                                                // await _reduceCart(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState);
+                                                                await _reduceCart(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState);
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -1882,10 +1947,10 @@ class _AdjustStockState extends State<AdjustStock> {
                                                             ElevatedButton(
                                                               onPressed:
                                                                   () async {
-                                                                // await _reduceCart(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState);
+                                                                await _reduceCart(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState);
 
                                                                 setModalState(
                                                                     () {
@@ -1893,11 +1958,6 @@ class _AdjustStockState extends State<AdjustStock> {
                                                                           index]
                                                                       .qty++;
                                                                 });
-                                                                // await _updateStock3(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState,
-                                                                //     'OUT');
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -1926,15 +1986,10 @@ class _AdjustStockState extends State<AdjustStock> {
                                                             ElevatedButton(
                                                               onPressed:
                                                                   () async {
-                                                                // await _deleteCart(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState);
-                                                                // await _updateStock2(
-                                                                //     cartlist[
-                                                                //         index],
-                                                                //     setModalState,
-                                                                //     "IN");
+                                                                await _deleteCart(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState);
 
                                                                 setModalState(
                                                                   () {
@@ -1945,8 +2000,7 @@ class _AdjustStockState extends State<AdjustStock> {
                                                                             cartlist[index].unit));
                                                                   },
                                                                 );
-                                                                // await _getTotalCart(
-                                                                //     setModalState);
+                                                                ;
 
                                                                 if (cartList
                                                                         .length ==
