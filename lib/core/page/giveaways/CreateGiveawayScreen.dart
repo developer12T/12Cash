@@ -180,14 +180,13 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
   List<CartList> cartList = [];
   List<PromotionList> promotionList = [];
   List<PromotionListItem> listPromotions = [];
-  List<ImageModel> imageList = [];
   final Debouncer _debouncer = Debouncer();
   final Throttler _throttler = Throttler();
 
   String latitude = '';
   String longitude = '';
   final LocationService locationService = LocationService();
-
+  String userQrCode = '';
   late SocketService socketService;
 
   Future<void> uploadImageSlip(String orderId) async {
@@ -342,11 +341,8 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
         method: 'GET',
       );
       if (response.statusCode == 200) {
-        print(response.data['data']['image']);
-        final List<dynamic> data = response.data['data']['image'];
-
         setState(() {
-          imageList = data.map((item) => ImageModel.fromJson(item)).toList();
+          userQrCode = response.data['data'];
         });
       }
     } catch (e) {

@@ -41,6 +41,8 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal_windows.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
+import '../../../data/models/Shipping.dart';
+
 class CreateRefundScreen extends StatefulWidget {
   final String? storeName;
   final String? storeId;
@@ -89,6 +91,12 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
   late TextEditingController noteController;
   late SocketService socketService;
 
+  List<Shipping> shippingList = [];
+  Shipping? selectedShipping;
+  String isShippingId = '';
+  String addressShipping = '';
+  final ScrollController _shippingScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +106,33 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
     noteController = TextEditingController();
+    _shippingScrollController.dispose();
+    _getShipping();
+  }
+
+  Future<void> _getShipping() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+          endpoint: 'api/cash/store/getShipping',
+          method: 'POST',
+          body: {
+            "storeId": "${widget.storeId}",
+          });
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+        print(data);
+        setState(() {
+          shippingList = data.map((item) => Shipping.fromJson(item)).toList();
+          selectedShipping = shippingList[0];
+        });
+
+        print(shippingList);
+      }
+    } catch (e) {
+      print("Error _getShipping $e");
+    }
   }
 
   bool isInteger(String input) {
@@ -188,7 +223,8 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
     super.dispose();
   }
 
-  List<ImageModel> imageList = [];
+  // List<ImageModel> imageList = [];
+  String userQrCode = '';
   final Debouncer _debouncer = Debouncer();
   final Throttler _throttler = Throttler();
 
@@ -360,11 +396,11 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
         method: 'GET',
       );
       if (response.statusCode == 200) {
-        print(response.data['data']['image']);
-        final List<dynamic> data = response.data['data']['image'];
+        // print(response.data['data']['image']);
+        // final List<dynamic> data = response.data['data']['image'];
 
         setState(() {
-          imageList = data.map((item) => ImageModel.fromJson(item)).toList();
+          userQrCode = response.data['data'];
         });
       }
     } catch (e) {
@@ -656,7 +692,9 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                           )
                                         ],
                                       ),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        _showAddressSheet(context);
+                                      },
                                     ),
                                   ),
                                 ),
@@ -1818,12 +1856,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                   checkNetwork: true,
                                   label: "QR Code",
                                   icon: Icons.image_not_supported_outlined,
-                                  imagePath: imageList.isNotEmpty
-                                      ? imageList
-                                          .firstWhere((element) =>
-                                              element.type == "qrcode")
-                                          .path
-                                      : '',
+                                  imagePath: userQrCode != '' ? userQrCode : '',
                                 ),
                                 IconButtonWithLabelOld(
                                   icon: Icons.photo_camera,
@@ -1849,6 +1882,207 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
           ],
         ),
       ),
+    );
+  }
+
+  void _showAddressSheet(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.storefront_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              Text(' เลือกสถานที่จัดส่ง',
+                                  style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        child: Column(
+                          children: [
+                            Expanded(
+                                child: Scrollbar(
+                              controller: _shippingScrollController,
+                              thickness: 10,
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              radius: Radius.circular(16),
+                              child: ListView.builder(
+                                controller: _shippingScrollController,
+                                itemCount: shippingList.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+
+                                                  elevation:
+                                                      0, // Disable shadow
+                                                  shadowColor: Colors
+                                                      .transparent, // Ensure no shadow color
+                                                  backgroundColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.zero,
+                                                      side: BorderSide.none),
+                                                ),
+                                                onPressed: () {
+                                                  setModalState(() {
+                                                    isShippingId =
+                                                        shippingList[index]
+                                                                .shippingId ??
+                                                            "";
+                                                  });
+                                                  setState(() {
+                                                    selectedShipping =
+                                                        shippingList[index];
+                                                    addressShipping =
+                                                        "${shippingList[index].address} ${shippingList[index].district} ${shippingList[index].subDistrict} ${shippingList[index].province} ${shippingList[index].postCode}";
+                                                  });
+                                                },
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              // Text(
+                                                              //   shippingList[
+                                                              //           index]
+                                                              //       .shippingId,
+                                                              //   style: Styles
+                                                              //       .black18(
+                                                              //           context),
+                                                              // ),
+                                                              shippingList[index]
+                                                                          .address !=
+                                                                      ""
+                                                                  ? Row(
+                                                                      children: [
+                                                                        Expanded(
+                                                                          child:
+                                                                              Text(
+                                                                            "${shippingList[index].address} ${shippingList[index].district} ${shippingList[index].subDistrict}  ${shippingList[index].province} ${shippingList[index].postCode}",
+                                                                            style:
+                                                                                Styles.black18(context),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    )
+                                                                  : SizedBox(),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        isShippingId ==
+                                                                shippingList[
+                                                                        index]
+                                                                    .shippingId
+                                                            ? Icon(
+                                                                Icons
+                                                                    .check_circle_outline_rounded,
+                                                                color: Styles
+                                                                    .success,
+                                                                size: 25,
+                                                              )
+                                                            : Icon(
+                                                                Icons
+                                                                    .keyboard_arrow_right_sharp,
+                                                                color:
+                                                                    Colors.grey,
+                                                                size: 25,
+                                                              )
+                                                      ],
+                                                    ),
+                                                    Divider(
+                                                      color: Colors.grey[200],
+                                                      thickness: 1,
+                                                      indent: 16,
+                                                      endIndent: 16,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ))
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
     );
   }
 

@@ -94,6 +94,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   late TextEditingController noteController;
   List<Shipping> shippingList = [];
+  Shipping? selectedShipping;
 
   @override
   void initState() {
@@ -254,15 +255,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-          endpoint: 'api/cash/store/getShipping?storeId=${widget.storeId}',
+          endpoint: 'api/cash/store/getShipping',
           method: 'POST',
-          body: {"storeId": "${widget.storeId}"});
+          body: {
+            "storeId": "${widget.storeId}",
+          });
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> data = response.data['data'];
         print(data);
         setState(() {
           shippingList = data.map((item) => Shipping.fromJson(item)).toList();
+          selectedShipping = shippingList[0];
         });
+
         print(shippingList);
       }
     } catch (e) {
@@ -501,7 +506,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           "note": "${noteController.text}",
           "latitude": "$latitude",
           "longitude": "$longitude",
-          "shipping": "${widget.storeAddress}",
+          "shipping": selectedShipping,
           "payment": isSelectCheckout == "QR Payment" ? "qr" : "cash",
           "changePromotionStatus": promotionListChangeStatus,
           "listPromotion": promotionListChange,
@@ -578,10 +583,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
         setState(() {
           qrImage = response.data['data'];
         });
-        // final List<dynamic> data = response.data['data']['data'];
-        // setState(() {
-        //   imageList = data.map((item) => ImageModel.fromJson(item)).toList();
-        // });
       }
     } catch (e) {
       print("Error _getQRImage $e");
@@ -996,7 +997,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                         ],
                                       ),
                                       onPressed: () {
-                                        // _showAddressSheet(context);
+                                        _showAddressSheet(context);
                                       },
                                     ),
                                   ),
@@ -2363,11 +2364,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                           Row(
                             children: [
                               Icon(
-                                Icons.shopping_bag_outlined,
+                                Icons.storefront_outlined,
                                 color: Colors.white,
                                 size: 30,
                               ),
-                              Text('เลือกวันที่ต้องการรับของ',
+                              Text(' เลือกสถานที่จัดส่ง',
                                   style: Styles.white24(context)),
                             ],
                           ),
@@ -2426,6 +2427,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                             "";
                                                   });
                                                   setState(() {
+                                                    selectedShipping =
+                                                        shippingList[index];
                                                     addressShipping =
                                                         "${shippingList[index].address} ${shippingList[index].district} ${shippingList[index].subDistrict} ${shippingList[index].province} ${shippingList[index].postCode}";
                                                   });
@@ -2443,14 +2446,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 CrossAxisAlignment
                                                                     .start,
                                                             children: [
-                                                              Text(
-                                                                shippingList[
-                                                                        index]
-                                                                    .shippingId,
-                                                                style: Styles
-                                                                    .black18(
-                                                                        context),
-                                                              ),
+                                                              // Text(
+                                                              //   shippingList[
+                                                              //           index]
+                                                              //       .shippingId,
+                                                              //   style: Styles
+                                                              //       .black18(
+                                                              //           context),
+                                                              // ),
                                                               shippingList[index]
                                                                           .address !=
                                                                       ""
