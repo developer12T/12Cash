@@ -255,7 +255,8 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                                   child: Column(
                                     children: [
                                       Text("รับ", style: Styles.red18(context)),
-                                      Text("0", style: Styles.red18(context)),
+                                      Text("${p.receiveQty}",
+                                          style: Styles.red18(context)),
                                     ],
                                   ),
                                 ),

@@ -131,6 +131,7 @@ class Product {
   final String size;
   final String flavour;
   final int qty;
+  final int receiveQty;
   final String unit;
   final int qtyPcs;
   final int price;
@@ -147,6 +148,7 @@ class Product {
     required this.size,
     required this.flavour,
     required this.qty,
+    required this.receiveQty,
     required this.unit,
     required this.qtyPcs,
     required this.price,
@@ -165,6 +167,7 @@ class Product {
       size: json['size'] ?? '',
       flavour: json['flavour'] ?? '',
       qty: json['qty'] ?? 0,
+      receiveQty: json['receiveQty'] ?? 0,
       unit: json['unit'] ?? '',
       qtyPcs: json['qtyPcs'] ?? 0,
       price: json['price'] ?? 0,
@@ -183,6 +186,7 @@ class Product {
         'size': size,
         'flavour': flavour,
         'qty': qty,
+        'receiveQty': receiveQty,
         'unit': unit,
         'qtyPcs': qtyPcs,
         'price': price,
