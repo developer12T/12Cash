@@ -85,7 +85,7 @@ class RefundCard extends StatelessWidget {
                                 ),
                                 Skeleton.ignore(
                                   child: Container(
-                                    width: screenWidth / 7,
+                                    width: screenWidth / 6.5,
                                     // padding: EdgeInsets.all(4),
                                     // margin: EdgeInsets.only(right: 8),
                                     // height: screenWidth / ,
@@ -179,14 +179,6 @@ class RefundCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-
-                            // Container(
-                            //     margin: EdgeInsets.only(right: 8),
-                            //     child: Text(
-                            //       "ราคารวม ${NumberFormat.currency(locale: 'th_TH', symbol: '฿').format(item.total)} บาท",
-                            //       style: Styles.black16(context),
-                            //     ),
-                            //   ),
                           ],
                         ),
                       )

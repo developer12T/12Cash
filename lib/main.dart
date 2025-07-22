@@ -65,7 +65,7 @@ void main() async {
     await dotenv.load(fileName: ".env");
     await ScreenUtil.ensureScreenSize();
     // Hide status bar + navigation bar for true fullscreen
-    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
     // final hasPermissions = await FlutterBackground.initialize(
     //   androidConfig: const FlutterBackgroundAndroidConfig(
@@ -111,6 +111,7 @@ void main() async {
         ),
       ),
     );
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
   });
 }
 
@@ -583,6 +584,7 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
 
   Future<void> _initUpgrade() async {
     await _upgrader.initialize();
+    print('shouldDisplayUpgrade: ${_upgrader.shouldDisplayUpgrade()}');
     // ถ้าไม่มีอัปเดต -> preload user data
     if (!_upgrader.shouldDisplayUpgrade()) {
       setState(() {
@@ -590,6 +592,7 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
       });
       getUserData();
     }
+    getUserData();
     // ถ้ามีอัปเดต MyUpgradeAlert จะ popup เอง และบล็อก user ไว้
     // ไม่ต้อง preload user data ตอนนี้!
   }
@@ -626,19 +629,19 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
         return null;
       } else {
         setState(() {
-          User.username = sharedPreferences.getString('username')!;
-          User.firstName = sharedPreferences.getString('firstName')!;
-          User.surName = sharedPreferences.getString('surName')!;
-          User.fullName = sharedPreferences.getString('fullName')!;
-          User.salePayer = sharedPreferences.getString('salePayer')!;
-          User.tel = sharedPreferences.getString('tel')!;
-          User.area = sharedPreferences.getString('area')!;
-          User.typeTruck = sharedPreferences.getString('typeTruck')!;
-          User.saleCode = sharedPreferences.getString('saleCode')!;
-          User.zone = sharedPreferences.getString('zone')!;
-          User.warehouse = sharedPreferences.getString('warehouse')!;
-          User.role = sharedPreferences.getString('role')!;
-          User.token = sharedPreferences.getString('token')!;
+          User.username = sharedPreferences.getString('username') ?? "";
+          User.firstName = sharedPreferences.getString('firstName') ?? "";
+          User.surName = sharedPreferences.getString('surName') ?? "";
+          User.fullName = sharedPreferences.getString('fullName') ?? "";
+          User.salePayer = sharedPreferences.getString('salePayer') ?? "";
+          User.tel = sharedPreferences.getString('tel') ?? "";
+          User.area = sharedPreferences.getString('area') ?? "";
+          User.typeTruck = sharedPreferences.getString('typeTruck') ?? "";
+          User.saleCode = sharedPreferences.getString('saleCode') ?? "";
+          User.zone = sharedPreferences.getString('zone') ?? "";
+          User.warehouse = sharedPreferences.getString('warehouse') ?? "";
+          User.role = sharedPreferences.getString('role') ?? "";
+          User.token = sharedPreferences.getString('token') ?? "";
           userAvailable = true;
         });
         Timer(
