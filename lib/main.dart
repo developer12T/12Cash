@@ -592,7 +592,6 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
       });
       getUserData();
     }
-    getUserData();
     // ถ้ามีอัปเดต MyUpgradeAlert จะ popup เอง และบล็อก user ไว้
     // ไม่ต้อง preload user data ตอนนี้!
   }

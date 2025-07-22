@@ -30,30 +30,6 @@ class _SummarybyMonthState extends State<SummarybyMonth> {
     // getDataSummary();
   }
 
-  // Future<void> getDataSummary() async {
-  //   try {
-  //     ApiService apiService = ApiService();
-  //     await apiService.init();
-  //     var response = await apiService.request(
-  //       endpoint:
-  //           'api/cash/order/getSummarybyMonth?area=${User.area}&period=${period}',
-  //       method: 'GET',
-  //     );
-  //     if (response.statusCode == 200) {
-  //       // dashboard = data.map((item) => MonthlySummary.fromJson(item)).toList();
-  //       var data = response.data['data'];
-  //       // spots = data.map<FlSpot>((item) {
-  //       //   double x = (item['month'] as num).toDouble();
-  //       //   double y = (item['summary'] as num).toDouble();
-  //       //   return FlSpot(x, y);
-  //       // }).toList();
-  //     }
-  //     // print(spots);
-  //   } catch (e) {
-  //     print("Error on getDataSummary is $e");
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     final tooltipsOnBar = LineChartBarData(
@@ -61,27 +37,24 @@ class _SummarybyMonthState extends State<SummarybyMonth> {
           color: Styles.primaryColorIcons.withOpacity(0.2),
           show: true,
         ),
-        // dotData: FlDotData(
-        //     show: true,
-        //     getDotPainter: (spot, percent, barData, index) {
-        //       return FlDotCirclePainter(
-        //         radius: 6,
-        //         color: Colors.white,
-        //         strokeWidth: 3,
-        //         strokeColor: Styles.primaryColor,
-        //       );
-        //     },),
         show: true,
         spots: widget.spots,
-        dotData: FlDotData(show: true), // Shows dots at data points
+        // dotData: FlDotData(
+        //   show: true,
+        //   getDotPainter: (spot, percent, barData, index) {
+        //     return FlDotCirclePainter(
+        //       radius: 6,
+        //       color: Colors.white,
+        //       strokeWidth: 3,
+        //       strokeColor: Styles.primaryColor,
+        //     );
+        //   },
+        // ), // Shows dots at data points
         isCurved: true,
         preventCurveOverShooting: true,
         color: Styles.primaryColorIcons,
         isStrokeJoinRound: true,
-        // isStepLineChart: true,
-        isStrokeCapRound: true
-        // isStrokeCapRound: true,
-        );
+        isStrokeCapRound: true);
 
     // final showingTooltipOnSpots = [
     //   12,

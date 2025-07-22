@@ -142,7 +142,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
       }
     } catch (e) {
       setState(() {
-        totalCart = 00.00;
+        totalCart = 0;
       });
       print("Error $e");
     }
@@ -362,6 +362,8 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
           }
         });
       }
+    } on ApiException catch (e) {
+      print("Error occurred: $e");
     } catch (e) {
       print("Error occurred: $e");
     }

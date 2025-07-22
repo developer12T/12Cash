@@ -232,7 +232,7 @@ class _AdjustStockState extends State<AdjustStock> {
           "area": User.area,
           "id": product.id,
           "qty": count,
-          "unit": selectedUnit,
+          "unit": "${product.listUnit[0].unit}",
           "action": "OUT", // add,reduce for adjuststock
         },
       );
@@ -290,6 +290,7 @@ class _AdjustStockState extends State<AdjustStock> {
         method: 'POST',
         body: {
           "type": "sale",
+          "orderId": "${widget.orderId}",
           "period": "${period}",
           "area": "${User.area}",
           "group": selectedGroups,
@@ -2000,7 +2001,6 @@ class _AdjustStockState extends State<AdjustStock> {
                                                                             cartlist[index].unit));
                                                                   },
                                                                 );
-                                                                ;
 
                                                                 if (cartList
                                                                         .length ==

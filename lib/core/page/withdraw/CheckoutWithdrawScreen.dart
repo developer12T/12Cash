@@ -977,164 +977,165 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                                   // ),
                                                                 ],
                                                               ),
-                                                              Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .end,
-                                                                children: [
-                                                                  ElevatedButton(
-                                                                    onPressed:
-                                                                        () async {
-                                                                      setState(
-                                                                          () {
-                                                                        if (cartList[index].qty >
-                                                                            1) {
-                                                                          cartList[index]
-                                                                              .qty--;
-                                                                        }
-                                                                      });
-                                                                      await _reduceCart(
-                                                                        cartList[
-                                                                            index],
-                                                                      );
-                                                                    },
-                                                                    style: ElevatedButton
-                                                                        .styleFrom(
-                                                                      shape:
-                                                                          const CircleBorder(
-                                                                        side: BorderSide(
-                                                                            color:
-                                                                                Colors.grey,
-                                                                            width: 1),
-                                                                      ), // ✅ Makes the button circular
-                                                                      padding:
-                                                                          const EdgeInsets
-                                                                              .all(
-                                                                              8),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white, // Button color
-                                                                    ),
-                                                                    child:
-                                                                        const Icon(
-                                                                      Icons
-                                                                          .remove,
-                                                                      size: 24,
-                                                                      color: Colors
-                                                                          .grey,
-                                                                    ), // Example
-                                                                  ),
-                                                                  Container(
-                                                                    padding:
-                                                                        EdgeInsets
-                                                                            .all(4),
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      border:
-                                                                          Border
-                                                                              .all(
-                                                                        color: Colors
-                                                                            .grey,
-                                                                        width:
-                                                                            1,
-                                                                      ),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              16),
-                                                                    ),
-                                                                    width: 75,
-                                                                    child: Text(
-                                                                      '${cartList[index].qty.toStringAsFixed(0)}',
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .center,
-                                                                      style: Styles
-                                                                          .black18(
-                                                                        context,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  ElevatedButton(
-                                                                    onPressed:
-                                                                        () async {
-                                                                      await _reduceCart(
-                                                                          cartList[
-                                                                              index]);
 
-                                                                      setState(
-                                                                          () {
-                                                                        cartList[index]
-                                                                            .qty++;
-                                                                      });
-                                                                    },
-                                                                    style: ElevatedButton
-                                                                        .styleFrom(
-                                                                      shape:
-                                                                          const CircleBorder(
-                                                                        side: BorderSide(
-                                                                            color:
-                                                                                Colors.grey,
-                                                                            width: 1),
-                                                                      ), // ✅ Makes the button circular
-                                                                      padding:
-                                                                          const EdgeInsets
-                                                                              .all(
-                                                                              8),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white, // Button color
-                                                                    ),
-                                                                    child:
-                                                                        const Icon(
-                                                                      Icons.add,
-                                                                      size: 24,
-                                                                      color: Colors
-                                                                          .grey,
-                                                                    ), // Example
-                                                                  ),
-                                                                  ElevatedButton(
-                                                                    onPressed:
-                                                                        () async {
-                                                                      await _deleteCart(
-                                                                          cartList[
-                                                                              index]);
+                                                              // Row(
+                                                              //   mainAxisAlignment:
+                                                              //       MainAxisAlignment
+                                                              //           .end,
+                                                              //   children: [
+                                                              //     ElevatedButton(
+                                                              //       onPressed:
+                                                              //           () async {
+                                                              //         setState(
+                                                              //             () {
+                                                              //           if (cartList[index].qty >
+                                                              //               1) {
+                                                              //             cartList[index]
+                                                              //                 .qty--;
+                                                              //           }
+                                                              //         });
+                                                              //         await _reduceCart(
+                                                              //           cartList[
+                                                              //               index],
+                                                              //         );
+                                                              //       },
+                                                              //       style: ElevatedButton
+                                                              //           .styleFrom(
+                                                              //         shape:
+                                                              //             const CircleBorder(
+                                                              //           side: BorderSide(
+                                                              //               color:
+                                                              //                   Colors.grey,
+                                                              //               width: 1),
+                                                              //         ), // ✅ Makes the button circular
+                                                              //         padding:
+                                                              //             const EdgeInsets
+                                                              //                 .all(
+                                                              //                 8),
+                                                              //         backgroundColor:
+                                                              //             Colors
+                                                              //                 .white, // Button color
+                                                              //       ),
+                                                              //       child:
+                                                              //           const Icon(
+                                                              //         Icons
+                                                              //             .remove,
+                                                              //         size: 24,
+                                                              //         color: Colors
+                                                              //             .grey,
+                                                              //       ), // Example
+                                                              //     ),
+                                                              //     Container(
+                                                              //       padding:
+                                                              //           EdgeInsets
+                                                              //               .all(4),
+                                                              //       decoration:
+                                                              //           BoxDecoration(
+                                                              //         border:
+                                                              //             Border
+                                                              //                 .all(
+                                                              //           color: Colors
+                                                              //               .grey,
+                                                              //           width:
+                                                              //               1,
+                                                              //         ),
+                                                              //         borderRadius:
+                                                              //             BorderRadius.circular(
+                                                              //                 16),
+                                                              //       ),
+                                                              //       width: 75,
+                                                              //       child: Text(
+                                                              //         '${cartList[index].qty.toStringAsFixed(0)}',
+                                                              //         textAlign:
+                                                              //             TextAlign
+                                                              //                 .center,
+                                                              //         style: Styles
+                                                              //             .black18(
+                                                              //           context,
+                                                              //         ),
+                                                              //       ),
+                                                              //     ),
+                                                              //     ElevatedButton(
+                                                              //       onPressed:
+                                                              //           () async {
+                                                              //         await _reduceCart(
+                                                              //             cartList[
+                                                              //                 index]);
 
-                                                                      setState(
-                                                                        () {
-                                                                          cartList.removeWhere((item) =>
-                                                                              (item.id == cartList[index].id && item.unit == cartList[index].unit));
-                                                                        },
-                                                                      );
-                                                                      // await _getTotalCart(setModalState);
-                                                                    },
-                                                                    style: ElevatedButton
-                                                                        .styleFrom(
-                                                                      shape:
-                                                                          const CircleBorder(
-                                                                        side: BorderSide(
-                                                                            color:
-                                                                                Colors.red,
-                                                                            width: 1),
-                                                                      ),
-                                                                      padding:
-                                                                          const EdgeInsets
-                                                                              .all(
-                                                                              8),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white, // Button color
-                                                                    ),
-                                                                    child:
-                                                                        const Icon(
-                                                                      Icons
-                                                                          .delete,
-                                                                      size: 24,
-                                                                      color: Colors
-                                                                          .red,
-                                                                    ), // Example
-                                                                  ),
-                                                                ],
-                                                              ),
+                                                              //         setState(
+                                                              //             () {
+                                                              //           cartList[index]
+                                                              //               .qty++;
+                                                              //         });
+                                                              //       },
+                                                              //       style: ElevatedButton
+                                                              //           .styleFrom(
+                                                              //         shape:
+                                                              //             const CircleBorder(
+                                                              //           side: BorderSide(
+                                                              //               color:
+                                                              //                   Colors.grey,
+                                                              //               width: 1),
+                                                              //         ), // ✅ Makes the button circular
+                                                              //         padding:
+                                                              //             const EdgeInsets
+                                                              //                 .all(
+                                                              //                 8),
+                                                              //         backgroundColor:
+                                                              //             Colors
+                                                              //                 .white, // Button color
+                                                              //       ),
+                                                              //       child:
+                                                              //           const Icon(
+                                                              //         Icons.add,
+                                                              //         size: 24,
+                                                              //         color: Colors
+                                                              //             .grey,
+                                                              //       ), // Example
+                                                              //     ),
+                                                              //     ElevatedButton(
+                                                              //       onPressed:
+                                                              //           () async {
+                                                              //         await _deleteCart(
+                                                              //             cartList[
+                                                              //                 index]);
+
+                                                              //         setState(
+                                                              //           () {
+                                                              //             cartList.removeWhere((item) =>
+                                                              //                 (item.id == cartList[index].id && item.unit == cartList[index].unit));
+                                                              //           },
+                                                              //         );
+                                                              //         // await _getTotalCart(setModalState);
+                                                              //       },
+                                                              //       style: ElevatedButton
+                                                              //           .styleFrom(
+                                                              //         shape:
+                                                              //             const CircleBorder(
+                                                              //           side: BorderSide(
+                                                              //               color:
+                                                              //                   Colors.red,
+                                                              //               width: 1),
+                                                              //         ),
+                                                              //         padding:
+                                                              //             const EdgeInsets
+                                                              //                 .all(
+                                                              //                 8),
+                                                              //         backgroundColor:
+                                                              //             Colors
+                                                              //                 .white, // Button color
+                                                              //       ),
+                                                              //       child:
+                                                              //           const Icon(
+                                                              //         Icons
+                                                              //             .delete,
+                                                              //         size: 24,
+                                                              //         color: Colors
+                                                              //             .red,
+                                                              //       ), // Example
+                                                              //     ),
+                                                              //   ],
+                                                              // ),
                                                             ],
                                                           ),
                                                         ],

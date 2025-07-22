@@ -180,7 +180,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               "${response.data['data'][0]['total'].toStringAsFixed(2)}";
           receiptData['OBSMCD'] = "${saleDetail?.name}";
           receiptData['taxno'] = "${storeDetail?.taxId}";
-
           receiptData["items"] = listProduct
               .map((cartItem) => {
                     "name": cartItem.name,
@@ -601,15 +600,6 @@ ${centerText('ออกใบกำกับภาษีโดยสำนัก
 ${centerText('($typeBill)', 69)}
 ${centerText('เอกสารออกเป็นชุด', 69)}
 ''';
-//     String header = '''
-// ${centerText('บริษัท วันทูเทรดดิ้ง จำกัด', paperWidthHeader)}
-// ${centerText('58/3 หมู่ที่ 6 ถ.พระประโทน-บ้านแพ้ว', paperWidthHeader)}
-// ${centerText('ต.ตลาดจินดา อ.สามพราน จ.นครปฐม 73110', paperWidthHeader)}
-// ${centerText('โทร.(034) 981-555', paperWidthHeader)}
-// ${centerText('เลขประจำตัวผู้เสียภาษี 0105563063410', paperWidthHeader)}
-// ${centerText('ออกใบกำกับภาษีโดยสำนักงานใหญ่', paperWidthHeader)}
-// ${centerText('($typeBill)', paperWidthHeader)}
-// ${centerText('เอกสารออกเป็นชุด', paperWidthHeader)}''';
     Uint8List encodedContent = await CharsetConverter.encode('TIS-620', header);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
@@ -625,12 +615,6 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     printHeaderSeparator2();
     await printBill(
         "\nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม");
-
-//     String body = '''
-// \nรายการสินค้า${' ' * (21)}จำนวน${' ' * (10)}ราคา${' ' * (4)}ส่วนลด${' ' * (7)}รวม
-// ''';
-//     Uint8List encodedBody = await CharsetConverter.encode('TIS-620', body);
-//     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedBody));
 
     String items = await data['items'].asMap().entries.map((entry) {
       int index = entry.key;
@@ -661,15 +645,15 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
         " ${NumberFormat.currency(locale: 'th_TH', symbol: '').format(double.tryParse(data['discountProduct'] ?? "00.00"))}";
 
     await printBetween('รวมมูลค่าสินค้า', data['ex_vat'].toString());
-    // await printBetween('ส่วนลด', '0.00');
     await printBetween('ภาษีมูลค่าเพิ่ม 7%', data['vat'].toString());
     await printBetween('ส่วนลดท้ายบิล', discountProduct);
     await printBetween('ส่วนลดสินค้า', discountCurrency);
     await printBetween('จำนวนเงินรวมสุทธิ', totalCurrency);
     await printBetween("", "($totalText)");
+
     String footer = '''\n\n
-    ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', '.........................', 70)}
-    ${leftRightText('', 'ลายเซ็นลูกค้า', 61)}
+    ${leftRightText('    ...........', '...........', 60)}
+    ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', 'ลายเซ็นลูกค้า', 70)}
     \n\n\n''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));
@@ -783,8 +767,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
     if (connectionStatus) {
       // await printHeaderSeparator();
+
       await printHeaderBill('สำเนาบิลเงินสด/ใบกำกับภาษี');
       await printBodyBill(receiptData);
+
       // await printHeaderSeparator();
       // await printHeaderBill('ใบลดหนี้');
       // await printBodyBill(receiptData);
