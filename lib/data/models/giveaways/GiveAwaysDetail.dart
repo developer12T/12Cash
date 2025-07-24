@@ -2,10 +2,10 @@ class GiveOrder {
   final String id;
   final String type;
   final String orderId;
-  final GiveInfo giveInfo;
-  final Sale sale;
-  final Store store;
-  final Shipping shipping;
+  final GiveInfo? giveInfo;
+  final Sale? sale;
+  final Store? store;
+  final Shipping? shipping;
   final String note;
   final String latitude;
   final String longitude;
@@ -15,8 +15,8 @@ class GiveOrder {
   final double totalExVat;
   final double total;
   final List<ListImage> listImage;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   GiveOrder({
     required this.id,
@@ -40,29 +40,61 @@ class GiveOrder {
   });
 
   factory GiveOrder.fromJson(Map<String, dynamic> json) {
-    return GiveOrder(
-      id: json['_id'],
-      type: json['type'],
-      orderId: json['orderId'],
-      giveInfo: GiveInfo.fromJson(json['giveInfo']),
-      sale: Sale.fromJson(json['sale']),
-      store: Store.fromJson(json['store']),
-      shipping: Shipping.fromJson(json['shipping']),
-      note: json['note'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-      status: json['status'],
-      listProduct: (json['listProduct'] as List)
+    List<Product> safeProductList = [];
+    if (json['listProduct'] is List) {
+      safeProductList = (json['listProduct'] as List)
+          .where((item) => item != null)
           .map((item) => Product.fromJson(item))
-          .toList(),
-      totalVat: (json['totalVat'] ?? 0).toDouble(),
-      totalExVat: (json['totalExVat'] ?? 0).toDouble(),
-      total: (json['total'] ?? 0).toDouble(),
-      listImage: (json['listImage'] as List)
+          .toList();
+    }
+
+    List<ListImage> safeImageList = [];
+    if (json['listImage'] is List) {
+      safeImageList = (json['listImage'] as List)
+          .where((item) => item != null)
           .map((item) => ListImage.fromJson(item))
-          .toList(),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+          .toList();
+    }
+
+    DateTime? safeCreatedAt;
+    if (json['createdAt'] != null) {
+      try {
+        safeCreatedAt = DateTime.parse(json['createdAt']);
+      } catch (_) {
+        safeCreatedAt = null;
+      }
+    }
+
+    DateTime? safeUpdatedAt;
+    if (json['updatedAt'] != null) {
+      try {
+        safeUpdatedAt = DateTime.parse(json['updatedAt']);
+      } catch (_) {
+        safeUpdatedAt = null;
+      }
+    }
+
+    return GiveOrder(
+      id: json['_id']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      orderId: json['orderId']?.toString() ?? '',
+      giveInfo:
+          json['giveInfo'] != null ? GiveInfo.fromJson(json['giveInfo']) : null,
+      sale: json['sale'] != null ? Sale.fromJson(json['sale']) : null,
+      store: json['store'] != null ? Store.fromJson(json['store']) : null,
+      shipping:
+          json['shipping'] != null ? Shipping.fromJson(json['shipping']) : null,
+      note: json['note']?.toString() ?? '',
+      latitude: json['latitude']?.toString() ?? '',
+      longitude: json['longitude']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      listProduct: safeProductList,
+      totalVat: _safeDouble(json['totalVat']),
+      totalExVat: _safeDouble(json['totalExVat']),
+      total: _safeDouble(json['total']),
+      listImage: safeImageList,
+      createdAt: safeCreatedAt,
+      updatedAt: safeUpdatedAt,
     );
   }
 
@@ -71,10 +103,10 @@ class GiveOrder {
       "_id": id,
       "type": type,
       "orderId": orderId,
-      "giveInfo": giveInfo.toJson(),
-      "sale": sale.toJson(),
-      "store": store.toJson(),
-      "shipping": shipping.toJson(),
+      "giveInfo": giveInfo?.toJson(),
+      "sale": sale?.toJson(),
+      "store": store?.toJson(),
+      "shipping": shipping?.toJson(),
       "note": note,
       "latitude": latitude,
       "longitude": longitude,
@@ -83,12 +115,25 @@ class GiveOrder {
       "totalVat": totalVat,
       "totalExVat": totalExVat,
       "total": total,
-      "listImage": listImage,
-      "createdAt": createdAt.toIso8601String(),
-      "updatedAt": updatedAt.toIso8601String(),
+      "listImage": listImage.map((item) => item.toJson()).toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
     };
   }
 }
+
+// Safe double parsing utility
+double _safeDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
+// -----------------
+// Child models (แก้ null safety เช่นเดียวกัน)
+// -----------------
 
 class GiveInfo {
   final String name;
@@ -107,11 +152,11 @@ class GiveInfo {
 
   factory GiveInfo.fromJson(Map<String, dynamic> json) {
     return GiveInfo(
-      name: json['name'],
-      type: json['type'],
-      remark: json['remark'],
-      dept: json['dept'],
-      id: json['_id'],
+      name: json['name']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      remark: json['remark']?.toString() ?? '',
+      dept: json['dept']?.toString() ?? '',
+      id: json['_id']?.toString() ?? '',
     );
   }
 
@@ -143,12 +188,12 @@ class Sale {
 
   factory Sale.fromJson(Map<String, dynamic> json) {
     return Sale(
-      saleCode: json['saleCode'],
-      salePayer: json['salePayer'],
-      name: json['name'],
-      tel: json['tel'],
-      warehouse: json['warehouse'],
-      id: json['_id'],
+      saleCode: json['saleCode']?.toString() ?? '',
+      salePayer: json['salePayer']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      tel: json['tel']?.toString() ?? '',
+      warehouse: json['warehouse']?.toString() ?? '',
+      id: json['_id']?.toString() ?? '',
     );
   }
 
@@ -185,14 +230,14 @@ class Store {
 
   factory Store.fromJson(Map<String, dynamic> json) {
     return Store(
-      storeId: json['storeId'],
-      name: json['name'],
-      address: json['address'],
-      taxId: json['taxId'],
-      tel: json['tel'],
-      area: json['area'],
-      zone: json['zone'],
-      id: json['_id'],
+      storeId: json['storeId']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      taxId: json['taxId']?.toString() ?? '',
+      tel: json['tel']?.toString() ?? '',
+      area: json['area']?.toString() ?? '',
+      zone: json['zone']?.toString() ?? '',
+      id: json['_id']?.toString() ?? '',
     );
   }
 
@@ -221,9 +266,9 @@ class Shipping {
 
   factory Shipping.fromJson(Map<String, dynamic> json) {
     return Shipping(
-      shippingId: json['shippingId'],
-      address: json['address'],
-      id: json['_id'],
+      shippingId: json['shippingId']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      id: json['_id']?.toString() ?? '',
     );
   }
 
@@ -265,18 +310,18 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
-      name: json['name'],
-      group: json['group'],
-      brand: json['brand'],
-      size: json['size'],
-      flavour: json['flavour'],
-      qty: json['qty'],
-      unit: json['unit'],
-      unitName: json['unitName'],
-      qtyPcs: json['qtyPcs'],
-      price: json['price'].toDouble(),
-      total: json['total'].toDouble(),
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      group: json['group']?.toString() ?? '',
+      brand: json['brand']?.toString() ?? '',
+      size: json['size']?.toString() ?? '',
+      flavour: json['flavour']?.toString() ?? '',
+      qty: _safeInt(json['qty']),
+      unit: json['unit']?.toString() ?? '',
+      unitName: json['unitName']?.toString() ?? '',
+      qtyPcs: _safeInt(json['qtyPcs']),
+      price: _safeDouble(json['price']),
+      total: _safeDouble(json['total']),
     );
   }
 
@@ -307,16 +352,14 @@ class ListImage {
     required this.type,
   });
 
-  // ✅ Convert JSON to Dart Object
   factory ListImage.fromJson(Map<String, dynamic> json) {
     return ListImage(
-      name: json['name'] ?? '', //  field name
-      path: json['path'] ?? '', //  field name
-      type: json['type'] ?? '', //  field name
+      name: json['name']?.toString() ?? '',
+      path: json['path']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
     );
   }
 
-  // ✅ Convert Dart Object to JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -324,4 +367,13 @@ class ListImage {
       'type': type,
     };
   }
+}
+
+// Helper function for safe int parsing
+int _safeInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
 }

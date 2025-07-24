@@ -43,9 +43,11 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
         if (data != null && data.isNotEmpty) {
           setState(() {
             // ถ้ามีหลาย record แนะนำใช้ .addAll หรือ .map
-            adjustStockDetail.add(WithdrawDetail.fromJson(data[0]));
+            adjustStockDetail =
+                data.map((e) => WithdrawDetail.fromJson(e)).toList();
           });
         }
+        print("adjustStockDetail: $adjustStockDetail");
       }
     } catch (e) {
       print("Error _getAdjustStockDetail $e");
@@ -369,8 +371,11 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                   child: Column(
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("ปรับใบเบิก", style: Styles.black18(context)),
+                          Text("${adjustStockDetail.length} ใบ",
+                              style: Styles.black18(context)),
                         ],
                       ),
                     ],
@@ -378,84 +383,116 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
                 ),
                 // Adjust Stock Details
                 ...adjustStockDetail.map((adjust) {
-                  return BoxShadowCustom(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  return Column(
+                    children: [
+                      BoxShadowCustom(
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
                             children: [
-                              Text("รายการที่ปรับใบเบิก",
-                                  style: Styles.black18(context)),
-                              Text("จำนวน ${adjust.listProduct.length} รายการ",
-                                  style: Styles.black18(context)),
-                            ],
-                          ),
-                          ListView.separated(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: adjust.listProduct.length,
-                            separatorBuilder: (context, i) => const Divider(),
-                            itemBuilder: (context, i) {
-                              final p = adjust.listProduct[i];
-                              return Row(
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      '${ApiService.apiHost}/images/products/${p.id}.webp',
-                                      width: screenWidth / 8,
-                                      height: screenWidth / 8,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        width: screenWidth / 8,
-                                        height: screenWidth / 8,
-                                        color: Colors.grey,
+                                  Text(
+                                    "รายการที่ปรับใบปรับของ ${adjust.orderId}",
+                                    style: Styles.black18(context),
+                                  ),
+                                  Container(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 8),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: adjust.status.toUpperCase() ==
+                                                "APPROVED"
+                                            ? Styles.success
+                                            : Styles.warning),
+                                    child: Text(
+                                      adjust.status.toUpperCase(),
+                                      style: Styles.white16(context),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "จำนวน ${adjust.listProduct.length} รายการ",
+                                    style: Styles.black18(context),
+                                  ),
+                                ],
+                              ),
+                              ListView.separated(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: adjust.listProduct.length,
+                                separatorBuilder: (context, i) =>
+                                    const Divider(),
+                                itemBuilder: (context, i) {
+                                  final p = adjust.listProduct[i];
+                                  return Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          '${ApiService.apiHost}/images/products/${p.id}.webp',
+                                          width: screenWidth / 8,
+                                          height: screenWidth / 8,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              Container(
+                                            width: screenWidth / 8,
+                                            height: screenWidth / 8,
+                                            color: Colors.grey,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.hide_image,
+                                                    color: Colors.white),
+                                                Text("ไม่มีภาพ",
+                                                    style: Styles.white18(
+                                                        context)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        flex: 3,
                                         child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Icon(Icons.hide_image,
-                                                color: Colors.white),
-                                            Text("ไม่มีภาพ",
-                                                style: Styles.white18(context)),
+                                            Text(p.name,
+                                                style: Styles.black16(context)),
+                                            Text("รหัส : ${p.id}",
+                                                style: Styles.black16(context)),
                                           ],
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(p.name,
-                                            style: Styles.black16(context)),
-                                        Text("รหัส : ${p.id}",
-                                            style: Styles.black16(context)),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        Text("ปรับออก",
-                                            style: Styles.black16(context)),
-                                        Text("${p.qty}",
-                                            style: Styles.black16(context)),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          )
-                        ],
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text("ปรับออก",
+                                                style: Styles.black16(context)),
+                                            Text("${p.qty}",
+                                                style: Styles.black16(context)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                      SizedBox(height: 10),
+                    ],
                   );
                 }).toList(),
               ],

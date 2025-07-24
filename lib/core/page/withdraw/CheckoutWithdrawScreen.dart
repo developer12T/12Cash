@@ -1186,12 +1186,16 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
   }
 
   void _showDatePicker(BuildContext context) async {
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, 1);
+    final lastDay =
+        DateTime(now.year, now.month + 1, 0); // วันสุดท้ายของเดือนนี้
     final DateTime? pickedDate = await showDatePicker(
       locale: Locale('th', 'TH'),
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(DateTime.now().year),
-      lastDate: DateTime(DateTime.now().year + 3),
+      firstDate: firstDay,
+      lastDate: lastDay,
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       builder: (BuildContext context, Widget? child) {
         return Theme(

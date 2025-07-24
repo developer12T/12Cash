@@ -1618,7 +1618,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                     ),
                                                                     width: 75,
                                                                     child: Text(
-                                                                      '${listPromotions[innerIndex].qty.toStringAsFixed(0)} ${unitPromotionText}',
+                                                                      '${listPromotions[innerIndex].qty.toStringAsFixed(0)} ${unitPromotion}',
                                                                       textAlign:
                                                                           TextAlign
                                                                               .center,

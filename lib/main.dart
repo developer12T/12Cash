@@ -618,14 +618,21 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
   Future<void> getUserData() async {
     sharedPreferences = await SharedPreferences.getInstance();
     // Check expiry
-    int? expiryTimestamp = sharedPreferences.getInt('dataExpiry');
+    final now = DateTime.now();
+    final tomorrow =
+        DateTime(now.year, now.month, now.day + 1); // 00:00 ของวันถัดไป
+    int expiryTimestamp = tomorrow.millisecondsSinceEpoch;
+
+    await sharedPreferences.setInt('dataExpiry', expiryTimestamp);
     if (expiryTimestamp != null) {
       int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
       if (currentTimestamp > expiryTimestamp) {
         // Data has expired, clear it
         sharedPreferences.clear();
         print('User data has expired');
-        return null;
+        // ปิดแอปทันที
+        exit(0); // <-- เพิ่มบรรทัดนี้
+        // return null; // ไม่จำเป็นต้อง return แล้ว
       } else {
         setState(() {
           User.username = sharedPreferences.getString('username') ?? "";
@@ -662,17 +669,79 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
       Timer(
         Duration(seconds: 3),
         () {
-          if (!mounted) return; // เช็คก่อน Navigator
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LoginScreen(),
-            ),
-          );
+          // ไม่มีข้อมูล user -> ปิดแอปเลย
+          exit(0); // <-- เพิ่มตรงนี้
+          // หรือจะไป Login ก็ได้ แล้วแต่ต้องการ
+          // if (!mounted) return;
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => LoginScreen(),
+          //   ),
+          // );
         },
       );
     }
   }
+
+  // Future<void> getUserData() async {
+  //   sharedPreferences = await SharedPreferences.getInstance();
+  //   // Check expiry
+  //   int? expiryTimestamp = sharedPreferences.getInt('dataExpiry');
+  //   if (expiryTimestamp != null) {
+  //     int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+  //     if (currentTimestamp > expiryTimestamp) {
+  //       // Data has expired, clear it
+  //       sharedPreferences.clear();
+  //       print('User data has expired');
+  //       return null;
+  //     } else {
+  //       setState(() {
+  //         User.username = sharedPreferences.getString('username') ?? "";
+  //         User.firstName = sharedPreferences.getString('firstName') ?? "";
+  //         User.surName = sharedPreferences.getString('surName') ?? "";
+  //         User.fullName = sharedPreferences.getString('fullName') ?? "";
+  //         User.salePayer = sharedPreferences.getString('salePayer') ?? "";
+  //         User.tel = sharedPreferences.getString('tel') ?? "";
+  //         User.area = sharedPreferences.getString('area') ?? "";
+  //         User.typeTruck = sharedPreferences.getString('typeTruck') ?? "";
+  //         User.saleCode = sharedPreferences.getString('saleCode') ?? "";
+  //         User.zone = sharedPreferences.getString('zone') ?? "";
+  //         User.warehouse = sharedPreferences.getString('warehouse') ?? "";
+  //         User.role = sharedPreferences.getString('role') ?? "";
+  //         User.token = sharedPreferences.getString('token') ?? "";
+  //         userAvailable = true;
+  //       });
+  //       Timer(
+  //         Duration(seconds: 3),
+  //         () {
+  //           if (!mounted) return; // เช็คก่อน Navigator
+  //           Navigator.pushReplacement(
+  //             context,
+  //             MaterialPageRoute(
+  //               builder: (context) => HomeScreen(
+  //                 index: 0,
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     }
+  //   } else {
+  //     Timer(
+  //       Duration(seconds: 3),
+  //       () {
+  //         if (!mounted) return; // เช็คก่อน Navigator
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => LoginScreen(),
+  //           ),
+  //         );
+  //       },
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

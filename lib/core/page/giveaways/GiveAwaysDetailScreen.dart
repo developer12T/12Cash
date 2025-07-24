@@ -165,16 +165,16 @@ class _GiveAwaysDetailScreenState extends State<GiveAwaysDetailScreen> {
           // totalExVat = response.data['data'][0]['totalExVat'].toDouble();
           // total = response.data['data'][0]['total'].toDouble();
           // Map cartList to receiptData["items"]
-          receiptData['customer']['customercode'] = orderDetail?.store.storeId;
-          receiptData['customer']['customername'] = orderDetail?.store.name;
-          receiptData['customer']['address1'] = orderDetail?.store.address;
-          receiptData['customer']['salecode'] = orderDetail?.sale.saleCode;
-          receiptData['customer']['taxno'] = orderDetail?.store.taxId;
+          receiptData['customer']['customercode'] = orderDetail?.store?.storeId;
+          receiptData['customer']['customername'] = orderDetail?.store?.name;
+          receiptData['customer']['address1'] = orderDetail?.store?.address;
+          receiptData['customer']['salecode'] = orderDetail?.sale?.saleCode;
+          receiptData['customer']['taxno'] = orderDetail?.store?.taxId;
           receiptData['CUOR'] = widget.orderId;
-          receiptData['OBSMCD'] = "${orderDetail?.sale.name}";
+          receiptData['OBSMCD'] = "${orderDetail?.sale?.name}";
           receiptData['OAORDT'] =
               DateFormat('dd/MM/yyyy').format(DateTime.now());
-          receiptData['giveName'] = "${orderDetail?.giveInfo.name}";
+          receiptData['giveName'] = "${orderDetail?.giveInfo?.name}";
 
           // receiptData['totaltext'] = "${orderDetail?.total.toStringAsFixed(2)}";
           // receiptData['ex_vat'] =
@@ -587,10 +587,9 @@ ${centerText('($typeBill)', 69)}
     await printBetween("", "($totalText)");
 
     String footer = '''
-    \n\n
-    ${leftRightText('ลงชื่อพนักงานขาย ${data['OBSMCD']}', '', 70)}\n\n
+    ${leftRightText('ลงชื่อพนักงานขาย ${data['OBSMCD']}', '', 70)}
     ${leftRightText('', '.........................', 58)}
-    ${leftRightText('', 'ลายเซ็นลูกค้า', 55)}\n\n
+    ${leftRightText('', 'ลายเซ็นลูกค้า', 55)}
     ${leftRightText('.........................', '', 58)}
     ${leftRightText('    ลายเซ็น Supervisor\n\n\n', '', 55)}
     ''';
@@ -789,8 +788,7 @@ ${centerText('($typeBill)', 69)}
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  // "${widget.storeId}",
-                                  "${orderDetail?.store.name} ${orderDetail?.store.storeId}",
+                                  "${orderDetail?.store?.name ?? ''} ${orderDetail?.store?.storeId ?? ''}",
                                   style: Styles.black24(context),
                                 ),
                                 listImage.isNotEmpty
@@ -838,7 +836,7 @@ ${centerText('($typeBill)', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "เลขที่ผู้เสียภาษี : ${orderDetail?.store.taxId}",
+                                  "เลขที่ผู้เสียภาษี : ${orderDetail?.store?.taxId ?? ""}",
                                   style: Styles.black18(context),
                                 )
                               ],
@@ -848,7 +846,7 @@ ${centerText('($typeBill)', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "เบอร์โทรศัพท์ : ${orderDetail?.store.tel}",
+                                  "เบอร์โทรศัพท์ : ${orderDetail?.store?.tel ?? ""}",
                                   style: Styles.black18(context),
                                 )
                               ],
@@ -896,7 +894,7 @@ ${centerText('($typeBill)', 69)}
                                                 Expanded(
                                                   child: Text(
                                                     // " ${widget.storeAddress}",
-                                                    "${orderDetail?.store.address}",
+                                                    "${orderDetail?.store?.address ?? ""}",
                                                     style:
                                                         Styles.grey18(context),
                                                   ),
@@ -917,7 +915,7 @@ ${centerText('($typeBill)', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "พนักงานขาย : ${orderDetail?.sale.name}",
+                                  "พนักงานขาย : ${orderDetail?.sale?.name ?? ""}",
                                   style: Styles.black24(context),
                                 )
                               ],
@@ -927,7 +925,7 @@ ${centerText('($typeBill)', 69)}
                               children: [
                                 Text(
                                   // "${widget.storeId}",
-                                  "เบอร์โทรศัพท์ : ${orderDetail?.sale.tel}",
+                                  "เบอร์โทรศัพท์ : ${orderDetail?.sale?.tel ?? ""}",
                                   style: Styles.black18(context),
                                 )
                               ],

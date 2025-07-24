@@ -179,6 +179,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           receiptData['total'] =
               "${response.data['data'][0]['total'].toStringAsFixed(2)}";
           receiptData['OBSMCD'] = "${saleDetail?.name}";
+          receiptData['phone'] = "${saleDetail?.tel}";
           receiptData['taxno'] = "${storeDetail?.taxId}";
           receiptData["items"] = listProduct
               .map((cartItem) => {
@@ -654,6 +655,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     String footer = '''\n\n
     ${leftRightText('    ...........', '...........', 60)}
     ${leftRightText('ผู้รับเงิน ${data['OBSMCD']}', 'ลายเซ็นลูกค้า', 70)}
+    ${leftRightText('เบอร์โทร ${data['phone']}', '', 70)}
     \n\n\n''';
     Uint8List encodedFooter = await CharsetConverter.encode('TIS-620', footer);
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedFooter));

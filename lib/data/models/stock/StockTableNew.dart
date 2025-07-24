@@ -36,6 +36,7 @@ class UnitTableNew {
   final int good;
   final int damaged;
   final int sale;
+  final int promotion;
   final int change;
   final int adjust;
   final int give;
@@ -49,6 +50,7 @@ class UnitTableNew {
     required this.good,
     required this.damaged,
     required this.sale,
+    required this.promotion,
     required this.change,
     required this.adjust,
     required this.give,
@@ -63,6 +65,7 @@ class UnitTableNew {
       withdraw: json['withdraw'] ?? 0,
       good: json['good'] ?? 0,
       sale: json['sale'] ?? 0,
+      promotion: json['promotion'] ?? 0,
       damaged: json['damaged'] ?? 0,
       change: json['change'] ?? 0,
       adjust: json['adjust'] ?? 0,
@@ -79,6 +82,7 @@ class UnitTableNew {
       'withdraw': withdraw,
       'good': good,
       'sale': sale,
+      'promotion': promotion,
       'damaged': damaged,
       'change': change,
       'adjust': adjust,
