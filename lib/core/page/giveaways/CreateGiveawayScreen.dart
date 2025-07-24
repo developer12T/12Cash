@@ -640,10 +640,10 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                                         "ที่อยู่การจัดส่ง",
                                         style: Styles.black18(context),
                                       ),
-                                      Text(
-                                        "แก้ไขที่อยู่",
-                                        style: Styles.pirmary18(context),
-                                      )
+                                      // Text(
+                                      //   "แก้ไขที่อยู่",
+                                      //   style: Styles.pirmary18(context),
+                                      // )
                                     ],
                                   ),
                                   Row(
@@ -700,7 +700,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
                                               ],
                                             ),
                                             onPressed: () {
-                                              _showAddressSheet(context);
+                                              // _showAddressSheet(context);
                                             },
                                           ),
                                         ),

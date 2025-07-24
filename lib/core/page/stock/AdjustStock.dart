@@ -536,7 +536,7 @@ class _AdjustStockState extends State<AdjustStock> {
                         ],
                       ),
                       onPressed: () {
-                        _showAddressSheet(context);
+                        // _showAddressSheet(context);
                       },
                     ),
                   ),

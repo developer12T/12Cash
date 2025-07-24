@@ -14,7 +14,7 @@ class WithdrawDetail {
   final String sendDate;
   final String remark;
   final List<Product> listProduct;
-  final int total;
+  final double total;
   final int totalQty;
   final double totalWeightGross;
   final double totalWeightNet;
@@ -76,7 +76,7 @@ class WithdrawDetail {
       listProduct: (json['listProduct'] as List? ?? [])
           .map((item) => Product.fromJson(item))
           .toList(),
-      total: json['total'] ?? 0,
+      total: (json['total'] ?? 0).toDouble(),
       totalQty: json['totalQty'] ?? 0,
       totalWeightGross: (json['totalWeightGross'] ?? 0).toDouble(),
       totalWeightNet: (json['totalWeightNet'] ?? 0).toDouble(),
@@ -134,8 +134,8 @@ class Product {
   final int receiveQty;
   final String unit;
   final int qtyPcs;
-  final int price;
-  final int total;
+  final double price;
+  final double total;
   final double weightGross;
   final double weightNet;
   final String productId;
@@ -170,8 +170,8 @@ class Product {
       receiveQty: json['receiveQty'] ?? 0,
       unit: json['unit'] ?? '',
       qtyPcs: json['qtyPcs'] ?? 0,
-      price: json['price'] ?? 0,
-      total: json['total'] ?? 0,
+      price: (json['price'] ?? 0).toDouble(),
+      total: (json['total'] ?? 0).toDouble(),
       weightGross: (json['weightGross'] ?? 0).toDouble(),
       weightNet: (json['weightNet'] ?? 0).toDouble(),
       productId: json['_id'] ?? '',
