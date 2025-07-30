@@ -838,7 +838,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text("ยอดรวมจำนวณ", style: Styles.white24(context)),
-                            Text("${totalCart.toStringAsFixed(0)} หีบ",
+                            Text("${totalCart.toStringAsFixed(0)}",
                                 style: Styles.white24(context)),
                           ],
                         ),
@@ -1450,7 +1450,7 @@ class _ProductWithdrowScreenState extends State<ProductWithdrowScreen>
                                       Expanded(
                                         flex: 2,
                                         child: Text(
-                                          "ยอดรวม ${totalCart.toStringAsFixed(0)} หีบ",
+                                          "ยอดรวม ${totalCart.toStringAsFixed(0)}",
                                           style: Styles.black24(context),
                                         ),
                                       ),

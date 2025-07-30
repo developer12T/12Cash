@@ -17,6 +17,7 @@ import 'package:_12sale_app/data/models/search/StoreFilterLocal.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -30,6 +31,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
+import 'package:toastification/toastification.dart';
 
 List<Store> storeAll = [];
 List<Store> storeNew = [];
@@ -70,6 +72,18 @@ class _StoreScreenState extends State<StoreScreen> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final socketService = Provider.of<SocketService>(context);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        if (socketService.updateStoreStatus != '') {
+          _getStoreDataAll();
+          _getStoreDataNew();
+          print(
+              '${socketService.updateStoreStatus} socketService.updateStoreStatus');
+        }
+      },
+    );
+
     // Register this screen as a route-aware widget
     final ModalRoute? route = ModalRoute.of(context);
     if (route is PageRoute) {

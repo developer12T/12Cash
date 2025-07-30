@@ -478,7 +478,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                           ],
                         ),
                         Text(
-                          "${totalCart.toStringAsFixed(0)} หีบ",
+                          "${totalCart.toStringAsFixed(0)}",
                           style: Styles.headerWhite18(context),
                         )
                       ],

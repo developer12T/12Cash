@@ -2690,7 +2690,8 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
     setState(() {
       if ((widget.maxQty == null) || (totalQty < widget.maxQty!)) {
         final item = list[idx];
-        final oriIdx = widget.originalList.indexWhere((e) => e.id == item.id);
+        final oriIdx = widget.originalList
+            .indexWhere((e) => e.id == item.id && e.proId == widget.proId);
         if (oriIdx != -1) {
           widget.originalList[oriIdx] = widget.originalList[oriIdx]
               .copyWith(qty: widget.originalList[oriIdx].qty + 1);
@@ -2698,25 +2699,24 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
           widget.originalList.add(item.copyWith(qty: 1));
         }
       }
-      // ถ้า totalQty >= maxQty จะเพิ่มไม่ได้
     });
   }
 
   void _removeQty(int idx) {
     setState(() {
       final item = list[idx];
-      final oriIdx = widget.originalList.indexWhere((e) => e.id == item.id);
+      final oriIdx = widget.originalList.indexWhere(
+        (e) => e.id == item.id && e.proId == widget.proId,
+      );
       if (oriIdx != -1 && widget.originalList[oriIdx].qty > 0) {
         widget.originalList[oriIdx] = widget.originalList[oriIdx]
             .copyWith(qty: widget.originalList[oriIdx].qty - 1);
       }
-      // ไม่ต้อง remove ออกจาก originalList ก็ได้ ให้ qty = 0 ไว้เฉยๆ
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: DraggableScrollableSheet(
         initialChildSize: 0.85,
@@ -2789,7 +2789,9 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
                                       alignment: Alignment.center,
                                       child: Text(
                                         '${widget.originalList.firstWhere(
-                                              (promo) => promo.id == item.id,
+                                              (promo) =>
+                                                  promo.id == item.id &&
+                                                  promo.proId == widget.proId,
                                               orElse: () =>
                                                   item.copyWith(qty: 0),
                                             ).qty}',
@@ -2827,7 +2829,8 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
                             : Colors.grey.shade400, // เลือกไม่ครบ ใช้สีเทาอ่อน
                       ),
                     ),
-                    icon: Icon(Icons.check_circle_outline, color: Colors.white),
+                    icon: const Icon(Icons.check_circle_outline,
+                        color: Colors.white),
                     label: Text("บันทึก", style: Styles.white18(context)),
                     onPressed: (totalQty == (widget.maxQty ?? 0))
                         ? () {

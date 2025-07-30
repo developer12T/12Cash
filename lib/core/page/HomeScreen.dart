@@ -186,24 +186,41 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // final socketService = Provider.of<SocketService>(context);
+    // WidgetsBinding.instance.addPostFrameCallback(
+    //   (_) {
+    //     print(
+    //         '${socketService.updateStoreStatus} socketService.updateStoreStatus');
+    //     if (socketService.updateStoreStatus != '') {
+    //       toastification.show(
+    //         context: context,
+    //         title: Text(
+    //           socketService.updateStoreStatus,
+    //           style: Styles.green18(context),
+    //         ),
+    //         style: ToastificationStyle.flatColored,
+    //         primaryColor: Colors.green,
+    //         autoCloseDuration: Duration(seconds: 5),
+    //       );
+    //     }
+    //   },
+    // );
 
-    final socketService = Provider.of<SocketService>(context);
-
-    // Listen for updates and show toast
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (socketService.latestMessage != '') {
-        // toastification.show(
-        //   context: context,
-        //   title: Text(
-        //     socketService.latestMessage,
-        //     style: Styles.green18(context),
-        //   ),
-        //   style: ToastificationStyle.flatColored,
-        //   primaryColor: Colors.green,
-        //   autoCloseDuration: Duration(seconds: 5),
-        // );
-      }
-    });
+    // // Listen for updates and show toast
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (socketService.latestMessage != '') {
+    //     toastification.show(
+    //       context: context,
+    //       title: Text(
+    //         socketService.latestMessage,
+    //         style: Styles.green18(context),
+    //       ),
+    //       style: ToastificationStyle.flatColored,
+    //       primaryColor: Colors.green,
+    //       autoCloseDuration: Duration(seconds: 5),
+    //     );
+    //   }
+    // });
   }
 
   @override

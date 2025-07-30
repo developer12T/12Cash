@@ -8,6 +8,11 @@ class SocketService with ChangeNotifier {
 
   IO.Socket? socket;
   String latestMessage = "";
+  String updateStoreStatus = "";
+  String statusOrderUpdated = "";
+  String withdrawUpdate = "";
+  String refundUpdate = "";
+  String giveUpdate = "";
 
   SocketService._internal() {
     connect();
@@ -26,8 +31,28 @@ class SocketService with ChangeNotifier {
       print('✅ Socket connected');
     });
 
-    socket!.on('sale_getSummarybyArea', (data) {
-      latestMessage = data['data'].toString();
+    socket!.on('order/statusOrderUpdated', (data) {
+      statusOrderUpdated = data['updatedCount'].toString();
+      notifyListeners();
+    });
+
+    socket!.on('store/updateStoreStatus', (data) {
+      updateStoreStatus = data['data'].toString();
+      notifyListeners();
+    });
+
+    socket!.on('distribution/approveWithdraw', (data) {
+      withdrawUpdate = data['data'].toString();
+      notifyListeners();
+    });
+
+    socket!.on('give/approve', (data) {
+      giveUpdate = data['data'].toString();
+      notifyListeners();
+    });
+
+    socket!.on('refund/updateStatus', (data) {
+      refundUpdate = data['data'].toString();
       notifyListeners();
     });
 

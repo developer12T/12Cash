@@ -88,7 +88,7 @@ class WithDrawCard extends StatelessWidget {
                               ],
                             ),
                             Text(
-                              "จำนวนเบิก: ${item.total.toStringAsFixed(0)} หีบ",
+                              "จำนวนเบิก: ${item.total.toStringAsFixed(0)}",
                               style: Styles.black16(context),
                             ),
                             // Text(

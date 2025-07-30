@@ -7,6 +7,7 @@ import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class WithdrawDetailScreen extends StatefulWidget {
   final orderId;
@@ -27,6 +28,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     // Register this screen as a route-aware widget
     final ModalRoute? route = ModalRoute.of(context);
     if (route is PageRoute) {
@@ -102,6 +104,30 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
     }
   }
 
+  Future<void> _saleConfirmWithdraw() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/distribution/saleConfirmWithdraw',
+        method: 'POST',
+        body: {
+          "orderId": widget.orderId,
+          "status": true,
+        },
+      );
+      if (response.statusCode == 200) {
+        context.loaderOverlay.show();
+        await _getWithdrawDetail();
+        await _getAdjustStockDetail();
+        context.loaderOverlay.hide();
+      }
+    } catch (e) {
+      context.loaderOverlay.hide();
+      print("Error _getWithdrawDetail $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -117,11 +143,15 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
       ),
       persistentFooterButtons: [
         // เช็ค null & isNotEmpty ก่อนเสมอ
-        (withdrawDetail.isNotEmpty &&
-                (withdrawDetail[0].status?.toUpperCase() ?? '') == "APPROVED")
-            ? Row(
-                children: [
-                  Expanded(
+        Row(
+          children: [
+            (withdrawDetail.isNotEmpty &&
+                        (withdrawDetail[0].status?.toUpperCase() ?? '') ==
+                            "APPROVED" ||
+                    withdrawDetail.isNotEmpty &&
+                        (withdrawDetail[0].status?.toUpperCase() ?? '') ==
+                            "CONFIRM")
+                ? Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -150,10 +180,40 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                         ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            : const SizedBox(),
+                  )
+                : SizedBox(),
+            SizedBox(
+              width: 10,
+            ),
+            withdrawDetail.isNotEmpty &&
+                    (withdrawDetail[0].status?.toUpperCase() ?? '') != "CONFIRM"
+                ? Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        backgroundColor: Styles.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () async {
+                        await _saleConfirmWithdraw();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("รับสินค้า",
+                                style: Styles.headerWhite18(context)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox(),
+          ],
+        )
       ],
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8),
@@ -179,10 +239,12 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                               padding: EdgeInsets.symmetric(horizontal: 8),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  color:
-                                      detail.status.toUpperCase() == "APPROVED"
-                                          ? Styles.success
-                                          : Styles.warning),
+                                  color: detail.status.toUpperCase() ==
+                                              "APPROVED" ||
+                                          detail.status.toUpperCase() ==
+                                              "CONFIRM"
+                                      ? Styles.success
+                                      : Styles.warning),
                               child: Text(
                                 detail.status.toUpperCase(),
                                 style: Styles.white16(context),
@@ -274,7 +336,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                     children: [
                                       Text("เบิก",
                                           style: Styles.black18(context)),
-                                      Text("${p.qty}",
+                                      Text("${p.qty} ${p.unit}",
                                           style: Styles.black18(context)),
                                     ],
                                   ),
@@ -283,7 +345,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                   child: Column(
                                     children: [
                                       Text("รับ", style: Styles.red18(context)),
-                                      Text("${p.receiveQty}",
+                                      Text("${p.receiveQty} ${p.unit}",
                                           style: Styles.red18(context)),
                                     ],
                                   ),
@@ -315,7 +377,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                 children: [
                                   Text("จำนวนรวม",
                                       style: Styles.black16(context)),
-                                  Text("${detail.totalQty} หีบ",
+                                  Text("${detail.totalQty}",
                                       style: Styles.black16(context)),
                                 ],
                               ),
@@ -356,7 +418,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                 children: [
                                   Text("จำนวนรวม",
                                       style: Styles.black16(context)),
-                                  Text("${detail.receivetotalQty} หีบ",
+                                  Text("${detail.receivetotalQty}",
                                       style: Styles.black16(context)),
                                 ],
                               ),

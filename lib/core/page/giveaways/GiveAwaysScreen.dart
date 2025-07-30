@@ -413,9 +413,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
           "period": "${period}",
           "area": "${User.area}",
           "group": groups,
-          "brand": selectedBrands,
-          "size": selectedSize,
-          "flavour": selectedFlavours
+          "brand": brandList,
+          "size": sizeList,
+          "flavour": flavourList
         },
       );
       print("Response: $response");

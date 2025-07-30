@@ -9,11 +9,13 @@ import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/giveaways/GiveAways.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:provider/provider.dart';
 
 class GiveawaysHistoryScreen extends StatefulWidget {
   const GiveawaysHistoryScreen({super.key});
@@ -33,6 +35,19 @@ class _GiveawaysHistoryScreenState extends State<GiveawaysHistoryScreen> {
   void initState() {
     super.initState();
     _getGiveAways();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final socketService = Provider.of<SocketService>(context);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        if (socketService.giveUpdate != '') {
+          _getGiveAways();
+        }
+      },
+    );
   }
 
   Future<void> _getGiveAways() async {

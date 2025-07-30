@@ -11,11 +11,14 @@ import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/withdraw/Withdraw.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class WithDrawScreen extends StatefulWidget {
   const WithDrawScreen({super.key});
@@ -63,6 +66,20 @@ class _WithDrawScreenState extends State<WithDrawScreen> {
     // TODO: implement initState
     super.initState();
     _getDetail();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final socketService = Provider.of<SocketService>(context);
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        if (socketService.withdrawUpdate != '') {
+          _getDetail();
+        }
+      },
+    );
   }
 
   @override

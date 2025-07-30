@@ -14,6 +14,7 @@ import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/models/order/Orders.dart';
 import 'package:_12sale_app/data/models/refund/RefundOrder.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:_12sale_app/main.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -111,6 +112,19 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final socketService = Provider.of<SocketService>(context);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        if (socketService.statusOrderUpdated != '0') {
+          _getOrder();
+        }
+
+        if (socketService.refundUpdate != '') {
+          _getRefundOrder();
+        }
+      },
+    );
+
     // Register this screen as a route-aware widget
     final ModalRoute? route = ModalRoute.of(context);
     if (route is PageRoute) {
@@ -132,46 +146,35 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
     final isSelect = Provider.of<RefundfilterLocal>(context);
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () {
-      //     // Show refresh indicator programmatically on button tap.
-      //     _refreshIndicatorKey.currentState?.show();
-      //   },
-      //   icon: const Icon(Icons.refresh),
-      // ),
-      // floatingActionButton: FloatingActionButton(
-      //   shape: CircleBorder(),
-      //   child: const Icon(Icons.refresh),
-      //   onPressed: () {
-      //     _refreshIndicatorKey.currentState?.show();
-      //   },
-      // ),
       backgroundColor: Colors.transparent,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
           margin: EdgeInsets.only(top: 20),
           child: isSelect.isSelect == 1
-              ? LoadingSkeletonizer(
-                  loading: _loadingOrder,
-                  child: ListView.builder(
-                    itemCount: orders.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: InvoiceCard(
-                          item: orders[index],
-                          onDetailsPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => OrderDetailScreen(
-                                    orderId: orders[index].orderId),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
+              ? RefreshIndicator(
+                  onRefresh: () => _getOrder(),
+                  child: LoadingSkeletonizer(
+                    loading: _loadingOrder,
+                    child: ListView.builder(
+                      itemCount: orders.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: InvoiceCard(
+                            item: orders[index],
+                            onDetailsPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => OrderDetailScreen(
+                                      orderId: orders[index].orderId),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 )
               : refundOrders.isNotEmpty
@@ -282,14 +285,6 @@ class _ReportHeaderState extends State<ReportHeader> {
                           ),
                         ),
                       ),
-
-                      // Flexible(
-                      //   fit: FlexFit.loose,
-                      //   child: Container(
-                      //     // width: screenWidth / 3,
-                      //     child: const CustomerDropdownSearch(),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
