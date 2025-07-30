@@ -30,8 +30,8 @@ android {
         applicationId = "com.onetwotrading.onetwocashapp"
         minSdk = 21  // Ensure minSdk is at least 21
         targetSdk = 35
-        versionCode = 17
-        versionName = "2.0.5"
+        versionCode = 19
+        versionName = "2.1.1"
         multiDexEnabled = true  // ✅ Enable MultiDex if not already enabled
     }
 

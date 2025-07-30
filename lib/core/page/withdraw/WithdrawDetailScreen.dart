@@ -4,6 +4,7 @@ import 'package:_12sale_app/core/page/stock/AdjustStock.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/withdraw/WithdrawDetail2.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/main.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -18,9 +19,32 @@ class WithdrawDetailScreen extends StatefulWidget {
   State<WithdrawDetailScreen> createState() => _WithdrawDetailScreenState();
 }
 
-class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
+class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
+    with RouteAware {
   List<WithdrawDetail> withdrawDetail = [];
   List<WithdrawDetail> adjustStockDetail = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Register this screen as a route-aware widget
+    final ModalRoute? route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      // Only subscribe if the route is a P ageRoute
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    // setState(() {
+    //   _loadingRouteVisit = true;
+    // });
+    // Called when the screen is popped back to
+    // _getCart();
+    _getWithdrawDetail();
+    _getAdjustStockDetail();
+  }
 
   @override
   void initState() {
@@ -41,6 +65,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
       if (response.statusCode == 200) {
         final List<dynamic>? data = response.data['data'];
         if (data != null && data.isNotEmpty) {
+          adjustStockDetail.clear();
           setState(() {
             // ถ้ามีหลาย record แนะนำใช้ .addAll หรือ .map
             adjustStockDetail =
@@ -66,6 +91,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen> {
       if (response.statusCode == 200) {
         final List<dynamic>? data = response.data['data'];
         if (data != null && data.isNotEmpty) {
+          withdrawDetail.clear();
           setState(() {
             withdrawDetail.add(WithdrawDetail.fromJson(data[0]));
           });

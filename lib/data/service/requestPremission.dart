@@ -15,7 +15,6 @@ Future<void> requestAllPermissions() async {
     Permission.photos,
     Permission.storage,
   ];
-
   for (var permission in permissions) {
     // Check if the permission is denied
     if (await permission.isDenied) {

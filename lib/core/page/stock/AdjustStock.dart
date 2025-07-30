@@ -9,6 +9,7 @@ import 'package:_12sale_app/core/components/filter/BadageFilter.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
+import 'package:_12sale_app/core/page/withdraw/WithdrawDetailScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/Cart.dart';
@@ -158,7 +159,8 @@ class _AdjustStockState extends State<AdjustStock> {
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
-        endpoint: 'api/cash/cart/get?type=adjuststock&area=${User.area}',
+        endpoint:
+            'api/cash/cart/get?type=adjuststock&area=${User.area}&withdrawId=${widget.orderId}',
         method: 'GET',
       );
       if (response.statusCode == 200) {
@@ -231,8 +233,9 @@ class _AdjustStockState extends State<AdjustStock> {
           "period": period,
           "area": User.area,
           "id": product.id,
+          "withdrawId": widget.orderId,
           "qty": count,
-          "unit": "${product.listUnit[0].unit}",
+          "unit": selectedUnit,
           "action": "OUT", // add,reduce for adjuststock
         },
       );
@@ -536,7 +539,7 @@ class _AdjustStockState extends State<AdjustStock> {
                         ],
                       ),
                       onPressed: () {
-                        // _showAddressSheet(context);
+                        _showCauseSheet(context);
                       },
                     ),
                   ),
@@ -1062,12 +1065,12 @@ class _AdjustStockState extends State<AdjustStock> {
                       onPressed: () {
                         if (cartList.length > 0 && casue != '') {
                           _checkout();
+                          // Navigator.pop(context);
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomeScreen(
-                                index: 0,
-                              ),
+                              builder: (context) =>
+                                  WithdrawDetailScreen(orderId: widget.orderId),
                             ),
                           );
                         } else {
@@ -1561,6 +1564,7 @@ class _AdjustStockState extends State<AdjustStock> {
             body: {
               "type": "adjuststock",
               "area": User.area,
+              "withdrawId": widget.orderId,
               "id": cart.id,
               "qty": cart.qty,
               "unit": cart.unit,
@@ -2096,7 +2100,7 @@ class _AdjustStockState extends State<AdjustStock> {
     );
   }
 
-  void _showAddressSheet(BuildContext context) {
+  void _showCauseSheet(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     showModalBottomSheet(
       context: context,

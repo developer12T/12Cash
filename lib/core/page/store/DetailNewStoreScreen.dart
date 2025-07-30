@@ -395,30 +395,30 @@ class _DetailNewStoreScreenState extends State<DetailNewStoreScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    MenuButton(
-                                      icon: Icons.edit_document,
-                                      label: "แก้ไข",
-                                      // color: Colors.teal,
-                                      color: Styles.warning!,
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                EditStoreDataScreen(
-                                                    initialSelectedRoute: RouteStore(
-                                                        route: widget
-                                                            .initialSelectedRoute
-                                                            .route),
-                                                    store: widget.store,
-                                                    customerNo:
-                                                        widget.customerNo,
-                                                    customerName:
-                                                        widget.customerName),
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                    // MenuButton(
+                                    //   icon: Icons.edit_document,
+                                    //   label: "แก้ไข",
+                                    //   // color: Colors.teal,
+                                    //   color: Styles.warning!,
+                                    //   onPressed: () {
+                                    //     Navigator.push(
+                                    //       context,
+                                    //       MaterialPageRoute(
+                                    //         builder: (context) =>
+                                    //             EditStoreDataScreen(
+                                    //                 initialSelectedRoute: RouteStore(
+                                    //                     route: widget
+                                    //                         .initialSelectedRoute
+                                    //                         .route),
+                                    //                 store: widget.store,
+                                    //                 customerNo:
+                                    //                     widget.customerNo,
+                                    //                 customerName:
+                                    //                     widget.customerName),
+                                    //       ),
+                                    //     );
+                                    //   },
+                                    // ),
                                     MenuButton(
                                       icon: widget.store.latitude != "0.000000"
                                           ? Icons.gps_fixed_rounded
