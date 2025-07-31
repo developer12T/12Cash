@@ -12,6 +12,7 @@ import 'package:_12sale_app/data/service/localNotification.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/data/service/requestPremission.dart';
 import 'package:_12sale_app/data/service/sockertService.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +53,12 @@ void main() async {
     // Initialize the locale data for Thai lanqguage
     // Ensure the app is always in portrait mode
     WidgetsFlutterBinding.ensureInitialized();
+
+    bool isDev = await checkDevMode();
+    if (isDev) {
+      runApp(DevOptionWarningApp());
+      return;
+    }
     await Upgrader.clearSavedSettings();
 
     await availableCameras();
@@ -113,6 +120,42 @@ void main() async {
     );
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
   });
+}
+
+Future<bool> isDeveloperModeOn() async {
+  const platform = MethodChannel('com.onetwotrading.onetwocashapp/dev_mode');
+  try {
+    final bool result = await platform.invokeMethod('isDeveloperMode');
+    return result;
+  } on PlatformException catch (e) {
+    print("Failed to get developer mode: '${e.message}'.");
+    return false;
+  }
+}
+
+Future<bool> checkDevMode() async {
+  if (!Platform.isAndroid) return false;
+
+  final deviceInfo = DeviceInfoPlugin();
+  final androidInfo = await deviceInfo.androidInfo;
+
+  // 1. Emulator เช็คจาก brand หรือ product
+  bool isEmulator = androidInfo.isPhysicalDevice == false ||
+      androidInfo.brand.toLowerCase() == 'generic' ||
+      androidInfo.product.toLowerCase().contains('sdk');
+
+  // 2. เช็ค tags (เครื่อง dev ส่วนมากจะเป็น 'test-keys')
+  bool isTestKeys = androidInfo.tags?.contains('test-keys') ?? false;
+
+  // 3. เช็ค developer mode
+  bool isDeveloperMode = await isDeveloperModeOn();
+
+  print('isEmulator: $isEmulator');
+  print('isTestKeys: $isTestKeys');
+  print('isDeveloperMode: $isDeveloperMode');
+
+  // Return ตามต้องการ เช่น ถ้าเครื่อง dev หรือ emulator หรือเปิด developer mode
+  return isEmulator || isTestKeys || isDeveloperMode;
 }
 
 void _logError(String code, String? message) {
@@ -882,6 +925,50 @@ class MyUpgradeAlertState extends UpgradeAlertState {
           ],
         );
       },
+    );
+  }
+}
+
+class DeveloperOptionsUtil {
+  static const platform =
+      MethodChannel('com.onetwotrading.onetwocashapp/dev_options');
+
+  static Future<bool> isDeveloperModeEnabled() async {
+    try {
+      final bool isEnabled =
+          await platform.invokeMethod('isDeveloperModeEnabled');
+      return isEnabled;
+    } on PlatformException {
+      return false;
+    }
+  }
+}
+
+class DevOptionWarningApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: AlertDialog(
+            title: Text("แจ้งเตือน", style: Styles.black18(context)),
+            content: Text(
+                "กรุณาปิด Developer Options หรือ USB Debugging ก่อนใช้งานแอปนี้",
+                style: Styles.black18(context)),
+            actions: [
+              TextButton(
+                child: Text(
+                  "ปิดแอป",
+                  style: Styles.black18(context),
+                ),
+                onPressed: () {
+                  SystemNavigator.pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -68,11 +68,13 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         final List<dynamic>? data = response.data['data'];
         if (data != null && data.isNotEmpty) {
           adjustStockDetail.clear();
-          setState(() {
-            // ถ้ามีหลาย record แนะนำใช้ .addAll หรือ .map
-            adjustStockDetail =
-                data.map((e) => WithdrawDetail.fromJson(e)).toList();
-          });
+          if (mounted) {
+            setState(() {
+              // ถ้ามีหลาย record แนะนำใช้ .addAll หรือ .map
+              adjustStockDetail =
+                  data.map((e) => WithdrawDetail.fromJson(e)).toList();
+            });
+          }
         }
         print("adjustStockDetail: $adjustStockDetail");
       }
@@ -94,9 +96,12 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         final List<dynamic>? data = response.data['data'];
         if (data != null && data.isNotEmpty) {
           withdrawDetail.clear();
-          setState(() {
-            withdrawDetail.add(WithdrawDetail.fromJson(data[0]));
-          });
+
+          if (mounted) {
+            setState(() {
+              withdrawDetail.add(WithdrawDetail.fromJson(data[0]));
+            });
+          }
         }
       }
     } catch (e) {
@@ -132,7 +137,6 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     // double screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),

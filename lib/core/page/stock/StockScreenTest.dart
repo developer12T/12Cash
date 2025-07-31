@@ -691,7 +691,7 @@ ${leftRightText('', '\n\n\n', 61)}
       'คืนดี',
       'คืนเสีย',
       'ขาย',
-      'โปรโมชั่น',
+      'แถม',
       'เปลี่ยน',
       'ปรับ',
       'แจก',
@@ -805,107 +805,107 @@ ${leftRightText('', '\n\n\n', 61)}
                               ),
                             ),
                             SizedBox(width: 8),
-                            Expanded(
-                              child: DropdownSearch<Cause>(
-                                dropdownButtonProps: DropdownButtonProps(
-                                  color: Colors.white,
-                                  icon: Icon(
-                                    Icons.arrow_drop_down,
-                                    size: screenWidth / 20,
-                                    color: Colors.black54,
-                                  ),
-                                ),
+                            // Expanded(
+                            //   child: DropdownSearch<Cause>(
+                            //     dropdownButtonProps: DropdownButtonProps(
+                            //       color: Colors.white,
+                            //       icon: Icon(
+                            //         Icons.arrow_drop_down,
+                            //         size: screenWidth / 20,
+                            //         color: Colors.black54,
+                            //       ),
+                            //     ),
 
-                                itemAsString: (item) => item.name,
-                                asyncItems: (filter) =>
-                                    getRefundDropdown(filter),
+                            //     itemAsString: (item) => item.name,
+                            //     asyncItems: (filter) =>
+                            //         getRefundDropdown(filter),
 
-                                // items:(filter, infiniteScrollProps) =>
-                                dropdownDecoratorProps: DropDownDecoratorProps(
-                                  baseStyle: Styles.black18(context),
-                                  dropdownSearchDecoration: InputDecoration(
-                                    // fillColor: Colors.white,
-                                    // prefixIcon: widget.icon,
-                                    labelText: "เลือกประเภท",
-                                    labelStyle: Styles.grey18(context),
-                                    hintText: "เลือกประเภท",
-                                    hintStyle: Styles.grey18(context),
-                                    border: const OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
-                                      borderSide: BorderSide(
-                                          color: Colors.grey, width: 1),
-                                    ),
-                                    focusedBorder: const OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
-                                      borderSide: BorderSide(
-                                          color: Colors.blue, width: 1.5),
-                                    ),
-                                  ),
-                                ),
-                                onChanged: (Cause? data) {
-                                  // noteController.clear();
-                                  // setModalState(
-                                  //   () {
-                                  //     selectedCause = data!.name;
-                                  //   },
-                                  // );
-                                },
-                                popupProps: PopupPropsMultiSelection.dialog(
-                                  constraints: BoxConstraints(
-                                    maxHeight: screenWidth * 0.7,
-                                    maxWidth: screenWidth,
-                                    minHeight: screenWidth * 0.7,
-                                    minWidth: screenWidth,
-                                  ),
-                                  title: Container(
-                                    decoration: const BoxDecoration(
-                                      color: Styles.primaryColor,
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(16),
-                                        topRight: Radius.circular(16),
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16),
-                                    child: Text(
-                                      "เลือกเหตุผลเช็คอิน",
-                                      style: Styles.white18(context),
-                                    ),
-                                  ),
+                            //     // items:(filter, infiniteScrollProps) =>
+                            //     dropdownDecoratorProps: DropDownDecoratorProps(
+                            //       baseStyle: Styles.black18(context),
+                            //       dropdownSearchDecoration: InputDecoration(
+                            //         // fillColor: Colors.white,
+                            //         // prefixIcon: widget.icon,
+                            //         labelText: "เลือกประเภท",
+                            //         labelStyle: Styles.grey18(context),
+                            //         hintText: "เลือกประเภท",
+                            //         hintStyle: Styles.grey18(context),
+                            //         border: const OutlineInputBorder(
+                            //           borderRadius:
+                            //               BorderRadius.all(Radius.circular(8)),
+                            //           borderSide: BorderSide(
+                            //               color: Colors.grey, width: 1),
+                            //         ),
+                            //         focusedBorder: const OutlineInputBorder(
+                            //           borderRadius:
+                            //               BorderRadius.all(Radius.circular(8)),
+                            //           borderSide: BorderSide(
+                            //               color: Colors.blue, width: 1.5),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //     onChanged: (Cause? data) {
+                            //       // noteController.clear();
+                            //       // setModalState(
+                            //       //   () {
+                            //       //     selectedCause = data!.name;
+                            //       //   },
+                            //       // );
+                            //     },
+                            //     popupProps: PopupPropsMultiSelection.dialog(
+                            //       constraints: BoxConstraints(
+                            //         maxHeight: screenWidth * 0.7,
+                            //         maxWidth: screenWidth,
+                            //         minHeight: screenWidth * 0.7,
+                            //         minWidth: screenWidth,
+                            //       ),
+                            //       title: Container(
+                            //         decoration: const BoxDecoration(
+                            //           color: Styles.primaryColor,
+                            //           borderRadius: BorderRadius.only(
+                            //             topLeft: Radius.circular(16),
+                            //             topRight: Radius.circular(16),
+                            //           ),
+                            //         ),
+                            //         alignment: Alignment.center,
+                            //         padding: const EdgeInsets.symmetric(
+                            //             vertical: 16),
+                            //         child: Text(
+                            //           "เลือกเหตุผลเช็คอิน",
+                            //           style: Styles.white18(context),
+                            //         ),
+                            //       ),
 
-                                  // showSearchBox: widget.showSearchBox,
-                                  itemBuilder: (context, item, isSelected) {
-                                    return Column(
-                                      children: [
-                                        ListTile(
-                                          title: Text(
-                                            " ${item.name}",
-                                            style: Styles.black18(context),
-                                          ),
-                                          selected: isSelected,
-                                        ),
-                                        Divider(
-                                          color: Colors.grey[
-                                              200], // Color of the divider line
-                                          thickness: 1, // Thickness of the line
-                                          indent:
-                                              16, // Left padding for the divider line
-                                          endIndent:
-                                              16, // Right padding for the divider line
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                  // searchFieldProps: TextFieldProps(
-                                  //   style: Styles.black18(context),
-                                  //   autofocus: true,
-                                  // ),
-                                ),
-                              ),
-                            ),
+                            //       // showSearchBox: widget.showSearchBox,
+                            //       itemBuilder: (context, item, isSelected) {
+                            //         return Column(
+                            //           children: [
+                            //             ListTile(
+                            //               title: Text(
+                            //                 " ${item.name}",
+                            //                 style: Styles.black18(context),
+                            //               ),
+                            //               selected: isSelected,
+                            //             ),
+                            //             Divider(
+                            //               color: Colors.grey[
+                            //                   200], // Color of the divider line
+                            //               thickness: 1, // Thickness of the line
+                            //               indent:
+                            //                   16, // Left padding for the divider line
+                            //               endIndent:
+                            //                   16, // Right padding for the divider line
+                            //             ),
+                            //           ],
+                            //         );
+                            //       },
+                            //       // searchFieldProps: TextFieldProps(
+                            //       //   style: Styles.black18(context),
+                            //       //   autofocus: true,
+                            //       // ),
+                            //     ),
+                            //   ),
+                            // ),
                             SizedBox(width: 8),
                             TextButton(
                               style: TextButton.styleFrom(

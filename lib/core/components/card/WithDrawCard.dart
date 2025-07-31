@@ -71,7 +71,8 @@ class WithDrawCard extends StatelessWidget {
                                     padding: EdgeInsets.all(2),
                                     decoration: BoxDecoration(
                                       color: item.status == 'success' ||
-                                              item.status == 'approved'
+                                              item.status == 'approved' ||
+                                              item.status == 'confirm'
                                           ? Styles.success
                                           : item.status == 'canceled'
                                               ? Styles.fail
