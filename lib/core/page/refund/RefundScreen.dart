@@ -211,7 +211,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
           "qty": count,
           "unit": "${selectedUnit}",
           "condition": _isCheckboxChecked ? "damaged" : "good", //good, damaged
-          "expire": "${DateFormat("yyyymmdd").format(_selectedDate!)}"
+          "expire": "${DateFormat("yyyyMMdd").format(_selectedDate!)}"
         },
       );
       // print("Response add Cart: ${response.data['data']['listProduct']}");
@@ -1942,6 +1942,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                             setState(() {
                                               _selectedDate = date;
                                             });
+                                            print(_selectedDate);
                                           },
                                         );
                                       },

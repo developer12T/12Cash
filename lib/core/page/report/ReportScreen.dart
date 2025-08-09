@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:_12sale_app/core/components/Loading.dart';
+import 'package:_12sale_app/core/components/card/cart/CartCard.dart';
+import 'package:_12sale_app/core/components/card/order/CartCard.dart';
 import 'package:_12sale_app/core/components/card/order/InvoiceCard.dart';
 import 'package:_12sale_app/core/components/refund/RefundCard.dart';
 import 'package:_12sale_app/core/page/giveaways/GiveAwaysDetailScreen.dart';
@@ -8,8 +10,10 @@ import 'package:_12sale_app/core/page/refund/RefundDetailScreen.dart';
 import 'package:_12sale_app/core/page/withdraw/PrinterGiveAwaysScreen.dart';
 
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:_12sale_app/data/models/CartAll.dart';
 import 'package:_12sale_app/data/models/RefundFilter.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/models/order/Cart.dart';
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/models/order/Orders.dart';
 import 'package:_12sale_app/data/models/refund/RefundOrder.dart';
@@ -37,10 +41,15 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
   final ScrollController _scrollController = ScrollController();
   List<Orders> orders = [];
   List<RefundOrder> refundOrders = [];
+  List<CartAll> cartList = [];
   bool _loadingOrder = true;
   bool _loadingRefund = true;
+  bool _loadingCart = true;
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+
+  final ScrollController _cartScrollController = ScrollController();
+
   // String period = "202502";
   Future<void> _getRefundOrder() async {
     try {
@@ -96,17 +105,46 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
     }
   }
 
+  Future<void> _getCartAll() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/cart/getAll?area=${User.area}', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
+      );
+      print("Data ${response.data['data']}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+        Timer(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            setState(() {
+              _loadingCart = false;
+              cartList = data.map((item) => CartAll.fromJson(item)).toList();
+            });
+          }
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _getOrder();
     _getRefundOrder();
+    _getCartAll();
   }
 
   @override
   void didPopNext() {
     _getOrder();
     _getRefundOrder();
+    _getCartAll();
   }
 
   @override
@@ -137,6 +175,8 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
   void dispose() {
     routeObserver.unsubscribe(this);
     _scrollController.dispose();
+    _cartScrollController.dispose();
+
     // TODO: implement dispose
     super.dispose();
   }
@@ -177,7 +217,7 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                     ),
                   ),
                 )
-              : refundOrders.isNotEmpty
+              : isSelect.isSelect == 2 && refundOrders.isNotEmpty
                   ? RefreshIndicator(
                       onRefresh: () => _getRefundOrder(),
                       child: LoadingSkeletonizer(
@@ -200,17 +240,273 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                         ),
                       ),
                     )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "ไม่พบข้อมูล",
-                          style: Styles.grey18(context),
+                  : isSelect.isSelect == 3
+                      ? RefreshIndicator(
+                          onRefresh: () => _getCartAll(),
+                          child: LoadingSkeletonizer(
+                            loading: _loadingCart,
+                            child: ListView.builder(
+                              itemCount: cartList.length,
+                              itemBuilder: (context, index) {
+                                return CartCardCheck(
+                                  item: cartList[index],
+                                  onDetailsPressed: () {
+                                    _showCartSheet(context, cartList[index]);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "ไม่พบข้อมูล",
+                              style: Styles.grey18(context),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
         ),
       ),
+    );
+  }
+
+  void _showCartSheet(BuildContext context, CartAll cartlist) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              Text('ตะกร้าสินค้าที่เลือก',
+                                  style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              // _getCart();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: screenHeight * 0.9,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                  child: Scrollbar(
+                                controller: _cartScrollController,
+                                thickness: 10,
+                                thumbVisibility: true,
+                                trackVisibility: true,
+                                radius: Radius.circular(16),
+                                child: ListView.builder(
+                                  controller: _cartScrollController,
+                                  itemCount: cartlist.listProduct.length,
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.network(
+                                                '${ApiService.apiHost}/images/products/${cartlist.listProduct[index].id}.webp',
+                                                width: screenWidth / 8,
+                                                height: screenWidth / 8,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return Container(
+                                                    width: screenWidth / 8,
+                                                    height: screenWidth / 8,
+                                                    color: Colors.grey,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(Icons.hide_image,
+                                                            color: Colors.white,
+                                                            size: 30),
+                                                        Text(
+                                                          "ไม่มีภาพ",
+                                                          style: Styles.white18(
+                                                              context),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            cartlist
+                                                                .listProduct[
+                                                                    index]
+                                                                .name,
+                                                            style:
+                                                                Styles.black16(
+                                                                    context),
+                                                            softWrap: true,
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .visible,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'id : ${cartlist.listProduct[index].id}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'จำนวน : ${cartlist.listProduct[index].qty.toStringAsFixed(0)} ${cartlist.listProduct[index].unit}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'ราคา : ${cartlist.listProduct[index].price}',
+                                                                  style: Styles
+                                                                      .black16(
+                                                                          context),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Divider(
+                                          color: Colors.grey[200],
+                                          thickness: 1,
+                                          indent: 16,
+                                          endIndent: 16,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ))
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      color: Styles.primaryColor,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("ยอดรวม", style: Styles.white24(context)),
+                            Text(
+                                "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(cartlist.total)} บาท",
+                                style: Styles.white24(context)),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
     );
   }
 }
@@ -329,6 +625,24 @@ class _ReportHeaderState extends State<ReportHeader> {
                   Text(
                     'คืน',
                     style: isSelect.isSelect == 2
+                        ? Styles.headerPirmary24(context)
+                        : Styles.headerWhite24(context),
+                  ),
+                ],
+              ),
+              3: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.shopping_cart,
+                    color: isSelect.isSelect == 3
+                        ? Styles.primaryColorIcons
+                        : Styles.white,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'ตะกร้า',
+                    style: isSelect.isSelect == 3
                         ? Styles.headerPirmary24(context)
                         : Styles.headerWhite24(context),
                   ),

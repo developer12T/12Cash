@@ -7,7 +7,10 @@ import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
 import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
 import 'package:_12sale_app/core/page/store/StoreScreen.dart';
+import 'package:_12sale_app/data/models/CartAll.dart';
 import 'package:_12sale_app/data/models/RefundFilter.dart';
+import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/data/service/sockertService.dart';
 // import 'package:_12sale_app/page/TestTabel.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -44,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
     _selectedIndex = widget.index; //_selectedIndex
-    _clearOrders();
+    // _clearOrders();
     searchController.addListener(() {
       _filterItems(searchController.text);
     });
@@ -57,12 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int _selectedIndex = 0;
-  bool _loading = true;
   List<Store> storeItem = [];
   List<Store> allStores = [];
   List<String> filteredItems = [];
-  final List<Order> _orders = <Order>[];
   TextEditingController searchController = TextEditingController();
+  List<CartAll> cartList = [];
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   static const List<Widget> _widgetOptionsHeader = <Widget>[
     DashboardHeader(),
@@ -77,13 +81,60 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _clearOrders() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('orders'); // Clear orders from SharedPreferences
-    // await prefs.remove('ท'); // Clear orders from SharedPreferences
-    setState(() {
-      _orders.clear(); // Clear orders in the UI
-    });
+  Future<void> _getCartAll() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/cart/getAll?area=${User.area}', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
+      );
+      print("Data ${response.data['data']}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+
+        if (mounted) {
+          setState(() {
+            // _loadingCart = false;
+            cartList = data.map((item) => CartAll.fromJson(item)).toList();
+          });
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _clearCart() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+          endpoint:
+              'api/cash/cart/clearcart', // You only need to pass the endpoint, the base URL is handled
+          method: 'POST',
+          body: {
+            "period": period,
+            "cartAll": cartList,
+          });
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "เคลียตะกร้าเรียบร้อย",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _filterItems(String query) {
@@ -101,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _getFuction(int isSelect) {
+  void _getFuction(int isSelect) async {
     switch (_selectedIndex) {
       case 0:
         return () {}();
@@ -124,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }();
       case 3:
-        return () {
+        return () async {
           if (isSelect == 1) {
             Navigator.push(
               context,
@@ -132,11 +183,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (context) => OrderOutRouteScreen(),
               ),
             );
-          } else {
+          } else if (isSelect == 2) {
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => RefundScreen(),
+              ),
+            );
+          } else {
+            await _getCartAll();
+            await _clearCart();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(
+                  index: 3,
+                ),
               ),
             );
           }
@@ -173,11 +235,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 size: 40,
                 color: Styles.primaryColor,
               )
-            : const Icon(
-                Icons.change_circle_outlined,
-                size: 40,
-                color: Styles.primaryColor,
-              );
+            : isSelect == 2
+                ? const Icon(
+                    Icons.change_circle_outlined,
+                    size: 40,
+                    color: Styles.primaryColor,
+                  )
+                : const Icon(
+                    Icons.cleaning_services,
+                    size: 40,
+                    color: Styles.primaryColor,
+                  );
       default:
         return const Icon(Icons.shopping_basket, size: 30);
     }

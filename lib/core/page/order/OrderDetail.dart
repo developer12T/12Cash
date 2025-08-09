@@ -113,6 +113,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   bool _loadOrderDetail = true;
   Future<void> _getOrderDetail() async {
     try {
+      context.loaderOverlay.show();
       print("Order ID : ${widget.orderId}");
       ApiService apiService = ApiService();
       await apiService.init();
@@ -163,9 +164,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           receiptData['customer']['customercode'] = storeDetail?.storeId;
           receiptData['customer']['taxno'] = storeDetail?.taxId;
           receiptData['CUOR'] = widget.orderId;
-          receiptData['OAORDT'] =
-              DateFormat('dd/MM/yyyy').format(DateTime.now());
+          // receiptData['OAORDT'] =
+          //     DateFormat('dd/MM/yyyy').format(DateTime.now());
 
+          final createdAtUtc =
+              DateTime.parse(response.data['data'][0]['createdAt']); // ✅ parse
+          final createdAtLocal = createdAtUtc.toLocal(); // ✅ แปลงเป็นเวลาไทย
+
+          receiptData['OAORDT'] =
+              DateFormat('dd/MM/yyyy').format(createdAtLocal);
           receiptData['totaltext'] =
               "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
           receiptData['ex_vat'] =
@@ -215,13 +222,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           }
         });
       }
+      context.loaderOverlay.hide();
     } catch (e) {
+      context.loaderOverlay.hide();
       print("Error $e");
     }
   }
 
   Future<void> _updateStatus() async {
     try {
+      context.loaderOverlay.show();
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
@@ -245,6 +255,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             style: Styles.green18(context),
           ),
         );
+        context.loaderOverlay.hide();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -255,6 +266,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         );
       }
     } catch (e) {
+      context.loaderOverlay.hide();
       print("Error $e");
     }
   }

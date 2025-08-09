@@ -1,4 +1,5 @@
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/page/stock/AdjustStock.dart';
 import 'package:_12sale_app/core/styles/style.dart';
@@ -111,6 +112,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
 
   Future<void> _saleConfirmWithdraw() async {
     try {
+      context.loaderOverlay.show();
       ApiService apiService = ApiService();
       await apiService.init();
       var response = await apiService.request(
@@ -122,7 +124,6 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         },
       );
       if (response.statusCode == 200) {
-        context.loaderOverlay.show();
         await _getWithdrawDetail();
         await _getAdjustStockDetail();
         context.loaderOverlay.hide();
@@ -201,7 +202,12 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                         ),
                       ),
                       onPressed: () async {
-                        await _saleConfirmWithdraw();
+                        AllAlert.customAlert(
+                            context,
+                            "store.processtimeline_screen.alert.title".tr(),
+                            "คุณต้องการจะรับสินค้าใช่หรือไม่ ?",
+                            _saleConfirmWithdraw);
+                        // await _saleConfirmWithdraw();
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),

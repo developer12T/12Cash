@@ -54,11 +54,12 @@ void main() async {
     // Ensure the app is always in portrait mode
     WidgetsFlutterBinding.ensureInitialized();
 
-    bool isDev = await checkDevMode();
-    if (isDev) {
-      runApp(DevOptionWarningApp());
-      return;
-    }
+    // bool isDev = await checkDevMode();
+    // if (isDev) {
+    //   runApp(DevOptionWarningApp());
+    //   return;
+    // }
+
     await Upgrader.clearSavedSettings();
 
     await availableCameras();

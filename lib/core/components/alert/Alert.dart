@@ -53,25 +53,33 @@ class CustomAlertDialog {
     ).show();
   }
 
-  static void showCommonAlert(
-      BuildContext context, String title, String content) {
-    showDialog(
+  static Future<void> showCommonAlert(
+    BuildContext context,
+    String title,
+    String content,
+  ) async {
+    // ป้องกัน context ไม่ valid
+    if (!context.mounted) return;
+
+    return showDialog(
       context: context,
-      builder: (BuildContext context) {
+      useRootNavigator:
+          true, // ใช้ navigator หลัก ป้องกันปัญหา context ถูก dispose
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(
             title,
-            style: Styles.headerRed24(context),
+            style: Styles.headerRed24(dialogContext),
           ),
           content: Text(
             content,
-            style: Styles.red18(context),
+            style: Styles.red18(dialogContext),
           ),
           actions: [
             TextButton(
-              child: Text("ตกลง", style: Styles.black18(context)),
-              onPressed: () async {
-                Navigator.of(context).pop();
+              child: Text("ตกลง", style: Styles.black18(dialogContext)),
+              onPressed: () {
+                Navigator.of(dialogContext, rootNavigator: true).pop();
               },
             ),
           ],
