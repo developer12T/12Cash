@@ -28,6 +28,7 @@ class WithDrawScreen extends StatefulWidget {
 }
 
 class _WithDrawScreenState extends State<WithDrawScreen> {
+  bool _isChecked = false;
   bool _loading = true;
   List<Withdraw> withdrawList = [];
   int isSelect = 1;

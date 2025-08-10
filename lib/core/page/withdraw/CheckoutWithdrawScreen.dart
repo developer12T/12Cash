@@ -46,6 +46,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
   String addressShipping = '';
   String nameShipping = '';
   double totalCart = 0;
+  bool _isChecked = false;
 
   ScrollController _outerController = ScrollController();
   final ScrollController _cartScrollController = ScrollController();
@@ -285,7 +286,8 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
               "sendDate": "${DateFormat("yyyy-MM-dd").format(_selectedDate!)}",
               "note": "${noteController.text}",
               "latitude": "${latitude}",
-              "longitude": "${longitude}"
+              "longitude": "${longitude}",
+              "newtrip": _isChecked
             });
         if (response.statusCode == 200) {
           socketService.emitEvent('distribution/checkout', {
@@ -818,6 +820,21 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                   thickness: 1,
                                   indent: 16,
                                   endIndent: 16,
+                                ),
+                                CheckboxListTile(
+                                  title: Text(
+                                    'เบิกต้นทริป',
+                                    style: Styles.black18(context),
+                                  ),
+                                  value: _isChecked,
+                                  onChanged: (bool? newValue) {
+                                    setState(() {
+                                      _isChecked = newValue!;
+                                      print(_isChecked);
+                                    });
+                                  },
+                                  controlAffinity: ListTileControlAffinity
+                                      .leading, // checkbox on the left
                                 ),
                               ],
                             ),
