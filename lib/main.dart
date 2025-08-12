@@ -371,6 +371,41 @@ class _MyAppState extends State<MyApp> {
     FlutterForegroundTask.sendDataToTask(MyTaskHandler.incrementCountCommand);
   }
 
+  Timer? _logoutTimer;
+
+  DateTime nextLocalMidnight() {
+    final now = DateTime.now();
+    return DateTime(
+        now.year, now.month, now.day + 1); // เที่ยงคืนวันถัดไป (ตามเวลาเครื่อง)
+  }
+
+  Future<void> forceLogout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (!context.mounted) return;
+    // กลับหน้า Login และล้าง navigation stack
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
+
+  Future<void> scheduleAutoLogout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final expiryMs = prefs.getInt('sessionExpiry');
+    _logoutTimer?.cancel();
+    if (expiryMs == null) return;
+
+    final expiry = DateTime.fromMillisecondsSinceEpoch(expiryMs);
+    final now = DateTime.now();
+    final diff = expiry.difference(now);
+    if (diff.isNegative) {
+      await forceLogout(context);
+    } else {
+      _logoutTimer = Timer(diff, () => forceLogout(context));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -384,6 +419,10 @@ class _MyAppState extends State<MyApp> {
     //   _initService();
     //   _startService();
     // });
+    // เรียกหนึ่งครั้งตอนบูต
+    scheduleAutoLogout();
+    // เวลาใดก็ตามที่คุณรู้ว่ามี login ใหม่เกิดขึ้น (หรือ refresh token ใหม่)
+    // ให้เรียก scheduleAutoLogout() อีกครั้งเพื่อรีเซ็ต timer
   }
 
   void checkForUpdateIfNeeded(BuildContext context) async {
@@ -420,6 +459,7 @@ class _MyAppState extends State<MyApp> {
     // _taskDataListenable.dispose();
     // _cameraController
     //     .dispose(); // Dispose of the camera controller to free resources
+    _logoutTimer?.cancel();
     super.dispose();
   }
 
@@ -643,6 +683,20 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
+      final prefs = await SharedPreferences.getInstance();
+      final expiryMs = prefs.getInt('sessionExpiry');
+      if (expiryMs != null &&
+          DateTime.now()
+              .isAfter(DateTime.fromMillisecondsSinceEpoch(expiryMs))) {
+        await prefs.clear();
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (_) => false,
+        );
+        return;
+      }
       await _upgrader.initialize();
       if (!_upgrader.shouldDisplayUpgrade()) {
         setState(() {
@@ -659,86 +713,24 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  Future<void> getUserData() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    // Check expiry
-    final now = DateTime.now();
-    final tomorrow =
-        DateTime(now.year, now.month, now.day + 1); // 00:00 ของวันถัดไป
-    int expiryTimestamp = tomorrow.millisecondsSinceEpoch;
-
-    await sharedPreferences.setInt('dataExpiry', expiryTimestamp);
-    if (expiryTimestamp != null) {
-      int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      if (currentTimestamp > expiryTimestamp) {
-        // Data has expired, clear it
-        sharedPreferences.clear();
-        print('User data has expired');
-        // ปิดแอปทันที
-        exit(0); // <-- เพิ่มบรรทัดนี้
-        // return null; // ไม่จำเป็นต้อง return แล้ว
-      } else {
-        setState(() {
-          User.username = sharedPreferences.getString('username') ?? "";
-          User.firstName = sharedPreferences.getString('firstName') ?? "";
-          User.surName = sharedPreferences.getString('surName') ?? "";
-          User.fullName = sharedPreferences.getString('fullName') ?? "";
-          User.salePayer = sharedPreferences.getString('salePayer') ?? "";
-          User.tel = sharedPreferences.getString('tel') ?? "";
-          User.area = sharedPreferences.getString('area') ?? "";
-          User.typeTruck = sharedPreferences.getString('typeTruck') ?? "";
-          User.saleCode = sharedPreferences.getString('saleCode') ?? "";
-          User.zone = sharedPreferences.getString('zone') ?? "";
-          User.warehouse = sharedPreferences.getString('warehouse') ?? "";
-          User.role = sharedPreferences.getString('role') ?? "";
-          User.token = sharedPreferences.getString('token') ?? "";
-          userAvailable = true;
-        });
-        Timer(
-          Duration(seconds: 3),
-          () {
-            if (!mounted) return; // เช็คก่อน Navigator
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(
-                  index: 0,
-                ),
-              ),
-            );
-          },
-        );
-      }
-    } else {
-      Timer(
-        Duration(seconds: 3),
-        () {
-          // ไม่มีข้อมูล user -> ปิดแอปเลย
-          exit(0); // <-- เพิ่มตรงนี้
-          // หรือจะไป Login ก็ได้ แล้วแต่ต้องการ
-          // if (!mounted) return;
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => LoginScreen(),
-          //   ),
-          // );
-        },
-      );
-    }
-  }
-
   // Future<void> getUserData() async {
   //   sharedPreferences = await SharedPreferences.getInstance();
   //   // Check expiry
-  //   int? expiryTimestamp = sharedPreferences.getInt('dataExpiry');
+  //   final now = DateTime.now();
+  //   final tomorrow =
+  //       DateTime(now.year, now.month, now.day + 1); // 00:00 ของวันถัดไป
+  //   int expiryTimestamp = tomorrow.millisecondsSinceEpoch;
+
+  //   await sharedPreferences.setInt('dataExpiry', expiryTimestamp);
   //   if (expiryTimestamp != null) {
   //     int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
   //     if (currentTimestamp > expiryTimestamp) {
   //       // Data has expired, clear it
   //       sharedPreferences.clear();
   //       print('User data has expired');
-  //       return null;
+  //       // ปิดแอปทันที
+  //       exit(0); // <-- เพิ่มบรรทัดนี้
+  //       // return null; // ไม่จำเป็นต้อง return แล้ว
   //     } else {
   //       setState(() {
   //         User.username = sharedPreferences.getString('username') ?? "";
@@ -775,17 +767,70 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
   //     Timer(
   //       Duration(seconds: 3),
   //       () {
-  //         if (!mounted) return; // เช็คก่อน Navigator
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => LoginScreen(),
-  //           ),
-  //         );
+  //         // ไม่มีข้อมูล user -> ปิดแอปเลย
+  //         exit(0); // <-- เพิ่มตรงนี้
+  //         // หรือจะไป Login ก็ได้ แล้วแต่ต้องการ
+  //         // if (!mounted) return;
+  //         // Navigator.pushReplacement(
+  //         //   context,
+  //         //   MaterialPageRoute(
+  //         //     builder: (context) => LoginScreen(),
+  //         //   ),
+  //         // );
   //       },
   //     );
   //   }
   // }
+
+  Future<void> getUserData() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    final expiryMs = sharedPreferences.getInt('sessionExpiry');
+    if (expiryMs == null) {
+      // ไม่เคยล็อกอิน → ไป Login
+      if (!mounted) return;
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+
+    final isExpired = DateTime.now().isAfter(
+      DateTime.fromMillisecondsSinceEpoch(expiryMs),
+    );
+
+    if (isExpired) {
+      await sharedPreferences.clear();
+      if (!mounted) return;
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+
+    // ✅ ยังไม่หมดอายุ → โหลด user แล้วเข้า Home
+    setState(() {
+      User.username = sharedPreferences.getString('username') ?? "";
+      User.firstName = sharedPreferences.getString('firstName') ?? "";
+      User.surName = sharedPreferences.getString('surName') ?? "";
+      User.fullName = sharedPreferences.getString('fullName') ?? "";
+      User.salePayer = sharedPreferences.getString('salePayer') ?? "";
+      User.tel = sharedPreferences.getString('tel') ?? "";
+      User.area = sharedPreferences.getString('area') ?? "";
+      User.typeTruck = sharedPreferences.getString('typeTruck') ?? "";
+      User.saleCode = sharedPreferences.getString('saleCode') ?? "";
+      User.zone = sharedPreferences.getString('zone') ?? "";
+      User.warehouse = sharedPreferences.getString('warehouse') ?? "";
+      User.role = sharedPreferences.getString('role') ?? "";
+      User.token = sharedPreferences.getString('token') ?? "";
+      userAvailable = true;
+    });
+
+    // ไปหน้า Home
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen(index: 0)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

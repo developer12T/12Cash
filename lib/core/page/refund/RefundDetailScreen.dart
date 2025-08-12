@@ -177,7 +177,12 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
         receiptData['customer']['salecode'] = refundDetails?.sale.saleCode;
         receiptData['customer']['taxno'] = refundDetails?.store.taxId;
         receiptData['CUOR'] = widget.orderId;
-        receiptData['OAORDT'] = DateFormat('dd/MM/yyyy').format(DateTime.now());
+
+        final createdAtUtc =
+            DateTime.parse(response.data['createdAt']); // ✅ parse
+        final createdAtLocal = createdAtUtc.toLocal(); // ✅ แปลงเป็นเวลาไทย
+        receiptData['OAORDT'] = DateFormat('dd/MM/yyyy').format(createdAtLocal);
+        // receiptData['OAORDT'] = DateFormat('dd/MM/yyyy').format(DateTime.now());
 
         receiptData['totalRefundExVat'] =
             "${refundDetails?.totalRefundExVat.toStringAsFixed(2)}";
@@ -982,6 +987,29 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
     });
   }
 
+  Future<void> printTestCopy() async {
+    bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
+    if (connectionStatus) {
+      await printHeaderBill('สำเนาใบลดหนี้');
+      await printBodyBillRefund(receiptData);
+      await printHeaderSeparator();
+      await printHeaderBill('สำเนาบิลเงินสด/ใบกำกับภาษี');
+      await printBodyBill(receiptData);
+    } else {
+      toastification.show(
+        autoCloseDuration: const Duration(seconds: 5),
+        context: context,
+        primaryColor: Colors.red,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: Text(
+          "ยังไม่ได้เชื่อมต่อเครื่องปริ้น",
+          style: Styles.red18(context),
+        ),
+      );
+    }
+  }
+
   Future<void> printTest() async {
     bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
     if (connectionStatus) {
@@ -1002,10 +1030,6 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
           style: Styles.red18(context),
         ),
       );
-      // print("Printer is disconnected ($connectionStatus)");
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text("Printer is not connected")),
-      // );
     }
   }
 
@@ -1909,27 +1933,59 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
       persistentFooterButtons: [
         Row(
           children: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                backgroundColor:
+                    User.connectPrinter ? Styles.success : Styles.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                if (!User.connectPrinter) {
+                  _connectToPrinter(User.devicePrinter);
+                } else {
+                  _disconnectPrinter();
+                }
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.print_rounded,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
             Expanded(
               child: Container(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    backgroundColor:
-                        User.connectPrinter ? Styles.success : Styles.grey,
+                    backgroundColor: Styles.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    if (!User.connectPrinter) {
-                      _connectToPrinter(User.devicePrinter);
-                    } else {
-                      _disconnectPrinter();
-                    }
+                  onPressed: () async {
+                    await printTestCopy();
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1941,7 +1997,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                               size: 25,
                             ),
                             Text(
-                              " ${User.connectPrinter ? "เชื่อมต่อแล้ว" : "ยังไม่ได้เชื่อมต่อ"}",
+                              " พิมพ์สำเนา",
                               style: Styles.headerWhite18(context),
                             ),
                           ],
@@ -1969,26 +2025,23 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                   onPressed: () async {
                     await printTest();
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.print_rounded,
-                              color: Colors.white,
-                              size: 25,
-                            ),
-                            Text(
-                              " พิมพ์ใบคืนสินค้า",
-                              style: Styles.headerWhite18(context),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.print_rounded,
+                            color: Colors.white,
+                            size: 25,
+                          ),
+                          Text(
+                            "พิมพ์ใบคืน",
+                            style: Styles.headerWhite18(context),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),

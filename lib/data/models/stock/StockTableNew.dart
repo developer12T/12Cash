@@ -1,11 +1,13 @@
 class StockTableNew {
   final String productId;
   final String productName;
+  final String productGroup;
   final List<UnitTableNew> listUnit;
 
   StockTableNew({
     required this.productId,
     required this.productName,
+    required this.productGroup,
     required this.listUnit,
   });
 
@@ -13,6 +15,7 @@ class StockTableNew {
     return StockTableNew(
       productId: json['productId'] ?? '',
       productName: json['productName'] ?? '',
+      productGroup: json['productGroup'] ?? '',
       listUnit: (json['listUnit'] as List)
           .map((unitJson) => UnitTableNew.fromJson(unitJson))
           .toList(),
@@ -23,6 +26,7 @@ class StockTableNew {
     return {
       'productId': productId,
       'productName': productName,
+      'productGroup': productGroup,
       'listUnit': listUnit.map((u) => u.toJson()).toList(),
     };
   }

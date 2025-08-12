@@ -41,10 +41,10 @@ class OrderINRouteScreen extends StatefulWidget {
   });
 
   @override
-  State<OrderINRouteScreen> createState() => _OrderOutRouteScreenState();
+  State<OrderINRouteScreen> createState() => _OrderINRouteScreenState();
 }
 
-class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
+class _OrderINRouteScreenState extends State<OrderINRouteScreen>
     with RouteAware {
   final Debouncer _debouncer = Debouncer();
   final Throttler _throttler = Throttler();
@@ -227,7 +227,8 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
             body: {
               "type": "sale",
               "area": "${User.area}",
-              "storeId": "${selectedStoreId}",
+              "storeId":
+                  "${widget.storeDetail?.listStore[0].storeInfo.storeId}",
               "id": "${cart.id}",
               "qty": cart.qty,
               "unit": "${cart.unit}",
@@ -2084,19 +2085,19 @@ class _OrderOutRouteScreenState extends State<OrderINRouteScreen>
                                                             ElevatedButton(
                                                               onPressed:
                                                                   () async {
-                                                                await _reduceCart(
-                                                                    cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    "OUT");
-                                                                await _getCart();
-                                                                await _getProduct();
                                                                 setModalState(
                                                                     () {
                                                                   cartlist[
                                                                           index]
                                                                       .qty++;
                                                                 });
+                                                                await _reduceCart(
+                                                                    cartlist[
+                                                                        index],
+                                                                    setModalState,
+                                                                    "OUT");
+                                                                // await _getCart();
+                                                                // await _getProduct();
                                                               },
                                                               style:
                                                                   ElevatedButton

@@ -330,12 +330,12 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                       MaterialPageRoute(builder: (context) => const Campaign()),
                     );
                   },
-                  title_8: "คู่มือการใช้งาน",
-                  icon_8: Icons.book,
+                  title_8: "รายงานยอดขาย",
+                  icon_8: Icons.line_axis,
                   onTap8: () async {
                     try {
-                      final url = Uri.parse(
-                          'https://apps.onetwotrading.co.th/sale/manual');
+                      final url =
+                          Uri.parse('https://apps.onetwotrading.co.th/');
                       await launchUrl(
                         url,
                         mode: LaunchMode.externalApplication,

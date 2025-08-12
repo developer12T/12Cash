@@ -170,9 +170,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           final createdAtUtc =
               DateTime.parse(response.data['data'][0]['createdAt']); // ✅ parse
           final createdAtLocal = createdAtUtc.toLocal(); // ✅ แปลงเป็นเวลาไทย
-
           receiptData['OAORDT'] =
               DateFormat('dd/MM/yyyy').format(createdAtLocal);
+
           receiptData['totaltext'] =
               "${response.data['data'][0]['subtotal'].toStringAsFixed(2)}";
           receiptData['ex_vat'] =

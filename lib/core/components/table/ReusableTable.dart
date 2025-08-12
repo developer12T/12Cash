@@ -94,7 +94,7 @@ class _ReusableTableState extends State<ReusableTable> {
 
     // กำหนดความกว้างคอลัมน์ตามต้องการ
     final col0Width = screenW * 0.30; // คอลัมน์ที่ 1 (กว้างหน่อย)
-    final col1Width = screenW * 0.20; // คอลัมน์ที่ 2 (ใหม่: ถูกล็อคด้วย)
+    final col1Width = screenW * 0.15; // คอลัมน์ที่ 2 (ใหม่: ถูกล็อคด้วย)
     final otherColWidth = screenW * 0.18; // คอลัมน์ถัด ๆ ไป
 
     return Column(
@@ -131,7 +131,7 @@ class _ReusableTableState extends State<ReusableTable> {
         const Divider(height: 1, color: Colors.black12),
 
         // ===================== BODY =====================
-        Expanded(
+        Flexible(
           child: Row(
             children: [
               // ------- Frozen left (2 columns) — Y only -------

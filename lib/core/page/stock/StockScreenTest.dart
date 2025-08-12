@@ -16,6 +16,7 @@ import 'package:charset_converter/charset_converter.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:toastification/toastification.dart';
 import '../../../data/models/option/Group.dart';
@@ -33,6 +34,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
   List<StockTableNew> stocks = [];
   List<Cause> causes = [];
+  Cause? selectedCauses;
   List<List<String>> rows = [];
   List<String> footerTable = [];
   List<String> footerTable2 = [];
@@ -40,6 +42,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
   List<List<String>> filteredRows = [];
   bool isLoading = true;
   bool _loadingProduct = true;
+  String condition = '';
   final List<String> vowelAndToneMark = [
     '่',
     '้',
@@ -89,7 +92,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
   @override
   void initState() {
     super.initState();
-    _getStockQty();
+    // _getStockQty();
     _getStockQtyNew();
   }
 
@@ -110,6 +113,32 @@ class _StockScreenTestState extends State<StockScreenTest> {
       return causes;
     } catch (e) {
       print("Error _getShoptype: $e");
+      return [];
+    }
+  }
+
+  Future<List<Cause>> getRoutesDropdown(String filter) async {
+    try {
+      // Load the JSON file for districts
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/manage/option/get?module=stock&type=refund',
+        method: 'GET',
+      );
+
+      // Filter and map JSON data to District model based on selected province and filter
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> data = response.data['data'];
+        setState(() {
+          causes = data.map((item) => Cause.fromJson(item)).toList();
+        });
+      }
+
+      // Group districts by amphoe
+      return causes;
+    } catch (e) {
+      print("Error _getOrder occurred: $e");
       return [];
     }
   }
@@ -148,7 +177,11 @@ class _StockScreenTestState extends State<StockScreenTest> {
       final response = await apiService.request(
         endpoint: 'api/cash/stock/getStockQtyNew',
         method: 'POST',
-        body: {"area": User.area, "period": period},
+        body: {
+          "area": User.area,
+          "period": period,
+          "condition": condition,
+        },
       );
       if (response.statusCode == 200 && mounted) {
         // setState(() {
@@ -212,6 +245,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
           return [
             item.productName,
+            item.productGroup,
             joinField('stock'),
             joinField('withdraw'),
             joinField('good'),
@@ -686,6 +720,7 @@ ${leftRightText('', '\n\n\n', 61)}
     double screenWidth = MediaQuery.of(context).size.width;
     final columns = [
       'ชื่อ',
+      'กลุ่ม',
       'ต้นทริป',
       'เบิก',
       'คืนดี',
@@ -756,8 +791,7 @@ ${leftRightText('', '\n\n\n', 61)}
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : rows.isEmpty
-                  ? const Center(child: Text('ไม่มีข้อมูล'))
-                  : Column(
+                  ? Column(
                       children: [
                         Row(
                           children: [
@@ -767,6 +801,7 @@ ${leftRightText('', '\n\n\n', 61)}
                                 titleText: "เลือกกลุ่ม",
                                 fetchItems: (filter) => getShoptype(filter),
                                 onChanged: (Group? selected) async {
+                                  print(rows);
                                   if (selected != null) {
                                     setState(() {
                                       selectedGroup = selected;
@@ -774,7 +809,7 @@ ${leftRightText('', '\n\n\n', 61)}
                                       // Filter rows based on selected group
                                       filteredRows = rows.where((row) {
                                         // Assuming the group name is in the first column of each row (row[0])
-                                        return row[0].contains(selected.group);
+                                        return row[1].contains(selected.group);
                                       }).toList();
                                     });
                                   }
@@ -804,109 +839,129 @@ ${leftRightText('', '\n\n\n', 61)}
                                 },
                               ),
                             ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Container(
+                                  child: DropdownSearch<Cause>(
+                                    dropdownButtonProps: DropdownButtonProps(
+                                      color: Colors.white,
+                                      icon: Icon(
+                                        Icons.arrow_drop_down,
+                                        size: screenWidth / 20,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
 
-                            SizedBox(width: 8),
-                            // Expanded(
-                            //   child: DropdownSearch<Cause>(
-                            //     dropdownButtonProps: DropdownButtonProps(
-                            //       color: Colors.white,
-                            //       icon: Icon(
-                            //         Icons.arrow_drop_down,
-                            //         size: screenWidth / 20,
-                            //         color: Colors.black54,
-                            //       ),
-                            //     ),
+                                    itemAsString: (item) => item.name,
+                                    asyncItems: (filter) =>
+                                        getRoutesDropdown(filter),
 
-                            //     itemAsString: (item) => item.name,
-                            //     asyncItems: (filter) =>
-                            //         getRefundDropdown(filter),
+                                    // items:(filter, infiniteScrollProps) =>
+                                    dropdownDecoratorProps:
+                                        DropDownDecoratorProps(
+                                      baseStyle: Styles.black18(context),
+                                      dropdownSearchDecoration: InputDecoration(
+                                        // fillColor: Colors.white,
+                                        // prefixIcon: widget.icon,
+                                        labelText: "เลือกประเภทการคืน",
+                                        labelStyle: Styles.grey18(context),
+                                        hintText: "เลือกประเภทการคืน",
+                                        hintStyle: Styles.grey18(context),
+                                        border: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Colors.grey, width: 1),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Colors.blue, width: 1.5),
+                                        ),
+                                      ),
+                                    ),
+                                    onChanged: (Cause? data) async {
+                                      context.loaderOverlay.show();
+                                      setState(() {
+                                        condition = data!.value;
+                                        selectedCauses = Cause(
+                                          name: data.name,
+                                          id: '',
+                                          value: data.value,
+                                        );
+                                      });
+                                      await _getStockQtyNew();
+                                      context.loaderOverlay.hide();
+                                      // noteController.clear();
+                                      // setModalState(
+                                      //   () {
+                                      //     selectedCause = data!.name;
+                                      //   },
+                                      // );
+                                    },
+                                    popupProps: PopupPropsMultiSelection.dialog(
+                                      constraints: BoxConstraints(
+                                        maxHeight: screenWidth * 0.7,
+                                        maxWidth: screenWidth,
+                                        minHeight: screenWidth * 0.7,
+                                        minWidth: screenWidth,
+                                      ),
+                                      title: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Styles.primaryColor,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(16),
+                                            topRight: Radius.circular(16),
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        child: Text(
+                                          "เลือกประเภทการคืน",
+                                          style: Styles.white18(context),
+                                        ),
+                                      ),
 
-                            //     // items:(filter, infiniteScrollProps) =>
-                            //     dropdownDecoratorProps: DropDownDecoratorProps(
-                            //       baseStyle: Styles.black18(context),
-                            //       dropdownSearchDecoration: InputDecoration(
-                            //         // fillColor: Colors.white,
-                            //         // prefixIcon: widget.icon,
-                            //         labelText: "เลือกประเภท",
-                            //         labelStyle: Styles.grey18(context),
-                            //         hintText: "เลือกประเภท",
-                            //         hintStyle: Styles.grey18(context),
-                            //         border: const OutlineInputBorder(
-                            //           borderRadius:
-                            //               BorderRadius.all(Radius.circular(8)),
-                            //           borderSide: BorderSide(
-                            //               color: Colors.grey, width: 1),
-                            //         ),
-                            //         focusedBorder: const OutlineInputBorder(
-                            //           borderRadius:
-                            //               BorderRadius.all(Radius.circular(8)),
-                            //           borderSide: BorderSide(
-                            //               color: Colors.blue, width: 1.5),
-                            //         ),
-                            //       ),
-                            //     ),
-                            //     onChanged: (Cause? data) {
-                            //       // noteController.clear();
-                            //       // setModalState(
-                            //       //   () {
-                            //       //     selectedCause = data!.name;
-                            //       //   },
-                            //       // );
-                            //     },
-                            //     popupProps: PopupPropsMultiSelection.dialog(
-                            //       constraints: BoxConstraints(
-                            //         maxHeight: screenWidth * 0.7,
-                            //         maxWidth: screenWidth,
-                            //         minHeight: screenWidth * 0.7,
-                            //         minWidth: screenWidth,
-                            //       ),
-                            //       title: Container(
-                            //         decoration: const BoxDecoration(
-                            //           color: Styles.primaryColor,
-                            //           borderRadius: BorderRadius.only(
-                            //             topLeft: Radius.circular(16),
-                            //             topRight: Radius.circular(16),
-                            //           ),
-                            //         ),
-                            //         alignment: Alignment.center,
-                            //         padding: const EdgeInsets.symmetric(
-                            //             vertical: 16),
-                            //         child: Text(
-                            //           "เลือกเหตุผลเช็คอิน",
-                            //           style: Styles.white18(context),
-                            //         ),
-                            //       ),
-
-                            //       // showSearchBox: widget.showSearchBox,
-                            //       itemBuilder: (context, item, isSelected) {
-                            //         return Column(
-                            //           children: [
-                            //             ListTile(
-                            //               title: Text(
-                            //                 " ${item.name}",
-                            //                 style: Styles.black18(context),
-                            //               ),
-                            //               selected: isSelected,
-                            //             ),
-                            //             Divider(
-                            //               color: Colors.grey[
-                            //                   200], // Color of the divider line
-                            //               thickness: 1, // Thickness of the line
-                            //               indent:
-                            //                   16, // Left padding for the divider line
-                            //               endIndent:
-                            //                   16, // Right padding for the divider line
-                            //             ),
-                            //           ],
-                            //         );
-                            //       },
-                            //       // searchFieldProps: TextFieldProps(
-                            //       //   style: Styles.black18(context),
-                            //       //   autofocus: true,
-                            //       // ),
-                            //     ),
-                            //   ),
-                            // ),
+                                      // showSearchBox: widget.showSearchBox,
+                                      itemBuilder: (context, item, isSelected) {
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              title: Text(
+                                                " ${item.name}",
+                                                style: Styles.black18(context),
+                                              ),
+                                              selected: isSelected,
+                                            ),
+                                            Divider(
+                                              color: Colors.grey[
+                                                  200], // Color of the divider line
+                                              thickness:
+                                                  1, // Thickness of the line
+                                              indent:
+                                                  16, // Left padding for the divider line
+                                              endIndent:
+                                                  16, // Right padding for the divider line
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                      searchFieldProps: TextFieldProps(
+                                        style: Styles.black18(context),
+                                        autofocus: true,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                             SizedBox(width: 8),
                             TextButton(
                               style: TextButton.styleFrom(
@@ -918,11 +973,225 @@ ${leftRightText('', '\n\n\n', 61)}
                                   ),
                                 ),
                               ),
-                              onPressed: () {
+                              onPressed: () async {
+                                context.loaderOverlay.show();
                                 setState(() {
                                   selectedGroup = null;
-                                  filteredRows = rows; // Reset to show all
+                                  condition = '';
+                                  filteredRows = rows;
+                                  selectedCauses = null;
                                 });
+                                await _getStockQtyNew();
+                                context.loaderOverlay.hide();
+                              },
+                              child: Text(
+                                "ล้างตัวกรอง",
+                                style: Styles.white16(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Center(
+                            child: Text(
+                          'ไม่มีข้อมูล',
+                          style: Styles.black18(context),
+                        )),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownSearchCustom<Group>(
+                                label: 'เลือกกลุ่ม',
+                                titleText: "เลือกกลุ่ม",
+                                fetchItems: (filter) => getShoptype(filter),
+                                onChanged: (Group? selected) async {
+                                  print(rows);
+                                  if (selected != null) {
+                                    setState(() {
+                                      selectedGroup = selected;
+
+                                      // Filter rows based on selected group
+                                      filteredRows = rows.where((row) {
+                                        // Assuming the group name is in the first column of each row (row[0])
+                                        return row[1].contains(selected.group);
+                                      }).toList();
+                                    });
+                                  }
+                                },
+                                itemAsString: (Group data) => data.group,
+                                itemBuilder: (context, item, isSelected) {
+                                  return Column(
+                                    children: [
+                                      ListTile(
+                                        title: Text(
+                                          "${item.group}",
+                                          style: Styles.black18(context),
+                                        ),
+                                        selected: isSelected,
+                                      ),
+                                      Divider(
+                                        color: Colors.grey[
+                                            200], // Color of the divider line
+                                        thickness: 1, // Thickness of the line
+                                        indent:
+                                            16, // Left padding for the divider line
+                                        endIndent:
+                                            16, // Right padding for the divider line
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Container(
+                                  child: DropdownSearch<Cause>(
+                                    selectedItem: selectedCauses,
+                                    dropdownButtonProps: DropdownButtonProps(
+                                      color: Colors.white,
+                                      icon: Icon(
+                                        Icons.arrow_drop_down,
+                                        size: screenWidth / 20,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+
+                                    itemAsString: (item) => item.name,
+                                    asyncItems: (filter) =>
+                                        getRoutesDropdown(filter),
+
+                                    // items:(filter, infiniteScrollProps) =>
+                                    dropdownDecoratorProps:
+                                        DropDownDecoratorProps(
+                                      baseStyle: Styles.black18(context),
+                                      dropdownSearchDecoration: InputDecoration(
+                                        // fillColor: Colors.white,
+                                        // prefixIcon: widget.icon,
+                                        labelText: "เลือกประเภทการคืน",
+                                        labelStyle: Styles.grey18(context),
+                                        hintText: "เลือกประเภทการคืน",
+                                        hintStyle: Styles.grey18(context),
+                                        border: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Colors.grey, width: 1),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Colors.blue, width: 1.5),
+                                        ),
+                                      ),
+                                    ),
+                                    onChanged: (Cause? data) async {
+                                      context.loaderOverlay.show();
+                                      setState(() {
+                                        condition = data!.value;
+                                        selectedCauses = Cause(
+                                          name: data.name,
+                                          id: '',
+                                          value: data.value,
+                                        );
+                                      });
+                                      await _getStockQtyNew();
+                                      context.loaderOverlay.hide();
+                                      // noteController.clear();
+                                      // setModalState(
+                                      //   () {
+                                      //     selectedCause = data!.name;
+                                      //   },
+                                      // );
+                                    },
+                                    popupProps: PopupPropsMultiSelection.dialog(
+                                      constraints: BoxConstraints(
+                                        maxHeight: screenWidth * 0.7,
+                                        maxWidth: screenWidth,
+                                        minHeight: screenWidth * 0.7,
+                                        minWidth: screenWidth,
+                                      ),
+                                      title: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Styles.primaryColor,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(16),
+                                            topRight: Radius.circular(16),
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        child: Text(
+                                          "เลือกประเภทการคืน",
+                                          style: Styles.white18(context),
+                                        ),
+                                      ),
+
+                                      // showSearchBox: widget.showSearchBox,
+                                      itemBuilder: (context, item, isSelected) {
+                                        return Column(
+                                          children: [
+                                            ListTile(
+                                              title: Text(
+                                                " ${item.name}",
+                                                style: Styles.black18(context),
+                                              ),
+                                              selected: isSelected,
+                                            ),
+                                            Divider(
+                                              color: Colors.grey[
+                                                  200], // Color of the divider line
+                                              thickness:
+                                                  1, // Thickness of the line
+                                              indent:
+                                                  16, // Left padding for the divider line
+                                              endIndent:
+                                                  16, // Right padding for the divider line
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                      searchFieldProps: TextFieldProps(
+                                        style: Styles.black18(context),
+                                        autofocus: true,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: Styles.primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: const BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              onPressed: () async {
+                                context.loaderOverlay.show();
+                                setState(() {
+                                  selectedGroup = null;
+                                  condition = '';
+                                  selectedCauses = null;
+                                  filteredRows = rows;
+                                });
+                                await _getStockQtyNew();
+                                context.loaderOverlay.hide();
                               },
                               child: Text(
                                 "ล้างตัวกรอง",

@@ -679,15 +679,11 @@ ${centerText('($typeBill)', 69)}
     await PrintBluetoothThermal.writeBytes(List<int>.from(encodedContent));
   }
 
-  Future<void> printTest() async {
+  Future<void> printTestCopy() async {
     bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
     if (connectionStatus) {
-      // await printHeaderSeparator();
       await printHeaderBill('สำเนาเอกสารการตั้งโชว์สินค้า');
       await printBodyBill(receiptData);
-      // await printHeaderSeparator();
-      // await printHeaderBill('ใบลดหนี้');
-      // await printBodyBill(receiptData);
     } else {
       toastification.show(
         autoCloseDuration: const Duration(seconds: 5),
@@ -700,10 +696,26 @@ ${centerText('($typeBill)', 69)}
           style: Styles.red18(context),
         ),
       );
-      // print("Printer is disconnected ($connectionStatus)");
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text("Printer is not connected")),
-      // );
+    }
+  }
+
+  Future<void> printTest() async {
+    bool connectionStatus = await PrintBluetoothThermal.connectionStatus;
+    if (connectionStatus) {
+      await printHeaderBill('เอกสารการตั้งโชว์สินค้า');
+      await printBodyBill(receiptData);
+    } else {
+      toastification.show(
+        autoCloseDuration: const Duration(seconds: 5),
+        context: context,
+        primaryColor: Colors.red,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: Text(
+          "ยังไม่ได้เชื่อมต่อเครื่องปริ้น",
+          style: Styles.red18(context),
+        ),
+      );
     }
   }
 
@@ -1191,27 +1203,56 @@ ${centerText('($typeBill)', 69)}
       persistentFooterButtons: [
         Row(
           children: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                backgroundColor:
+                    User.connectPrinter ? Styles.success : Styles.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                if (!User.connectPrinter) {
+                  _connectToPrinter(User.devicePrinter);
+                } else {
+                  _disconnectPrinter();
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.print_rounded,
+                        color: Colors.white,
+                        size: 25,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
             Expanded(
               child: Container(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    backgroundColor:
-                        User.connectPrinter ? Styles.success : Styles.grey,
+                    backgroundColor: Styles.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    if (!User.connectPrinter) {
-                      _connectToPrinter(User.devicePrinter);
-                    } else {
-                      _disconnectPrinter();
-                    }
+                  onPressed: () async {
+                    await printTestCopy();
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1223,7 +1264,7 @@ ${centerText('($typeBill)', 69)}
                               size: 25,
                             ),
                             Text(
-                              " ${User.connectPrinter ? "เชื่อมต่อแล้ว" : "ยังไม่ได้เชื่อมต่อ"}",
+                              " พิมพ์สำเนา",
                               style: Styles.headerWhite18(context),
                             ),
                           ],
