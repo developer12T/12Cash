@@ -56,9 +56,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
   bool _loadingProduct = true;
 
   List<String> groupList = ['ผงปรุงรส'];
-  List<String> selectedGroups = [
-    'ผงปรุงรส                                                                                    '
-  ];
+  List<String> selectedGroups = ['ผงปรุงรส'];
 
   List<String> brandList = [];
   List<String> selectedBrands = [];

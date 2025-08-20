@@ -10,11 +10,12 @@ class DatePickerHelper {
   }) async {
     final now = DateTime.now();
     // ให้เลือกได้ย้อนหลัง 2 ปีถึง "วันนี้"
-    final firstDate = DateTime(now.year - 2, now.month, now.day);
+    final firstDate = DateTime(now.year - 2, 1, 1);
     final lastDate = DateTime(now.year + 2, now.month, now.day);
 
     // ตัดเวลาออกและหนีบค่าให้อยู่ในช่วง
     DateTime init = DateUtils.dateOnly(initialDate ?? now);
+
     if (init.isBefore(firstDate)) init = firstDate;
     if (init.isAfter(lastDate)) init = lastDate;
 
