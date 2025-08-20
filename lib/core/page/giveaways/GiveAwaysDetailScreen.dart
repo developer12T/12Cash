@@ -5,6 +5,9 @@ import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
+import 'package:_12sale_app/core/page/HomeScreen.dart';
+import 'package:_12sale_app/core/page/giveaways/GiveAwaysHistoryScreen.dart';
+import 'package:_12sale_app/core/page/giveaways/GiveAwaysScreen.dart';
 import 'package:_12sale_app/core/page/printer/ManagePrinterScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/User.dart';
@@ -97,6 +100,48 @@ class _GiveAwaysDetailScreenState extends State<GiveAwaysDetailScreen> {
     }
   }
 
+  Future<void> _updateStatus() async {
+    try {
+      context.loaderOverlay.show();
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/give/updateStatus',
+        method: 'POST',
+        body: {
+          "orderId": "${widget.orderId}",
+          "status": "canceled"
+          // 'pending', 'completed', 'canceled', 'rejected'
+        },
+      );
+      if (response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ยกเลิกใบแจกสินค้าสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+        context.loaderOverlay.hide();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(
+              index: 0,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      context.loaderOverlay.hide();
+      print("Error $e");
+    }
+  }
+
   void test() {
     context.loaderOverlay.hide();
   }
@@ -172,8 +217,11 @@ class _GiveAwaysDetailScreenState extends State<GiveAwaysDetailScreen> {
           receiptData['customer']['taxno'] = orderDetail?.store?.taxId;
           receiptData['CUOR'] = widget.orderId;
           receiptData['OBSMCD'] = "${orderDetail?.sale?.name}";
+          final createdAtUtc =
+              DateTime.parse(response.data['data'][0]['createdAt']); // ✅ parse
+          final createdAtLocal = createdAtUtc.toLocal(); // ✅ แปลงเป็นเวลาไทย
           receiptData['OAORDT'] =
-              DateFormat('dd/MM/yyyy').format(DateTime.now());
+              DateFormat('dd/MM/yyyy').format(createdAtLocal);
           receiptData['giveName'] = "${orderDetail?.giveInfo?.name}";
 
           // receiptData['totaltext'] = "${orderDetail?.total.toStringAsFixed(2)}";
@@ -1331,11 +1379,7 @@ ${centerText('($typeBill)', 69)}
                     ),
                   ),
                   onPressed: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => GiveAwaysDetailScreen()),
-                    // );
+                    _updateStatus();
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),

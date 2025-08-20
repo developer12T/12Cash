@@ -545,6 +545,15 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                   setState(() {
                                     isType = v;
                                   });
+                                  if (v == "T05") {
+                                    setState(() {
+                                      _isChecked = false;
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _isChecked = true;
+                                    });
+                                  }
 
                                   _getShipping();
                                   print(v);
@@ -590,7 +599,8 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                             ),
                                           ),
                                           onPressed: () {
-                                            _showDatePicker(context);
+                                            _showDatePicker(
+                                                context, _isChecked);
                                           },
                                           child: Text(
                                             _selectedDate == null
@@ -821,21 +831,23 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                   indent: 16,
                                   endIndent: 16,
                                 ),
-                                CheckboxListTile(
-                                  title: Text(
-                                    'เบิกต้นทริป',
-                                    style: Styles.black18(context),
-                                  ),
-                                  value: _isChecked,
-                                  onChanged: (bool? newValue) {
-                                    setState(() {
-                                      _isChecked = newValue!;
-                                      print(_isChecked);
-                                    });
-                                  },
-                                  controlAffinity: ListTileControlAffinity
-                                      .leading, // checkbox on the left
-                                ),
+                                isType == "T04"
+                                    ? CheckboxListTile(
+                                        title: Text(
+                                          'เบิกต้นทริป',
+                                          style: Styles.black18(context),
+                                        ),
+                                        value: _isChecked,
+                                        onChanged: (bool? newValue) {
+                                          setState(() {
+                                            _isChecked = newValue!;
+                                            print(_isChecked);
+                                          });
+                                        },
+                                        controlAffinity: ListTileControlAffinity
+                                            .leading, // checkbox on the left
+                                      )
+                                    : SizedBox(),
                               ],
                             ),
                           ),
@@ -1202,11 +1214,12 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
     );
   }
 
-  void _showDatePicker(BuildContext context) async {
+  void _showDatePicker(BuildContext context, bool isNewtrip) async {
     final now = DateTime.now();
     final firstDay = DateTime(now.year, now.month, 1);
-    final lastDay =
-        DateTime(now.year, now.month + 1, 0); // วันสุดท้ายของเดือนนี้
+    final lastDay = isNewtrip == true
+        ? DateTime(now.year, now.month + 2, 0)
+        : DateTime(now.year, now.month + 1, 0);
     final DateTime? pickedDate = await showDatePicker(
       locale: Locale('th', 'TH'),
       context: context,

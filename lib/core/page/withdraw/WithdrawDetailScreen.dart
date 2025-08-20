@@ -9,6 +9,7 @@ import 'package:_12sale_app/main.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:toastification/toastification.dart';
 
 class WithdrawDetailScreen extends StatefulWidget {
   final orderId;
@@ -25,6 +26,8 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
     with RouteAware {
   List<WithdrawDetail> withdrawDetail = [];
   List<WithdrawDetail> adjustStockDetail = [];
+  String highStatus = '';
+  String lowStatus = '';
 
   @override
   void didChangeDependencies() {
@@ -54,6 +57,93 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
     super.initState();
     _getWithdrawDetail();
     _getAdjustStockDetail();
+    _getReceiveQty();
+  }
+
+  Future<void> _getReceiveQty() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/distribution/getReceiveQty',
+        method: 'POST',
+        body: {
+          "orderId": widget.orderId,
+        },
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          highStatus = response.data['data']['highStatus'];
+          lowStatus = response.data['data']['lowStatus'];
+        });
+        if (lowStatus == '99') {
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.green,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "ใบเบิกสถานะ 99 แล้ว",
+              style: Styles.green18(context),
+            ),
+          );
+        } else if (highStatus == 99) {
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.green,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "ใบเบิกสถานะ 99 ยังไม่ครบ",
+              style: Styles.green18(context),
+            ),
+          );
+        } else {
+          toastification.show(
+            autoCloseDuration: const Duration(seconds: 5),
+            context: context,
+            primaryColor: Colors.green,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flatColored,
+            title: Text(
+              "ใบเบิกยังไม่ได้เดินสถานะ",
+              style: Styles.green18(context),
+            ),
+          );
+        }
+        print(response.data['data']['lowStatus']);
+      }
+    } on ApiException catch (e) {
+      if (e.statusCode == 400) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.red,
+          type: ToastificationType.warning,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ใบเบิกยังไม่ 99",
+            style: Styles.red18(context),
+          ),
+        );
+      } else if (e.statusCode == 404) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.red,
+          type: ToastificationType.warning,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ไม่พบใบเบิกนี้ใน M3",
+            style: Styles.red18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error _getReceiveQty $e");
+    }
   }
 
   Future<void> _getAdjustStockDetail() async {
@@ -150,12 +240,36 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         // เช็ค null & isNotEmpty ก่อนเสมอ
         Row(
           children: [
+            withdrawDetail.isNotEmpty &&
+                    (withdrawDetail[0].status.toUpperCase()) == "APPROVED"
+                ? Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        backgroundColor: Styles.fail,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
+                        _getReceiveQty();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("เช็คสถานะใบเบิก",
+                                style: Styles.headerWhite18(context)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : SizedBox(),
             (withdrawDetail.isNotEmpty &&
-                        (withdrawDetail[0].status?.toUpperCase() ?? '') ==
-                            "APPROVED" ||
-                    withdrawDetail.isNotEmpty &&
-                        (withdrawDetail[0].status?.toUpperCase() ?? '') ==
-                            "CONFIRM")
+                    (withdrawDetail[0].status?.toUpperCase() ?? '') ==
+                        "CONFIRM")
                 ? Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -186,12 +300,11 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                       ),
                     ),
                   )
-                : SizedBox(),
-            SizedBox(
+                : const SizedBox(),
+            const SizedBox(
               width: 10,
             ),
-            withdrawDetail.isNotEmpty &&
-                    (withdrawDetail[0].status?.toUpperCase() ?? '') != "CONFIRM"
+            lowStatus == "99"
                 ? Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -318,7 +431,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Icon(Icons.hide_image,
+                                          const Icon(Icons.hide_image,
                                               color: Colors.white),
                                           Text("ไม่มีภาพ",
                                               style: Styles.white18(context)),
@@ -351,15 +464,18 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                     ],
                                   ),
                                 ),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Text("รับ", style: Styles.red18(context)),
-                                      Text("${p.receiveQty} ${p.unit}",
-                                          style: Styles.red18(context)),
-                                    ],
-                                  ),
-                                ),
+                                highStatus == "99"
+                                    ? Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text("รับ",
+                                                style: Styles.red18(context)),
+                                            Text("${p.receiveQty} ${p.unit}",
+                                                style: Styles.red18(context)),
+                                          ],
+                                        ),
+                                      )
+                                    : const SizedBox(),
                               ],
                             );
                           },

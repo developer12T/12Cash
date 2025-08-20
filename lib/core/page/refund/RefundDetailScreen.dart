@@ -177,6 +177,7 @@ class _RefundDetailScreenState extends State<RefundDetailScreen> {
         receiptData['customer']['salecode'] = refundDetails?.sale.saleCode;
         receiptData['customer']['taxno'] = refundDetails?.store.taxId;
         receiptData['CUOR'] = widget.orderId;
+        receiptData['reference'] = refundDetails?.reference;
 
         final createdAtUtc =
             DateTime.parse(response.data['createdAt']); // ✅ parse
@@ -822,7 +823,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
 
   Future<void> printBodyBill(Map<String, dynamic> data) async {
     await printBetween('รหัสลูกค้า ${data['customer']['customercode']}',
-        'เลขที่ ${data['CUOR']}');
+        'เลขที่ ${data['reference']}');
     await printBetween('ชื่อลูกค้า ${data['customer']['customername']}',
         'วันที่ ${data['OAORDT']}');
     await printBill(

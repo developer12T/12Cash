@@ -1,4 +1,5 @@
 import 'package:_12sale_app/core/page/order/OrderDetail.dart';
+import 'package:_12sale_app/core/page/refund/RefundDetailScreen.dart';
 import 'package:_12sale_app/core/page/stock/StockDetail.dart';
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +62,7 @@ class SaleReportTable extends StatelessWidget {
             const Divider(height: 1, color: Colors.black12),
 
             // Scrollable Body Rows
-            Expanded(
+            Flexible(
               child: Scrollbar(
                 controller: verticalController,
                 thumbVisibility: true,
@@ -73,16 +74,28 @@ class SaleReportTable extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           // Replace this with navigation logic
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => OrderDetailScreen(
-                                orderId: row[0],
+                          if (row[5] == 'refund') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RefundDetailScreen(
+                                  orderId: row[0],
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderDetailScreen(
+                                  orderId: row[0],
+                                ),
+                              ),
+                            );
+                          }
                         },
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: row.asMap().entries.map((entry) {
                             final index = entry.key;
                             final cell = entry.value;
@@ -94,13 +107,14 @@ class SaleReportTable extends StatelessWidget {
                               ),
                               width: MediaQuery.of(context).size.width * 0.25,
                               height: 50,
-                              padding: const EdgeInsets.all(8),
-                              alignment: Alignment.center,
+                              // padding: const EdgeInsets.all(8),
+                              alignment: Alignment.centerRight,
                               child: Text(
                                 cell,
                                 style: Styles.black18(context),
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.right,
                               ),
                             );
                           }).toList(),
@@ -124,14 +138,19 @@ class SaleReportTable extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
                       ),
+                      // width: index == 0
+                      //     ? MediaQuery.of(context).size.width * 0.25 * 2
+                      //     : MediaQuery.of(context).size.width * 0.25 * 4,
                       width: MediaQuery.of(context).size.width * 0.25,
                       height: 56,
                       padding: const EdgeInsets.all(8),
-                      alignment: Alignment.center,
+                      alignment: Alignment.centerRight,
                       child: Text(
                         cell,
-                        style: Styles.black18(context)
-                            .copyWith(fontWeight: FontWeight.bold),
+                        style: Styles.black18(context).copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.start,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -151,9 +170,11 @@ class SaleReportTable extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
                       ),
-                      width: MediaQuery.of(context).size.width * 0.25,
+                      width: index == 0
+                          ? MediaQuery.of(context).size.width * 0.25
+                          : MediaQuery.of(context).size.width * 0.25 * 5,
                       height: 56,
-                      alignment: Alignment.center,
+                      alignment: Alignment.centerRight,
                       child: Text(
                         cell,
                         style: Styles.black18(context)

@@ -41,6 +41,31 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   double different = 0;
   double money = 0;
   double summary = 0;
+  double grandTotal = 0;
+
+  // เก็บ summary จาก API (Map<String, dynamic>)
+  Map<String, dynamic> summaryType = {
+    'sale': {'count': 0, 'total': 0},
+    'change': {'count': 0, 'total': 0},
+    'refund': {'count': 0, 'total': 0},
+  };
+
+  // ---------- Helpers ปลอดภัยจาก null ----------
+  int getCount(String key) {
+    final m = summaryType[key] as Map<String, dynamic>?;
+    final v = m?['count'];
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse('$v') ?? 0;
+  }
+
+  double getTotal(String key) {
+    final m = summaryType[key] as Map<String, dynamic>?;
+    final v = m?['total'];
+    if (v is num) return v.toDouble();
+    return double.tryParse('$v') ?? 0.0;
+  }
+
   String status = "";
   late SocketService socketService;
 
@@ -53,7 +78,6 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   @override
   void initState() {
     super.initState();
-
     _getSendmoney();
     _getSaleReport();
   }
@@ -79,6 +103,21 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         method: 'GET',
       );
       if (response.statusCode == 200) {
+        setState(() {
+          final s = response.data['summary'] as Map<String, dynamic>?;
+
+          summaryType = {
+            'sale': (s?['sale'] as Map<String, dynamic>?) ??
+                const {'count': 0, 'total': 0},
+            'change': (s?['change'] as Map<String, dynamic>?) ??
+                const {'count': 0, 'total': 0},
+            'refund': (s?['refund'] as Map<String, dynamic>?) ??
+                const {'count': 0, 'total': 0},
+          };
+
+          grandTotal = (response.data['grandTotal'] as num?)?.toDouble() ?? 0.0;
+        });
+
         final fetchedStocks = (response.data['data'] as List)
             .map((item) => SaleReport.fromJson(item))
             .toList();
@@ -88,11 +127,13 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             .map((e) => [
                   e.orderId,
                   e.storeId,
-                  e.saleName,
-                  e.total.toString(),
+                  e.storeName,
+                  formatCurrency(e.total),
                   e.paymentMethod,
+                  e.type,
                 ])
             .toList();
+        print(mappedRows);
 
         setState(() {
           rows = mappedRows;
@@ -124,6 +165,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
       print("Error _getSaleReport: $e");
       context.loaderOverlay.hide();
     }
+  }
+
+  String formatCurrency(num value,
+      {String locale = 'th_TH', String symbol = '฿'}) {
+    final formatter = NumberFormat.currency(locale: locale, symbol: symbol);
+    return formatter.format(value);
   }
 
   Future<void> uploadImageSendmoney() async {
@@ -249,7 +296,14 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    final columns = ['เลขออเดอร์', 'รหัสร้าน', 'ชื่อร้าน', 'รวม', 'ช่องทาง'];
+    final columns = [
+      'เลขออเดอร์',
+      'รหัสร้าน',
+      'ชื่อร้าน',
+      'รวม',
+      'ช่องทาง/REF',
+      'ประเภท',
+    ];
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70),
@@ -439,7 +493,22 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                       SizedBox(
                           height: screenHeight * 0.5,
                           width: screenWidth,
-                          child: SaleReportTable(columns: columns, rows: rows))
+                          child: SaleReportTable(
+                            columns: columns,
+                            rows: rows,
+                            footer: [
+                              'ขาย',
+                              '${formatCurrency(summaryType['sale']['total'])}',
+                              "เปลี่ยน",
+                              '${formatCurrency(summaryType['change']['total'])}',
+                              "คืน",
+                              '${formatCurrency(summaryType['refund']['total'])}',
+                            ],
+                            footer2: ['รวม', '${formatCurrency(grandTotal)}'],
+                          )),
+                      const SizedBox(
+                        height: 16,
+                      ),
                     ],
                   ),
                 ),

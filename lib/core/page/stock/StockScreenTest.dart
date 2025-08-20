@@ -92,7 +92,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
   @override
   void initState() {
     super.initState();
-    // _getStockQty();
+    _getStockQty();
     _getStockQtyNew();
   }
 
@@ -337,6 +337,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
                 };
               })
               .where((e) => e != null)
+              // .take(5)
               .toList();
         });
 

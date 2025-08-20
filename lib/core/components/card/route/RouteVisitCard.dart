@@ -74,7 +74,7 @@ class RouteVisitCard extends StatelessWidget {
                                   style: Styles.black18(context),
                                 ),
                                 Text(
-                                  '${item.storeCheckInNotSell}',
+                                  '${item.storeCheckInNotSell + item.storeNotSell + item.storeSell}',
                                   style: Styles.black18(context),
                                 ),
                               ],

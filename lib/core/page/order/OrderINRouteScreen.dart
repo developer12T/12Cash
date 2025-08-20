@@ -55,8 +55,10 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
 
   bool _loadingProduct = true;
 
-  List<String> groupList = [];
-  List<String> selectedGroups = [];
+  List<String> groupList = ['ผงปรุงรส'];
+  List<String> selectedGroups = [
+    'ผงปรุงรส                                                                                    '
+  ];
 
   List<String> brandList = [];
   List<String> selectedBrands = [];
@@ -99,7 +101,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
   void initState() {
     super.initState();
     _getFliter();
-    _getProduct();
+    _getProduct(true);
     _getCart();
   }
 
@@ -237,7 +239,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
           );
           if (response.statusCode == 200) {
             await _getTotalCart(setModalState);
-            await _getProduct();
+            _getProduct(true);
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -401,7 +403,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
     }
   }
 
-  Future<void> _getProduct() async {
+  Future<void> _getProduct(bool limit) async {
     try {
       ApiService apiService = ApiService();
       await apiService.init();
@@ -411,6 +413,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
         method: 'POST',
         body: {
           "type": "sale",
+          "limit": limit,
           "period": "${period}",
           "area": "${User.area}",
           "group": selectedGroups,
@@ -743,7 +746,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                   sizeList.clear();
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
-                                                  _getProduct().then((_) =>
+                                                  _getProduct(false).then((_) =>
                                                       Timer(
                                                           Duration(seconds: 1),
                                                           () {
@@ -751,7 +754,8 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                             .hide();
                                                       }));
                                                 },
-                                                onSearch: _getProduct,
+                                                onSearch: () =>
+                                                    _getProduct(false),
                                               );
                                             },
                                             child: badgeFilter(
@@ -803,11 +807,12 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                   sizeList.clear();
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
-                                                  _getProduct().then((_) =>
+                                                  _getProduct(false).then((_) =>
                                                       context.loaderOverlay
                                                           .hide());
                                                 },
-                                                onSearch: _getProduct,
+                                                onSearch: () =>
+                                                    _getProduct(false),
                                               );
                                             },
                                             child: badgeFilter(
@@ -858,11 +863,12 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                   sizeList.clear();
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
-                                                  _getProduct().then((_) =>
+                                                  _getProduct(false).then((_) =>
                                                       context.loaderOverlay
                                                           .hide());
                                                 },
-                                                onSearch: _getProduct,
+                                                onSearch: () =>
+                                                    _getProduct(false),
                                               );
                                             },
                                             child: badgeFilter(
@@ -910,7 +916,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                   selectedFlavours.clear();
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
-                                                  _getProduct().then((_) =>
+                                                  _getProduct(false).then((_) =>
                                                       Timer(
                                                           Duration(seconds: 1),
                                                           () {
@@ -918,7 +924,8 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                             .hide();
                                                       }));
                                                 },
-                                                onSearch: _getProduct,
+                                                onSearch: () =>
+                                                    _getProduct(false),
                                               );
                                             },
                                             child: badgeFilter(
@@ -950,8 +957,9 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                             onTap: () {
                                               _clearFilter();
                                               context.loaderOverlay.show();
-                                              _getProduct().then((_) => Timer(
-                                                      Duration(seconds: 1), () {
+                                              _getProduct(false).then((_) =>
+                                                  Timer(Duration(seconds: 1),
+                                                      () {
                                                     context.loaderOverlay
                                                         .hide();
                                                   }));
@@ -1749,7 +1757,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                     context.loaderOverlay
                                                         .show();
                                                     await _addCart(product);
-                                                    await _getProduct();
+                                                    await _getProduct(true);
                                                     await _getCart();
                                                     setModalState(() {
                                                       stockQty -= count;

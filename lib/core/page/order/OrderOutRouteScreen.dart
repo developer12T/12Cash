@@ -54,8 +54,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   bool _loadingProduct = true;
 
   // Filter Set
-  List<String> groupList = [];
-  List<String> selectedGroups = [];
+  List<String> groupList = ['ผงปรุงรส'];
+  List<String> selectedGroups = ['ผงปรุงรส'];
 
   List<String> brandList = [];
   List<String> selectedBrands = [];
@@ -101,7 +101,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   void initState() {
     super.initState();
     _getFliter();
-    _getProduct();
+    _getProduct(true);
     _getStore();
   }
 
@@ -246,7 +246,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
           );
           if (response.statusCode == 200) {
             await _getTotalCart(setModalState);
-            await _getProduct();
+            await _getProduct(true);
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -440,7 +440,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     } catch (e) {}
   }
 
-  Future<void> _getProduct() async {
+  Future<void> _getProduct(bool limit) async {
     try {
       ApiService apiService = ApiService();
       await apiService.init();
@@ -450,6 +450,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
         method: 'POST',
         body: {
           "type": "sale",
+          "limit": limit,
           "period": "${period}",
           "area": "${User.area}",
           "group": selectedGroups,
@@ -785,14 +786,15 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 sizeList.clear();
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
-                                                _getProduct().then((_) =>
+                                                _getProduct(false).then((_) =>
                                                     Timer(Duration(seconds: 3),
                                                         () {
                                                       context.loaderOverlay
                                                           .hide();
                                                     }));
                                               },
-                                              onSearch: _getProduct,
+                                              onSearch: () =>
+                                                  _getProduct(false),
                                             );
                                           },
                                           child: badgeFilter(
@@ -840,14 +842,15 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 sizeList.clear();
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
-                                                _getProduct().then((_) =>
+                                                _getProduct(false).then((_) =>
                                                     Timer(Duration(seconds: 3),
                                                         () {
                                                       context.loaderOverlay
                                                           .hide();
                                                     }));
                                               },
-                                              onSearch: _getProduct,
+                                              onSearch: () =>
+                                                  _getProduct(false),
                                             );
                                           },
                                           child: badgeFilter(
@@ -890,14 +893,15 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 selectedFlavours.clear();
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
-                                                _getProduct().then((_) =>
+                                                _getProduct(false).then((_) =>
                                                     Timer(Duration(seconds: 3),
                                                         () {
                                                       context.loaderOverlay
                                                           .hide();
                                                     }));
                                               },
-                                              onSearch: _getProduct,
+                                              onSearch: () =>
+                                                  _getProduct(false),
                                             );
                                           },
                                           child: badgeFilter(
@@ -926,7 +930,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                           onTap: () {
                                             _clearFilter();
                                             context.loaderOverlay.show();
-                                            _getProduct().then((_) =>
+                                            _getProduct(false).then((_) =>
                                                 Timer(Duration(seconds: 3), () {
                                                   context.loaderOverlay.hide();
                                                 }));
@@ -1745,7 +1749,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                         .show();
                                                     await _addCart(product);
                                                     await _getCart();
-                                                    await _getProduct();
+                                                    await _getProduct(true);
                                                     setModalState(() {
                                                       stockQty -= count;
                                                     });
@@ -2124,7 +2128,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
-                                                                await _getProduct();
+                                                                await _getProduct(
+                                                                    true);
                                                                 setModalState(
                                                                   () {
                                                                     cartList.removeWhere((item) => (item.id ==
