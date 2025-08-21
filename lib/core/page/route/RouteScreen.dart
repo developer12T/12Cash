@@ -790,72 +790,6 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
         ),
       ),
     );
-    // return Column(
-    //   children: [
-    //     // Expanded(
-    //     //   child: Container(
-    //     //     padding: const EdgeInsets.all(8),
-    //     //     margin: EdgeInsets.all(screenWidth / 45),
-    //     //     child: Stack(
-    //     //       children: [
-    //     //         GoogleMap(
-    //     //           initialCameraPosition: const CameraPosition(
-    //     //             target: origin,
-    //     //             zoom: 5.0,
-    //     //           ),
-    //     //           markers: _markers,
-    //     //           // polylines: Set<Polyline>.of(polylines.values),
-    //     //           polylines: _polylines,
-    //     //           mapType: MapType.normal,
-    //     //           myLocationButtonEnabled: true,
-    //     //           myLocationEnabled: true,
-    //     //           // initialCameraPosition: _kGooglePlex,
-    //     //           onMapCreated: (controller) {
-    //     //             setState(() {
-    //     //               _mapController = controller;
-    //     //             });
-    //     //             _generateDistanceLabels();
-    //     //           },
-    //     //         ),
-    //     //         ...distanceLabels,
-    //     //       ],
-    //     //     ),
-    //     //   ),
-    //     // ),
-    //     // TextButton(
-    //     //   onPressed: () {
-    //     //     print("test");
-    //     //     // fetchPolylineDataWithDio(
-    //     //     //     origin, destination, 'AIzaSyAQ9F4z5GhkeW5n8z03OK7H5CcMpzUAZr0');
-    //     //   },
-    //     //   child: const Text('add'),
-    //     // ),
-    //     // Expanded(
-    //     //   child: Container(
-    //     //     padding: const EdgeInsets.all(8),
-    //     //     margin: EdgeInsets.all(screenWidth / 45),
-    //     //     width: screenWidth,
-    //     //     // color: Colors.red,
-    //     //     child: Column(
-    //     //       mainAxisAlignment: MainAxisAlignment.center,
-    //     //       children: [
-    //     //         Text(
-    //     //           "ยังไม่เปิดให้บริการ ",
-    //     //           style: Styles.black32(context),
-    //     //         ),
-    //     //       ],
-    //     //     ),
-    //     //   ),
-    //     // ),
-    // Expanded(
-    //   child: Padding(
-    //     padding: const EdgeInsets.only(top: 20),
-    //     child: RouteTable(),
-    //   ),
-    // ),
-
-    //   ],
-    // );
   }
 }
 
@@ -872,27 +806,6 @@ class _RouteHeaderState extends State<RouteHeader> {
   void initState() {
     super.initState();
   }
-
-  // Future<void> _getRouteVisit() async {
-  //   ApiService apiService = ApiService();
-  //   await apiService.init();
-
-  //   var response = await apiService.request(
-  //     endpoint: 'api/cash/route/getRoute?area=${User.area}&period=${period}',
-  //     method: 'GET',
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     final List<dynamic> data = response.data['data'];
-  //     // print("getRoute: ${response.data['data']}");
-  //     if (mounted) {
-  //       setState(() {
-  //         routeVisits = data.map((item) => RouteVisit.fromJson(item)).toList();
-  //       });
-  //     }
-  //     print("getRoute: $routeVisits");
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -1020,6 +933,7 @@ class _RouteHeaderState extends State<RouteHeader> {
                                 );
 
                                 if (response.statusCode == 200) {
+                                  context.loaderOverlay.show();
                                   final List<dynamic> data =
                                       response.data['data'];
                                   // print("getRoute: ${response.data['data']}");
