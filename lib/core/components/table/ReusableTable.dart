@@ -1,6 +1,7 @@
 import 'package:_12sale_app/core/page/stock/StockDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:_12sale_app/core/styles/style.dart';
+import 'package:intl/intl.dart';
 
 class ReusableTable extends StatefulWidget {
   final List<String> columns;
@@ -203,24 +204,24 @@ class _ReusableTableState extends State<ReusableTable> {
         ),
 
         // ===================== FOOTERS (optional, sync กับ X) =====================
-        // if (widget.footer != null)
-        //   _buildFooterRow(
-        //     widget.footer!,
-        //     col0Width,
-        //     col1Width,
-        //     otherColWidth,
-        //     context,
-        //     controller: _hFooter1,
-        //   ),
-        // if (widget.footer2 != null)
-        //   _buildFooterRow(
-        //     widget.footer2!,
-        //     col0Width,
-        //     col1Width,
-        //     otherColWidth,
-        //     context,
-        //     controller: _hFooter2,
-        //   ),
+        if (widget.footer != null)
+          _buildFooterRow(
+            widget.footer!,
+            col0Width,
+            col1Width,
+            otherColWidth,
+            context,
+            controller: _hFooter1,
+          ),
+        if (widget.footer2 != null)
+          _buildFooterRow(
+            widget.footer2!,
+            col0Width,
+            col1Width,
+            otherColWidth,
+            context,
+            controller: _hFooter2,
+          ),
       ],
     );
   }
@@ -313,7 +314,15 @@ class _ReusableTableState extends State<ReusableTable> {
     );
   }
 
-  Widget _buildFooterCell(String text, double width, BuildContext context) {
+  Widget _buildFooterCell(String? text, double width, BuildContext context) {
+    // แปลง text -> double อย่างปลอดภัย
+    final number = double.tryParse(text ?? '');
+
+    // ถ้า number != null แปลว่าเป็นตัวเลข => ฟอร์แมตเป็น "10,000"
+    final formatted = number != null
+        ? NumberFormat.decimalPattern('th_TH').format(number)
+        : text ?? '';
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black),
@@ -324,8 +333,8 @@ class _ReusableTableState extends State<ReusableTable> {
       padding: const EdgeInsets.all(8),
       alignment: Alignment.center,
       child: Text(
-        text,
-        style: Styles.black18(context).copyWith(fontWeight: FontWeight.bold),
+        formatted,
+        style: Styles.black16(context).copyWith(fontWeight: FontWeight.bold),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

@@ -94,6 +94,7 @@ class ItemProductChange {
   final String brand;
   final String size;
   int qty;
+  int qtyBal;
 
   ItemProductChange({
     required this.id,
@@ -103,6 +104,7 @@ class ItemProductChange {
     required this.brand,
     required this.size,
     required this.qty,
+    required this.qtyBal,
   });
 
   factory ItemProductChange.fromJson(Map<String, dynamic> json) {
@@ -114,6 +116,7 @@ class ItemProductChange {
       brand: json['brand'],
       size: json['size'],
       qty: json['qty'],
+      qtyBal: json['qtyBal'],
     );
   }
 
@@ -126,6 +129,7 @@ class ItemProductChange {
       'brand': brand,
       'size': size,
       'qty': qty,
+      'qtyBal': qtyBal,
     };
   }
 }
@@ -151,6 +155,7 @@ extension ItemProductChangeX on ItemProductChange {
       proName: proName,
       proType: proType,
       qty: qty,
+      qtyBal: qtyBal,
     );
   }
 }

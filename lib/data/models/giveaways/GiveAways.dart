@@ -6,7 +6,7 @@ class GiveAways {
   final String storeAddress;
   final double total;
   final String status;
-  // final DateTime createAt;
+  final DateTime createAt;
   GiveAways({
     required this.orderId,
     required this.giveName,
@@ -15,7 +15,7 @@ class GiveAways {
     required this.storeAddress,
     required this.total,
     required this.status,
-    // required this.createAt,
+    required this.createAt,
   });
 
   factory GiveAways.fromJson(Map<String, dynamic> json) {
@@ -27,7 +27,7 @@ class GiveAways {
       storeAddress: json['storeAddress'],
       total: json['total'].toDouble(),
       status: json['status'],
-      // createAt: DateTime.parse(json['createAt']),
+      createAt: DateTime.parse(json['createAt']),
     );
   }
 }

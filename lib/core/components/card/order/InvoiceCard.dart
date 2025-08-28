@@ -58,12 +58,14 @@ class InvoiceCard extends StatelessWidget {
                             color: Styles.secondaryColor.withOpacity(0.1),
                           ),
                           padding: EdgeInsets.all(8),
-                          margin: EdgeInsets.symmetric(horizontal: 4),
+                          margin: EdgeInsets.symmetric(horizontal: 2),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               FaIcon(
-                                FontAwesomeIcons.solidFileLines,
+                                item.paymentMethod == "cash"
+                                    ? FontAwesomeIcons.moneyBill1Wave
+                                    : FontAwesomeIcons.qrcode,
                                 color: Styles.primaryColorIcons,
                                 size: 35,
                               ),
@@ -86,6 +88,10 @@ class InvoiceCard extends StatelessWidget {
                                   children: [
                                     Text(
                                       "วันที่เวลา: ${formatted}",
+                                      style: Styles.black16(context),
+                                    ),
+                                    Text(
+                                      " Status: ${item.paymentStatus}",
                                       style: Styles.black16(context),
                                     ),
                                   ],

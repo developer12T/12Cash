@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
+import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/layout/BoxShadowCustom.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/page/HomeScreen.dart';
@@ -53,6 +54,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 //  Map<String, dynamic> itemPr = [];
+  bool _loadOrderDetail = true;
+//
+  String qrImage = '';
+  String qrImagePath = "";
+  String qrImagePath2 = "";
 
   @override
   void initState() {
@@ -60,10 +66,30 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     // requestPermissions();
     // _getCart();
     _getOrderDetail();
+    _getQRImage();
     // _fetchPairedDevices();
     _cartScrollController.addListener(_handleInnerScroll);
     _promotionScrollController.addListener(_handleInnerScroll2);
     _outerController.addListener(_onScroll);
+  }
+
+  Future<void> _getQRImage() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/user/qrcode?area=${User.area}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        print("getQRImage ${response.data['data']}");
+        setState(() {
+          qrImage = response.data['data'];
+        });
+      }
+    } catch (e) {
+      print("Error _getQRImage $e");
+    }
   }
   // Scroll Bar
 
@@ -110,7 +136,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
-  bool _loadOrderDetail = true;
   Future<void> _getOrderDetail() async {
     try {
       context.loaderOverlay.show();
@@ -128,7 +153,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         print("Response: ${response.data['data'][0]}");
 
         setState(() {
-          // orderDetail = OrderDetail.fromJson(response.data['data'][0]);
+          orderDetail = OrderDetail.fromJson(response.data['data'][0]);
 
           orderId = response.data['data'][0]['orderId'];
           status = response.data['data'][0]['status'];
@@ -947,6 +972,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                 )
                               ],
                             ),
+                            Text(
+                              "รูปแบบการจ่ายเงิน: ${orderDetail?.paymentMethod.toUpperCase()}",
+                              style: Styles.black18(context),
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -1582,6 +1611,92 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                 ),
               ),
             ),
+            (orderDetail?.paymentMethod ?? "cash") != "cash"
+                ? Padding(
+                    padding: EdgeInsets.all(8),
+                    child: BoxShadowCustom(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                ShowPhotoButton(
+                                  checkNetwork: true,
+                                  label: "QR Code",
+                                  icon: Icons.image_not_supported_outlined,
+                                  imagePath: qrImage != "" ? qrImage : '',
+                                ),
+                                IconButtonWithLabelOld(
+                                  icon: Icons.photo_camera,
+                                  imagePath:
+                                      qrImagePath != "" ? qrImagePath : null,
+                                  label: "ถ่ายภาพการโอน 1",
+                                  onImageSelected: (String imagePath) async {
+                                    setState(() {
+                                      qrImagePath = imagePath;
+                                    });
+                                  },
+                                ),
+                                IconButtonWithLabelOld(
+                                  icon: Icons.photo_camera,
+                                  imagePath:
+                                      qrImagePath2 != "" ? qrImagePath2 : null,
+                                  label: "ถ่ายภาพการโอน 2",
+                                  onImageSelected: (String imagePath) async {
+                                    setState(() {
+                                      qrImagePath2 = imagePath;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
+                                backgroundColor: Styles.primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () {
+                                // if (!User.connectPrinter) {
+                                //   _connectToPrinter(User.devicePrinter);
+                                // } else {
+                                //   _disconnectPrinter();
+                                // }
+                              },
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "อัพโหลดรูป QR Code",
+                                          style: Styles.white18(context),
+                                        )
+                                        // Icon(
+                                        //   Icons.print_rounded,
+                                        //   color: Colors.white,
+                                        //   size: 25,
+                                        // ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : SizedBox()
           ],
         ),
       ),

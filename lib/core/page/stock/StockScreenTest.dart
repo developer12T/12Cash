@@ -21,6 +21,36 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:toastification/toastification.dart';
 import '../../../data/models/option/Group.dart';
 
+enum ColumnId {
+  name, // ชื่อสินค้า
+  group, // กลุ่ม
+  stock, // ต้นทริป
+  withdraw, // เบิก
+  good, // คืนดี
+  damaged, // คืนเสีย
+  sale, // ขาย
+  promotion, // แถม
+  change, // เปลี่ยน
+  adjust, // ปรับ
+  give, // แจก
+  balance, // คงเหลือ
+}
+
+const Map<ColumnId, String> columnLabels = {
+  ColumnId.name: 'ชื่อ',
+  ColumnId.group: 'กลุ่ม',
+  ColumnId.stock: 'ต้นทริป',
+  ColumnId.withdraw: 'เบิก',
+  ColumnId.good: 'คืนดี',
+  ColumnId.damaged: 'คืนเสีย',
+  ColumnId.sale: 'ขาย',
+  ColumnId.promotion: 'แถม',
+  ColumnId.change: 'เปลี่ยน',
+  ColumnId.adjust: 'ปรับ',
+  ColumnId.give: 'แจก',
+  ColumnId.balance: 'คงเหลือ',
+};
+
 class StockScreenTest extends StatefulWidget {
   const StockScreenTest({super.key});
 
@@ -38,6 +68,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
   List<List<String>> rows = [];
   List<String> footerTable = [];
   List<String> footerTable2 = [];
+  List<String> displayColumns = [];
   Group? selectedGroup;
   List<List<String>> filteredRows = [];
   bool isLoading = true;
@@ -89,11 +120,120 @@ class _StockScreenTestState extends State<StockScreenTest> {
     ],
   };
 
+  // ---------- Dynamic Columns ----------
+  List<ColumnId> selectedColumns = [
+    ColumnId.name,
+    ColumnId.group,
+    ColumnId.stock,
+    ColumnId.withdraw,
+    ColumnId.good,
+    ColumnId.damaged,
+    ColumnId.sale,
+    ColumnId.promotion,
+    ColumnId.change,
+    ColumnId.adjust,
+    ColumnId.give,
+    ColumnId.balance,
+  ];
+
+  void applySelectedColumns(List<ColumnId> newCols) {
+    final enforced = _enforceRequiredColumns(newCols);
+    setState(() {
+      selectedColumns = enforced;
+      displayColumns = buildHeaderColumns(selectedColumns);
+      rows = stocks.map((it) => buildRowForItem(it, selectedColumns)).toList();
+      filteredRows = rows; // หรือคง filter เดิมโดยคำนวณใหม่
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _getStockQty();
     _getStockQtyNew();
+  }
+
+  List<String> buildHeaderColumns(List<ColumnId> cols) {
+    // บังคับให้มีชื่อ/กลุ่ม เสมอ (เพื่อให้ฟีเจอร์ filter/จับคู่ itemCodes ทำงานได้)
+    final enforced = _enforceRequiredColumns(cols);
+    return enforced.map((c) => columnLabels[c]!).toList();
+  }
+
+  List<ColumnId> _enforceRequiredColumns(List<ColumnId> cols) {
+    final set = {...cols};
+    set.add(ColumnId.name);
+    set.add(ColumnId.group);
+    return set.toList();
+  }
+
+  // helper: รวมค่าตามยูนิตเป็น "12 หีบ\n3 ถุง\n48 ซอง"
+  String _joinFieldByUnit(UnitTableNew u, String field) {
+    // ไม่ใช้ตรงนี้ (คงเดิมจากโค้ดคุณ) — จะใช้แบบ list ทั้งหมด
+    return '';
+  }
+
+  String _joinFieldForItem(StockTableNew item, String fieldKey) {
+    final unitList = item.listUnit; // List<UnitTableNew>
+    String pick(UnitTableNew u) {
+      switch (fieldKey) {
+        case 'stock':
+          return '${u.stock} ${u.unitName}';
+        case 'withdraw':
+          return '${u.withdraw} ${u.unitName}';
+        case 'good':
+          return '${u.good} ${u.unitName}';
+        case 'damaged':
+          return '${u.damaged} ${u.unitName}';
+        case 'sale':
+          return '${u.sale} ${u.unitName}';
+        case 'promotion':
+          return '${u.promotion} ${u.unitName}';
+        case 'change':
+          return '${u.change} ${u.unitName}';
+        case 'adjust':
+          return '${u.adjust} ${u.unitName}';
+        case 'give':
+          return '${u.give} ${u.unitName}';
+        case 'balance':
+          return '${u.balance} ${u.unitName}';
+        default:
+          return '0 ${u.unitName}';
+      }
+    }
+
+    return unitList.map(pick).join('\n');
+  }
+
+  List<String> buildRowForItem(StockTableNew item, List<ColumnId> cols) {
+    final enforced = _enforceRequiredColumns(cols);
+    return enforced.map((c) {
+      switch (c) {
+        case ColumnId.name:
+          return item.productName;
+        case ColumnId.group:
+          return item.productGroup;
+        case ColumnId.stock:
+          return _joinFieldForItem(item, 'stock');
+        case ColumnId.withdraw:
+          return _joinFieldForItem(item, 'withdraw');
+        case ColumnId.good:
+          return _joinFieldForItem(item, 'good');
+        case ColumnId.damaged:
+          return _joinFieldForItem(item, 'damaged');
+        case ColumnId.sale:
+          return _joinFieldForItem(item, 'sale');
+        case ColumnId.promotion:
+          return _joinFieldForItem(item, 'promotion');
+        case ColumnId.change:
+          return _joinFieldForItem(item, 'change');
+        case ColumnId.adjust:
+          return _joinFieldForItem(item, 'adjust');
+        case ColumnId.give:
+          return _joinFieldForItem(item, 'give');
+        case ColumnId.balance:
+          return _joinFieldForItem(item, 'balance');
+      }
+    }).toList();
   }
 
   Future<List<Cause>> getRefundDropdown(String filter) async {
@@ -169,6 +309,186 @@ class _StockScreenTestState extends State<StockScreenTest> {
     }
   }
 
+  void _openColumnPickerDialog() {
+    // สำเนา state ปัจจุบันไว้แก้ชั่วคราวใน dialog
+    final List<ColumnId> tempSelected = List.of(selectedColumns);
+
+    // helper: toggle/contains
+    bool has(ColumnId c) => tempSelected.contains(c);
+    void toggle(ColumnId c, bool? v) {
+      if (v == true) {
+        if (!has(c)) tempSelected.add(c);
+      } else {
+        tempSelected.remove(c);
+      }
+    }
+
+    // preset ต่าง ๆ
+    final List<ColumnId> presetMinimal = [
+      ColumnId.name,
+      ColumnId.group,
+      ColumnId.stock,
+      ColumnId.balance,
+    ];
+    final List<ColumnId> presetOperations = [
+      ColumnId.name,
+      ColumnId.group,
+      ColumnId.stock,
+      ColumnId.withdraw,
+      ColumnId.good,
+      ColumnId.damaged,
+      ColumnId.balance,
+    ];
+    final List<ColumnId> presetFull = ColumnId.values;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            // ปุ่ม select all/none ใช้กับทุกช่อง (เดี๋ยว enforce name/group ตอนกด "ใช้คอลัมน์")
+            void selectAll() => setLocal(() {
+                  tempSelected
+                    ..clear()
+                    ..addAll(ColumnId.values);
+                });
+            void selectNone() => setLocal(() {
+                  tempSelected
+                    ..clear()
+                    ..addAll([ColumnId.name, ColumnId.group]);
+                }); // กันผู้ใช้ลบหมดจนใช้งานยาก
+
+            void applyPreset(List<ColumnId> preset) => setLocal(() {
+                  tempSelected
+                    ..clear()
+                    ..addAll(preset);
+                });
+
+            return AlertDialog(
+              backgroundColor: Styles.primaryColor,
+              title: Text(
+                'เลือกคอลัมน์ที่จะแสดง',
+                style: Styles.white24(context),
+              ),
+              content: SizedBox(
+                width: 420,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Preset chips
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ActionChip(
+                          label: Text(
+                            'Minimal',
+                            style: Styles.black18(context),
+                          ),
+                          onPressed: () => applyPreset(presetMinimal),
+                        ),
+                        ActionChip(
+                          label: Text(
+                            'Operations',
+                            style: Styles.black18(context),
+                          ),
+                          onPressed: () => applyPreset(presetOperations),
+                        ),
+                        ActionChip(
+                          label: Text(
+                            'Full',
+                            style: Styles.black18(context),
+                          ),
+                          onPressed: () => applyPreset(presetFull),
+                        ),
+                        ActionChip(
+                          label: Text(
+                            'Select All',
+                            style: Styles.black18(context),
+                          ),
+                          onPressed: selectAll,
+                        ),
+                        ActionChip(
+                          label: Text(
+                            'Clear',
+                            style: Styles.black18(context),
+                          ),
+                          onPressed: selectNone,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // รายการ Checkbox
+                    Flexible(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: ColumnId.values.map((c) {
+                          final label = columnLabels[c]!;
+                          final isRequired =
+                              (c == ColumnId.name || c == ColumnId.group);
+
+                          return CheckboxListTile(
+                            checkColor: Colors.black,
+                            fillColor: WidgetStateProperty.all<Color>(
+                                Styles.secondaryColor),
+                            dense: true,
+                            title: Text(
+                              label,
+                              style: Styles.white18(context),
+                            ),
+                            value: has(c),
+                            onChanged: (bool? v) {
+                              // บังคับห้ามปิดคอลัมน์หลัก (name/group) ใน dialog
+                              if (isRequired && v == false) return;
+                              setLocal(() => toggle(c, v));
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                            secondary: isRequired
+                                ? Tooltip(
+                                    message: 'คอลัมน์หลัก (จำเป็น)',
+                                    child: Icon(
+                                      Icons.lock,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : null,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: Text(
+                    'ยกเลิก',
+                    style: Styles.white18(context),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.check),
+                  label: Text(
+                    'ใช้คอลัมน์',
+                    style: Styles.black18(context),
+                  ),
+                  onPressed: () {
+                    // อัปเดต state จริง และบังคับคอลัมน์หลักด้วย _enforceRequiredColumns
+                    applySelectedColumns(tempSelected);
+                    Navigator.of(ctx).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _getStockQtyNew() async {
     try {
       ApiService apiService = ApiService();
@@ -206,58 +526,59 @@ class _StockScreenTestState extends State<StockScreenTest> {
             .map((item) => StockTableNew.fromJson(item))
             .toList();
 
-        final fetchedRows = fetchedStocks.map<List<String>>((item) {
-          final unitList = <UnitTableNew>[];
-          for (var unit in item.listUnit) {
-            unitList.add(UnitTableNew(
-              unit: unit.unit,
-              unitName: unit.unitName,
-              stock: unit.stock,
-              withdraw: unit.withdraw,
-              good: unit.good,
-              damaged: unit.damaged,
-              sale: unit.sale,
-              promotion: unit.promotion,
-              change: unit.change,
-              adjust: unit.adjust,
-              give: unit.give,
-              balance: unit.balance,
-            ));
-          }
-          String joinField(String field) {
-            return unitList.map((u) {
-              final value = switch (field) {
-                'stock' => u.stock,
-                'withdraw' => u.withdraw,
-                'good' => u.good,
-                'damaged' => u.damaged,
-                'sale' => u.sale,
-                'promotion' => u.promotion,
-                'change' => u.change,
-                'adjust' => u.adjust,
-                'give' => u.give,
-                'balance' => u.balance,
-                _ => 0,
-              };
-              return '$value ${u.unitName}';
-            }).join('\n');
-          }
+        // final fetchedRows = fetchedStocks.map<List<String>>((item) {
+        //   final unitList = <UnitTableNew>[];
+        //   for (var unit in item.listUnit) {
+        //     unitList.add(UnitTableNew(
+        //       unit: unit.unit,
+        //       unitName: unit.unitName,
+        //       stock: unit.stock,
+        //       withdraw: unit.withdraw,
+        //       good: unit.good,
+        //       damaged: unit.damaged,
+        //       sale: unit.sale,
+        //       promotion: unit.promotion,
+        //       change: unit.change,
+        //       adjust: unit.adjust,
+        //       give: unit.give,
+        //       balance: unit.balance,
+        //     ));
+        //   }
 
-          return [
-            item.productName,
-            item.productGroup,
-            joinField('stock'),
-            joinField('withdraw'),
-            joinField('good'),
-            joinField('damaged'),
-            joinField('sale'),
-            joinField('promotion'),
-            joinField('change'),
-            joinField('adjust'),
-            joinField('give'),
-            joinField('balance'),
-          ];
-        }).toList();
+        //   String joinField(String field) {
+        //     return unitList.map((u) {
+        //       final value = switch (field) {
+        //         'stock' => u.stock,
+        //         'withdraw' => u.withdraw,
+        //         'good' => u.good,
+        //         'damaged' => u.damaged,
+        //         'sale' => u.sale,
+        //         'promotion' => u.promotion,
+        //         'change' => u.change,
+        //         'adjust' => u.adjust,
+        //         'give' => u.give,
+        //         'balance' => u.balance,
+        //         _ => 0,
+        //       };
+        //       return '$value ${u.unitName}';
+        //     }).join('\n');
+        //   }
+
+        //   return [
+        //     item.productName,
+        //     item.productGroup,
+        //     joinField('stock'),
+        //     joinField('withdraw'),
+        //     joinField('good'),
+        //     joinField('damaged'),
+        //     joinField('sale'),
+        //     joinField('promotion'),
+        //     joinField('change'),
+        //     joinField('adjust'),
+        //     joinField('give'),
+        //     joinField('balance'),
+        //   ];
+        // }).toList();
 
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
@@ -267,11 +588,31 @@ class _StockScreenTestState extends State<StockScreenTest> {
           }
         });
 
+        // setState(() {
+        //   stocks = fetchedStocks;
+        //   rows = fetchedRows;
+        //   filteredRows = rows; // Initially show all
+        //   isLoading = false;
+        // });
+
+        // HEADERS (dynamic)
+        final dynamicColumns = buildHeaderColumns(selectedColumns);
+
+        // ROWS (dynamic)
+        final fetchedRows = fetchedStocks
+            .map<List<String>>((item) => buildRowForItem(item, selectedColumns))
+            .toList();
+
         setState(() {
           stocks = fetchedStocks;
+          // ใช้ dynamic columns ใน build() — ย้ายไปเป็น state
+          displayColumns = dynamicColumns;
           rows = fetchedRows;
-          filteredRows = rows; // Initially show all
+          filteredRows = rows;
+          // footerTable = newFooter1;
+          // footerTable2 = newFooter2;
           isLoading = false;
+          _loadingProduct = false;
         });
       }
     } catch (e) {
@@ -292,23 +633,37 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
       if (response.statusCode == 200 && mounted) {
         final List<dynamic> data = response.data['data'];
-        // setState(() {
-        //   footerTable = [
-        //     'รวมจำนวน (PCS)',
-        //     '${response.data['summaryStockPcs']}',
-        //     '${response.data['summaryStockInPcs']}',
-        //     '${response.data['summaryStockOutPcs']}',
-        //     '${response.data['summaryStockBalPcs']}'
-        //   ];
+        setState(() {
+          footerTable = [
+            'รวมจำนวน (PCS)',
+            '',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+          ];
 
-        //   footerTable2 = [
-        //     'รวมจำนวนเงิน (บาท)',
-        //     '${response.data['summaryStock']}',
-        //     '${response.data['summaryStockIn']}',
-        //     '${response.data['summaryStockOut']}',
-        //     '${response.data['summaryStockBal']}'
-        //   ];
-        // });
+          footerTable2 = [
+            'ยอดรวม',
+            '',
+            '${response.data['summaryStock']}',
+            '${response.data['summaryWithdraw']}',
+            '${response.data['summaryGood']}',
+            '${response.data['summaryDamaged']}',
+            '${response.data['summarySale']}',
+            '${response.data['summaryPromotion']}',
+            '${response.data['summaryChange']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+            '${response.data['summaryStockPcs']}',
+          ];
+        });
 
         // final allowedUnits = ['CTN', 'PCS'];
 
@@ -719,20 +1074,24 @@ ${leftRightText('', '\n\n\n', 61)}
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    final columns = [
-      'ชื่อ',
-      'กลุ่ม',
-      'ต้นทริป',
-      'เบิก',
-      'คืนดี',
-      'คืนเสีย',
-      'ขาย',
-      'แถม',
-      'เปลี่ยน',
-      'ปรับ',
-      'แจก',
-      'คงเหลือ',
-    ];
+    // final columns = [
+    //   'ชื่อ',
+    //   'กลุ่ม',
+    //   'ต้นทริป',
+    //   'เบิก',
+    //   'คืนดี',
+    //   'คืนเสีย',
+    //   'ขาย',
+    //   'แถม',
+    //   'เปลี่ยน',
+    //   'ปรับ',
+    //   'แจก',
+    //   'คงเหลือ',
+    // ];
+
+    final columns = displayColumns.isNotEmpty
+        ? displayColumns
+        : buildHeaderColumns(selectedColumns); // กันค่าเริ่มต้น
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
@@ -965,31 +1324,27 @@ ${leftRightText('', '\n\n\n', 61)}
                             ),
                             SizedBox(width: 8),
                             TextButton(
-                              style: TextButton.styleFrom(
-                                backgroundColor: Styles.primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  side: const BorderSide(
-                                    color: Colors.white,
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Styles.primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: const BorderSide(
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              onPressed: () async {
-                                context.loaderOverlay.show();
-                                setState(() {
-                                  selectedGroup = null;
-                                  condition = '';
-                                  filteredRows = rows;
-                                  selectedCauses = null;
-                                });
-                                await _getStockQtyNew();
-                                context.loaderOverlay.hide();
-                              },
-                              child: Text(
-                                "ล้างตัวกรอง",
-                                style: Styles.white16(context),
-                              ),
-                            ),
+                                onPressed: () async {
+                                  context.loaderOverlay.show();
+                                  setState(() {
+                                    selectedGroup = null;
+                                    condition = '';
+                                    filteredRows = rows;
+                                    selectedCauses = null;
+                                  });
+                                  await _getStockQtyNew();
+                                  context.loaderOverlay.hide();
+                                },
+                                child: Icon(Icons.cleaning_services_outlined)),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -1048,6 +1403,42 @@ ${leftRightText('', '\n\n\n', 61)}
                                 },
                               ),
                             ),
+                            // ElevatedButton(
+                            //   style: ElevatedButton.styleFrom(
+                            //     backgroundColor: Styles.primaryColor,
+                            //     shape: RoundedRectangleBorder(
+                            //       borderRadius: BorderRadius.circular(8),
+                            //     ),
+                            //   ),
+                            //   onPressed: () {
+                            //     _openColumnPickerDialog();
+                            //   },
+                            //   child: Padding(
+                            //     padding:
+                            //         const EdgeInsets.symmetric(horizontal: 8.0),
+                            //     child: Row(
+                            //       mainAxisAlignment: MainAxisAlignment.center,
+                            //       children: [
+                            //         Row(
+                            //           children: [
+                            //             Text(
+                            //               "Column",
+                            //               style: Styles.white18(context),
+                            //             )
+                            //           ],
+                            //         ),
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
+                            // IconButton(
+                            //   icon: const Icon(
+                            //     Icons.view_column,
+                            //     color: Colors.red,
+                            //   ),
+                            //   tooltip: 'เลือกคอลัมน์',
+                            //   onPressed: () => _openColumnPickerDialog(),
+                            // ),
                             SizedBox(
                               width: 10,
                             ),
@@ -1172,6 +1563,15 @@ ${leftRightText('', '\n\n\n', 61)}
                                 ),
                               ),
                             ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.filter_alt,
+                                size: 35,
+                                color: Styles.primaryColor,
+                              ),
+                              tooltip: 'เลือกคอลัมน์',
+                              onPressed: () => _openColumnPickerDialog(),
+                            ),
                             SizedBox(width: 8),
                             TextButton(
                               style: TextButton.styleFrom(
@@ -1194,9 +1594,9 @@ ${leftRightText('', '\n\n\n', 61)}
                                 await _getStockQtyNew();
                                 context.loaderOverlay.hide();
                               },
-                              child: Text(
-                                "ล้างตัวกรอง",
-                                style: Styles.white16(context),
+                              child: const Icon(
+                                Icons.cleaning_services_outlined,
+                                color: Styles.white,
                               ),
                             ),
                           ],
@@ -1206,15 +1606,27 @@ ${leftRightText('', '\n\n\n', 61)}
                           child: ReusableTable(
                             columns: columns,
                             rows: filteredRows,
+
                             itemCodes: stocks
-                                .where((stock) => filteredRows.any((row) =>
-                                    row[0] ==
-                                    stock.productName)) // match ที่โชว์อยู่
-                                .map((stock) =>
-                                    [stock.productId]) // เก็บแค่ productId
+                                // ใช้คอลัมน์ 'ชื่อ' เพื่อจับคู่
+                                .where((stock) {
+                                  final nameIndex = columns.indexOf('ชื่อ');
+                                  if (nameIndex < 0) return false;
+                                  return filteredRows.any((row) =>
+                                      row[nameIndex] == stock.productName);
+                                })
+                                .map((stock) => [stock.productId])
                                 .toList(),
-                            footer: footerTable,
-                            footer2: footerTable2,
+
+                            // itemCodes: stocks
+                            //     .where((stock) => filteredRows.any((row) =>
+                            //         row[0] ==
+                            //         stock.productName)) // match ที่โชว์อยู่
+                            //     .map((stock) =>
+                            //         [stock.productId]) // เก็บแค่ productId
+                            //     .toList(),
+                            // footer: footerTable,
+                            // footer2: footerTable2,
                           ),
                         ),
                       ],

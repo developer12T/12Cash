@@ -61,6 +61,7 @@ class PromotionListItem {
   String? proCode;
   String? proType;
   int qty;
+  int qtyBal;
 
   PromotionListItem({
     required this.id,
@@ -76,6 +77,7 @@ class PromotionListItem {
     this.proCode,
     this.proType,
     required this.qty,
+    required this.qtyBal,
   });
 
   factory PromotionListItem.fromJson(Map<String, dynamic> json) {
@@ -92,7 +94,8 @@ class PromotionListItem {
       proName: json['proName'],
       proCode: json['proCode'],
       proType: json['proType'],
-      qty: json['qty'] as int,
+      qty: json['qty'] as int? ?? 0,
+      qtyBal: json['qtyBal'] as int? ?? 0,
     );
   }
 
@@ -111,6 +114,7 @@ class PromotionListItem {
       'proCode': proCode,
       'proType': proType,
       'qty': qty,
+      'qtyBal': qtyBal,
     };
   }
 }
@@ -131,6 +135,7 @@ extension PromotionListItemCopy on PromotionListItem {
     String? proCode,
     String? proType,
     int? qty,
+    int? qtyBal,
   }) {
     return PromotionListItem(
       id: id ?? this.id,
@@ -146,6 +151,7 @@ extension PromotionListItemCopy on PromotionListItem {
       proCode: proCode ?? this.proCode,
       proType: proType ?? this.proType,
       qty: qty ?? this.qty,
+      qtyBal: qty ?? this.qtyBal,
     );
   }
 }

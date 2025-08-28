@@ -137,29 +137,56 @@ class _PolicyScreenState extends State<PolicyScreen> {
   }
 
   Future<void> fetchLocation() async {
-    try {
-      // Initialize the location service
-      await locationService.initialize();
+    while (true) {
+      try {
+        // Initialize the location service
+        await locationService.initialize();
 
-      // Get latitude and longitude
-      double? lat = await locationService.getLatitude();
-      double? lon = await locationService.getLongitude();
-
-      setState(() {
-        latitude = lat?.toString() ?? "Unavailable";
-        longitude = lon?.toString() ?? "Unavailable";
-      });
-      print("${latitude}, ${longitude}");
-    } catch (e) {
-      if (mounted) {
+        // Get latitude and longitude
+        double? lat = await locationService.getLatitude();
+        double? lon = await locationService.getLongitude();
+        if (!mounted) return;
         setState(() {
-          latitude = "Error fetching latitude";
-          longitude = "Error fetching longitude";
+          latitude = lat.toString();
+          longitude = lon.toString();
         });
+        print("${latitude}, ${longitude}");
+        break; // ได้ค่าแล้ว ออกจาก loop
+      } catch (e) {
+        // if (mounted) {
+        //   setState(() {
+        //     latitude = "Error fetching latitude";
+        //     longitude = "Error fetching longitude";
+        //   });
+        // }
+        print("⚠️ Error: $e");
+        // รอ 1 วินาทีแล้วลองใหม่
+        await Future.delayed(const Duration(seconds: 1));
       }
-      print("Error: $e");
     }
   }
+
+  // double? latitude;
+  // double? longitude;
+
+  // Future<void> fetchLocation() async {
+  //   try {
+  //     // Initialize the location service
+  //     await locationService.initialize();
+
+  //     // Get latitude and longitude
+  //     double? lat = await locationService.getLatitude();
+  //     double? lon = await locationService.getLongitude();
+
+  //     if (!mounted) return;
+  //     setState(() {}); // แค่รีเฟรช UI
+
+  //     print("lat=$latitude, lon=$longitude");
+  //   } catch (e) {
+  //     // กรณี exception (เช่น user กดยกเลิก permission)
+  //     rethrow; // ส่ง error กลับไป ไม่เซ็ตค่าเป็น string
+  //   }
+  // }
 
   late final TextEditingController _controller = TextEditingController(
       text: "${bodyPolicy.join("\n")} \n    ${policy?.footer}");

@@ -933,7 +933,7 @@ class _RouteHeaderState extends State<RouteHeader> {
                                 );
 
                                 if (response.statusCode == 200) {
-                                  context.loaderOverlay.show();
+                                  // context.loaderOverlay.show();
                                   final List<dynamic> data =
                                       response.data['data'];
                                   // print("getRoute: ${response.data['data']}");

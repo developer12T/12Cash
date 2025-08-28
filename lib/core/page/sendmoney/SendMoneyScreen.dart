@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:_12sale_app/core/components/Appbar.dart';
+import 'package:_12sale_app/core/components/button/ShowPhotoButton.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld.dart';
 import 'package:_12sale_app/core/components/camera/IconButtonWithLabelOld2.dart';
 import 'package:_12sale_app/core/components/table/ReusableTable.dart';
@@ -279,11 +280,16 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
       print("Response: $response");
       if (response.statusCode == 200) {
         setState(() {
+          String fullPath = response.data['image'][0]['path'];
           sendMoney = response.data['sendmoney'].toDouble().abs();
           different = response.data['different'].toDouble().abs();
           money = response.data['different'].toDouble().abs();
           summary = response.data['summary'].toDouble().abs();
           status = response.data['status'];
+
+// ตัด `/var/www/12AppAPI/public` ออก
+          storeImagePath = fullPath.replaceFirst(
+              '/var/www/12AppAPI/public', 'https://apps.onetwotrading.co.th');
           countController = TextEditingController(text: different.toString());
         });
       }
@@ -433,16 +439,24 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                       const SizedBox(
                         height: 16,
                       ),
-                      IconButtonWithLabelOld2(
-                        icon: Icons.photo_camera,
-                        imagePath: storeImagePath != "" ? storeImagePath : null,
-                        label: "ใบเงินฝาก",
-                        onImageSelected: (String imagePath) async {
-                          setState(() {
-                            storeImagePath = imagePath;
-                          });
-                        },
-                      ),
+                      storeImagePath != ""
+                          ? ShowPhotoButton(
+                              checkNetwork: true,
+                              label: "ร้านค้า",
+                              icon: Icons.image_not_supported_outlined,
+                              imagePath: storeImagePath,
+                            )
+                          : IconButtonWithLabelOld2(
+                              icon: Icons.photo_camera,
+                              imagePath:
+                                  storeImagePath != "" ? storeImagePath : null,
+                              label: "ใบเงินฝาก",
+                              onImageSelected: (String imagePath) async {
+                                setState(() {
+                                  storeImagePath = imagePath;
+                                });
+                              },
+                            ),
                       const SizedBox(
                         height: 16,
                       ),

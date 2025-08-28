@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:_12sale_app/core/components/CalendarPicker.dart';
+import 'package:_12sale_app/core/components/DateFilterType.dart';
 import 'package:_12sale_app/core/components/camera/CameraPreviewScreen.dart';
 import 'package:_12sale_app/core/components/button/MenuButton.dart';
 import 'package:_12sale_app/core/components/card/MenuDashboard.dart';
@@ -50,6 +51,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../components/table/TestGridTable.dart';
 import 'package:timezone/standalone.dart' as tz;
 
+enum PeriodType { day, month, year }
+
 class Dashboardscreen extends StatefulWidget {
   const Dashboardscreen({super.key});
 
@@ -73,6 +76,22 @@ class _DashboardscreenState extends State<Dashboardscreen> {
 
   List<FlSpot> spots = [];
   bool isLoading = true;
+
+  // Dashboard
+  // double percent = 100;
+
+  final now = DateTime.now();
+
+  PeriodType _period = PeriodType.month;
+  late int _year;
+  late int _month;
+  late int _day;
+
+  double _sale = 0;
+  double _target = 0;
+
+  final _thFmt = NumberFormat.decimalPattern('th_TH');
+  final _thCurrency = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
   Future<void> getDataSummaryChoince(String type) async {
     try {
@@ -224,49 +243,121 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   Widget build(BuildContext context) {
     selectedLanguageCode = context.locale.toString().split("_")[0];
     double screenWidth = MediaQuery.of(context).size.width;
+    double percent = _target == 0 ? 0.0 : (_sale / _target).clamp(0, 1);
     return Container(
         padding: const EdgeInsets.all(10.0),
         // height: screenWidth / 2.5,
         // width: screenWidth / 1.5,
         child: Column(
           children: [
-            const BudgetCard(
-              title: 'Total Sales',
-              icon: Icons.attach_money,
-              color: Colors.green,
+            // ในหน้าหลักของคุณ (เช่น build ของหน้า Dashboard)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DateFilter(
+                  initialType: DateFilterType.day, // day | month | year
+                  initialDate: DateTime.now(),
+                  onRangeChanged: (range, type) {
+                    // ใช้ range.start และ range.end
+                    // ตัวอย่าง: ส่งไป query backend
+                    print('type=$type start=${range.start} end=${range.end}');
+                  },
+                ),
+              ],
             ),
-            // SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
-            isLoading
-                ? CircularProgressIndicator()
-                : SizedBox(
-                    height: 335,
-                    width: screenWidth,
-                    child: SummarybyMonth(
-                      spots: spots,
-                    ),
-                  ),
 
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: menuList.asMap().entries.map((entry) {
-            //     return GestureDetector(
-            //       onTap: () => _controller.animateToPage(entry.key),
-            //       child: Container(
-            //         width: 12.0,
-            //         height: 12.0,
-            //         margin: const EdgeInsets.symmetric(horizontal: 4.0),
-            //         decoration: BoxDecoration(
-            //           shape: BoxShape.circle,
-            //           color: (Theme.of(context).brightness == Brightness.dark
-            //                   ? Colors.white
-            //                   : Colors.black)
-            //               .withOpacity(_current == entry.key ? 0.9 : 0.4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                _KpiCard(
+                  title: 'ยอดขาย',
+                  value: _thCurrency.format(_sale),
+                  icon: Icons.shopping_cart_checkout,
+                ),
+                _KpiCard(
+                  title: 'เป้าหมาย',
+                  value: _thCurrency.format(_target),
+                  icon: Icons.flag,
+                ),
+                _PercentCard(
+                  percent: percent,
+                  icon: Icons.percent,
+                  label: 'เปอร์เซ็น',
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                _KpiCard(
+                  title: 'ยอดคืนดี',
+                  value: _thCurrency.format(_sale),
+                  icon: Icons.change_circle_outlined,
+                ),
+                _KpiCard(
+                  title: 'ยอดคืนเสีย',
+                  value: _thCurrency.format(_target),
+                  icon: Icons.change_circle_outlined,
+                ),
+                _KpiCard(
+                  title: 'ยอดรวมคืน',
+                  value: _thCurrency.format(_target),
+                  icon: Icons.monetization_on_outlined,
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                _KpiCard(
+                  title: 'ยอดแจกสินค้า',
+                  value: _thCurrency.format(_sale),
+                  icon: FontAwesomeIcons.gift,
+                ),
+                _KpiCard(
+                  title: 'ยอดเบิก',
+                  value: _thCurrency.format(_target),
+                  icon: Icons.local_shipping,
+                ),
+                _KpiCard(
+                  title: 'ยอดรับ',
+                  value: _thCurrency.format(_target),
+                  icon: Icons.local_shipping,
+                ),
+              ],
+            ),
+            // Flexible(
+            //   child: LayoutBuilder(
+            //     builder: (context, constraints) {
+            //       final isWide = constraints.maxWidth > 820;
+            //       return GridView.count(
+            //         crossAxisCount: isWide ? 3 : 1,
+            //         crossAxisSpacing: 16,
+            //         mainAxisSpacing: 16,
+            //         childAspectRatio: isWide ? 1.6 : 2.8,
+            //         children: [
+
+            //         ],
+            //       );
+            //     },
+            //   ),
+            // ),
+            // const BudgetCard(
+            //   title: 'Total Sales',
+            //   icon: Icons.attach_money,
+            //   color: Colors.green,
+            // ),
+            // SizedBox(height: 300, width: screenWidth, child: LineChartSample()),
+            // isLoading
+            //     ? CircularProgressIndicator()
+            //     : SizedBox(
+            //         height: 335,
+            //         width: screenWidth,
+            //         child: SummarybyMonth(
+            //           spots: spots,
             //         ),
             //       ),
-            //     );
-            //   }).toList(),
-            // ),
-
+            SizedBox(height: screenWidth / 37),
             Column(
               children: [
                 MenuDashboard(
@@ -433,25 +524,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
             //   DataColumn(label: Text('สถานะ')), // "Status" in Thai
             // ]),
           ],
-        )
-        // CustomTable(
-        //   data: _buildRows(),
-        //     // )
-        //     Row(
-        //   crossAxisAlignment: CrossAxisAlignment.stretch,
-        //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //   children: [DropdownSearchWidget()],
-        // ),
-        );
-
-    //   // SizedBox(width: 10),
-    //   CustomTable(data: _buildRows2(), columns: [
-    //     DataColumn(label: Text('วันที่')), // "Date" in Thai
-    //     DataColumn(label: Text('เส้นทาง')), // "Path" in Thai
-    //     DataColumn(label: Text('สถานะ')), // "Status" in Thai
-    //     DataColumn(label: Text('adw')), // "Status" in Thai
-    //   ])
-    // return Container(height: 500, width: 400, child: LineChartSample());
+        ));
   }
 
   Widget _buildStatCard(String label, String value) {
@@ -649,5 +722,153 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
       ],
     );
+  }
+}
+
+class _KpiCard extends StatelessWidget {
+  const _KpiCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
+
+  final String title;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Styles.secondaryColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Styles.primaryColor,
+              ),
+              child: Icon(
+                icon,
+                color: Styles.white,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: Styles.black18(context),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: Styles.black18(context),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: Styles.black18(context),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PercentCard extends StatelessWidget {
+  const _PercentCard({
+    required this.percent,
+    required this.label,
+    required this.icon,
+  });
+
+  final double percent; // 0..1
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Styles.secondaryColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Styles.primaryColor,
+              ),
+              child: Icon(
+                icon,
+                color: Styles.white,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: Styles.black18(context),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${(percent * 100).toStringAsFixed(2)}%',
+                  style: Styles.black18(context),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class Metrics {
+  final double sale;
+  final double target;
+  const Metrics(this.sale, this.target);
+}
+
+class FakeRepository {
+// Simulate different metrics by period
+  static Future<Metrics> getMetrics(
+    PeriodType type, {
+    required int year,
+    required int month,
+    required int day,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+
+// simple deterministic mock based on inputs
+    final seed = year * 10000 + month * 100 + day;
+    final base = (seed % 9 + 2) * 10000; // 20k..100k
+
+    switch (type) {
+      case PeriodType.day:
+        return Metrics(base * 0.35, base * 0.5);
+      case PeriodType.month:
+        return Metrics(base * 8, base * 10);
+      case PeriodType.year:
+        return Metrics(base * 90, base * 110);
+    }
   }
 }

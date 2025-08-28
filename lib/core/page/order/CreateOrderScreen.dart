@@ -521,7 +521,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
           socketService.emitEvent('order/checkout', {
             'message': 'Order added successfully',
           });
-          await uploadImageSlip(response.data['data']['orderId']);
+          // await uploadImageSlip(response.data['data']['orderId']);
           toastification.show(
             autoCloseDuration: const Duration(seconds: 5),
             context: context,
@@ -628,6 +628,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                 id: item.id,
                 name: item.name,
                 qty: item.qty,
+                qtyBal: 1,
                 size: item.size,
                 unit: item.unit,
                 unitName: item.unitName,
@@ -837,25 +838,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                   onPressed: () {
                     if (_isCreateOrderEnabled) {
                       if (isSelectCheckout == "QR Payment") {
-                        if (qrImagePath != "") {
-                          AllAlert.customAlert(
-                              context,
-                              "store.processtimeline_screen.alert.title".tr(),
-                              "คุณต้องการจะสั่งซื้อสินค้าใช่หรือไม่ ?",
-                              _checkOutOrder);
-                        } else {
-                          toastification.show(
-                            autoCloseDuration: const Duration(seconds: 5),
-                            context: context,
-                            primaryColor: Colors.red,
-                            type: ToastificationType.error,
-                            style: ToastificationStyle.flatColored,
-                            title: Text(
-                              "กรุณาอัพโหลดสลิป",
-                              style: Styles.red18(context),
-                            ),
-                          );
-                        }
+                        AllAlert.customAlert(
+                            context,
+                            "store.processtimeline_screen.alert.title".tr(),
+                            "คุณต้องการจะสั่งซื้อสินค้าใช่หรือไม่ ?",
+                            _checkOutOrder);
                       } else {
                         AllAlert.customAlert(
                             context,
@@ -1214,171 +1201,171 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                                 ),
                                                               ],
                                                             ),
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .end,
-                                                              children: [
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    setState(
-                                                                        () {
-                                                                      if (cartList[index]
-                                                                              .qty >
-                                                                          1) {
-                                                                        cartList[index]
-                                                                            .qty--;
-                                                                      }
-                                                                    });
-                                                                    await _reduceCart(
-                                                                        cartList[
-                                                                            index],
-                                                                        "IN");
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .grey,
-                                                                          width:
-                                                                              1),
-                                                                    ), // ✅ Makes the button circular
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons
-                                                                        .remove,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ), // Example
-                                                                ),
-                                                                Container(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .all(
-                                                                              4),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    border:
-                                                                        Border
-                                                                            .all(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            16),
-                                                                  ),
-                                                                  width: 75,
-                                                                  child: Text(
-                                                                    '${cartList[index].qty.toStringAsFixed(0)}',
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style: Styles
-                                                                        .black18(
-                                                                      context,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    await _reduceCart(
-                                                                        cartList[
-                                                                            index],
-                                                                        "OUT");
 
-                                                                    setState(
-                                                                        () {
-                                                                      cartList[
-                                                                              index]
-                                                                          .qty++;
-                                                                    });
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .grey,
-                                                                          width:
-                                                                              1),
-                                                                    ), // ✅ Makes the button circular
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons.add,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .grey,
-                                                                  ), // Example
-                                                                ),
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    await _deleteCart(
-                                                                        cartList[
-                                                                            index]);
+                                                            // Row(
+                                                            //   mainAxisAlignment:
+                                                            //       MainAxisAlignment
+                                                            //           .end,
+                                                            //   children: [
+                                                            //     ElevatedButton(
+                                                            //       onPressed:
+                                                            //           () async {
+                                                            //         setState(
+                                                            //             () {
+                                                            //           if (cartList[index]
+                                                            //                   .qty >
+                                                            //               1) {
+                                                            //             cartList[index]
+                                                            //                 .qty--;
+                                                            //           }
+                                                            //         });
+                                                            //         await _reduceCart(
+                                                            //             cartList[
+                                                            //                 index],
+                                                            //             "IN");
+                                                            //       },
+                                                            //       style: ElevatedButton
+                                                            //           .styleFrom(
+                                                            //         shape:
+                                                            //             const CircleBorder(
+                                                            //           side: BorderSide(
+                                                            //               color: Colors
+                                                            //                   .grey,
+                                                            //               width:
+                                                            //                   1),
+                                                            //         ), // ✅ Makes the button circular
+                                                            //         padding:
+                                                            //             const EdgeInsets
+                                                            //                 .all(
+                                                            //                 8),
+                                                            //         backgroundColor:
+                                                            //             Colors
+                                                            //                 .white, // Button color
+                                                            //       ),
+                                                            //       child:
+                                                            //           const Icon(
+                                                            //         Icons
+                                                            //             .remove,
+                                                            //         size: 24,
+                                                            //         color: Colors
+                                                            //             .grey,
+                                                            //       ), // Example
+                                                            //     ),
+                                                            //     Container(
+                                                            //       padding:
+                                                            //           EdgeInsets
+                                                            //               .all(
+                                                            //                   4),
+                                                            //       decoration:
+                                                            //           BoxDecoration(
+                                                            //         border:
+                                                            //             Border
+                                                            //                 .all(
+                                                            //           color: Colors
+                                                            //               .grey,
+                                                            //           width: 1,
+                                                            //         ),
+                                                            //         borderRadius:
+                                                            //             BorderRadius.circular(
+                                                            //                 16),
+                                                            //       ),
+                                                            //       width: 75,
+                                                            //       child: Text(
+                                                            //         '${cartList[index].qty.toStringAsFixed(0)}',
+                                                            //         textAlign:
+                                                            //             TextAlign
+                                                            //                 .center,
+                                                            //         style: Styles
+                                                            //             .black18(
+                                                            //           context,
+                                                            //         ),
+                                                            //       ),
+                                                            //     ),
+                                                            //     ElevatedButton(
+                                                            //       onPressed:
+                                                            //           () async {
+                                                            //         await _reduceCart(
+                                                            //             cartList[
+                                                            //                 index],
+                                                            //             "OUT");
+                                                            //         setState(
+                                                            //             () {
+                                                            //           cartList[
+                                                            //                   index]
+                                                            //               .qty++;
+                                                            //         });
+                                                            //       },
+                                                            //       style: ElevatedButton
+                                                            //           .styleFrom(
+                                                            //         shape:
+                                                            //             const CircleBorder(
+                                                            //           side: BorderSide(
+                                                            //               color: Colors
+                                                            //                   .grey,
+                                                            //               width:
+                                                            //                   1),
+                                                            //         ), // ✅ Makes the button circular
+                                                            //         padding:
+                                                            //             const EdgeInsets
+                                                            //                 .all(
+                                                            //                 8),
+                                                            //         backgroundColor:
+                                                            //             Colors
+                                                            //                 .white, // Button color
+                                                            //       ),
+                                                            //       child:
+                                                            //           const Icon(
+                                                            //         Icons.add,
+                                                            //         size: 24,
+                                                            //         color: Colors
+                                                            //             .grey,
+                                                            //       ), // Example
+                                                            //     ),
+                                                            //     ElevatedButton(
+                                                            //       onPressed:
+                                                            //           () async {
+                                                            //         await _deleteCart(
+                                                            //             cartList[
+                                                            //                 index]);
 
-                                                                    setState(
-                                                                      () {
-                                                                        cartList.removeWhere((item) =>
-                                                                            (item.id == cartList[index].id &&
-                                                                                item.unit == cartList[index].unit));
-                                                                      },
-                                                                    );
-                                                                    // await _getTotalCart(setModalState);
-                                                                  },
-                                                                  style: ElevatedButton
-                                                                      .styleFrom(
-                                                                    shape:
-                                                                        const CircleBorder(
-                                                                      side: BorderSide(
-                                                                          color: Colors
-                                                                              .red,
-                                                                          width:
-                                                                              1),
-                                                                    ),
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            8),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .white, // Button color
-                                                                  ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons
-                                                                        .delete,
-                                                                    size: 24,
-                                                                    color: Colors
-                                                                        .red,
-                                                                  ), // Example
-                                                                ),
-                                                              ],
-                                                            ),
+                                                            //         setState(
+                                                            //           () {
+                                                            //             cartList.removeWhere((item) =>
+                                                            //                 (item.id == cartList[index].id &&
+                                                            //                     item.unit == cartList[index].unit));
+                                                            //           },
+                                                            //         );
+                                                            //         // await _getTotalCart(setModalState);
+                                                            //       },
+                                                            //       style: ElevatedButton
+                                                            //           .styleFrom(
+                                                            //         shape:
+                                                            //             const CircleBorder(
+                                                            //           side: BorderSide(
+                                                            //               color: Colors
+                                                            //                   .red,
+                                                            //               width:
+                                                            //                   1),
+                                                            //         ),
+                                                            //         padding:
+                                                            //             const EdgeInsets
+                                                            //                 .all(
+                                                            //                 8),
+                                                            //         backgroundColor:
+                                                            //             Colors
+                                                            //                 .white, // Button color
+                                                            //       ),
+                                                            //       child:
+                                                            //           const Icon(
+                                                            //         Icons
+                                                            //             .delete,
+                                                            //         size: 24,
+                                                            //         color: Colors
+                                                            //             .red,
+                                                            //       ), // Example
+                                                            //     ),
+                                                            //   ],
+                                                            // ),
                                                           ],
                                                         ),
                                                       ],
@@ -1825,6 +1812,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                 color: Styles.primaryColorIcons,
                                                 size: 40,
                                               ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
                                               Text(
                                                 isSelectCheckout != ""
                                                     ? isSelectCheckout
@@ -1931,46 +1921,46 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                       ),
                     ),
                   ),
-                  isSelectCheckout == "QR Payment"
-                      ? Padding(
-                          padding: EdgeInsets.all(8),
-                          child: BoxShadowCustom(
-                            child: Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      ShowPhotoButton(
-                                        checkNetwork: true,
-                                        label: "QR Code",
-                                        icon:
-                                            Icons.image_not_supported_outlined,
-                                        imagePath: qrImage != "" ? qrImage : '',
-                                      ),
-                                      IconButtonWithLabelOld(
-                                        icon: Icons.photo_camera,
-                                        imagePath: qrImagePath != ""
-                                            ? qrImagePath
-                                            : null,
-                                        label: "ถ่ายภาพการโอน",
-                                        onImageSelected:
-                                            (String imagePath) async {
-                                          setState(() {
-                                            qrImagePath = imagePath;
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                      : SizedBox()
+                  // isSelectCheckout == "QR Payment"
+                  //     ? Padding(
+                  //         padding: EdgeInsets.all(8),
+                  //         child: BoxShadowCustom(
+                  //           child: Padding(
+                  //             padding: EdgeInsets.all(8),
+                  //             child: Column(
+                  //               children: [
+                  //                 Row(
+                  //                   mainAxisAlignment:
+                  //                       MainAxisAlignment.spaceAround,
+                  //                   children: [
+                  //                     ShowPhotoButton(
+                  //                       checkNetwork: true,
+                  //                       label: "QR Code",
+                  //                       icon:
+                  //                           Icons.image_not_supported_outlined,
+                  //                       imagePath: qrImage != "" ? qrImage : '',
+                  //                     ),
+                  //                     IconButtonWithLabelOld(
+                  //                       icon: Icons.photo_camera,
+                  //                       imagePath: qrImagePath != ""
+                  //                           ? qrImagePath
+                  //                           : null,
+                  //                       label: "ถ่ายภาพการโอน",
+                  //                       onImageSelected:
+                  //                           (String imagePath) async {
+                  //                         setState(() {
+                  //                           qrImagePath = imagePath;
+                  //                         });
+                  //                       },
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       )
+                  //     : SizedBox()
                 ],
               ),
             ),
@@ -2802,6 +2792,18 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
                                       icon: Icon(Icons.add),
                                       onPressed: () => _addQty(idx),
                                     ),
+                                    SizedBox(
+                                      width: 25,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          'จำนวนคงเหลือ ${item.qtyBal} PCS',
+                                          style: Styles.black18(context),
+                                        )
+                                      ],
+                                    )
                                   ],
                                 ),
                               ],
