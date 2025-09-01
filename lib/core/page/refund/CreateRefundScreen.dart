@@ -317,7 +317,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
           "latitude": latitude?.toString(),
           "longitude": longitude?.toString(),
           "shipping": selectedShipping,
-          "payment": "cash"
+          "payment": isSelectCheckout == "QR Payment" ? "qr" : 'cash'
         },
       );
       if (response.statusCode == 200) {
@@ -526,26 +526,6 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                   onPressed: () {
                     if (_isCreateOrderEnabled) {
                       if (isSelectCheckout == "QR Payment") {
-                        if (qrImagePath != "") {
-                          AllAlert.customAlert(
-                              context,
-                              "store.processtimeline_screen.alert.title".tr(),
-                              "คุณต้องการจะขอคืนสินค้าใช่หรือไม่ ?",
-                              _checkOutOrder);
-                        } else {
-                          toastification.show(
-                            autoCloseDuration: const Duration(seconds: 5),
-                            context: context,
-                            primaryColor: Colors.red,
-                            type: ToastificationType.error,
-                            style: ToastificationStyle.flatColored,
-                            title: Text(
-                              "กรุณาอัพโหลดสลิป",
-                              style: Styles.red18(context),
-                            ),
-                          );
-                        }
-                      } else {
                         AllAlert.customAlert(
                             context,
                             "store.processtimeline_screen.alert.title".tr(),
@@ -1841,44 +1821,44 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                 ],
               ),
             ),
-            isSelectCheckout == "QR Payment"
-                ? Padding(
-                    padding: EdgeInsets.all(8),
-                    child: BoxShadowCustom(
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                ShowPhotoButton(
-                                  checkNetwork: true,
-                                  label: "QR Code",
-                                  icon: Icons.image_not_supported_outlined,
-                                  imagePath: userQrCode != '' ? userQrCode : '',
-                                ),
-                                IconButtonWithLabelOld(
-                                  icon: Icons.photo_camera,
-                                  imagePath:
-                                      qrImagePath != "" ? qrImagePath : null,
-                                  label: "ถ่ายภาพการโอน",
-                                  onImageSelected: (String imagePath) async {
-                                    setState(() {
-                                      qrImagePath = imagePath;
-                                    });
-                                    // await uploadFormDataWithDio(
-                                    //     imagePath, 'store', context);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                : SizedBox()
+            // isSelectCheckout == "QR Payment"
+            //     ? Padding(
+            //         padding: EdgeInsets.all(8),
+            //         child: BoxShadowCustom(
+            //           child: Padding(
+            //             padding: EdgeInsets.all(8),
+            //             child: Column(
+            //               children: [
+            //                 Row(
+            //                   mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //                   children: [
+            //                     ShowPhotoButton(
+            //                       checkNetwork: true,
+            //                       label: "QR Code",
+            //                       icon: Icons.image_not_supported_outlined,
+            //                       imagePath: userQrCode != '' ? userQrCode : '',
+            //                     ),
+            //                     IconButtonWithLabelOld(
+            //                       icon: Icons.photo_camera,
+            //                       imagePath:
+            //                           qrImagePath != "" ? qrImagePath : null,
+            //                       label: "ถ่ายภาพการโอน",
+            //                       onImageSelected: (String imagePath) async {
+            //                         setState(() {
+            //                           qrImagePath = imagePath;
+            //                         });
+            //                         // await uploadFormDataWithDio(
+            //                         //     imagePath, 'store', context);
+            //                       },
+            //                     ),
+            //                   ],
+            //                 ),
+            //               ],
+            //             ),
+            //           ),
+            //         ),
+            //       )
+            //     : SizedBox()
           ],
         ),
       ),

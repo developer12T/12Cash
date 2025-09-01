@@ -95,7 +95,12 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   double percent = 0;
 
   final _thFmt = NumberFormat.decimalPattern('th_TH');
-  final _thCurrency = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
+
+  final _thCurrency = NumberFormat.currency(
+    locale: 'th_TH',
+    symbol: '฿',
+    decimalDigits: 0,
+  );
 
   String yyyymmdd(DateTime d) =>
       '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
@@ -137,8 +142,8 @@ class _DashboardscreenState extends State<Dashboardscreen> {
       if (response.statusCode == 200) {
         setState(() {
           data = Dashboard.fromJson(response.data);
-          _target = response.data['target'];
-          percent = response.data['targetPercent'];
+          // _target = response.data['target'];
+          // percent = response.data['targetPercent'];
         });
         print("data ${data}");
       }
@@ -319,12 +324,14 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                 ),
                 _KpiCard(
                   title: 'เป้าหมาย',
-                  value: _thCurrency.format(_target),
+                  value: _thCurrency.format(
+                    (data?.target ?? 0) != 0 ? ((data?.target ?? 0) * 1.07) : 0,
+                  ),
                   qty: (data?.saleQty ?? 0).toString(),
                   icon: Icons.flag,
                 ),
                 _PercentCard(
-                  percent: percent,
+                  percent: data?.targetPercent ?? 0,
                   icon: Icons.percent,
                   label: 'เปอร์เซ็น',
                 ),
@@ -352,6 +359,9 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                   icon: Icons.monetization_on_outlined,
                 ),
               ],
+            ),
+            SizedBox(
+              height: 180,
             ),
 
             // Row(
@@ -661,7 +671,7 @@ class _KpiCard extends StatelessWidget {
                     style: Styles.black18(context),
                   ),
                   Text(
-                    qty,
+                    '${qty} หีบ',
                     style: Styles.black18(context),
                   ),
                 ],
@@ -721,7 +731,7 @@ class _PercentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${(percent * 100).toStringAsFixed(2)}%',
+                    '${(percent).toStringAsFixed(0)}%',
                     style: Styles.black18(context),
                   ),
                 ],

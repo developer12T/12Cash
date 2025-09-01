@@ -64,6 +64,9 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
 
   DateTime? _selectedDate;
 
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+
   @override
   void initState() {
     super.initState();

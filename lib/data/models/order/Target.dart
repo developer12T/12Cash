@@ -9,6 +9,8 @@ class Dashboard {
   final double withdraw;
   final double recieve; // คงสะกดตาม API
   final double adjustStock;
+  final double target;
+  final double targetPercent;
 
   // Quantities (จำนวนชิ้น/หน่วย)
   final int saleQty;
@@ -40,6 +42,8 @@ class Dashboard {
     this.recieveQty = 0,
     this.adjustStock = 0,
     this.adjustStockQty = 0,
+    this.target = 0,
+    this.targetPercent = 0,
   });
 
   factory Dashboard.fromJson(Map<String, dynamic> json) {
@@ -77,6 +81,8 @@ class Dashboard {
       recieveQty: _i(json['recieveQty']),
       adjustStock: _d(json['adjustStock']),
       adjustStockQty: _i(json['adjustStockQty']),
+      target: _d(json['target']),
+      targetPercent: _d(json['targetPercent']),
     );
   }
 
@@ -99,6 +105,8 @@ class Dashboard {
         'recieveQty': recieveQty,
         'adjustStock': adjustStock,
         'adjustStockQty': adjustStockQty,
+        'target': target,
+        'targetPercent': targetPercent,
       };
 
   Dashboard copyWith({
@@ -120,6 +128,8 @@ class Dashboard {
     int? recieveQty,
     double? adjustStock,
     int? adjustStockQty,
+    double? target,
+    double? targetPercent,
   }) {
     return Dashboard(
       sale: sale ?? this.sale,
@@ -140,6 +150,8 @@ class Dashboard {
       recieveQty: recieveQty ?? this.recieveQty,
       adjustStock: adjustStock ?? this.adjustStock,
       adjustStockQty: adjustStockQty ?? this.adjustStockQty,
+      target: target ?? this.target,
+      targetPercent: targetPercent ?? this.targetPercent,
     );
   }
 

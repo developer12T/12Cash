@@ -151,7 +151,7 @@ extension PromotionListItemCopy on PromotionListItem {
       proCode: proCode ?? this.proCode,
       proType: proType ?? this.proType,
       qty: qty ?? this.qty,
-      qtyBal: qty ?? this.qtyBal,
+      qtyBal: qtyBal ?? this.qtyBal,
     );
   }
 }

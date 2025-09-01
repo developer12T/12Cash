@@ -320,7 +320,9 @@ class _ReusableTableState extends State<ReusableTable> {
 
     // ถ้า number != null แปลว่าเป็นตัวเลข => ฟอร์แมตเป็น "10,000"
     final formatted = number != null
-        ? NumberFormat.decimalPattern('th_TH').format(number)
+        ? NumberFormat('#,##0', 'th_TH').format(
+            number,
+          )
         : text ?? '';
 
     return Container(

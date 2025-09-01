@@ -91,6 +91,9 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
   String isShippingId = '';
   String storeImagePath = "";
 
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+
   @override
   void initState() {
     super.initState();

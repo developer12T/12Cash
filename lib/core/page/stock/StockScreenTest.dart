@@ -471,13 +471,13 @@ class _StockScreenTestState extends State<StockScreenTest> {
                           ),
                           onPressed: () => applyPreset(presetOperations),
                         ),
-                        ActionChip(
-                          label: Text(
-                            'Full',
-                            style: Styles.black18(context),
-                          ),
-                          onPressed: () => applyPreset(presetFull),
-                        ),
+                        // ActionChip(
+                        //   label: Text(
+                        //     'Full',
+                        //     style: Styles.black18(context),
+                        //   ),
+                        //   onPressed: () => applyPreset(presetFull),
+                        // ),
                         ActionChip(
                           label: Text(
                             'Select All',
@@ -577,7 +577,7 @@ class _StockScreenTestState extends State<StockScreenTest> {
         body: {
           "area": User.area,
           "period": period,
-          "condition": condition,
+          // "condition": condition,
         },
       );
       if (response.statusCode == 200 && mounted) {

@@ -14,6 +14,7 @@ import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:charset_converter/charset_converter.dart';
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -58,6 +59,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 //
   String qrImage = '';
   String qrImagePath = "";
+  bool uploadQR = false;
   String qrImagePath2 = "";
 
   @override
@@ -151,6 +153,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         // final List<dynamic> images = response.data['data'][0]['listImage'];
         final List<dynamic> prData = response.data['data'][0]['listPromotions'];
         print("Response: ${response.data['data'][0]}");
+        final listImage = response.data['data'][0]['listImage'] as List?;
+        if (listImage != null && listImage.isNotEmpty) {
+          setState(() {
+            qrImagePath = listImage[0]['path'];
+          });
+        }
 
         setState(() {
           orderDetail = OrderDetail.fromJson(response.data['data'][0]);
@@ -527,59 +535,52 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   bool _isCreateOrderEnabled = false;
 
-  // int _getNoOfUpperLowerChars(String text) {
-  //   int counter = 0;
-  //   for (var char in vowelAndToneMark) {
-  //     counter += char.allMatches(text).length;
-  //   }
-  //   return counter;
-  // }
-
-  // String formatFixedWidthRow2(String itemName, String qty, String unit,
-  //     String price, String discount, String total) {
-  //   const int nameWidth = 31;
-  //   const int qtyWidth = 3;
-  //   const int unitWidth = 5;
-  //   const int priceWidth = 8;
-  //   const int discountWidth = 8;
-  //   const int totalWidth = 8;
-
-  //   List<String> wrapText(String text, int width) {
-  //     List<String> lines = [];
-  //     for (int i = 0; i < text.length; i += width) {
-  //       lines.add(text.substring(
-  //           i, i + width > text.length ? text.length : i + width));
-  //     }
-  //     return lines;
-  //   }
-
-  //   List<String> itemNameLines = wrapText(itemName, nameWidth);
-  //   for (var i = 0; i < itemNameLines.length; i++) {
-  //     while (itemNameLines[i].length < nameWidth) {
-  //       itemNameLines[i] += ' ';
-  //     }
-  //   }
-
-  //   String formattedQty = qty.padLeft(qtyWidth);
-  //   String formattedUnit =
-  //       unit.padRight(unitWidth + _getNoOfUpperLowerChars(unit));
-  //   String formattedPrice = price.padLeft(priceWidth);
-  //   String formattedDiscount = discount.padLeft(discountWidth);
-  //   String formattedTotal = total.padLeft(totalWidth);
-
-  //   StringBuffer rowBuffer = StringBuffer();
-  //   for (int i = 0; i < itemNameLines.length; i++) {
-  //     rowBuffer.write(itemNameLines[i].padRight(nameWidth));
-
-  //     if (i == 0) {
-  //       rowBuffer.write(
-  //           ' $formattedQty  $formattedUnit  $formattedPrice  $formattedDiscount  $formattedTotal\n');
-  //     } else {
-  //       rowBuffer.write('\n');
-  //     }
-  //   }
-  //   return rowBuffer.toString();
-  // }
+  Future<void> uploadImageSlip(String orderId) async {
+    try {
+      context.loaderOverlay.show();
+      Dio dio = Dio();
+      MultipartFile? imageFile;
+      imageFile = await MultipartFile.fromFile(qrImagePath);
+      var formData = FormData.fromMap(
+        {
+          'orderId': orderId,
+          'type': 'slip',
+          'image': imageFile,
+        },
+      );
+      var response = await dio.post(
+        '${ApiService.apiHost}/api/cash/order/addSlip',
+        data: formData,
+        options: Options(
+          headers: {
+            "Content-Type": "multipart/form-data",
+            'x-channel': 'cash',
+          },
+        ),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        setState(() {
+          qrImagePath = response.data['data'][0]['path'];
+          uploadQR = true;
+        });
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "อัพโหลด สลิปสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+      context.loaderOverlay.hide();
+    } catch (e) {
+      context.loaderOverlay.hide();
+      print("Error $e");
+    }
+  }
 
   Future<void> _printText(String text,
       {int fontSize = 1, bool isBold = false, int newLine = 1}) async {
@@ -1628,28 +1629,29 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                   icon: Icons.image_not_supported_outlined,
                                   imagePath: qrImage != "" ? qrImage : '',
                                 ),
-                                IconButtonWithLabelOld(
-                                  icon: Icons.photo_camera,
-                                  imagePath:
-                                      qrImagePath != "" ? qrImagePath : null,
-                                  label: "ถ่ายภาพการโอน 1",
-                                  onImageSelected: (String imagePath) async {
-                                    setState(() {
-                                      qrImagePath = imagePath;
-                                    });
-                                  },
-                                ),
-                                IconButtonWithLabelOld(
-                                  icon: Icons.photo_camera,
-                                  imagePath:
-                                      qrImagePath2 != "" ? qrImagePath2 : null,
-                                  label: "ถ่ายภาพการโอน 2",
-                                  onImageSelected: (String imagePath) async {
-                                    setState(() {
-                                      qrImagePath2 = imagePath;
-                                    });
-                                  },
-                                ),
+                                qrImagePath != '' && uploadQR
+                                    ? ShowPhotoButton(
+                                        checkNetwork: true,
+                                        icon:
+                                            Icons.image_not_supported_outlined,
+                                        imagePath: qrImagePath != ""
+                                            ? qrImagePath
+                                            : null,
+                                        label: "ถ่ายภาพการโอน",
+                                      )
+                                    : IconButtonWithLabelOld(
+                                        icon: Icons.photo_camera,
+                                        imagePath: qrImagePath != ""
+                                            ? qrImagePath
+                                            : null,
+                                        label: "ถ่ายภาพการโอน",
+                                        onImageSelected:
+                                            (String imagePath) async {
+                                          setState(() {
+                                            qrImagePath = imagePath;
+                                          });
+                                        },
+                                      ),
                               ],
                             ),
                             ElevatedButton(
@@ -1661,7 +1663,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              onPressed: () {
+                              onPressed: () async {
+                                if (qrImagePath != '') {
+                                  await uploadImageSlip(widget.orderId);
+                                }
                                 // if (!User.connectPrinter) {
                                 //   _connectToPrinter(User.devicePrinter);
                                 // } else {

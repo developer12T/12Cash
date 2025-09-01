@@ -124,8 +124,8 @@ class BadageRefundFilter {
                 label: Text(
                   data,
                   style: isSelected
-                      ? Styles.pirmary18(context)
-                      : Styles.grey18(context),
+                      ? Styles.white18(context)
+                      : Styles.white18(context),
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.0),
@@ -135,8 +135,8 @@ class BadageRefundFilter {
                   color: isSelected ? Styles.primaryColor : Colors.grey,
                   width: 1.5,
                 ),
-                backgroundColor: Colors.white,
-                selectedColor: Colors.white,
+                backgroundColor: Colors.black,
+                selectedColor: Styles.success,
                 onSelected: (selected) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (context.mounted) {
@@ -218,7 +218,7 @@ Widget badgeFilter({
       height: 50,
       decoration: BoxDecoration(
         border: Border.all(
-          color: isSelected ? Styles.primaryColor : Colors.grey,
+          color: isSelected ? Styles.primaryColor : Colors.black,
           width: 1,
         ),
         borderRadius: BorderRadius.circular(16),
@@ -238,7 +238,7 @@ Widget badgeFilter({
                 const SizedBox(width: 8),
                 Icon(
                   Icons.arrow_drop_down_rounded,
-                  color: isSelected ? Styles.primaryColor : Colors.grey,
+                  color: isSelected ? Styles.primaryColor : Colors.black,
                 ),
               ],
             ],

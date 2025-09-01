@@ -247,6 +247,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
 
   List<PromotionChangeList> proChangeLsit = [];
   final LocationService locationService = LocationService();
+  String period =
+      "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   // List<int> itemQuantities = []; // Store item quantities for each item
 
@@ -2175,6 +2177,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                           setModalState(() {
                                             isSelectCheckout = "QR Payment";
                                           });
+                                          setState(() {
+                                            isSelectCheckout = "QR Payment";
+                                          });
                                           Navigator.of(context).pop();
                                           // setState(() {
                                           //   // isSelect = title;
@@ -2666,9 +2671,13 @@ class _ChangePromotionSheetBody extends StatefulWidget {
 class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
   late List<PromotionListItem> list;
 
+  // int get totalQty => widget.originalList
+  //     .where((el) => el.proId == widget.proId)
+  //     .fold(0, (prev, el) => prev + (el.qty > 0 ? el.qty : 0));
+
   int get totalQty => widget.originalList
       .where((el) => el.proId == widget.proId)
-      .fold(0, (prev, el) => prev + (el.qty > 0 ? el.qty : 0));
+      .fold<int>(0, (prev, el) => prev + (el.qty ?? 0));
 
   @override
   void initState() {
@@ -2677,23 +2686,76 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
   }
 
   void _addQty(int idx) {
+    // กัน index หลุดก่อน
+    if (idx < 0 || idx >= list.length) return;
+
     setState(() {
-      if ((widget.maxQty == null) || (totalQty < widget.maxQty!)) {
-        final item = list[idx];
-        final oriIdx = widget.originalList
-            .indexWhere((e) => e.id == item.id && e.proId == widget.proId);
-        if (oriIdx != -1) {
-          if (widget.originalList[oriIdx].qty <=
-              widget.originalList[oriIdx].qtyBal) {
-            widget.originalList[oriIdx] = widget.originalList[oriIdx]
-                .copyWith(qty: widget.originalList[oriIdx].qty + 1);
-          }
-        } else {
-          widget.originalList.add(item.copyWith(qty: 1));
-        }
+      // กันเพดานรวมถ้ามี
+      if (widget.maxQty != null && totalQty >= widget.maxQty!) return;
+
+      final item = list[idx];
+
+      // หา item เดิมใน originalList ด้วย (id + proId)
+      final oriIdx = widget.originalList.indexWhere(
+        (e) => e.id == item.id && e.proId == widget.proId,
+      );
+
+      final currentQty =
+          oriIdx != -1 ? (widget.originalList[oriIdx].qty ?? 0) : 0;
+
+      // อ่าน qtyBal จากของเดิมก่อน ถ้าไม่มีค่อยใช้จาก item
+      final int? rawQtyBal =
+          oriIdx != -1 ? widget.originalList[oriIdx].qtyBal : item.qtyBal;
+
+      // ถ้า qtyBal เป็น null/<=0 จะถือว่า "ไม่จำกัด" ในการเช็ค (ใช้ค่าใหญ่เพื่อไม่เป็นข้อจำกัด)
+      final int remainingByBal = (rawQtyBal == null || rawQtyBal <= 0)
+          ? 1 << 30
+          : (rawQtyBal - currentQty);
+
+      // เหลือตาม maxQty (ถ้าไม่มี maxQty ให้ถือว่าไม่จำกัด)
+      final int remainingByMax =
+          widget.maxQty == null ? (1 << 30) : (widget.maxQty! - totalQty);
+
+      // กดหนึ่งครั้งเพิ่ม 1 ชิ้น: ทำได้ก็ต่อเมื่อทั้งสองข้อจำกัดยังเหลือมากกว่า 0
+      if (remainingByBal <= 0 || remainingByMax <= 0) return;
+
+      if (oriIdx != -1) {
+        // อัปเดตรายการเดิม
+        widget.originalList[oriIdx] = widget.originalList[oriIdx].copyWith(
+          qty: currentQty + 1,
+        );
+      } else {
+        // เพิ่มใหม่ (ผูก proId ให้ถูกต้อง)
+        widget.originalList.add(
+          item.copyWith(
+            qty: 1,
+            proId: widget.proId,
+            // ถ้าต้องพก qtyBal ติดไปด้วยก็ได้: qtyBal: item.qtyBal,
+          ),
+        );
       }
     });
   }
+
+  // void _addQty(int idx) {
+  //   setState(() {
+  //     if ((widget.maxQty == null) || (totalQty < widget.maxQty!)) {
+  //       final item = list[idx];
+  //       final oriIdx = widget.originalList
+  //           .indexWhere((e) => e.id == item.id && e.proId == widget.proId);
+  //       // print('${widget.originalList[oriIdx].qty}');
+  //       // print('${widget.originalList[oriIdx].qtyBal}');
+  //       if (oriIdx != -1 &&
+  //           widget.originalList[oriIdx].qty <
+  //               widget.originalList[oriIdx].qtyBal) {
+  //         widget.originalList[oriIdx] = widget.originalList[oriIdx]
+  //             .copyWith(qty: widget.originalList[oriIdx].qty + 1);
+  //       } else {
+  //         widget.originalList.add(item.copyWith(qty: 1));
+  //       }
+  //     }
+  //   });
+  // }
 
   void _removeQty(int idx) {
     setState(() {
@@ -2772,11 +2834,8 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: Icon(Icons.remove),
-                                      onPressed: item.qty > 0
-                                          ? () => _removeQty(idx)
-                                          : null,
-                                    ),
+                                        icon: Icon(Icons.remove),
+                                        onPressed: () => _removeQty(idx)),
                                     Container(
                                       width: 36,
                                       alignment: Alignment.center,

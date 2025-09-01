@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/cart/getAll?area=${User.area}', // You only need to pass the endpoint, the base URL is handled
+            'api/cash/cart/getAll?area=${User.area}&period=${period}', // You only need to pass the endpoint, the base URL is handled
         method: 'GET',
       );
       print("Data ${response.data['data']}");
