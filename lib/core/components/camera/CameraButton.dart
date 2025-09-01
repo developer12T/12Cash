@@ -59,6 +59,8 @@ class _CameraButtonWidgetState extends State<CameraButtonWidget> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CameraPreviewScreen(
+          initFuture:
+              _initializeControllerFuture!, // ส่ง future แทนการ init ใหม่
           cameraController: _cameraController,
           onImageCaptured: (String imagePath) {
             setState(() {
@@ -114,13 +116,82 @@ class _CameraButtonWidgetState extends State<CameraButtonWidget> {
 }
 
 // Screen to display the camera preview and allow the user to take a picture
+// class CameraPreviewScreen extends StatelessWidget {
+//   final CameraController cameraController;
+//   final Function(String) onImageCaptured;
+
+//   const CameraPreviewScreen({
+//     super.key,
+//     required this.cameraController,
+//     required this.onImageCaptured,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: PreferredSize(
+//         preferredSize: Size.fromHeight(70),
+//         child: AppbarCustom(
+//             icon: Icons.camera_alt, title: "gobal.camera_button.appbar".tr()),
+//       ),
+//       body: FutureBuilder<void>(
+//         future: cameraController.initialize(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.done) {
+//             return Stack(
+//               children: [
+//                 Center(
+//                   child: CameraPreview(cameraController),
+//                 ),
+//                 Align(
+//                   alignment: Alignment.bottomCenter,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(20.0),
+//                     child: FloatingActionButton(
+//                       backgroundColor: Colors.white,
+//                       onPressed: () async {
+//                         try {
+//                           // Capture the picture
+//                           final image = await cameraController.takePicture();
+
+//                           // Pass the file path back to the previous screen
+//                           onImageCaptured(image.path);
+
+//                           // Pop the current screen after the photo is taken
+//                           // ignore: use_build_context_synchronously
+//                           Navigator.pop(context);
+//                         } catch (e) {
+//                           print(e);
+//                         }
+//                       },
+//                       child: const Icon(
+//                         Icons.camera_alt,
+//                         color: Styles.primaryColorIcons,
+//                         size: 40,
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             );
+//           } else {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//         },
+//       ),
+//     );
+//   }
+// }
+
 class CameraPreviewScreen extends StatelessWidget {
   final CameraController cameraController;
+  final Future<void> initFuture;
   final Function(String) onImageCaptured;
 
   const CameraPreviewScreen({
     super.key,
     required this.cameraController,
+    required this.initFuture,
     required this.onImageCaptured,
   });
 
@@ -128,19 +199,18 @@ class CameraPreviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(70),
+        preferredSize: const Size.fromHeight(70),
         child: AppbarCustom(
             icon: Icons.camera_alt, title: "gobal.camera_button.appbar".tr()),
       ),
       body: FutureBuilder<void>(
-        future: cameraController.initialize(),
+        future: initFuture, // ใช้ future ที่ส่งมา
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              cameraController.value.isInitialized) {
             return Stack(
               children: [
-                Center(
-                  child: CameraPreview(cameraController),
-                ),
+                Center(child: CameraPreview(cameraController)),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
@@ -149,32 +219,27 @@ class CameraPreviewScreen extends StatelessWidget {
                       backgroundColor: Colors.white,
                       onPressed: () async {
                         try {
-                          // Capture the picture
                           final image = await cameraController.takePicture();
-
-                          // Pass the file path back to the previous screen
                           onImageCaptured(image.path);
-
-                          // Pop the current screen after the photo is taken
-                          // ignore: use_build_context_synchronously
-                          Navigator.pop(context);
+                          if (context.mounted) Navigator.pop(context);
                         } catch (e) {
-                          print(e);
+                          debugPrint("takePicture error: $e");
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('ถ่ายรูปไม่สำเร็จ')),
+                            );
+                          }
                         }
                       },
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Styles.primaryColorIcons,
-                        size: 40,
-                      ),
+                      child: const Icon(Icons.camera_alt,
+                          color: Styles.primaryColorIcons, size: 40),
                     ),
                   ),
                 ),
               ],
             );
-          } else {
-            return const Center(child: CircularProgressIndicator());
           }
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

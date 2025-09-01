@@ -271,7 +271,7 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Customtextinput(
-                  max: 36,
+                  max: 70,
                   onChanged: (value) => _onTextChanged(value, 'name'),
                   controller: widget.storeNameController,
                   onFieldTap: () {

@@ -76,6 +76,8 @@ class _IconButtonWithLabelOld3State extends State<IconButtonWithLabelOld3> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CameraPreviewScreen(
+          initFuture:
+              _initializeControllerFuture!, // ส่ง future แทนการ init ใหม่
           cameraController: _cameraController,
           onImageCaptured: (
             String imagePath,

@@ -318,7 +318,7 @@ class _StoreAddressScreenState extends State<StoreAddressScreen> {
               children: [
                 SizedBox(height: screenWidth / 37),
                 Customtextinput(
-                  max: 36,
+                  max: 105,
                   controller: widget.storeAddressController,
                   onChanged: (value) => _onTextChanged(value, 'address'),
                   context,

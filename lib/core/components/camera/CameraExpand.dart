@@ -45,9 +45,12 @@ class _CameraExpandState extends State<CameraExpand>
   double _maxAvailableExposureOffset = 0.0;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
+  late CameraController _cameraController;
 
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   Map<String, dynamic> _deviceData = <String, dynamic>{};
+
+  Future<void>? _initializeControllerFuture;
 
   Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
     return <String, dynamic>{
@@ -106,7 +109,19 @@ class _CameraExpandState extends State<CameraExpand>
     WidgetsFlutterBinding.ensureInitialized();
     super.initState();
     initPlatformState();
-    // _initializeCamera();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
+
+    _cameraController = CameraController(
+      firstCamera,
+      ResolutionPreset.max,
+    );
+
+    _initializeControllerFuture = _cameraController.initialize();
   }
 
   @override
@@ -287,6 +302,8 @@ class _CameraExpandState extends State<CameraExpand>
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => CameraPreviewScreen(
+            initFuture:
+                _initializeControllerFuture!, // ส่ง future แทนการ init ใหม่
             // deviceData: _deviceData,
             cameraController: controller!,
             onImageCaptured: (String imagePath) {

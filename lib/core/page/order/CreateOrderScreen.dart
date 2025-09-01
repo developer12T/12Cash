@@ -2683,8 +2683,11 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
         final oriIdx = widget.originalList
             .indexWhere((e) => e.id == item.id && e.proId == widget.proId);
         if (oriIdx != -1) {
-          widget.originalList[oriIdx] = widget.originalList[oriIdx]
-              .copyWith(qty: widget.originalList[oriIdx].qty + 1);
+          if (widget.originalList[oriIdx].qty <=
+              widget.originalList[oriIdx].qtyBal) {
+            widget.originalList[oriIdx] = widget.originalList[oriIdx]
+                .copyWith(qty: widget.originalList[oriIdx].qty + 1);
+          }
         } else {
           widget.originalList.add(item.copyWith(qty: 1));
         }

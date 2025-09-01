@@ -158,12 +158,12 @@ class _HomeScreenState extends State<HomeScreen> {
         return () {}();
       case 1:
         return () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AjustRoute(),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => AjustRoute(),
+          //   ),
+          // );
         }();
       case 2:
         return () {

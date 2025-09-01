@@ -20,6 +20,7 @@ class User {
   static BluetoothInfo devicePrinter =
       new BluetoothInfo(macAdress: "", name: "");
   static bool connectPrinter = false;
+  static int? expiryMs = 0;
 }
 
 class ImageModel {

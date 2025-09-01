@@ -30,6 +30,7 @@ import 'package:_12sale_app/core/page/withdraw/WithDrawScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/Shipping.dart';
 import 'package:_12sale_app/data/models/User.dart';
+import 'package:_12sale_app/data/models/order/Target.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -41,6 +42,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
 import 'package:path/path.dart';
@@ -61,6 +63,7 @@ class Dashboardscreen extends StatefulWidget {
 }
 
 class _DashboardscreenState extends State<Dashboardscreen> {
+  Dashboard? data;
   String reason = '';
   int _current = 0;
   Timer? _locationTimer;
@@ -89,9 +92,13 @@ class _DashboardscreenState extends State<Dashboardscreen> {
 
   double _sale = 0;
   double _target = 0;
+  double percent = 0;
 
   final _thFmt = NumberFormat.decimalPattern('th_TH');
   final _thCurrency = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
+
+  String yyyymmdd(DateTime d) =>
+      '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
 
   Future<void> getDataSummaryChoince(String type) async {
     try {
@@ -114,6 +121,29 @@ class _DashboardscreenState extends State<Dashboardscreen> {
       }
     } catch (e) {
       print("Error on getDataSummaryChoince is $e");
+    }
+  }
+
+  Future<void> getTarget(String startDate, String endDate) async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/order/getTarget?startDate=${startDate}&endDate=${endDate}&area=${User.area}',
+        method: 'GET',
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          data = Dashboard.fromJson(response.data);
+          _target = response.data['target'];
+          percent = response.data['targetPercent'];
+        });
+        print("data ${data}");
+      }
+    } catch (e) {
+      print("Error on getTarget is $e");
     }
   }
 
@@ -154,7 +184,8 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   void initState() {
     super.initState();
     getDataSummary();
-    getDataSummaryChoince('day');
+    getTarget('', '');
+    // getDataSummaryChoince('day');
     LocationService().initialize();
     _loadData();
   }
@@ -243,7 +274,7 @@ class _DashboardscreenState extends State<Dashboardscreen> {
   Widget build(BuildContext context) {
     selectedLanguageCode = context.locale.toString().split("_")[0];
     double screenWidth = MediaQuery.of(context).size.width;
-    double percent = _target == 0 ? 0.0 : (_sale / _target).clamp(0, 1);
+    // double percent = _target == 0 ? 0.0 : (_sale / _target).clamp(0, 1);
     return Container(
         padding: const EdgeInsets.all(10.0),
         // height: screenWidth / 2.5,
@@ -257,10 +288,21 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                 DateFilter(
                   initialType: DateFilterType.day, // day | month | year
                   initialDate: DateTime.now(),
-                  onRangeChanged: (range, type) {
+                  onRangeChanged: (range, type) async {
                     // ใช้ range.start และ range.end
                     // ตัวอย่าง: ส่งไป query backend
+
+                    final startDate = yyyymmdd(DateTime(
+                        range.start.year, range.start.month, range.start.day));
+
+                    final endDate = yyyymmdd(DateTime(
+                        range.end.year, range.end.month, range.end.day));
+
+                    // context.loaderOverlay.show();
+                    await getTarget(startDate, endDate);
+                    print('startDate ${startDate} endDate ${endDate}');
                     print('type=$type start=${range.start} end=${range.end}');
+                    // context.loaderOverlay.hide();
                   },
                 ),
               ],
@@ -271,12 +313,14 @@ class _DashboardscreenState extends State<Dashboardscreen> {
               children: [
                 _KpiCard(
                   title: 'ยอดขาย',
-                  value: _thCurrency.format(_sale),
+                  value: _thCurrency.format(data?.sale ?? 0),
+                  qty: (data?.saleQty ?? 0).toString(),
                   icon: Icons.shopping_cart_checkout,
                 ),
                 _KpiCard(
                   title: 'เป้าหมาย',
                   value: _thCurrency.format(_target),
+                  qty: (data?.saleQty ?? 0).toString(),
                   icon: Icons.flag,
                 ),
                 _PercentCard(
@@ -291,41 +335,59 @@ class _DashboardscreenState extends State<Dashboardscreen> {
               children: [
                 _KpiCard(
                   title: 'ยอดคืนดี',
-                  value: _thCurrency.format(_sale),
+                  value: _thCurrency.format(data?.good ?? 0),
+                  qty: (data?.goodQty ?? 0).toString(),
                   icon: Icons.change_circle_outlined,
                 ),
                 _KpiCard(
                   title: 'ยอดคืนเสีย',
-                  value: _thCurrency.format(_target),
+                  value: _thCurrency.format(data?.damaged ?? 0),
+                  qty: (data?.damagedQty ?? 0).toString(),
                   icon: Icons.change_circle_outlined,
                 ),
                 _KpiCard(
                   title: 'ยอดรวมคืน',
-                  value: _thCurrency.format(_target),
+                  value: _thCurrency.format(data?.refund ?? 0),
+                  qty: (data?.refundQty ?? 0).toString(),
                   icon: Icons.monetization_on_outlined,
                 ),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                _KpiCard(
-                  title: 'ยอดแจกสินค้า',
-                  value: _thCurrency.format(_sale),
-                  icon: FontAwesomeIcons.gift,
-                ),
-                _KpiCard(
-                  title: 'ยอดเบิก',
-                  value: _thCurrency.format(_target),
-                  icon: Icons.local_shipping,
-                ),
-                _KpiCard(
-                  title: 'ยอดรับ',
-                  value: _thCurrency.format(_target),
-                  icon: Icons.local_shipping,
-                ),
-              ],
-            ),
+
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //   children: [
+            //     _KpiCard(
+            //       title: 'ยอดแจกสินค้า',
+            //       value: _thCurrency.format(data?.give ?? 0),
+            //       qty: (data?.giveQty ?? 0).toString(),
+            //       icon: FontAwesomeIcons.gift,
+            //     ),
+            //     _KpiCard(
+            //       title: 'ยอดเบิก',
+            //       value: _thCurrency.format(data?.withdraw ?? 0),
+            //       qty: (data?.withdrawQty ?? 0).toString(),
+            //       icon: Icons.local_shipping,
+            //     ),
+            //     _KpiCard(
+            //       title: 'ยอดรับ',
+            //       value: _thCurrency.format(data?.recieve ?? 0),
+            //       qty: (data?.recieveQty ?? 0).toString(),
+            //       icon: Icons.local_shipping,
+            //     ),
+            //   ],
+            // ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //   children: [
+            //     _KpiCard(
+            //       title: 'ยอดรับ',
+            //       value: _thCurrency.format(data?.recieve ?? 0),
+            //       qty: (data?.recieveQty ?? 0).toString(),
+            //       icon: Icons.local_shipping,
+            //     ),
+            //   ],
+            // ),
             // Flexible(
             //   child: LayoutBuilder(
             //     builder: (context, constraints) {
@@ -547,6 +609,162 @@ class DashboardHeader extends StatefulWidget {
   State<DashboardHeader> createState() => _DashboardHeaderState();
 }
 
+class _KpiCard extends StatelessWidget {
+  const _KpiCard({
+    required this.title,
+    required this.value,
+    required this.qty,
+    required this.icon,
+  });
+
+  final String title;
+  final String value;
+  final String qty;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 190,
+      height: 110,
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        color: Styles.secondaryColor,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Styles.primaryColor,
+                ),
+                child: Icon(
+                  icon,
+                  color: Styles.white,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: Styles.black18(context),
+                  ),
+                  Text(
+                    value,
+                    style: Styles.black18(context),
+                  ),
+                  Text(
+                    qty,
+                    style: Styles.black18(context),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PercentCard extends StatelessWidget {
+  const _PercentCard({
+    required this.percent,
+    required this.label,
+    required this.icon,
+  });
+
+  final double percent; // 0..1
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 190,
+      height: 110,
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        color: Styles.secondaryColor,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Styles.primaryColor,
+                ),
+                child: Icon(
+                  icon,
+                  color: Styles.white,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: Styles.black18(context),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${(percent * 100).toStringAsFixed(2)}%',
+                    style: Styles.black18(context),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Metrics {
+  final double sale;
+  final double target;
+  const Metrics(this.sale, this.target);
+}
+
+class FakeRepository {
+// Simulate different metrics by period
+  static Future<Metrics> getMetrics(
+    PeriodType type, {
+    required int year,
+    required int month,
+    required int day,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+
+// simple deterministic mock based on inputs
+    final seed = year * 10000 + month * 100 + day;
+    final base = (seed % 9 + 2) * 10000; // 20k..100k
+
+    switch (type) {
+      case PeriodType.day:
+        return Metrics(base * 0.35, base * 0.5);
+      case PeriodType.month:
+        return Metrics(base * 8, base * 10);
+      case PeriodType.year:
+        return Metrics(base * 90, base * 110);
+    }
+  }
+}
+
 class _DashboardHeaderState extends State<DashboardHeader> {
   // final SharedPreferences prefs = await SharedPreferences.getInstance();
   late SharedPreferences sharedPreferences;
@@ -722,153 +940,5 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
       ],
     );
-  }
-}
-
-class _KpiCard extends StatelessWidget {
-  const _KpiCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
-
-  final String title;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Styles.secondaryColor,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Styles.primaryColor,
-              ),
-              child: Icon(
-                icon,
-                color: Styles.white,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  title,
-                  style: Styles.black18(context),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  value,
-                  style: Styles.black18(context),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  value,
-                  style: Styles.black18(context),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PercentCard extends StatelessWidget {
-  const _PercentCard({
-    required this.percent,
-    required this.label,
-    required this.icon,
-  });
-
-  final double percent; // 0..1
-  final String label;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Styles.secondaryColor,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Styles.primaryColor,
-              ),
-              child: Icon(
-                icon,
-                color: Styles.white,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: Styles.black18(context),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${(percent * 100).toStringAsFixed(2)}%',
-                  style: Styles.black18(context),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class Metrics {
-  final double sale;
-  final double target;
-  const Metrics(this.sale, this.target);
-}
-
-class FakeRepository {
-// Simulate different metrics by period
-  static Future<Metrics> getMetrics(
-    PeriodType type, {
-    required int year,
-    required int month,
-    required int day,
-  }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-
-// simple deterministic mock based on inputs
-    final seed = year * 10000 + month * 100 + day;
-    final base = (seed % 9 + 2) * 10000; // 20k..100k
-
-    switch (type) {
-      case PeriodType.day:
-        return Metrics(base * 0.35, base * 0.5);
-      case PeriodType.month:
-        return Metrics(base * 8, base * 10);
-      case PeriodType.year:
-        return Metrics(base * 90, base * 110);
-    }
   }
 }

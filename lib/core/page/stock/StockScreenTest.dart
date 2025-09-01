@@ -135,12 +135,20 @@ class _StockScreenTestState extends State<StockScreenTest> {
     ColumnId.give,
     ColumnId.balance,
   ];
+  Map<String, dynamic> data = {};
 
   void applySelectedColumns(List<ColumnId> newCols) {
     final enforced = _enforceRequiredColumns(newCols);
+
+    // คำนวณฟุตเตอร์ใหม่ให้ “เรียงตามคอลัมน์” ชุดที่เลือก
+    final newFooter1 = buildFooter1(data, enforced);
+    final newFooter2 = buildFooter2(data, enforced);
     setState(() {
       selectedColumns = enforced;
       displayColumns = buildHeaderColumns(selectedColumns);
+      // คำนวณฟุตเตอร์ใหม่ให้ “เรียงตามคอลัมน์” ชุดที่เลือก
+      footerTable = newFooter1;
+      footerTable2 = newFooter2;
       rows = stocks.map((it) => buildRowForItem(it, selectedColumns)).toList();
       filteredRows = rows; // หรือคง filter เดิมโดยคำนวณใหม่
     });
@@ -170,6 +178,75 @@ class _StockScreenTestState extends State<StockScreenTest> {
   String _joinFieldByUnit(UnitTableNew u, String field) {
     // ไม่ใช้ตรงนี้ (คงเดิมจากโค้ดคุณ) — จะใช้แบบ list ทั้งหมด
     return '';
+  }
+
+  String _readNum(Map m, String key) {
+    final v = m[key];
+    if (v == null) return '';
+    if (v is num) return v.toString();
+    return '$v';
+  }
+
+// footer แถว “รวมจำนวน (PCS)” — ตัวอย่างคุณอาจจะใช้ summary เป็น “Pcs” หรือ “บาท” ตาม API
+  List<String> buildFooter1(Map<String, dynamic> data, List<ColumnId> cols) {
+    final enforced = _enforceRequiredColumns(cols);
+
+    // ตัวอย่างชื่อคีย์ — ปรับให้ตรง API ของคุณ
+    final mapKeyByCol = {
+      ColumnId.stock: 'StockTotalCtn',
+      ColumnId.withdraw:
+          'withdrawTotalCtn', // ถ้า API คุณใช้ key อื่น ให้เปลี่ยน
+      ColumnId.good: 'goodTotalCtn',
+      ColumnId.damaged: 'damagedTotalCtn',
+      ColumnId.sale: 'saleTotalCtn',
+      ColumnId.promotion: 'promotionTotalCtn',
+      ColumnId.change: 'changeTotalCtn',
+      ColumnId.adjust: 'adjustTotalCtn',
+      ColumnId.give: 'giveTotalCtn',
+      ColumnId.balance: 'balTotalCtn',
+    };
+
+    return enforced.map((c) {
+      switch (c) {
+        case ColumnId.name:
+          return 'รวมจำนวน (หีบ)'; // ช่องหัว footer
+        case ColumnId.group:
+          return ''; // เว้นว่าง
+        default:
+          final key = mapKeyByCol[c];
+          return key == null ? '' : _readNum(data, key);
+      }
+    }).toList();
+  }
+
+// footer แถว “ยอดรวม (บาท)” — ถ้าคุณไม่ต้องการ แค่ return [] หรือไม่ส่ง footer2 ก็ได้
+  List<String> buildFooter2(Map<String, dynamic> data, List<ColumnId> cols) {
+    final enforced = _enforceRequiredColumns(cols);
+
+    final mapKeyByCol = {
+      ColumnId.stock: 'summaryStock',
+      ColumnId.withdraw: 'summaryWithdraw',
+      ColumnId.good: 'summaryGood',
+      ColumnId.damaged: 'summaryDamaged',
+      ColumnId.sale: 'summarySale',
+      ColumnId.promotion: 'summaryPromotion',
+      ColumnId.change: 'summaryChange',
+      ColumnId.adjust: 'summaryAdjust',
+      ColumnId.give: 'summaryGive',
+      ColumnId.balance: 'summaryStockBal',
+    };
+
+    return enforced.map((c) {
+      switch (c) {
+        case ColumnId.name:
+          return 'ยอดรวม';
+        case ColumnId.group:
+          return '';
+        default:
+          final key = mapKeyByCol[c];
+          return key == null ? '' : _readNum(data, key);
+      }
+    }).toList();
   }
 
   String _joinFieldForItem(StockTableNew item, String fieldKey) {
@@ -603,14 +680,19 @@ class _StockScreenTestState extends State<StockScreenTest> {
             .map<List<String>>((item) => buildRowForItem(item, selectedColumns))
             .toList();
 
+        // FOOTERS (ถ้าต้องการจาก API ชุดใหม่)
+        final newFooter1 = buildFooter1(response.data, selectedColumns);
+        final newFooter2 = buildFooter2(response.data, selectedColumns);
+
         setState(() {
+          data = response.data;
           stocks = fetchedStocks;
           // ใช้ dynamic columns ใน build() — ย้ายไปเป็น state
           displayColumns = dynamicColumns;
           rows = fetchedRows;
           filteredRows = rows;
-          // footerTable = newFooter1;
-          // footerTable2 = newFooter2;
+          footerTable = newFooter1;
+          footerTable2 = newFooter2;
           isLoading = false;
           _loadingProduct = false;
         });
@@ -633,37 +715,37 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
       if (response.statusCode == 200 && mounted) {
         final List<dynamic> data = response.data['data'];
-        setState(() {
-          footerTable = [
-            'รวมจำนวน (PCS)',
-            '',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-          ];
+        // setState(() {
+        //   footerTable = [
+        //     'รวมจำนวน (PCS)',
+        //     '',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //   ];
 
-          footerTable2 = [
-            'ยอดรวม',
-            '',
-            '${response.data['summaryStock']}',
-            '${response.data['summaryWithdraw']}',
-            '${response.data['summaryGood']}',
-            '${response.data['summaryDamaged']}',
-            '${response.data['summarySale']}',
-            '${response.data['summaryPromotion']}',
-            '${response.data['summaryChange']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-            '${response.data['summaryStockPcs']}',
-          ];
-        });
+        //   footerTable2 = [
+        //     'ยอดรวม',
+        //     '',
+        //     '${response.data['summaryStock']}',
+        //     '${response.data['summaryWithdraw']}',
+        //     '${response.data['summaryGood']}',
+        //     '${response.data['summaryDamaged']}',
+        //     '${response.data['summarySale']}',
+        //     '${response.data['summaryPromotion']}',
+        //     '${response.data['summaryChange']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //     '${response.data['summaryStockPcs']}',
+        //   ];
+        // });
 
         // final allowedUnits = ['CTN', 'PCS'];
 
@@ -1625,8 +1707,8 @@ ${leftRightText('', '\n\n\n', 61)}
                             //     .map((stock) =>
                             //         [stock.productId]) // เก็บแค่ productId
                             //     .toList(),
-                            // footer: footerTable,
-                            // footer2: footerTable2,
+                            footer: footerTable,
+                            footer2: footerTable2,
                           ),
                         ),
                       ],

@@ -271,9 +271,9 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
 
   Future<void> getUserData() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    // final expiryMs = sharedPreferences.getInt('sessionExpiry');
+    // User.expiryMs = sharedPreferences.getInt('sessionExpiry');
 
-    // if (expiryMs == null) {
+    // if (User.expiryMs == null) {
     //   if (!mounted) return;
     //   Navigator.pushReplacement(
     //     context,
@@ -282,8 +282,8 @@ class _AuthCheckState extends State<AuthCheck> with WidgetsBindingObserver {
     //   return;
     // }
 
-    // final isExpired =
-    //     DateTime.now().isAfter(DateTime.fromMillisecondsSinceEpoch(expiryMs));
+    // final isExpired = DateTime.now()
+    //     .isAfter(DateTime.fromMillisecondsSinceEpoch(User.expiryMs!));
     // if (isExpired) {
     //   await sharedPreferences.clear();
     //   if (!mounted) return;
