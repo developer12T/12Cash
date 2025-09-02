@@ -2686,26 +2686,37 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
   }
 
   void _addQty(int idx) {
+    print(widget.maxQty);
+    print(totalQty);
+    print(idx);
+    print(list.length);
+    print(widget.maxQty != null && totalQty >= widget.maxQty!);
     // กัน index หลุดก่อน
-    if (idx < 0 || idx >= list.length) return;
+    // if (idx < 0 || idx >= list.length) return;
 
     setState(() {
       // กันเพดานรวมถ้ามี
       if (widget.maxQty != null && totalQty >= widget.maxQty!) return;
 
       final item = list[idx];
+      print("item.qtyBal ${item.qtyBal}");
 
       // หา item เดิมใน originalList ด้วย (id + proId)
       final oriIdx = widget.originalList.indexWhere(
         (e) => e.id == item.id && e.proId == widget.proId,
       );
 
+      print("oriIdx ${oriIdx}");
+
       final currentQty =
           oriIdx != -1 ? (widget.originalList[oriIdx].qty ?? 0) : 0;
 
+      // print(
+      //     "widget.originalList[oriIdx].qtyBal ${widget.originalList[oriIdx].qtyBal}");
       // อ่าน qtyBal จากของเดิมก่อน ถ้าไม่มีค่อยใช้จาก item
-      final int? rawQtyBal =
-          oriIdx != -1 ? widget.originalList[oriIdx].qtyBal : item.qtyBal;
+      final int? rawQtyBal = oriIdx != -1 ? item.qtyBal : item.qtyBal;
+
+      // print("rawQtyBal ${rawQtyBal}");
 
       // ถ้า qtyBal เป็น null/<=0 จะถือว่า "ไม่จำกัด" ในการเช็ค (ใช้ค่าใหญ่เพื่อไม่เป็นข้อจำกัด)
       final int remainingByBal = (rawQtyBal == null || rawQtyBal <= 0)
@@ -2715,6 +2726,9 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
       // เหลือตาม maxQty (ถ้าไม่มี maxQty ให้ถือว่าไม่จำกัด)
       final int remainingByMax =
           widget.maxQty == null ? (1 << 30) : (widget.maxQty! - totalQty);
+
+      print("remainingByBal ${remainingByBal}");
+      print("remainingByMax ${remainingByMax}");
 
       // กดหนึ่งครั้งเพิ่ม 1 ชิ้น: ทำได้ก็ต่อเมื่อทั้งสองข้อจำกัดยังเหลือมากกว่า 0
       if (remainingByBal <= 0 || remainingByMax <= 0) return;

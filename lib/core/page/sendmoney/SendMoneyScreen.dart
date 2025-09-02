@@ -287,7 +287,6 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
           summary = response.data['summary'].toDouble().abs();
           status = response.data['status'];
 
-// ตัด `/var/www/12AppAPI/public` ออก
           storeImagePath = fullPath.replaceFirst(
               '/var/www/12AppAPI/public', 'https://apps.onetwotrading.co.th');
           countController = TextEditingController(text: different.toString());

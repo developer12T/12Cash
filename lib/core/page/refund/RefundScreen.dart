@@ -101,6 +101,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
     _getStore();
     _getFliter();
     _getProduct(isSelect);
+    _getFliterSize();
     _getCart();
   }
 

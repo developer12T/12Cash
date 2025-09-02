@@ -525,13 +525,11 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                   ),
                   onPressed: () {
                     if (_isCreateOrderEnabled) {
-                      if (isSelectCheckout == "QR Payment") {
-                        AllAlert.customAlert(
-                            context,
-                            "store.processtimeline_screen.alert.title".tr(),
-                            "คุณต้องการจะขอคืนสินค้าใช่หรือไม่ ?",
-                            _checkOutOrder);
-                      }
+                      AllAlert.customAlert(
+                          context,
+                          "store.processtimeline_screen.alert.title".tr(),
+                          "คุณต้องการจะขอคืนสินค้าใช่หรือไม่ ?",
+                          _checkOutOrder);
                     }
                   },
                   child: Padding(

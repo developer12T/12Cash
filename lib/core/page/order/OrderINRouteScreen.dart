@@ -100,6 +100,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
     super.initState();
     _getFliter();
     _getProduct(true);
+    _getFliterSize();
     _getCart();
   }
 

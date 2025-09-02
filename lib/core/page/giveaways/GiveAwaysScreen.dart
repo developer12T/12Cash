@@ -88,6 +88,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
   void initState() {
     super.initState();
     // _getStore();
+    // _getFliterSize();
     _getGiveType();
   }
 

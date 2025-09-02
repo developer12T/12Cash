@@ -102,6 +102,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     super.initState();
     _getFliter();
     _getProduct(true);
+    _getFliterSize();
     _getStore();
   }
 

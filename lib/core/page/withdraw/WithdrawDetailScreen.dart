@@ -304,7 +304,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             const SizedBox(
               width: 10,
             ),
-            lowStatus == "99"
+            lowStatus == "99" || withdrawDetail[0].withdrawType == "credit"
                 ? Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -464,7 +464,8 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                     ],
                                   ),
                                 ),
-                                highStatus == "99"
+                                highStatus == "99" ||
+                                        detail.withdrawType == "credit"
                                     ? Expanded(
                                         child: Column(
                                           children: [

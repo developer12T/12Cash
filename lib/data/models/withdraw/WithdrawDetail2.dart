@@ -1,6 +1,7 @@
 class WithdrawDetail {
   final String id;
   final String type;
+  final String withdrawType;
   final String orderId;
   final String orderType;
   final String orderTypeName;
@@ -30,6 +31,7 @@ class WithdrawDetail {
   WithdrawDetail({
     required this.id,
     required this.type,
+    required this.withdrawType,
     required this.orderId,
     required this.orderType,
     required this.orderTypeName,
@@ -61,6 +63,7 @@ class WithdrawDetail {
     return WithdrawDetail(
       id: json['_id'] ?? '',
       type: json['type'] ?? '',
+      withdrawType: json['withdrawType'] ?? '',
       orderId: json['orderId'] ?? '',
       orderType: json['orderType'] ?? '',
       orderTypeName: json['orderTypeName'] ?? '',
@@ -95,6 +98,7 @@ class WithdrawDetail {
   Map<String, dynamic> toJson() => {
         '_id': id,
         'type': type,
+        'withdrawType': withdrawType,
         'orderId': orderId,
         'orderType': orderType,
         'orderTypeName': orderTypeName,
