@@ -322,12 +322,11 @@ class _DashboardscreenState extends State<Dashboardscreen> {
                   qty: (data?.saleQty ?? 0).toString(),
                   icon: Icons.shopping_cart_checkout,
                 ),
-                _KpiCard(
+                _TargetCard(
                   title: 'เป้าหมาย',
                   value: _thCurrency.format(
                     (data?.target ?? 0) != 0 ? ((data?.target ?? 0) * 1.07) : 0,
                   ),
-                  qty: (data?.saleQty ?? 0).toString(),
                   icon: Icons.flag,
                 ),
                 _PercentCard(
@@ -617,6 +616,65 @@ class DashboardHeader extends StatefulWidget {
 
   @override
   State<DashboardHeader> createState() => _DashboardHeaderState();
+}
+
+class _TargetCard extends StatelessWidget {
+  const _TargetCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
+
+  final String title;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 190,
+      height: 110,
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        color: Styles.secondaryColor,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Styles.primaryColor,
+                ),
+                child: Icon(
+                  icon,
+                  color: Styles.white,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: Styles.black18(context),
+                  ),
+                  Text(
+                    value,
+                    style: Styles.black18(context),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _KpiCard extends StatelessWidget {

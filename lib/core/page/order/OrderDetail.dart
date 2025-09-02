@@ -157,6 +157,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         if (listImage != null && listImage.isNotEmpty) {
           setState(() {
             qrImagePath = listImage[0]['path'];
+            uploadQR = true;
           });
         }
 
@@ -1629,6 +1630,15 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                   icon: Icons.image_not_supported_outlined,
                                   imagePath: qrImage != "" ? qrImage : '',
                                 ),
+                                // qrImagePath != '' && uploadQR
+                                //     ? ShowPhotoButton(
+                                //         checkNetwork: true,
+                                //         icon:
+                                //             Icons.image_not_supported_outlined,
+                                //         imagePath: qrImagePath,
+                                //         label: "ถ่ายภาพการโอน",
+                                //       )
+                                //     : SizedBox()
                                 qrImagePath != '' && uploadQR
                                     ? ShowPhotoButton(
                                         checkNetwork: true,

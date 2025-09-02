@@ -1245,10 +1245,15 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                                         _selectedDate = null;
                                                       });
 
-                                                      _showProductSheet(
-                                                          context,
-                                                          productList[
-                                                              firstIndex]);
+                                                      if (isSelect == 1) {
+                                                        _showRefundSheet(
+                                                            context,
+                                                            productList[index]);
+                                                      } else {
+                                                        _showProductSheet(
+                                                            context,
+                                                            productList[index]);
+                                                      }
                                                     },
                                                   ),
                                                 ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:_12sale_app/core/components/DateFilterType.dart';
 import 'package:_12sale_app/core/components/Loading.dart';
 import 'package:_12sale_app/core/components/card/cart/CartCard.dart';
 import 'package:_12sale_app/core/components/card/order/CartCard.dart';
@@ -24,6 +25,7 @@ import 'package:custom_sliding_segmented_control/custom_sliding_segmented_contro
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
 import '../withdraw/PrintWithdraw.dart';
@@ -49,7 +51,8 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
   final ScrollController _cartScrollController = ScrollController();
-
+  String yyyymmdd(DateTime d) =>
+      '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
   // String period = "202502";
   Future<void> _getRefundOrder() async {
     try {
@@ -62,6 +65,7 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
       );
       print("Data ${response.data['data']}");
       if (response.statusCode == 200 || response.statusCode == 201) {
+        refundOrders.clear();
         final List<dynamic> data = response.data['data'];
         Timer(Duration(milliseconds: 500), () {
           if (mounted) {
@@ -90,6 +94,7 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
       print("Data ${response.data['data']}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        orders.clear();
         final List<dynamic> data = response.data['data'];
         Timer(const Duration(milliseconds: 500), () {
           if (mounted) {
@@ -101,6 +106,61 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
         });
       }
     } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _getRefundOrderDate(startDate, endDate) async {
+    context.loaderOverlay.show();
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/refund/all?type=refund&area=${User.area}&start=${startDate}&end=${endDate}', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
+      );
+      print("Data ${response.data['data']}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        refundOrders.clear();
+        final List<dynamic> data = response.data['data'];
+
+        setState(() {
+          _loadingRefund = false;
+          refundOrders =
+              data.map((item) => RefundOrder.fromJson(item)).toList();
+        });
+      }
+      context.loaderOverlay.hide();
+    } catch (e) {
+      context.loaderOverlay.hide();
+      print("Error $e");
+    }
+  }
+
+  Future<void> _getOrderDate(startDate, endDate) async {
+    context.loaderOverlay.show();
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint:
+            'api/cash/order/all?type=sale&area=${User.area}&start=${startDate}&end=${endDate}', // You only need to pass the endpoint, the base URL is handled
+        method: 'GET',
+      );
+      print("Data ${response.data['data']}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        orders.clear();
+        final List<dynamic> data = response.data['data'];
+        setState(() {
+          _loadingOrder = false;
+          orders = data.map((item) => Orders.fromJson(item)).toList();
+        });
+      }
+      context.loaderOverlay.hide();
+    } catch (e) {
+      context.loaderOverlay.hide();
       print(e);
     }
   }
@@ -189,84 +249,124 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
       backgroundColor: Colors.transparent,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Container(
-          margin: EdgeInsets.only(top: 20),
-          child: isSelect.isSelect == 1
-              ? RefreshIndicator(
-                  onRefresh: () => _getOrder(),
-                  child: LoadingSkeletonizer(
-                    loading: _loadingOrder,
-                    child: ListView.builder(
-                      itemCount: orders.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: InvoiceCard(
-                            item: orders[index],
-                            onDetailsPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => OrderDetailScreen(
-                                      orderId: orders[index].orderId),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DateFilter(
+                  initialType: DateFilterType.day, // day | month | year
+                  initialDate: DateTime.now(),
+                  onRangeChanged: (range, type) async {
+                    // ใช้ range.start และ range.end
+                    // ตัวอย่าง: ส่งไป query backend
+
+                    final startDate = yyyymmdd(DateTime(
+                        range.start.year, range.start.month, range.start.day));
+
+                    final endDate = yyyymmdd(DateTime(
+                        range.end.year, range.end.month, range.end.day));
+
+                    // context.loaderOverlay.show();
+                    // await getTarget(startDate, endDate);
+                    print('startDate ${startDate} endDate ${endDate}');
+                    print('type=$type start=${range.start} end=${range.end}');
+
+                    if (isSelect.isSelect == 1) {
+                      await _getOrderDate(startDate, endDate);
+                    } else {
+                      await _getRefundOrderDate(startDate, endDate);
+                    }
+                    // context.loaderOverlay.hide();
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: 20),
+                child: isSelect.isSelect == 1
+                    ? RefreshIndicator(
+                        onRefresh: () => _getOrder(),
+                        child: LoadingSkeletonizer(
+                          loading: _loadingOrder,
+                          child: ListView.builder(
+                            itemCount: orders.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: InvoiceCard(
+                                  item: orders[index],
+                                  onDetailsPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => OrderDetailScreen(
+                                            orderId: orders[index].orderId),
+                                      ),
+                                    );
+                                  },
                                 ),
                               );
                             },
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                )
-              : isSelect.isSelect == 2 && refundOrders.isNotEmpty
-                  ? RefreshIndicator(
-                      onRefresh: () => _getRefundOrder(),
-                      child: LoadingSkeletonizer(
-                        loading: _loadingRefund,
-                        child: ListView.builder(
-                          itemCount: refundOrders.length,
-                          itemBuilder: (context, index) {
-                            return RefundCard(
-                              item: refundOrders[index],
-                              onDetailsPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => RefundDetailScreen(
-                                        orderId: refundOrders[index].orderId),
+                        ),
+                      )
+                    : isSelect.isSelect == 2 && refundOrders.isNotEmpty
+                        ? RefreshIndicator(
+                            onRefresh: () => _getRefundOrder(),
+                            child: LoadingSkeletonizer(
+                              loading: _loadingRefund,
+                              child: ListView.builder(
+                                itemCount: refundOrders.length,
+                                itemBuilder: (context, index) {
+                                  return RefundCard(
+                                    item: refundOrders[index],
+                                    onDetailsPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              RefundDetailScreen(
+                                                  orderId: refundOrders[index]
+                                                      .orderId),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          )
+                        : isSelect.isSelect == 3
+                            ? RefreshIndicator(
+                                onRefresh: () => _getCartAll(),
+                                child: LoadingSkeletonizer(
+                                  loading: _loadingCart,
+                                  child: ListView.builder(
+                                    itemCount: cartList.length,
+                                    itemBuilder: (context, index) {
+                                      return CartCardCheck(
+                                        item: cartList[index],
+                                        onDetailsPressed: () {
+                                          _showCartSheet(
+                                              context, cartList[index]);
+                                        },
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    )
-                  : isSelect.isSelect == 3
-                      ? RefreshIndicator(
-                          onRefresh: () => _getCartAll(),
-                          child: LoadingSkeletonizer(
-                            loading: _loadingCart,
-                            child: ListView.builder(
-                              itemCount: cartList.length,
-                              itemBuilder: (context, index) {
-                                return CartCardCheck(
-                                  item: cartList[index],
-                                  onDetailsPressed: () {
-                                    _showCartSheet(context, cartList[index]);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "ไม่พบข้อมูล",
-                              style: Styles.grey18(context),
-                            ),
-                          ],
-                        ),
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "ไม่พบข้อมูล",
+                                    style: Styles.grey18(context),
+                                  ),
+                                ],
+                              ),
+              ),
+            ),
+          ],
         ),
       ),
     );
