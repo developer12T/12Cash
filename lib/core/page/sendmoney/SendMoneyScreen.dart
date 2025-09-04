@@ -280,7 +280,8 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
       print("Response: $response");
       if (response.statusCode == 200) {
         setState(() {
-          String fullPath = response.data['image'][0]['path'];
+          // String fullPath = response.data['image'][0]['path'];
+          final String fullPath = extractImagePath(response.data) ?? '';
           sendMoney = response.data['sendmoney'].toDouble().abs();
           different = response.data['different'].toDouble().abs();
           money = response.data['different'].toDouble().abs();
@@ -295,6 +296,22 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
     } catch (e) {
       print("Error getSendmoney: $e");
     }
+  }
+
+  // ใช้กับ response จาก Dio ที่ response.data เป็น dynamic
+  String? extractImagePath(dynamic data) {
+    if (data is! Map) return null;
+
+    final images = data['image'];
+    if (images is! List || images.isEmpty) return null;
+
+    final first = images.first;
+    if (first is! Map) return null;
+
+    final path = first['path'];
+    if (path is! String || path.trim().isEmpty) return null;
+
+    return path;
   }
 
   @override

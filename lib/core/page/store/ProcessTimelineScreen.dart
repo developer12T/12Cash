@@ -423,6 +423,30 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
     throw Exception("Invalid image item type: ${item.runtimeType}");
   }
 
+  void debugPrintFormData(FormData fd) {
+    // fields (key -> value)
+    final fieldMap = {for (final f in fd.fields) f.key: f.value};
+
+    // files (key -> filename, length, contentType)
+    final fileList = [
+      for (final f in fd.files)
+        {
+          'key': f.key,
+          'filename': f.value.filename,
+          'length': f.value.length, // int
+          'contentType': f.value.contentType == null
+              ? null
+              : '${f.value.contentType!.type}/${f.value.contentType!.subtype}',
+        }
+    ];
+
+    debugPrint('=== FormData ===');
+    debugPrint(
+        'FIELDS: ${const JsonEncoder.withIndent("  ").convert(fieldMap)}');
+    debugPrint(
+        'FILES:  ${const JsonEncoder.withIndent("  ").convert(fileList)}');
+  }
+
   Future<void> addStore() async {
     String jsonData = '''
 {
@@ -490,6 +514,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
 
       print(formData);
       print(imageList);
+
       final apiService = ApiService();
       await apiService.init();
 
@@ -502,7 +527,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           'Content-Type': 'multipart/form-data',
         },
       );
-
+      debugPrintFormData(formData);
       // client.findProxy = HttpClient.findProxyFromEnvironment;
 
       // var response = await dio.post(
@@ -565,6 +590,7 @@ class _ProcessTimelinePageState extends State<ProcessTimelinePage> {
           );
         }
       }
+      context.loaderOverlay.hide();
     } catch (e) {
       toastification.show(
         autoCloseDuration: const Duration(seconds: 5),

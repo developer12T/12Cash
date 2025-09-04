@@ -156,6 +156,8 @@ class _StoreDataScreenState extends State<StoreDataScreen> {
         },
       );
 
+      // print("_storeData : ${_storeData.copyWith('imageList')}");
+
       // print("imageList:${imageList.length}");
       // print("imageListDetail:${imageList[0].type}");
       // print("imageListDetail:${imageList[1].type}");

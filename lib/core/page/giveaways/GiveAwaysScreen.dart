@@ -120,38 +120,30 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
 
   Future<void> _getProductFilter() async {
     try {
+      context.loaderOverlay.show();
       ApiService apiService = ApiService();
       await apiService.init();
-      // groupList.clear();
-      // brandList.clear();
-      // sizeList.clear();
-      // flavourList.clear();
-      // _clearFilter();
       var response = await apiService.request(
           endpoint: 'api/cash/give/getProductFilter',
           method: 'POST',
           body: {
             "area": "${User.area}",
             "giveId": isGiveTypeVal,
-            "group": selectedGroups,
-            "brand": selectedBrands,
-            "size": selectedSizes,
-            "flavour": selectedFlavours,
+            "period": "${period}"
           });
       if (response.statusCode == 200) {
-        final List<dynamic> dataGroup = response.data['data']['group'];
-        final List<dynamic> dataBrand = response.data['data']['brand'];
-        final List<dynamic> dataSize = response.data['data']['size'];
-        final List<dynamic> dataFlavour = response.data['data']['flavour'];
+        final List<dynamic> data = response.data['data'];
+        print(data);
 
         setState(() {
-          groupList = List<String>.from(dataGroup);
-          brandList = List<String>.from(dataBrand);
-          sizeList = List<String>.from(dataSize);
-          flavourList = List<String>.from(dataFlavour);
+          productList = data.map((item) => Product.fromJson(item)).toList();
+          filteredProductList = List.from(productList);
         });
+        // print("productList $productList");
+        // context.loaderOverlay.hide();
       }
     } catch (e) {
+      context.loaderOverlay.hide();
       print("Error  _getProductFilter $e");
     }
   }
@@ -401,46 +393,46 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
     }
   }
 
-  Future<void> _getProduct(List<String> groups) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
+  // Future<void> _getProduct(List<String> groups) async {
+  //   try {
+  //     ApiService apiService = ApiService();
+  //     await apiService.init();
 
-      var response = await apiService.request(
-        endpoint: 'api/cash/product/get',
-        method: 'POST',
-        body: {
-          "type": "sale",
-          "period": "${period}",
-          "area": "${User.area}",
-          "group": groups,
-          "brand": brandList,
-          "size": sizeList,
-          "flavour": flavourList
-        },
-      );
-      print("Response: $response");
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'];
-        if (mounted) {
-          setState(() {
-            productList = data.map((item) => Product.fromJson(item)).toList();
-            filteredProductList = List.from(productList);
-          });
-          context.loaderOverlay.hide();
-        }
-        Timer(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            setState(() {
-              _loadingProduct = false;
-            });
-          }
-        });
-      }
-    } catch (e) {
-      print("Error _getProduct: $e");
-    }
-  }
+  //     var response = await apiService.request(
+  //       endpoint: 'api/cash/product/get',
+  //       method: 'POST',
+  //       body: {
+  //         "type": "sale",
+  //         "period": "${period}",
+  //         "area": "${User.area}",
+  //         "group": groups,
+  //         "brand": brandList,
+  //         "size": sizeList,
+  //         "flavour": flavourList
+  //       },
+  //     );
+  //     print("Response: $response");
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> data = response.data['data'];
+  //       if (mounted) {
+  //         setState(() {
+  //           productList = data.map((item) => Product.fromJson(item)).toList();
+  //           filteredProductList = List.from(productList);
+  //         });
+  //         context.loaderOverlay.hide();
+  //       }
+  //       Timer(const Duration(milliseconds: 500), () {
+  //         if (mounted) {
+  //           setState(() {
+  //             _loadingProduct = false;
+  //           });
+  //         }
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print("Error _getProduct: $e");
+  //   }
+  // }
 
   Future<void> _getFliter() async {
     try {
@@ -1602,8 +1594,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                         index],
                                                                     setModalState,
                                                                     "IN");
-                                                                await _getProduct(
-                                                                    groupList);
+                                                                // await _getProduct(
+                                                                //     groupList);
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -1673,8 +1665,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                           index]
                                                                       .qty++;
                                                                 });
-                                                                await _getProduct(
-                                                                    groupList);
+                                                                // await _getProduct(
+                                                                //     groupList);
                                                               },
                                                               style:
                                                                   ElevatedButton
@@ -2168,14 +2160,22 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                           ),
                                           ElevatedButton(
                                             onPressed: () {
-                                              setModalState(() {
-                                                count++;
-                                                total = price * count;
-                                              });
-                                              setState(() {
-                                                count = count;
-                                                total = price * count;
-                                              });
+                                              if (count <=
+                                                  product.listUnit
+                                                      .firstWhere((element) =>
+                                                          element.name ==
+                                                          selectedSize)
+                                                      .qtyPro!) {
+                                                setModalState(() {
+                                                  count++;
+                                                  total = price * count;
+                                                });
+                                                setState(() {
+                                                  count = count;
+                                                  total = price * count;
+                                                });
+                                              }
+
                                               // print("total${total}");
                                             },
                                             style: ElevatedButton.styleFrom(
@@ -2217,7 +2217,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                     stockQty >= count) {
                                                   await _addCart(product);
                                                   await _getCart();
-                                                  await _getProduct(groupList);
+                                                  // await _getProduct(groupList);
                                                   setModalState(() {
                                                     stockQty -= count;
                                                   });
@@ -2699,7 +2699,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                 .giveId;
                                                       });
                                                       // await _getCart();
-
+                                                      await _getProductFilter();
                                                       setState(() {
                                                         isGiveTypeText =
                                                             filter[index].name;
@@ -2709,11 +2709,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                       context.loaderOverlay
                                                           .show();
                                                       await _getStore();
-                                                      await _getProductFilter();
+                                                      // await _getProductFilter();
                                                       print(
                                                           "groupList: $groupList");
-                                                      await _getProduct(
-                                                          groupList);
+                                                      // await _getProduct(
+                                                      //     groupList);
                                                       context.loaderOverlay
                                                           .hide();
                                                     },
