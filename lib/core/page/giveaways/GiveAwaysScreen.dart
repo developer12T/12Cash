@@ -16,6 +16,7 @@ import 'package:_12sale_app/data/models/order/Cart.dart';
 import 'package:_12sale_app/data/models/order/Product.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:_12sale_app/main.dart';
+import 'package:collection/collection.dart';
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:dartx/dartx.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -72,6 +73,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
   int _isSelectedGridView = 1;
 
   int stockQty = 0;
+  int proMaxQty = 0;
 
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
@@ -194,10 +196,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/cart/get?type=give&area=${User.area}&storeId=${isStoreId}',
+            'api/cash/cart/get?type=give&area=${User.area}&storeId=${isStoreId}&proId=${isGiveTypeVal}',
         method: 'GET',
       );
       if (response.statusCode == 200) {
+        cartList.clear();
         final List<dynamic> data = response.data['data'][0]['listProduct'];
         setState(() {
           totalCart = response.data['data'][0]['total'].toDouble();
@@ -226,7 +229,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
           "storeId": "${isStoreId}",
           "id": "${product.id}",
           "qty": count,
-          "unit": "${selectedUnit}"
+          "unit": "${selectedUnit}",
+          "proId": isGiveTypeVal
         },
       );
       print("Response add Cart: ${response.data['data']['listProduct']}");
@@ -390,191 +394,6 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
         ),
       );
       print("Error $e");
-    }
-  }
-
-  // Future<void> _getProduct(List<String> groups) async {
-  //   try {
-  //     ApiService apiService = ApiService();
-  //     await apiService.init();
-
-  //     var response = await apiService.request(
-  //       endpoint: 'api/cash/product/get',
-  //       method: 'POST',
-  //       body: {
-  //         "type": "sale",
-  //         "period": "${period}",
-  //         "area": "${User.area}",
-  //         "group": groups,
-  //         "brand": brandList,
-  //         "size": sizeList,
-  //         "flavour": flavourList
-  //       },
-  //     );
-  //     print("Response: $response");
-  //     if (response.statusCode == 200) {
-  //       final List<dynamic> data = response.data['data'];
-  //       if (mounted) {
-  //         setState(() {
-  //           productList = data.map((item) => Product.fromJson(item)).toList();
-  //           filteredProductList = List.from(productList);
-  //         });
-  //         context.loaderOverlay.hide();
-  //       }
-  //       Timer(const Duration(milliseconds: 500), () {
-  //         if (mounted) {
-  //           setState(() {
-  //             _loadingProduct = false;
-  //           });
-  //         }
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print("Error _getProduct: $e");
-  //   }
-  // }
-
-  Future<void> _getFliter() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-
-      var response = await apiService.request(
-        endpoint: 'api/cash/product/filter',
-        method: 'POST',
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> dataGroup = response.data['data']['group'];
-
-        print("_getFliter: ${response.data['data']}");
-        if (mounted) {
-          setState(() {
-            groupList = List<String>.from(dataGroup);
-          });
-        }
-        print("groupList: $groupList");
-      }
-    } catch (e) {
-      print("Error getFliter: $e");
-    }
-  }
-
-  Future<void> _getFliterGroup() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-      var response = await apiService.request(
-        endpoint: 'api/cash/product/filter',
-        method: 'POST',
-        body: {
-          "group": selectedGroups,
-          "brand": selectedBrands,
-          "size": selectedSize,
-          "flavour": selectedFlavours,
-        },
-      );
-      setState(() {
-        selectedBrands = [];
-        selectedSizes = [];
-        selectedFlavours = [];
-        brandList = [];
-        sizeList = [];
-        flavourList = [];
-      });
-      if (response.statusCode == 200) {
-        final List<dynamic> dataBrand = response.data['data']['brand'];
-        final List<dynamic> dataSize = response.data['data']['size'];
-        final List<dynamic> dataFlavour = response.data['data']['flavour'];
-        if (mounted) {
-          setState(() {
-            brandList = List<String>.from(dataBrand);
-            sizeList = List<String>.from(dataSize);
-            flavourList = List<String>.from(dataFlavour);
-          });
-        }
-      }
-      if (selectedGroups.length == 0) {
-        setState(() {
-          selectedBrands = [];
-          selectedSizes = [];
-          selectedFlavours = [];
-          brandList = [];
-          sizeList = [];
-          flavourList = [];
-        });
-      }
-    } catch (e) {
-      print("Error getFliterGroup: $e");
-    }
-  }
-
-  Future<void> _getFliterBrand() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-      var response = await apiService.request(
-        endpoint: 'api/cash/product/filter',
-        method: 'POST',
-        body: {
-          "group": selectedGroups,
-          "brand": selectedBrands,
-          "size": selectedSize,
-          "flavour": selectedFlavours,
-        },
-      );
-      setState(() {
-        selectedSizes = [];
-        selectedFlavours = [];
-        sizeList = [];
-        flavourList = [];
-      });
-
-      if (response.statusCode == 200) {
-        final List<dynamic> dataSize = response.data['data']['size'];
-        final List<dynamic> dataFlavour = response.data['data']['flavour'];
-        if (mounted) {
-          setState(() {
-            sizeList = List<String>.from(dataSize);
-            flavourList = List<String>.from(dataFlavour);
-          });
-        }
-      }
-    } catch (e) {
-      print("Error _getFliterBrand: $e");
-    }
-    // _getProduct();
-  }
-
-  Future<void> _getFliterSize() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-      var response = await apiService.request(
-        endpoint: 'api/cash/product/filter',
-        method: 'POST',
-        body: {
-          "group": selectedGroups,
-          "brand": selectedBrands,
-          "size": selectedSize,
-          "flavour": selectedFlavours,
-        },
-      );
-      setState(() {
-        selectedFlavours = [];
-        flavourList = [];
-      });
-
-      if (response.statusCode == 200) {
-        final List<dynamic> dataFlavour = response.data['data']['flavour'];
-        if (mounted) {
-          setState(() {
-            flavourList = List<String>.from(dataFlavour);
-          });
-        }
-      }
-    } catch (e) {
-      print("Error _getFliterSize: $e");
     }
   }
 
@@ -1575,52 +1394,53 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                               MainAxisAlignment
                                                                   .end,
                                                           children: [
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                setModalState(
-                                                                    () {
-                                                                  if (cartlist[
-                                                                              index]
-                                                                          .qty >
-                                                                      1) {
-                                                                    cartlist[
-                                                                            index]
-                                                                        .qty--;
-                                                                  }
-                                                                });
-                                                                await _reduceCart(
-                                                                    cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    "IN");
-                                                                // await _getProduct(
-                                                                //     groupList);
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                shape:
-                                                                    const CircleBorder(
-                                                                  side: BorderSide(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1),
-                                                                ), // ✅ Makes the button circular
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .white, // Button color
-                                                              ),
-                                                              child: const Icon(
-                                                                Icons.remove,
-                                                                size: 24,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ), // Example
-                                                            ),
+                                                            // ElevatedButton(
+                                                            //   onPressed:
+                                                            //       () async {
+                                                            //     setModalState(
+                                                            //         () {
+                                                            //       if (cartlist[
+                                                            //                   index]
+                                                            //               .qty >
+                                                            //           1) {
+                                                            //         cartlist[
+                                                            //                 index]
+                                                            //             .qty--;
+                                                            //       }
+                                                            //     });
+                                                            //     await _reduceCart(
+                                                            //         cartlist[
+                                                            //             index],
+                                                            //         setModalState,
+                                                            //         "IN");
+                                                            //     // await _getProduct(
+                                                            //     //     groupList);
+                                                            //   },
+                                                            //   style:
+                                                            //       ElevatedButton
+                                                            //           .styleFrom(
+                                                            //     shape:
+                                                            //         const CircleBorder(
+                                                            //       side: BorderSide(
+                                                            //           color: Colors
+                                                            //               .grey,
+                                                            //           width: 1),
+                                                            //     ), // ✅ Makes the button circular
+                                                            //     padding:
+                                                            //         const EdgeInsets
+                                                            //             .all(8),
+                                                            //     backgroundColor:
+                                                            //         Colors
+                                                            //             .white, // Button color
+                                                            //   ),
+                                                            //   child: const Icon(
+                                                            //     Icons.remove,
+                                                            //     size: 24,
+                                                            //     color:
+                                                            //         Colors.grey,
+                                                            //   ), // Example
+                                                            // ),
+
                                                             Container(
                                                               padding:
                                                                   EdgeInsets
@@ -1650,48 +1470,49 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                 ),
                                                               ),
                                                             ),
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                await _reduceCart(
-                                                                    cartlist[
-                                                                        index],
-                                                                    setModalState,
-                                                                    "OUT");
 
-                                                                setModalState(
-                                                                    () {
-                                                                  cartlist[
-                                                                          index]
-                                                                      .qty++;
-                                                                });
-                                                                // await _getProduct(
-                                                                //     groupList);
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                shape:
-                                                                    const CircleBorder(
-                                                                  side: BorderSide(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      width: 1),
-                                                                ), // ✅ Makes the button circular
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .white, // Button color
-                                                              ),
-                                                              child: const Icon(
-                                                                Icons.add,
-                                                                size: 24,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ), // Example
-                                                            ),
+                                                            // ElevatedButton(
+                                                            //   onPressed:
+                                                            //       () async {
+                                                            //     await _reduceCart(
+                                                            //         cartlist[
+                                                            //             index],
+                                                            //         setModalState,
+                                                            //         "OUT");
+                                                            //     setModalState(
+                                                            //         () {
+                                                            //       cartlist[
+                                                            //               index]
+                                                            //           .qty++;
+                                                            //     });
+                                                            //     // await _getProduct(
+                                                            //     //     groupList);
+                                                            //   },
+                                                            //   style:
+                                                            //       ElevatedButton
+                                                            //           .styleFrom(
+                                                            //     shape:
+                                                            //         const CircleBorder(
+                                                            //       side: BorderSide(
+                                                            //           color: Colors
+                                                            //               .grey,
+                                                            //           width: 1),
+                                                            //     ), // ✅ Makes the button circular
+                                                            //     padding:
+                                                            //         const EdgeInsets
+                                                            //             .all(8),
+                                                            //     backgroundColor:
+                                                            //         Colors
+                                                            //             .white, // Button color
+                                                            //   ),
+                                                            //   child: const Icon(
+                                                            //     Icons.add,
+                                                            //     size: 24,
+                                                            //     color:
+                                                            //         Colors.grey,
+                                                            //   ), // Example
+                                                            // ),
+
                                                             ElevatedButton(
                                                               onPressed:
                                                                   () async {
@@ -2000,10 +1821,11 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                   });
 
                                                   context.loaderOverlay.show();
-                                                  // print(selectedUnit);
-                                                  // print(selectedSize);
                                                   await _getQty(
                                                       product, setModalState);
+                                                  setState(() {
+                                                    proMaxQty = product.qtyPro!;
+                                                  });
                                                   context.loaderOverlay.hide();
                                                 },
                                                 style: ElevatedButton.styleFrom(
@@ -2136,9 +1958,9 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                               setState(() {
                                                 count = 1;
                                               });
-                                              _showCountSheet(
-                                                context,
-                                              );
+                                              // _showCountSheet(
+                                              //   context,
+                                              // );
                                             },
                                             child: Container(
                                               padding: EdgeInsets.all(4),
@@ -2160,20 +1982,58 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                           ),
                                           ElevatedButton(
                                             onPressed: () {
-                                              if (count <=
-                                                  product.listUnit
-                                                      .firstWhere((element) =>
-                                                          element.name ==
-                                                          selectedSize)
-                                                      .qtyPro!) {
-                                                setModalState(() {
-                                                  count++;
-                                                  total = price * count;
-                                                });
-                                                setState(() {
-                                                  count = count;
-                                                  total = price * count;
-                                                });
+                                              // final unit = product.listUnit
+                                              //     .firstWhereOrNull((e) =>
+                                              //         e.name == selectedSize);
+                                              // final int maxQty =
+                                              //     unit?.qtyPro ?? 0;
+                                              // final int next = count + 1;
+
+                                              // if (unit != null &&
+                                              //     next <= maxQty) {
+                                              //   setModalState(() {
+                                              //     count = next;
+                                              //     total = price * next;
+                                              //   });
+                                              //   setState(() {
+                                              //     count = next;
+                                              //     total = price * next;
+                                              //   });
+                                              // } else {
+                                              //   // ไม่เจอ unit หรือเต็มแล้ว
+                                              // }
+                                              final int cap =
+                                                  (product.qtyPro ?? 0);
+                                              final int next = count + 1;
+
+                                              if (product.limitType ==
+                                                  'limited') {
+                                                if (next <= cap) {
+                                                  setModalState(() {
+                                                    count = next;
+                                                    total = price * next;
+                                                  });
+                                                  setState(() {
+                                                    count = next;
+                                                    total = price * next;
+                                                  });
+                                                } else {
+                                                  // TODO: แจ้งผู้ใช้ว่าเต็มลิมิตแล้ว
+                                                }
+                                              } else {
+                                                print(stockQty);
+                                                print(next);
+                                                // print(stockQty);
+                                                if (count <= stockQty) {
+                                                  setModalState(() {
+                                                    count = next;
+                                                    total = price * next;
+                                                  });
+                                                  setState(() {
+                                                    count = next;
+                                                    total = price * next;
+                                                  });
+                                                }
                                               }
 
                                               // print("total${total}");
@@ -2215,12 +2075,182 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                     isStoreId != "" &&
                                                     stockQty > 0 &&
                                                     stockQty >= count) {
-                                                  await _addCart(product);
-                                                  await _getCart();
-                                                  // await _getProduct(groupList);
-                                                  setModalState(() {
-                                                    stockQty -= count;
-                                                  });
+                                                  // final int cap =
+                                                  //     (product.qtyPro ?? 0);
+                                                  // final int next = count + 1;
+                                                  // if (cartList
+                                                  //         .firstWhere((item) =>
+                                                  //             item.id ==
+                                                  //                 product.id &&
+                                                  //             item.unit ==
+                                                  //                 product.unit)
+                                                  //         .qty <=
+                                                  //     proMaxQty) {
+                                                  //   await _addCart(product);
+                                                  //   await _getCart();
+                                                  //   // await _getProduct(groupList);
+                                                  //   setModalState(() {
+                                                  //     stockQty -= count;
+                                                  //   });
+                                                  // }
+
+                                                  final idx =
+                                                      cartList.indexWhere(
+                                                    (item) =>
+                                                        item.id == product.id &&
+                                                        item.unit ==
+                                                            product.unit,
+                                                  );
+
+                                                  final int currentQty = idx >=
+                                                          0
+                                                      ? (cartList[idx].qty ?? 0)
+                                                      : 0;
+                                                  final int addQty =
+                                                      count; // จำนวนที่จะเพิ่มรอบนี้
+                                                  final int cap = proMaxQty ??
+                                                      0; // ถ้า null ให้ถือว่า 0 (หรือเปลี่ยน logic ด้านล่าง)
+                                                  final int nextQty =
+                                                      currentQty + addQty;
+
+                                                  final bool withinCap =
+                                                      proMaxQty == null
+                                                          ? true
+                                                          : nextQty <=
+                                                              cap; // null = ไม่จำกัด (ถ้าอยาก)
+                                                  final bool withinStock =
+                                                      addQty <= (stockQty ?? 0);
+                                                  print(withinCap);
+                                                  print(withinStock);
+                                                  print(product.limitType);
+
+                                                  if (product.limitType ==
+                                                      "limited") {
+                                                    if (withinCap &&
+                                                        withinStock) {
+                                                      final int applied =
+                                                          addQty; // capture ไว้กันหลุดค่า
+                                                      await _addCart(product);
+                                                      await _getCart();
+
+                                                      setModalState(() {
+                                                        stockQty = (stockQty -
+                                                                applied)
+                                                            .clamp(
+                                                                0,
+                                                                1 <<
+                                                                    31); // กันค่าติดลบ
+                                                      });
+                                                    } else {
+                                                      toastification.show(
+                                                        autoCloseDuration:
+                                                            const Duration(
+                                                                seconds: 5),
+                                                        context: context,
+                                                        primaryColor:
+                                                            Colors.red,
+                                                        type: ToastificationType
+                                                            .error,
+                                                        style:
+                                                            ToastificationStyle
+                                                                .flatColored,
+                                                        title: Text(
+                                                          "จำนวนเกินตามโปรโมทชั่นที่กำหนดไว้",
+                                                          style: Styles.red18(
+                                                              context),
+                                                        ),
+                                                      );
+                                                    }
+                                                  } else {
+                                                    if (withinStock) {
+                                                      final int applied =
+                                                          addQty; // capture ไว้กันหลุดค่า
+                                                      await _addCart(product);
+                                                      await _getCart();
+
+                                                      setModalState(() {
+                                                        stockQty = (stockQty -
+                                                                applied)
+                                                            .clamp(
+                                                                0,
+                                                                1 <<
+                                                                    31); // กันค่าติดลบ
+                                                      });
+                                                    } else {
+                                                      toastification.show(
+                                                        autoCloseDuration:
+                                                            const Duration(
+                                                                seconds: 5),
+                                                        context: context,
+                                                        primaryColor:
+                                                            Colors.red,
+                                                        type: ToastificationType
+                                                            .error,
+                                                        style:
+                                                            ToastificationStyle
+                                                                .flatColored,
+                                                        title: Text(
+                                                          "จำนวนเกินตามโปรโมทชั่นที่กำหนดไว้",
+                                                          style: Styles.red18(
+                                                              context),
+                                                        ),
+                                                      );
+                                                    }
+                                                  }
+
+                                                  // if (product.limitType !=
+                                                  //     "limited") {
+                                                  //   if (withinCap &&
+                                                  //       withinStock) {
+                                                  //     final int applied =
+                                                  //         addQty; // capture ไว้กันหลุดค่า
+                                                  //     await _addCart(product);
+                                                  //     await _getCart();
+
+                                                  //     setModalState(() {
+                                                  //       stockQty = (stockQty -
+                                                  //               applied)
+                                                  //           .clamp(
+                                                  //               0,
+                                                  //               1 <<
+                                                  //                   31); // กันค่าติดลบ
+                                                  //     });
+                                                  //   } else {
+                                                  //     toastification.show(
+                                                  //       autoCloseDuration:
+                                                  //           const Duration(
+                                                  //               seconds: 5),
+                                                  //       context: context,
+                                                  //       primaryColor:
+                                                  //           Colors.red,
+                                                  //       type: ToastificationType
+                                                  //           .error,
+                                                  //       style:
+                                                  //           ToastificationStyle
+                                                  //               .flatColored,
+                                                  //       title: Text(
+                                                  //         "จำนวนเกินตามโปรโมทชั่นที่กำหนดไว้",
+                                                  //         style: Styles.red18(
+                                                  //             context),
+                                                  //       ),
+                                                  //     );
+                                                  //   }
+                                                  // } else {
+                                                  //   final int applied =
+                                                  //       addQty; // capture ไว้กันหลุดค่า
+                                                  //   await _addCart(
+                                                  //       product); // ถ้า _addCart ต้องการ qty ให้ส่งไปด้วยตาม signature
+                                                  //   await _getCart();
+
+                                                  //   setModalState(() {
+                                                  //     stockQty = (stockQty -
+                                                  //             applied)
+                                                  //         .clamp(
+                                                  //             0,
+                                                  //             1 <<
+                                                  //                 31); // กันค่าติดลบ
+                                                  //   });
+                                                  // }
                                                 } else {
                                                   toastification.show(
                                                     autoCloseDuration:
@@ -2700,6 +2730,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                       });
                                                       // await _getCart();
                                                       await _getProductFilter();
+                                                      await _getCart();
                                                       setState(() {
                                                         isGiveTypeText =
                                                             filter[index].name;

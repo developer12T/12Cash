@@ -409,7 +409,7 @@ class _CreateGiveawayScreenState extends State<CreateGiveawayScreen>
       await apiService.init();
       var response = await apiService.request(
         endpoint:
-            'api/cash/cart/get?type=give&area=${User.area}&storeId=${widget.storeId}',
+            'api/cash/cart/get?type=give&area=${User.area}&storeId=${widget.storeId}&proId=${widget.giveawayId}',
         method: 'GET',
       );
       if (response.statusCode == 200) {

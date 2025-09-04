@@ -66,6 +66,9 @@ class Product {
   final DateTime updatedDate;
   final int? qtyCtn;
   final int? qtyPcs;
+  final int? qtyPro;
+  final String? unit;
+  final String? limitType;
 
   Product({
     required this.id,
@@ -86,6 +89,9 @@ class Product {
     required this.updatedDate,
     this.qtyCtn,
     this.qtyPcs,
+    this.qtyPro,
+    this.unit,
+    this.limitType,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -125,6 +131,9 @@ class Product {
       updatedDate: _asDate(json['updatedDate'] ?? json['updatedAt']),
       qtyCtn: json['qtyCtn'] == null ? null : _asInt(json['qtyCtn']),
       qtyPcs: json['qtyPcs'] == null ? null : _asInt(json['qtyPcs']),
+      qtyPro: json['qtyPro'] == null ? null : _asInt(json['qtyPro']),
+      unit: (json['unit'] ?? '').toString(),
+      limitType: (json['limitType'] ?? '').toString(),
     );
   }
 
@@ -148,6 +157,9 @@ class Product {
       'updatedDate': updatedDate.toIso8601String(),
       'qtyCtn': qtyCtn,
       'qtyPcs': qtyPcs,
+      'qtyPro': qtyPro,
+      'unit': unit,
+      'limitType': limitType,
     };
   }
 
