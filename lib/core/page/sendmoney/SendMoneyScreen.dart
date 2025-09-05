@@ -176,6 +176,13 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
 
   Future<void> uploadImageSendmoney() async {
     try {
+      // print('${ApiService.apiHost}/api/cash/sendmoney/addSendMoneyImage');
+      // print(
+      //   {
+      //     'area': "${User.area}",
+      //     "date": "${widget.date}",
+      //   },
+      // );
       Dio dio = Dio();
       final MultipartFile imageFile =
           await MultipartFile.fromFile(storeImagePath);
@@ -221,11 +228,6 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         },
       );
       if (response.statusCode == 200) {
-        socketService.emitEvent('sendmoney/addSendMoney', {
-          'message': 'Sendmoney added successfully',
-        });
-        await _getSendmoney();
-        await uploadImageSendmoney();
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,
@@ -237,7 +239,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
             style: Styles.green18(context),
           ),
         );
-        context.loaderOverlay.hide();
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -245,6 +247,10 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
           ),
           (route) => route.isFirst,
         );
+        // socketService.emitEvent('sendmoney/addSendMoney', {
+        //   'message': 'Sendmoney added successfully',
+        // });
+        context.loaderOverlay.hide();
       } else {
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
@@ -477,10 +483,12 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                         height: 16,
                       ),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (status != "ส่งเงินแล้ว") {
                             if (storeImagePath != '') {
-                              _addSendMoney(countController.text);
+                              await _addSendMoney(countController.text);
+                              await uploadImageSendmoney();
+                              await _getSendmoney();
                             } else {
                               toastification.show(
                                 autoCloseDuration: const Duration(seconds: 5),

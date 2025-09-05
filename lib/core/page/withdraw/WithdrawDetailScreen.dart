@@ -213,20 +213,38 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
           "status": true,
         },
       );
-      if (response.statusCode == 200) {
-        await _getWithdrawDetail();
-        await _getAdjustStockDetail();
-        context.loaderOverlay.hide();
-      }
-    } catch (e) {
+      // if (response.statusCode == 200) {
+      //   Navigator.pop(context);
+      // }
       context.loaderOverlay.hide();
-      print("Error _getWithdrawDetail $e");
+    } catch (e) {
+      // Navigator.pop(context);
+      context.loaderOverlay.hide();
+      print("Error _saleConfirmWithdraw $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    // สมมติใน build() มีตัวแปรพวกนี้อยู่แล้ว:
+// String? lowStatus;
+// List<WithdrawDetail>? withdrawDetail;
+
+    final wd0 = (withdrawDetail != null && withdrawDetail.isNotEmpty)
+        ? withdrawDetail!.first
+        : null;
+
+    final bool isLow99 = (lowStatus?.trim() == '99');
+    final bool isCredit = (wd0?.withdrawType?.trim().toLowerCase() == 'credit');
+
+    final String? st = wd0?.status?.trim().toLowerCase();
+// ถ้าไม่มีสถานะ => ถือว่า "ยังไม่ยืนยัน" (ให้แสดงปุ่ม)
+    final bool notConfirmed =
+        (st == null) || (st != 'confirm' && st != 'confrim');
+
+    final bool showReceiveButton = (isLow99 || isCredit) && notConfirmed;
+
     // double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: PreferredSize(
@@ -304,7 +322,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             const SizedBox(
               width: 10,
             ),
-            lowStatus == "99" || withdrawDetail[0].withdrawType == "credit"
+            showReceiveButton
                 ? Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -315,11 +333,14 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                         ),
                       ),
                       onPressed: () async {
-                        AllAlert.customAlert(
-                            context,
-                            "store.processtimeline_screen.alert.title".tr(),
-                            "คุณต้องการจะรับสินค้าใช่หรือไม่ ?",
-                            _saleConfirmWithdraw);
+                        // AllAlert.customAlert(
+                        //     context,
+                        //     "store.processtimeline_screen.alert.title".tr(),
+                        //     "คุณต้องการจะรับสินค้าใช่หรือไม่ ?",
+                        //     _saleConfirmWithdraw);
+                        await _saleConfirmWithdraw();
+                        await _getWithdrawDetail();
+                        await _getAdjustStockDetail();
                         // await _saleConfirmWithdraw();
                       },
                       child: Padding(
@@ -464,8 +485,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                     ],
                                   ),
                                 ),
-                                highStatus == "99" ||
-                                        detail.withdrawType == "credit"
+                                detail.status == "confirm"
                                     ? Expanded(
                                         child: Column(
                                           children: [

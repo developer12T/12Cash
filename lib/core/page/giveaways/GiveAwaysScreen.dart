@@ -146,7 +146,7 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
       }
     } catch (e) {
       context.loaderOverlay.hide();
-      print("Error  _getProductFilter $e");
+      print("Error _getProductFilter $e");
     }
   }
 
