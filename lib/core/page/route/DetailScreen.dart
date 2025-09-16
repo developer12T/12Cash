@@ -28,7 +28,9 @@ import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/Orders.dart';
 import 'package:_12sale_app/data/models/route/Cause.dart';
 import 'package:_12sale_app/data/models/route/DetailStoreVisit.dart';
+import 'package:_12sale_app/data/models/route/StoreLatLong.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/checkRadiusArea.dart';
 import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:_12sale_app/data/service/sockertService.dart';
 import 'package:dartx/dartx.dart';
@@ -85,6 +87,7 @@ class _DetailScreenState extends State<DetailScreen> {
   int statusCheck = 0;
   List<Cause> causes = [];
   List<Orders> orders = [];
+  List<StoreLatLong> storeLatLong = [];
   bool _loading = true;
   DateTime dateCheck = DateTime.now().add(Duration(hours: 1));
 
@@ -96,6 +99,8 @@ class _DetailScreenState extends State<DetailScreen> {
   List<FlSpot> spots = [];
   late SocketService socketService;
 
+  bool checkStoreLatLongStatus = false;
+
   // String
 
   @override
@@ -106,6 +111,8 @@ class _DetailScreenState extends State<DetailScreen> {
     _getOrder();
     getDataSummary();
     _getStore();
+    // _getLatLongStore();
+    _checkLatLongStatus();
   }
 
   @override
@@ -218,6 +225,52 @@ class _DetailScreenState extends State<DetailScreen> {
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<void> _checkLatLongStatus() async {
+    try {
+      await fetchLocation();
+      // print("_checkLatLongStatus ${latitude}");
+      // print("_checkLatLongStatus ${longitude}");
+      // setState(() {
+      //   latitude = "13.649145";
+      //   longitude = "100.594023";
+      // });
+      // print("_checkLatLongStatus ${latitude}");
+      // print("_checkLatLongStatus ${longitude}");
+
+      // print("_checkLatLongStatus ${latitudeDirection}");
+      // print("_checkLatLongStatus ${longitudeDirection}");
+      // print(longitude);
+      if (!isOutOfRange(latitude.toDouble(), longitude.toDouble(),
+          latitudeDirection.toDouble(), longitudeDirection.toDouble(), 50)) {
+        setState(() {
+          checkStoreLatLongStatus = true;
+        });
+      }
+    } catch (e) {
+      print("Error in function ${e}");
+    }
+  }
+
+  Future<void> _getLatLongStore() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+          endpoint: 'api/cash/route/getLatLongStore',
+          method: 'POST',
+          body: {"storeId": "${widget.customerNo}"});
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'];
+        setState(() {
+          storeLatLong =
+              data.map((item) => StoreLatLong.fromJson(item)).toList();
+        });
+      }
+    } catch (e) {
+      print("Error _getLatLongStore $e");
     }
   }
 
@@ -770,12 +823,27 @@ class _DetailScreenState extends State<DetailScreen> {
                                   : Styles.secondaryColor,
                               onPressed: () {
                                 if (statusCheck <= 0) {
-                                  _showCheckInSheet(context);
-                                  setState(
-                                    () {
-                                      selectedCause = "เลือกเหตุผล";
-                                    },
-                                  );
+                                  if (checkStoreLatLongStatus) {
+                                    _showCheckInSheet(context);
+                                    setState(
+                                      () {
+                                        selectedCause = "เลือกเหตุผล";
+                                      },
+                                    );
+                                  } else {
+                                    toastification.show(
+                                      autoCloseDuration:
+                                          const Duration(seconds: 5),
+                                      context: context,
+                                      primaryColor: Colors.red,
+                                      type: ToastificationType.error,
+                                      style: ToastificationStyle.flatColored,
+                                      title: Text(
+                                        "ระยะทางเกิน 50 เมตร",
+                                        style: Styles.red18(context),
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                             ),
@@ -801,7 +869,22 @@ class _DetailScreenState extends State<DetailScreen> {
                                     );
                                   }
                                 } else if (statusCheck == 0) {
-                                  _showCheckInAndSellSheet(context);
+                                  if (checkStoreLatLongStatus) {
+                                    _showCheckInAndSellSheet(context);
+                                  } else {
+                                    toastification.show(
+                                      autoCloseDuration:
+                                          const Duration(seconds: 5),
+                                      context: context,
+                                      primaryColor: Colors.red,
+                                      type: ToastificationType.error,
+                                      style: ToastificationStyle.flatColored,
+                                      title: Text(
+                                        "ระยะทางเกิน 50 เมตร",
+                                        style: Styles.red18(context),
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                             ),
@@ -1133,6 +1216,8 @@ class _DetailScreenState extends State<DetailScreen> {
                                       onPressed: () async {
                                         context.loaderOverlay.show();
                                         await checkInStore(context);
+
+                                        // calculateDistance()
                                         context.loaderOverlay.hide();
                                       },
                                       color: Styles.successButtonColor,
