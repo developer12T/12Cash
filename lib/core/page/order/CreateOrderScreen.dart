@@ -1099,7 +1099,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   child: Image.network(
-                                                    '${ApiService.apiHost}/images/products/${cartList[index].id}.webp',
+                                                    '${ApiService.image}/images/products/${cartList[index].id}.webp',
                                                     width: screenWidth / 8,
                                                     height: screenWidth / 8,
                                                     fit: BoxFit.cover,
@@ -1465,7 +1465,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with RouteAware {
                                                         BorderRadius.circular(
                                                             8),
                                                     child: Image.network(
-                                                      '${ApiService.apiHost}/images/products/${listPromotions[innerIndex].id}.webp',
+                                                      '${ApiService.image}/images/products/${listPromotions[innerIndex].id}.webp',
                                                       width: screenWidth / 8,
                                                       height: screenWidth / 8,
                                                       fit: BoxFit.cover,
@@ -2818,7 +2818,7 @@ class _ChangePromotionSheetBodyState extends State<_ChangePromotionSheetBody> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
-                              '${ApiService.apiHost}/images/products/${item.id}.webp',
+                              '${ApiService.image}/images/products/${item.id}.webp',
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Container(
                                 color: Colors.grey,

@@ -784,7 +784,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   child: Image.network(
-                                                    '${ApiService.apiHost}/images/products/${listRefund[index].id}.webp',
+                                                    '${ApiService.image}/images/products/${listRefund[index].id}.webp',
                                                     width: screenWidth / 8,
                                                     height: screenWidth / 8,
                                                     fit: BoxFit.cover,
@@ -1155,7 +1155,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 child: Image.network(
-                                                  '${ApiService.apiHost}/images/products/${listProduct[index].id}.webp',
+                                                  '${ApiService.image}/images/products/${listProduct[index].id}.webp',
                                                   width: screenWidth / 8,
                                                   height: screenWidth / 8,
                                                   fit: BoxFit.cover,
@@ -1485,7 +1485,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                 //                         BorderRadius.circular(
                                 //                             8),
                                 //                     child: Image.network(
-                                //                       '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
+                                //                       '${ApiService.image}/images/products/${widget.product.id}.webp',
                                 //                       width: screenWidth / 8,
                                 //                       height: screenWidth / 8,
                                 //                       fit: BoxFit.cover,
@@ -1694,7 +1694,7 @@ class _CreateRefundScreenState extends State<CreateRefundScreen>
                                               //   borderRadius:
                                               //       BorderRadius.circular(8),
                                               //   child: Image.network(
-                                              //     '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
+                                              //     '${ApiService.image}/images/products/${widget.product.id}.webp',
                                               //     width: screenWidth / 15,
                                               //     height: screenWidth / 15,
                                               //     fit: BoxFit.cover,

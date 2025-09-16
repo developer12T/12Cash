@@ -440,7 +440,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    '${ApiService.apiHost}/images/products/${p.id}.webp',
+                                    '${ApiService.image}/images/products/${p.id}.webp',
                                     width: screenWidth / 8,
                                     height: screenWidth / 8,
                                     fit: BoxFit.cover,
@@ -671,7 +671,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
-                                          '${ApiService.apiHost}/images/products/${p.id}.webp',
+                                          '${ApiService.image}/images/products/${p.id}.webp',
                                           width: screenWidth / 8,
                                           height: screenWidth / 8,
                                           fit: BoxFit.cover,

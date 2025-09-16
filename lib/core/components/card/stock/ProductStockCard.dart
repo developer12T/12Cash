@@ -53,7 +53,7 @@ class _ProductStockCardState extends State<ProductStockCard> {
                           borderRadius: BorderRadius.circular(
                               8), // Optional: Add rounded corners
                           child: Image.network(
-                            '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
+                            '${ApiService.image}/images/products/${widget.product.id}.webp',
                             width: screenWidth / 4,
                             height: screenWidth / 4,
                             fit: BoxFit.cover,

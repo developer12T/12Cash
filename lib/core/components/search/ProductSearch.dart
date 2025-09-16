@@ -206,7 +206,7 @@ class _ProductSearchState extends State<ProductSearch> {
                 borderRadius:
                     BorderRadius.circular(8), // Optional: Add rounded corners
                 child: Image.network(
-                  '${ApiService.apiHost}/images/products/${item.id}.webp',
+                  '${ApiService.image}/images/products/${item.id}.webp',
                   width: screenWidth / 4,
                   // height: screenWidth / 3,
                   fit: BoxFit.cover,

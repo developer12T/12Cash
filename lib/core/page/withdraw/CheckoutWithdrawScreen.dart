@@ -904,7 +904,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                                         BorderRadius.circular(
                                                             8),
                                                     child: Image.network(
-                                                      '${ApiService.apiHost}/images/products/${cartList[index].id}.webp',
+                                                      '${ApiService.image}/images/products/${cartList[index].id}.webp',
                                                       width: screenWidth / 8,
                                                       height: screenWidth / 8,
                                                       fit: BoxFit.cover,

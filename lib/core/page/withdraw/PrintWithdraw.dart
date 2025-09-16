@@ -977,7 +977,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   child: Image.network(
-                                                    '${ApiService.apiHost}/images/products/${listProduct[index].id}.webp',
+                                                    '${ApiService.image}/images/products/${listProduct[index].id}.webp',
                                                     width: screenWidth / 8,
                                                     height: screenWidth / 8,
                                                     fit: BoxFit.cover,
@@ -1155,7 +1155,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                         BorderRadius.circular(
                                                             8),
                                                     child: Image.network(
-                                                      '${ApiService.apiHost}/images/products/${listProduct[innerIndex].id}.webp',
+                                                      '${ApiService.image}/images/products/${listProduct[innerIndex].id}.webp',
                                                       width: screenWidth / 8,
                                                       height: screenWidth / 8,
                                                       fit: BoxFit.cover,

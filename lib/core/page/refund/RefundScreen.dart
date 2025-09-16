@@ -1734,7 +1734,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(
-                                        '${ApiService.apiHost}/images/products/${product.id}.webp',
+                                        '${ApiService.image}/images/products/${product.id}.webp',
                                         width: screenWidth / 4,
                                         height: screenWidth / 4,
                                         fit: BoxFit.cover,
@@ -2248,7 +2248,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(
-                                        '${ApiService.apiHost}/images/products/${product.id}.webp',
+                                        '${ApiService.image}/images/products/${product.id}.webp',
                                         width: screenWidth / 4,
                                         height: screenWidth / 4,
                                         fit: BoxFit.cover,
@@ -2735,7 +2735,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: Image.network(
-                                                '${ApiService.apiHost}/images/products/${cartList["items"][index]["id"]}.webp',
+                                                '${ApiService.image}/images/products/${cartList["items"][index]["id"]}.webp',
                                                 width: screenWidth / 8,
                                                 height: screenWidth / 8,
                                                 fit: BoxFit.cover,

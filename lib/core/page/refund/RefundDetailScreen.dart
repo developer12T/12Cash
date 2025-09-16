@@ -1334,7 +1334,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 child: Image.network(
-                                                  '${ApiService.apiHost}/images/products/${listProductRefund[index].id}.webp',
+                                                  '${ApiService.image}/images/products/${listProductRefund[index].id}.webp',
                                                   width: screenWidth / 8,
                                                   height: screenWidth / 8,
                                                   fit: BoxFit.cover,
@@ -1519,7 +1519,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   child: Image.network(
-                                                    '${ApiService.apiHost}/images/products/${listProductChange[index].id}.webp',
+                                                    '${ApiService.image}/images/products/${listProductChange[index].id}.webp',
                                                     width: screenWidth / 8,
                                                     height: screenWidth / 8,
                                                     fit: BoxFit.cover,
@@ -1662,7 +1662,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                 //                         BorderRadius.circular(
                                 //                             8),
                                 //                     child: Image.network(
-                                //                       '${ApiService.apiHost}/images/products/${widget.product.id}.webp',
+                                //                       '${ApiService.image}/images/products/${widget.product.id}.webp',
                                 //                       width: screenWidth / 8,
                                 //                       height: screenWidth / 8,
                                 //                       fit: BoxFit.cover,

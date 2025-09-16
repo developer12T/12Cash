@@ -22,6 +22,9 @@ class ApiService {
   static final String apiHost =
       dotenv.env['API_URL'] ?? 'https://default.host.com';
 
+  static final String image =
+      dotenv.env['API_IMAGE_URL'] ?? 'https://default.host.com';
+
   // Load the .env file in the constructor
   ApiService() {
     dotenv.load(fileName: ".env");
