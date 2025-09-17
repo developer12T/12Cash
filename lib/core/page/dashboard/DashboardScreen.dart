@@ -987,7 +987,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
-                                          "เวอร์ชั่น ${_packageInfo.version}",
+                                          "เวอร์ชั่น L ${_packageInfo.version}",
                                           style: Styles.white16(context),
                                         ),
                                       ],

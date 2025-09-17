@@ -95,6 +95,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
+  double raduis = 0;
 
   List<FlSpot> spots = [];
   late SocketService socketService;
@@ -228,23 +229,50 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  Future<void> _getRadius() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/route/getRadius?period=${period}',
+        method: 'GET',
+      );
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        setState(() {
+          raduis = data['radius'].toDouble();
+        });
+      }
+    } catch (e) {
+      print("Error _getRadius $e");
+    }
+  }
+
   Future<void> _checkLatLongStatus() async {
     try {
       await fetchLocation();
-      // print("_checkLatLongStatus ${latitude}");
-      // print("_checkLatLongStatus ${longitude}");
-      // setState(() {
-      //   latitude = "13.649145";
-      //   longitude = "100.594023";
-      // });
+      await _getRadius();
       // print("_checkLatLongStatus ${latitude}");
       // print("_checkLatLongStatus ${longitude}");
 
-      // print("_checkLatLongStatus ${latitudeDirection}");
-      // print("_checkLatLongStatus ${longitudeDirection}");
+      // setState(() {
+      //   latitude = "13.649143";
+      //   longitude = "100.594010";
+      // });
+
+      print("_checkLatLongStatus ${latitude}");
+      print("_checkLatLongStatus ${longitude}");
+
+      print("_checkLatLongStatus ${latitudeDirection}");
+      print("_checkLatLongStatus ${longitudeDirection}");
+
       // print(longitude);
-      if (!isOutOfRange(latitude.toDouble(), longitude.toDouble(),
-          latitudeDirection.toDouble(), longitudeDirection.toDouble(), 50)) {
+      if (!isOutOfRange(
+          latitude.toDouble(),
+          longitude.toDouble(),
+          latitudeDirection.toDouble(),
+          longitudeDirection.toDouble(),
+          raduis)) {
         setState(() {
           checkStoreLatLongStatus = true;
         });
