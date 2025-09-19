@@ -265,6 +265,9 @@ class _DetailScreenState extends State<DetailScreen> {
 
       print("_checkLatLongStatus ${latitudeDirection}");
       print("_checkLatLongStatus ${longitudeDirection}");
+      // setState(() {
+      //   checkStoreLatLongStatus = true;
+      // });
 
       // print(longitude);
       if (!isOutOfRange(
@@ -908,7 +911,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                       type: ToastificationType.error,
                                       style: ToastificationStyle.flatColored,
                                       title: Text(
-                                        "ระยะทางเกิน 50 เมตร",
+                                        "ระยะทางเกิน ${raduis} เมตร",
                                         style: Styles.red18(context),
                                       ),
                                     );

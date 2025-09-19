@@ -47,8 +47,8 @@ bool isOutOfRange(double originLat, double originLng, double destinationLat,
   // print(destinationLng);
   // print(distance);
   if (kDebugMode) {
-    print('isOutOfRange ${distance}');
-    print('isOutOfRange ${radius}');
+    print('isOutOfRange distance ${distance}');
+    print('isOutOfRange radius ${radius}');
     print('isOutOfRange ${distance > radius}');
   }
   return distance > radius;
