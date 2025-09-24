@@ -27,7 +27,7 @@ class WithDrawScreen extends StatefulWidget {
   State<WithDrawScreen> createState() => _WithDrawScreenState();
 }
 
-class _WithDrawScreenState extends State<WithDrawScreen> {
+class _WithDrawScreenState extends State<WithDrawScreen> with RouteAware {
   bool _isChecked = false;
   bool _loading = true;
   List<Withdraw> withdrawList = [];
@@ -81,6 +81,15 @@ class _WithDrawScreenState extends State<WithDrawScreen> {
         }
       },
     );
+  }
+
+  @override
+  void didPopNext() {
+    // setState(() {
+    //   _loadingRouteVisit = true;
+    // });
+    // Called when the screen is popped back to
+    _getDetail();
   }
 
   @override

@@ -834,7 +834,9 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                   indent: 16,
                                   endIndent: 16,
                                 ),
-                                isType == "T04"
+                                isType == "T04" &&
+                                        isWithdrawType == "normal" &&
+                                        isWithdrawType != ''
                                     ? CheckboxListTile(
                                         title: Text(
                                           'เบิกต้นทริป',

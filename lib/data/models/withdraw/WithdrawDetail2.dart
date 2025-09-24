@@ -24,6 +24,7 @@ class WithdrawDetail {
   final double receivetotalWeightGross;
   final double receivetotalWeightNet;
   final String status;
+  final String statusTH;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int v;
@@ -54,6 +55,7 @@ class WithdrawDetail {
     required this.receivetotalWeightGross,
     required this.receivetotalWeightNet,
     required this.status,
+    required this.statusTH,
     required this.createdAt,
     required this.updatedAt,
     required this.v,
@@ -89,6 +91,7 @@ class WithdrawDetail {
           (json['receivetotalWeightGross'] ?? 0).toDouble(),
       receivetotalWeightNet: (json['receivetotalWeightNet'] ?? 0).toDouble(),
       status: json['status'] ?? '',
+      statusTH: json['statusTH'] ?? '',
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
       v: json['__v'] ?? 0,
@@ -121,6 +124,7 @@ class WithdrawDetail {
         'receivetotalWeightGross': receivetotalWeightGross,
         'receivetotalWeightNet': receivetotalWeightNet,
         'status': status,
+        'statusTH': statusTH,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         '__v': v,

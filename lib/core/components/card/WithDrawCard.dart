@@ -17,6 +17,23 @@ class WithDrawCard extends StatelessWidget {
     super.key,
   });
 
+  Color getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Colors.grey; // รอ
+      case 'approved':
+        return Colors.blue.shade700; // อนุมัติแล้ว
+      case 'onprocess':
+        return Colors.orange; // กำลังดำเนินการ
+      case 'success':
+        return Colors.green.shade600; // สำเร็จ
+      case 'confirm':
+        return Colors.lightBlue.shade300; // ยืนยันแล้ว
+      default:
+        return Colors.black; // fallback
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -70,17 +87,11 @@ class WithDrawCard extends StatelessWidget {
                                     width: screenWidth / 6,
                                     padding: EdgeInsets.all(2),
                                     decoration: BoxDecoration(
-                                      color: item.status == 'success' ||
-                                              item.status == 'approved' ||
-                                              item.status == 'confirm'
-                                          ? Styles.success
-                                          : item.status == 'canceled'
-                                              ? Styles.fail
-                                              : Styles.warning,
+                                      color: getStatusColor(item.status),
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     child: Text(
-                                      '${item.status.toUpperCase()}',
+                                      '${item.statusTH.toUpperCase()}',
                                       style: Styles.white16(context),
                                       textAlign: TextAlign.center,
                                     ),

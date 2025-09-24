@@ -71,6 +71,7 @@ class DetailScreen extends StatefulWidget {
 
 class _DetailScreenState extends State<DetailScreen> {
   String? checkinImagePath; // Path to store the captured image
+  String? changeLatLngImagePath; // Path to store the captured image
   String? checkinSellImagePath; // Path to store the captured image
   String selectedCause = 'เลือกเหตุผล';
   String latitude = '00.00';
@@ -265,21 +266,21 @@ class _DetailScreenState extends State<DetailScreen> {
 
       print("_checkLatLongStatus ${latitudeDirection}");
       print("_checkLatLongStatus ${longitudeDirection}");
-      // setState(() {
-      //   checkStoreLatLongStatus = true;
-      // });
+      setState(() {
+        checkStoreLatLongStatus = true;
+      });
 
       // print(longitude);
-      if (!isOutOfRange(
-          latitude.toDouble(),
-          longitude.toDouble(),
-          latitudeDirection.toDouble(),
-          longitudeDirection.toDouble(),
-          raduis)) {
-        setState(() {
-          checkStoreLatLongStatus = true;
-        });
-      }
+      // if (!isOutOfRange(
+      //     latitude.toDouble(),
+      //     longitude.toDouble(),
+      //     latitudeDirection.toDouble(),
+      //     longitudeDirection.toDouble(),
+      //     raduis)) {
+      //   setState(() {
+      //     checkStoreLatLongStatus = true;
+      //   });
+      // }
     } catch (e) {
       print("Error in function ${e}");
     }
@@ -350,13 +351,6 @@ class _DetailScreenState extends State<DetailScreen> {
         if (inputString != "0") {
           DateTime inputDate = DateTime.parse(inputString);
           dateCheck = inputDate.add(Duration(hours: 7));
-          // limitDate = dateCheck?.add(Duration(days: 1));
-
-          // if (DateTime.now().isBefore(dateCheck!)) {
-          //   print('✅ Valid: limitDate is still before $dateCheck.');
-          // } else {
-          //   print('❌ Invalid: limitDate passed $dateCheck.');
-          // }
         }
       });
       // print("statusCheck $statusCheck");
@@ -500,6 +494,86 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  Future<void> addImageLatLong(BuildContext context, String orderId) async {
+    try {
+      await fetchLocation();
+      ApiService apiService = ApiService();
+      await apiService.init();
+      File imageFile = File(changeLatLngImagePath!);
+      // ใช้ฟังก์ชัน compressImages ที่เราสร้าง
+      MultipartFile compressedFile = await compressImages(imageFile);
+      var formData = FormData.fromMap(
+        {
+          'orderId': orderId,
+          'storeImages': compressedFile,
+          'type': 'store',
+        },
+      );
+      var response = await apiService.request2(
+        endpoint: 'api/cash/store/addImageLatLong',
+        method: 'POST',
+        body: formData,
+        headers: {
+          'x-channel': 'cash',
+          'Content-Type': 'multipart/form-data',
+        },
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "อัพโหลดรูปขออนุมัติเปลี่ยน Location สำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error addImageLatLong: $e');
+      context.loaderOverlay.hide();
+    }
+  }
+
+  Future<void> addLatLong(BuildContext context) async {
+    try {
+      await fetchLocation();
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/store/addLatLong',
+        method: 'POST',
+        body: {
+          "storeId": "${widget.customerNo}",
+          "latitude": "${latitude}",
+          "longtitude": "${longitude}",
+        },
+      );
+      if (response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "ขออนุมัติเปลี่ยน Location ร้านค้าสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+        print(response.data['data']['orderId']);
+        await addImageLatLong(context, response.data['data']['orderId']);
+        Navigator.pop(context);
+        // Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      print('Error addLatLong: $e');
+      context.loaderOverlay.hide();
+    }
+  }
+
   Future<void> checkInStore(BuildContext context) async {
     try {
       await fetchLocation();
@@ -550,16 +624,6 @@ class _DetailScreenState extends State<DetailScreen> {
               "longtitude": longitude
             },
           );
-          // var response = await dio.post(
-          //   '${ApiService.apiHost}/api/cash/route/checkIn',
-          //   data: formData,
-          //   options: Options(
-          //     headers: {
-          //       "Content-Type": "multipart/form-data",
-          //       'x-channel': 'cash',
-          //     },
-          //   ),
-          // );
 
           var response = await apiService.request2(
             endpoint: 'api/cash/route/checkIn',
@@ -822,6 +886,14 @@ class _DetailScreenState extends State<DetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             MenuButton(
+                              icon: Icons.change_circle_outlined,
+                              label: "ขอเปลี่ยน",
+                              color: Colors.deepPurple,
+                              onPressed: () async {
+                                _showChaneUpdateStoreLatLng(context);
+                              },
+                            ),
+                            MenuButton(
                               icon: latitudeDirection != "0.000000"
                                   ? Icons.gps_fixed_rounded
                                   : Icons.gps_off_rounded,
@@ -978,6 +1050,165 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showChaneUpdateStoreLatLng(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Makes the bottom sheet full screen height
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Colors.grey, width: 0.5),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (
+        BuildContext context,
+      ) {
+        double screenWidth = MediaQuery.of(context).size.width;
+        // double screenHeight = MediaQuery.of(context).size.height;
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return Container(
+            width: screenWidth * 0.9, // Fixed width
+            // height: screenHeight * 0.8,
+            padding: EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 16.0,
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with close button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'ขอเปลี่ยน Location ร้านค้า',
+                        style: Styles.headerBlack32(context),
+                        textAlign: TextAlign.center,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close bottom sheet
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Store Information
+                  Text(
+                    '${storeDetail?.listStore[0].storeInfo.name}',
+                    style: Styles.black24(context),
+                  ),
+                  Text(
+                    '${widget.customerNo}',
+                    style: Styles.black24(context),
+                  ),
+                  CameraExpand(
+                    icon: Icons.photo_camera,
+                    imagePath: changeLatLngImagePath != ""
+                        ? changeLatLngImagePath
+                        : null,
+                    label: "หน้าร้านค้า",
+                    onImageSelected: (String imagePath) async {
+                      setState(() {
+                        changeLatLngImagePath = imagePath;
+                      });
+                    },
+                  ),
+                  Container(
+                    width: double.infinity, // Full width button
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (changeLatLngImagePath != null) {
+                          Alert(
+                            context: context,
+                            title:
+                                "store.processtimeline_screen.alert.title".tr(),
+                            style: AlertStyle(
+                              animationType: AnimationType.grow,
+                              isCloseButton: true,
+                              isOverlayTapDismiss: false,
+                              descStyle: Styles.black18(context),
+                              descTextAlign: TextAlign.start,
+                              animationDuration:
+                                  const Duration(milliseconds: 400),
+                              alertBorder: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(22.0),
+                                side: const BorderSide(
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              titleStyle: Styles.headerBlack32(context),
+                              alertAlignment: Alignment.center,
+                            ),
+                            desc:
+                                "คุณต้องการยืนยันการเปลี่ยน Location ร้านค้าใช่หรือไม่ ?",
+                            buttons: [
+                              DialogButton(
+                                onPressed: () => Navigator.pop(context),
+                                color: Styles.failTextColor,
+                                child: Text(
+                                  "store.processtimeline_screen.alert.cancel"
+                                      .tr(),
+                                  style: Styles.white18(context),
+                                ),
+                              ),
+                              DialogButton(
+                                onPressed: () async {
+                                  context.loaderOverlay.show();
+                                  await addLatLong(context);
+
+                                  context.loaderOverlay.hide();
+                                },
+                                color: Styles.successButtonColor,
+                                child: Text(
+                                  "store.processtimeline_screen.alert.submit"
+                                      .tr(),
+                                  style: Styles.white18(context),
+                                ),
+                              )
+                            ],
+                          ).show();
+                        } else {
+                          toastification.show(
+                            autoCloseDuration: const Duration(seconds: 5),
+                            context: context,
+                            primaryColor: Colors.red,
+                            type: ToastificationType.error,
+                            style: ToastificationStyle.flatColored,
+                            title: Text(
+                              "กรุณาถ่ายรูปก่อนขอเปลี่ยน",
+                              style: Styles.red18(context),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Styles.primaryColor,
+                        // padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text('ขออนุมัติเปลี่ยน',
+                          style: Styles.white24(context)),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+      },
     );
   }
 

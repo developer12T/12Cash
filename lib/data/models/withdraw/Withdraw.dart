@@ -8,6 +8,7 @@ class Withdraw {
   final String sendDate;
   final double total;
   final String status;
+  final String statusTH;
   // final DateTime created;
 
   Withdraw({
@@ -18,6 +19,7 @@ class Withdraw {
     required this.sendDate,
     required this.total,
     required this.status,
+    required this.statusTH,
     // required this.created,
   });
 
@@ -31,6 +33,7 @@ class Withdraw {
       sendDate: json['sendDate'] as String,
       total: (json['total'] as num).toDouble(), // Ensures conversion to double
       status: json['status'] as String,
+      statusTH: json['statusTH'] as String,
       // created:
       //     DateTime.parse(json['created']), // Converts ISO string to DateTime
     );
@@ -46,6 +49,7 @@ class Withdraw {
       'sendDate': sendDate,
       'total': total,
       'status': status,
+      'statusTH': statusTH,
       // 'created': created.toIso8601String(),
     };
   }

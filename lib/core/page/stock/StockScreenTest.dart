@@ -193,23 +193,23 @@ class _StockScreenTestState extends State<StockScreenTest> {
 
     // ตัวอย่างชื่อคีย์ — ปรับให้ตรง API ของคุณ
     final mapKeyByCol = {
-      ColumnId.stock: 'StockTotalCtn',
+      ColumnId.stock: 'stockTotalPcs',
       ColumnId.withdraw:
-          'withdrawTotalCtn', // ถ้า API คุณใช้ key อื่น ให้เปลี่ยน
-      ColumnId.good: 'goodTotalCtn',
-      ColumnId.damaged: 'damagedTotalCtn',
-      ColumnId.sale: 'saleTotalCtn',
-      ColumnId.promotion: 'promotionTotalCtn',
-      ColumnId.change: 'changeTotalCtn',
-      ColumnId.adjust: 'adjustTotalCtn',
-      ColumnId.give: 'giveTotalCtn',
-      ColumnId.balance: 'balTotalCtn',
+          'withdrawTotalPcs', // ถ้า API คุณใช้ key อื่น ให้เปลี่ยน
+      ColumnId.good: 'goodTotalPcs',
+      ColumnId.damaged: 'damagedTotalPcs',
+      ColumnId.sale: 'saleTotalPcs',
+      ColumnId.promotion: 'promotionTotalPcs',
+      ColumnId.change: 'changeTotalPcs',
+      ColumnId.adjust: 'adjustTotalPcs',
+      ColumnId.give: 'giveTotalPcs',
+      ColumnId.balance: 'balTotalPcs',
     };
 
     return enforced.map((c) {
       switch (c) {
         case ColumnId.name:
-          return 'รวมจำนวน (หีบ)'; // ช่องหัว footer
+          return 'รวมจำนวน (ชิ้น)'; // ช่องหัว footer
         case ColumnId.group:
           return ''; // เว้นว่าง
         default:
