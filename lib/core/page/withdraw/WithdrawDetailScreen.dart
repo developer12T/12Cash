@@ -278,7 +278,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         (st == null) || (st != 'confirm' && st != 'confrim');
 
     final bool showReceiveButton =
-        (isLow99 || isCredit || isNewTrip) && notConfirmed;
+        (isLow99 || isCredit) && notConfirmed && isNewTrip;
 
     // print(isNewTrip);
 
