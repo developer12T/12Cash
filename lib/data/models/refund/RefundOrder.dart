@@ -7,6 +7,7 @@ class RefundOrder {
   final double totalRefund;
   final double total;
   final String status;
+  final String statusTH;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,6 +20,7 @@ class RefundOrder {
     required this.totalRefund,
     required this.total,
     required this.status,
+    required this.statusTH,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -34,6 +36,7 @@ class RefundOrder {
       totalRefund: double.tryParse(json['totalRefund'].toString()) ?? 0.0,
       total: double.tryParse(json['total'].toString()) ?? 0.0,
       status: json['status'],
+      statusTH: json['statusTH'],
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
           : DateTime.now(),
@@ -54,6 +57,7 @@ class RefundOrder {
       'totalRefund': totalRefund.toStringAsFixed(2),
       'total': total.toStringAsFixed(2),
       'status': status,
+      'statusTH': statusTH,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

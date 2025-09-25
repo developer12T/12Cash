@@ -274,7 +274,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         method: 'POST',
         body: {
           "orderId": "${widget.orderId}",
-          "paymentMethod": isSelectCheckout == "QR Payment" ? "qr" : "cash",
+          "paymentMethod": isSelectCheckout,
         },
       );
       if (response.statusCode == 200) {
@@ -2172,10 +2172,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                         ),
                                         onPressed: () {
                                           setModalState(() {
-                                            isSelectCheckout = "QR Payment";
+                                            isSelectCheckout = "qr";
                                           });
                                           setState(() {
-                                            isSelectCheckout = "QR Payment";
+                                            isSelectCheckout = "qr";
                                           });
                                           Navigator.of(context).pop();
                                           // setState(() {
@@ -2277,10 +2277,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                         ),
                                         onPressed: () {
                                           setModalState(() {
-                                            isSelectCheckout = "เงินสด";
+                                            isSelectCheckout = "cash";
                                           });
                                           setState(() {
-                                            isSelectCheckout = "เงินสด";
+                                            isSelectCheckout = "cash";
                                           });
                                           Navigator.of(context).pop();
                                         },

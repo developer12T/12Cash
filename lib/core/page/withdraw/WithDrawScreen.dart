@@ -59,6 +59,7 @@ class _WithDrawScreenState extends State<WithDrawScreen> with RouteAware {
         });
       }
     } catch (e) {
+      withdrawList.clear();
       print("Error $e");
     }
   }
@@ -190,6 +191,7 @@ class _WithDrawScreenState extends State<WithDrawScreen> with RouteAware {
                       },
                       onValueChanged: (v) async {
                         setState(() {
+                          withdrawList.clear();
                           isSelect = v;
                         });
                         if (v == 1) {

@@ -42,6 +42,8 @@ class WithDrawCard extends StatelessWidget {
         return Colors.green.shade600; // สำเร็จ
       case 'confirm':
         return Colors.lightBlue.shade300; // ยืนยันแล้ว
+      case 'rejected':
+        return Colors.redAccent; // ยืนยันแล้ว
       default:
         return Colors.black; // fallback
     }
@@ -97,7 +99,7 @@ class WithDrawCard extends StatelessWidget {
                                 ),
                                 Skeleton.ignore(
                                   child: Container(
-                                    width: screenWidth / 6,
+                                    width: screenWidth / 4.5,
                                     padding: EdgeInsets.all(2),
                                     decoration: BoxDecoration(
                                       color: getStatusColor(item.status),

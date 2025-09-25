@@ -97,7 +97,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "ใบเบิกสถานะ 99 แล้ว",
+              "จัดส่งสำเร็จแล้ว",
               style: Styles.green18(context),
             ),
           );
@@ -109,7 +109,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             type: ToastificationType.info,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "ใบเบิกสถานะ 99 ยังไม่ครบ",
+              "ติดต่อศูนย์ให้ดำเนินการใบเบิก",
               style: Styles.pirmary18(context),
             ),
           );
@@ -121,7 +121,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "ใบเบิกยังไม่ได้เดินสถานะ",
+              "ติดต่อศูนย์ให้ดำเนินการใบเบิก",
               style: Styles.green18(context),
             ),
           );
@@ -138,7 +138,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
           type: ToastificationType.warning,
           style: ToastificationStyle.flatColored,
           title: Text(
-            "ใบเบิกยังไม่ 99",
+            "ติดต่อศูนย์ให้ดำเนินการใบเบิก",
             style: Styles.red18(context),
           ),
         );
@@ -150,7 +150,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
           type: ToastificationType.warning,
           style: ToastificationStyle.flatColored,
           title: Text(
-            "ไม่พบใบเบิกนี้ใน M3",
+            "ไม่พบใบเบิกนี้ไม่เข้าระบบ Info M3",
             style: Styles.red18(context),
           ),
         );
@@ -226,6 +226,8 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         return Colors.green.shade600; // สำเร็จ
       case 'confirm':
         return Colors.lightBlue.shade300; // ยืนยันแล้ว
+      case 'rejected':
+        return Colors.redAccent; // ยืนยันแล้ว
       default:
         return Colors.black; // fallback
     }
@@ -268,7 +270,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
 
     final bool isLow99 = (lowStatus?.trim() == '99');
     final bool isCredit = (wd0?.withdrawType?.trim().toLowerCase() == 'credit');
-    final bool isNewTrip = (wd0?.newTrip?.trim().toLowerCase() == 'true');
+    final bool isNewTrip = (wd0?.newTrip?.trim().toLowerCase() == 'false');
 
     final String? st = wd0?.status?.trim().toLowerCase();
 // ถ้าไม่มีสถานะ => ถือว่า "ยังไม่ยืนยัน" (ให้แสดงปุ่ม)
@@ -277,6 +279,8 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
 
     final bool showReceiveButton =
         (isLow99 || isCredit || isNewTrip) && notConfirmed;
+
+    // print(isNewTrip);
 
     // double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -417,11 +421,13 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                               style: Styles.black16(context),
                             ),
                             Container(
+                              width: screenWidth / 4.5,
                               padding: EdgeInsets.symmetric(horizontal: 8),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   color: getStatusColor(detail.status)),
                               child: Text(
+                                textAlign: TextAlign.center,
                                 detail.statusTH.toUpperCase(),
                                 style: Styles.white16(context),
                               ),

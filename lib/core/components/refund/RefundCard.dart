@@ -98,7 +98,7 @@ class RefundCard extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     child: Text(
-                                      '${item.status.toUpperCase()}',
+                                      '${item.statusTH}',
                                       style: Styles.white16(context),
                                       textAlign: TextAlign.center,
                                     ),

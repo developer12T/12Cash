@@ -888,7 +888,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           children: [
                             MenuButton(
                               icon: Icons.change_circle_outlined,
-                              label: "ขอเปลี่ยน",
+                              label: "โลเคชั่น",
                               color: Colors.deepPurple,
                               onPressed: () async {
                                 _showChaneUpdateStoreLatLng(context);
