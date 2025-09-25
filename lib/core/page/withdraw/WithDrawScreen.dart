@@ -46,6 +46,7 @@ class _WithDrawScreenState extends State<WithDrawScreen> with RouteAware {
         method: 'GET',
       );
       if (response.statusCode == 200) {
+        withdrawList.clear();
         final List<dynamic> data = response.data['data'];
 
         setState(() {
@@ -90,6 +91,19 @@ class _WithDrawScreenState extends State<WithDrawScreen> with RouteAware {
     // });
     // Called when the screen is popped back to
     _getDetail();
+  }
+
+  String getTypeTH(String status) {
+    switch (status) {
+      case 'normal':
+        return "เบิกปกติ"; // รอ
+      case 'clearance':
+        return "ระบาย"; // อนุมัติแล้ว
+      case 'credit':
+        return "รับโอนจากเครดิต"; // อนุมัติแล้ว
+      default:
+        return ""; // fallback
+    }
   }
 
   @override

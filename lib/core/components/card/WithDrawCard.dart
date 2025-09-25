@@ -17,6 +17,19 @@ class WithDrawCard extends StatelessWidget {
     super.key,
   });
 
+  String getTypeTH(String status) {
+    switch (status) {
+      case 'normal':
+        return "เบิกปกติ"; // รอ
+      case 'clearance':
+        return "ระบาย"; // อนุมัติแล้ว
+      case 'credit':
+        return "รับโอนจากเครดิต";
+      default:
+        return "";
+    }
+  }
+
   Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -123,6 +136,19 @@ class WithDrawCard extends StatelessWidget {
                               children: [
                                 Text(
                                   "ประเภท: ${item.orderTypeName}",
+                                  style: Styles.black16(context),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "ประเภทเบิก: ${getTypeTH(item.withdrawType)}",
+                                  style: Styles.black16(context),
+                                ),
+                                Text(
+                                  "${item.newTrip == 'true' ? "เบิกต้นทริป" : "เบิกระหว่างทริป"}",
                                   style: Styles.black16(context),
                                 ),
                               ],

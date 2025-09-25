@@ -54,7 +54,7 @@ class Utilize {
 
     return Utilize(
       freePercentage: parseDouble(json['freePercentage']),
-      stockPercentage: parseDouble(json['stocklPercentage']),
+      stockPercentage: parseDouble(json['stockPercentage']),
       withdrawPercentage: parseDouble(json['withdrawPercentage']),
       sumPercentage: parseDouble(json['sumPercentage']),
       free: parseDouble(json['free']),
@@ -79,7 +79,7 @@ class Utilize {
   Map<String, dynamic> toJson() {
     return {
       'freePercentage': freePercentage,
-      'stocklPercentage': stockPercentage,
+      'stockPercentage': stockPercentage,
       'withdrawPercentage': withdrawPercentage,
       'sumPercentage': sumPercentage,
       'free': free,

@@ -68,7 +68,7 @@ class _SummarybyMonthState extends State<SummarybyMonth> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "ข้อมูลตัวอย่างการขายสินค้ารายเดือน",
+                "ยอดขายสินค้ารายเดือน",
                 style: Styles.black18(context),
               )
             ],

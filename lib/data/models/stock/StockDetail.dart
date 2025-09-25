@@ -67,6 +67,7 @@ class InOutGroup {
   final double summary;
   final List<UnitQty>? orderStock;
   final List<Orders>? order;
+  final List<Orders>? changeDetail;
   final List<UnitQty>? promotionStock;
   final List<UnitQty>? change;
 
@@ -87,6 +88,7 @@ class InOutGroup {
     required this.summary,
     this.orderStock,
     this.order,
+    this.changeDetail,
     this.promotionStock,
     this.change,
     this.summaryStockIn,
@@ -131,6 +133,9 @@ class InOutGroup {
           ?.map((e) => UnitQty.fromJson(e))
           .toList(),
       order: (json['order'] as List<dynamic>?)
+          ?.map((e) => Orders.fromJson(e))
+          .toList(),
+      changeDetail: (json['changeDetail'] as List<dynamic>?)
           ?.map((e) => Orders.fromJson(e))
           .toList(),
       promotionStock: (json['promotionStock'] as List<dynamic>?)

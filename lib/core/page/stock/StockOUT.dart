@@ -48,7 +48,7 @@ class _StockOUTState extends State<StockOUT> {
   @override
   Widget build(BuildContext context) {
     final orderList = widget.stockOut.order ?? [];
-    final refundList = widget.stockOut.refund ?? [];
+    final changeList = widget.stockOut.changeDetail ?? [];
 
     return Scaffold(
       appBar: PreferredSize(
@@ -85,22 +85,25 @@ class _StockOUTState extends State<StockOUT> {
             ),
             Text("Change", style: Styles.black20(context)),
             Expanded(
-              child: ListView.builder(
-                itemCount: refundList.length,
-                itemBuilder: (context, index) {
-                  return RefundCard(
-                    item: refundList[index],
-                    onDetailsPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => RefundDetailScreen(
-                            orderId: refundList[index].orderId,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView.builder(
+                  itemCount: changeList.length,
+                  itemBuilder: (context, index) {
+                    return InvoiceCard(
+                      item: changeList[index],
+                      onDetailsPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => OrderDetailScreen(
+                              orderId: changeList[index].orderId,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
             BoxShadowCustom(

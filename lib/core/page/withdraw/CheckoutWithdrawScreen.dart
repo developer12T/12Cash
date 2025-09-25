@@ -290,7 +290,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
               "note": "${noteController.text}",
               "latitude": "${latitude}",
               "longitude": "${longitude}",
-              "newtrip": _isChecked
+              "newtrip": isWithdrawType != "credit" ? _isChecked : false
             });
         if (response.statusCode == 200) {
           socketService.emitEvent('distribution/checkout', {
@@ -835,7 +835,7 @@ class _CheckoutWithdrawScreenState extends State<CheckoutWithdrawScreen> {
                                   endIndent: 16,
                                 ),
                                 isType == "T04" &&
-                                        isWithdrawType == "normal" &&
+                                        isWithdrawType != "credit" &&
                                         isWithdrawType != ''
                                     ? CheckboxListTile(
                                         title: Text(

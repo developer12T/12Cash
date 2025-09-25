@@ -39,7 +39,7 @@ class _WeightCudeCardState extends State<WeightCudeCard> {
         body: {
           "area": '${User.area}',
           "period": "$period",
-          "typetruck": "6W",
+          "typetruck": "${User.typeTruck}",
         },
         method: 'POST',
       );

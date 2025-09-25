@@ -676,6 +676,7 @@ class _DetailScreenState extends State<DetailScreen> {
             //   ),
             //   (route) => route.isFirst,
             // );
+
             // Navigator.pushReplacement(
             //   context,
             //   MaterialPageRoute(

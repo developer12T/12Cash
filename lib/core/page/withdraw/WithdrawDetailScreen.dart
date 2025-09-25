@@ -29,6 +29,19 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
   String highStatus = '';
   String lowStatus = '';
 
+  String getTypeTH(String status) {
+    switch (status) {
+      case 'normal':
+        return "เบิกปกติ"; // รอ
+      case 'clearance':
+        return "ระบาย"; // อนุมัติแล้ว
+      case 'credit':
+        return "รับโอนจากเครดิต"; // อนุมัติแล้ว
+      default:
+        return ""; // fallback
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -114,6 +127,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
           );
         }
         print(response.data['data']['lowStatus']);
+        await _getWithdrawDetail();
       }
     } on ApiException catch (e) {
       if (e.statusCode == 400) {
@@ -254,13 +268,15 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
 
     final bool isLow99 = (lowStatus?.trim() == '99');
     final bool isCredit = (wd0?.withdrawType?.trim().toLowerCase() == 'credit');
+    final bool isNewTrip = (wd0?.newTrip?.trim().toLowerCase() == 'true');
 
     final String? st = wd0?.status?.trim().toLowerCase();
 // ถ้าไม่มีสถานะ => ถือว่า "ยังไม่ยืนยัน" (ให้แสดงปุ่ม)
     final bool notConfirmed =
         (st == null) || (st != 'confirm' && st != 'confrim');
 
-    final bool showReceiveButton = (isLow99 || isCredit) && notConfirmed;
+    final bool showReceiveButton =
+        (isLow99 || isCredit || isNewTrip) && notConfirmed;
 
     // double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -413,10 +429,25 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
                           ],
                         ),
                         SizedBox(height: 4),
-                        Text("เลขที่: ${detail.orderId}",
-                            style: Styles.black16(context)),
-                        Text("ประเภทการเบิก: ${detail.orderTypeName}",
-                            style: Styles.black16(context)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("เลขที่: ${detail.orderId}",
+                                style: Styles.black16(context)),
+                            Text("${getTypeTH(detail.withdrawType)}",
+                                style: Styles.black16(context)),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("ประเภทการเบิก: ${detail.orderTypeName}",
+                                style: Styles.black16(context)),
+                            Text(
+                                "${detail.newTrip == "true" ? "เบิกต้นทริป" : "เบิกระหว่างทริป"}",
+                                style: Styles.black16(context)),
+                          ],
+                        ),
                         Text("หมายเหตุ: ${detail.remark}",
                             style: Styles.black16(context)),
                         Text(

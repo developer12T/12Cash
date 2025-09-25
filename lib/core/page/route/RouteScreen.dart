@@ -644,7 +644,8 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
                           final firstIndex = index * 2;
                           final secondIndex = firstIndex + 1;
                           return routeState.routeVisitList.length > 0 &&
-                                  (province != '' || amphoe != '')
+                                  province == '' &&
+                                  amphoe == ''
                               ? Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [

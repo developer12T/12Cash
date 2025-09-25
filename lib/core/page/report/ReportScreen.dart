@@ -132,7 +132,11 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
         });
       }
       context.loaderOverlay.hide();
+    } on ApiException catch (e) {
+      refundOrders.clear();
+      context.loaderOverlay.hide();
     } catch (e) {
+      refundOrders.clear();
       context.loaderOverlay.hide();
       print("Error $e");
     }
@@ -159,7 +163,11 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
         });
       }
       context.loaderOverlay.hide();
+    } on ApiException catch (e) {
+      orders.clear();
+      context.loaderOverlay.hide();
     } catch (e) {
+      orders.clear();
       context.loaderOverlay.hide();
       print(e);
     }
@@ -214,7 +222,7 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         if (socketService.statusOrderUpdated != '0') {
-          _getOrder();
+          // _getOrder();
         }
 
         if (socketService.refundUpdate != '') {
@@ -271,13 +279,12 @@ class _ReportScreenState extends State<ReportScreen> with RouteAware {
                     // await getTarget(startDate, endDate);
                     print('startDate ${startDate} endDate ${endDate}');
                     print('type=$type start=${range.start} end=${range.end}');
+                    await _getOrderDate(startDate, endDate);
+                    await _getRefundOrderDate(startDate, endDate);
 
-                    if (isSelect.isSelect == 1) {
-                      await _getOrderDate(startDate, endDate);
-                    } else {
-                      await _getRefundOrderDate(startDate, endDate);
-                    }
-                    // context.loaderOverlay.hide();
+                    // if (isSelect.isSelect == 1) {
+                    // } else {}
+                    // // context.loaderOverlay.hide();
                   },
                 ),
               ],

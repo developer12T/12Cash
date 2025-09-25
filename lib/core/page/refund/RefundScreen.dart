@@ -3122,7 +3122,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                 Text("ยอดรับคืน",
                                     style: Styles.white18(context)),
                                 Text(
-                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundList.isNotEmpty ? double.parse(refundList[0].totalChange) : 0)} บาท",
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundList.isNotEmpty ? double.parse(refundList[0].totalRefund) : 0)} บาท",
                                     style: Styles.white18(context)),
                               ],
                             ),
@@ -3132,7 +3132,7 @@ class _RefundScreenState extends State<RefundScreen> with RouteAware {
                                 Text("ยอดเปลี่ยน",
                                     style: Styles.white18(context)),
                                 Text(
-                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundList.isNotEmpty ? double.parse(refundList[0].totalRefund) : 0)} บาท",
+                                    "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(refundList.isNotEmpty ? double.parse(refundList[0].totalChange) : 0)} บาท",
                                     style: Styles.white18(context)),
                               ],
                             ),
