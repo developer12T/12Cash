@@ -266,43 +266,23 @@ class _DetailScreenState extends State<DetailScreen> {
 
       print("_checkLatLongStatus ${latitudeDirection}");
       print("_checkLatLongStatus ${longitudeDirection}");
-      setState(() {
-        checkStoreLatLongStatus = true;
-      });
+      // setState(() {
+      //   checkStoreLatLongStatus = true;
+      // });
 
       // print(longitude);
-      // if (!isOutOfRange(
-      //     latitude.toDouble(),
-      //     longitude.toDouble(),
-      //     latitudeDirection.toDouble(),
-      //     longitudeDirection.toDouble(),
-      //     raduis)) {
-      //   setState(() {
-      //     checkStoreLatLongStatus = true;
-      //   });
-      // }
-    } catch (e) {
-      print("Error in function ${e}");
-    }
-  }
-
-  Future<void> _getLatLongStore() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-      var response = await apiService.request(
-          endpoint: 'api/cash/route/getLatLongStore',
-          method: 'POST',
-          body: {"storeId": "${widget.customerNo}"});
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'];
+      if (!isOutOfRange(
+          latitude.toDouble(),
+          longitude.toDouble(),
+          latitudeDirection.toDouble(),
+          longitudeDirection.toDouble(),
+          raduis)) {
         setState(() {
-          storeLatLong =
-              data.map((item) => StoreLatLong.fromJson(item)).toList();
+          checkStoreLatLongStatus = true;
         });
       }
     } catch (e) {
-      print("Error _getLatLongStore $e");
+      print("Error in function ${e}");
     }
   }
 
@@ -925,7 +905,9 @@ class _DetailScreenState extends State<DetailScreen> {
                               color: statusCheck > 0
                                   ? Colors.grey
                                   : Styles.secondaryColor,
-                              onPressed: () {
+                              onPressed: () async {
+                                await _getStore();
+                                await _checkLatLongStatus();
                                 if (statusCheck <= 0) {
                                   if (checkStoreLatLongStatus) {
                                     _showCheckInSheet(context);
@@ -958,7 +940,9 @@ class _DetailScreenState extends State<DetailScreen> {
                                       DateTime.now().isBefore(dateCheck)
                                   ? Styles.success!
                                   : Colors.grey,
-                              onPressed: () {
+                              onPressed: () async {
+                                await _getStore();
+                                await _checkLatLongStatus();
                                 if (statusCheck == 1) {
                                   if (DateTime.now().isBefore(dateCheck)) {
                                     Navigator.push(

@@ -97,7 +97,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "จัดส่งสำเร็จแล้ว",
+              "จัดส่งสำเร็จแล้วกรุณากดรับสินค้า",
               style: Styles.green18(context),
             ),
           );
@@ -109,7 +109,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             type: ToastificationType.info,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "ติดต่อศูนย์ให้ดำเนินการใบเบิก",
+              "ใบเบิกยังดำเนินการไม่สำเร็จ",
               style: Styles.pirmary18(context),
             ),
           );
@@ -121,12 +121,13 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
             type: ToastificationType.success,
             style: ToastificationStyle.flatColored,
             title: Text(
-              "ติดต่อศูนย์ให้ดำเนินการใบเบิก",
+              "ใบเบิกยังดำเนินการไม่สำเร็จ",
               style: Styles.green18(context),
             ),
           );
         }
         print(response.data['data']['lowStatus']);
+        print(response.data['data']['highStatus']);
         await _getWithdrawDetail();
       }
     } on ApiException catch (e) {
