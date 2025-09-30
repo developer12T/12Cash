@@ -14,6 +14,7 @@ import 'package:_12sale_app/data/models/User.dart';
 import 'package:_12sale_app/data/models/order/OrderDetail.dart';
 import 'package:_12sale_app/data/service/apiService.dart';
 import 'package:charset_converter/charset_converter.dart';
+import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   String qrImagePath = "";
   bool uploadQR = false;
   String qrImagePath2 = "";
+
+  TextEditingController countController = TextEditingController();
 
   @override
   void initState() {
@@ -346,6 +349,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   BluetoothInfo? _selectedDevice;
   final int paperWidth = 69;
   final int paperWidthHeader = 76;
+  double money = 0;
 
   static const String encoding = 'TIS-620';
 
@@ -371,6 +375,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     "total": "0.00",
     "OBSMCD": ""
   };
+
+  bool isDouble(String input) {
+    return double.tryParse(input) != null;
+  }
 
   Future<void> _fetchPairedDevices() async {
     try {
@@ -570,6 +578,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   ];
 
   bool _isCreateOrderEnabled = false;
+
+  Future<void> updateSendmoney() async {
+    try {
+      context.loaderOverlay.show();
+      ApiService apiService = ApiService();
+      await apiService.init();
+      var response = await apiService.request(
+        endpoint: 'api/cash/order/updateSendmoney',
+        method: 'POST',
+        body: {"orderId": "${widget.orderId}", "sendmoney": money},
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        toastification.show(
+          autoCloseDuration: const Duration(seconds: 5),
+          context: context,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flatColored,
+          title: Text(
+            "อัพโหลดข้อมูลสำเร็จ",
+            style: Styles.green18(context),
+          ),
+        );
+      }
+      context.loaderOverlay.hide();
+    } catch (e) {
+      context.loaderOverlay.hide();
+      print("Error $e");
+    }
+  }
 
   Future<void> uploadImageSlip(String orderId) async {
     try {
@@ -998,7 +1036,10 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                             Text(
                                               isSelectCheckout == "qr"
                                                   ? "QR Payment"
-                                                  : "เงินสด",
+                                                  : isSelectCheckout ==
+                                                          "cashandqr"
+                                                      ? "เงินสด + โอน"
+                                                      : "เงินสด",
                                               style: Styles.white18(context),
                                             ),
                                             const Icon(
@@ -1745,15 +1786,6 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                   icon: Icons.image_not_supported_outlined,
                                   imagePath: qrImage != "" ? qrImage : '',
                                 ),
-                                // qrImagePath != '' && uploadQR
-                                //     ? ShowPhotoButton(
-                                //         checkNetwork: true,
-                                //         icon:
-                                //             Icons.image_not_supported_outlined,
-                                //         imagePath: qrImagePath,
-                                //         label: "ถ่ายภาพการโอน",
-                                //       )
-                                //     : SizedBox()
                                 qrImagePath != '' && uploadQR
                                     ? ShowPhotoButton(
                                         checkNetwork: true,
@@ -1779,47 +1811,133 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                       ),
                               ],
                             ),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8),
-                                backgroundColor: Styles.primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              onPressed: () async {
-                                if (qrImagePath != '') {
-                                  await uploadImageSlip(widget.orderId);
-                                }
-                                // if (!User.connectPrinter) {
-                                //   _connectToPrinter(User.devicePrinter);
-                                // } else {
-                                //   _disconnectPrinter();
-                                // }
-                              },
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "อัพโหลดรูป QR Code",
-                                          style: Styles.white18(context),
-                                        )
-                                        // Icon(
-                                        //   Icons.print_rounded,
-                                        //   color: Colors.white,
-                                        //   size: 25,
-                                        // ),
-                                      ],
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                isSelectCheckout == "cashandqr" &&
+                                        orderDetail!.qr! == 0
+                                    ? Container(
+                                        width: 250,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8),
+                                            backgroundColor:
+                                                Styles.primaryColor,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          onPressed: () async {
+                                            _showAssignMoney(context);
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      money == 0
+                                                          ? "ใส่จำนวนเงิน"
+                                                          : "${money} บาท",
+                                                      style: Styles.white18(
+                                                          context),
+                                                    )
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : isSelectCheckout == "cashandqr"
+                                        ? Container(
+                                            width: 250,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 8),
+                                                backgroundColor:
+                                                    Styles.primaryColor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              onPressed: () async {},
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8.0),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    Text(
+                                                      "ยอดเงินโอน",
+                                                      style: Styles.white18(
+                                                          context),
+                                                    ),
+                                                    Text(
+                                                      "${orderDetail!.qr} บาท",
+                                                      style: Styles.white18(
+                                                          context),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : SizedBox(
+                                            width: 250,
+                                          ),
+                                Container(
+                                  width: 250,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      backgroundColor: Styles.primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
                                     ),
-                                  ],
+                                    onPressed: () async {
+                                      if (qrImagePath != '') {
+                                        await uploadImageSlip(widget.orderId);
+                                        if (isSelectCheckout == "cashandqr") {
+                                          await updateSendmoney();
+                                        }
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "อัพโหลดข้อมูล",
+                                                style: Styles.white18(context),
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
                         ),
@@ -2137,8 +2255,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                 Expanded(
                                                   child: Row(
                                                     children: [
-                                                      (isSelectCheckout ==
-                                                              "QR Payment")
+                                                      (isSelectCheckout == "qr")
                                                           ? Container(
                                                               decoration:
                                                                   BoxDecoration(
@@ -2243,7 +2360,7 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                                   child: Row(
                                                     children: [
                                                       (isSelectCheckout ==
-                                                              "เงินสด")
+                                                              "cash")
                                                           ? Container(
                                                               decoration:
                                                                   BoxDecoration(
@@ -2288,27 +2405,265 @@ ${centerText('เอกสารออกเป็นชุด', 69)}
                                     ),
                                   ),
                                 ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.all(0),
+                                          elevation: 0, // Disable shadow
+                                          shadowColor: Colors
+                                              .transparent, // Ensure no shadow color
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius
+                                                .zero, // No rounded corners
+                                            side: BorderSide
+                                                .none, // Remove border
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        FontAwesomeIcons
+                                                            .moneyBill,
+                                                        color: Styles
+                                                            .primaryColorIcons,
+                                                        size: 40,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        "เงินสด + โอน",
+                                                        style: Styles.grey18(
+                                                            context),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Row(
+                                                    children: [
+                                                      (isSelectCheckout ==
+                                                              "cashandqr")
+                                                          ? Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                                color: Colors
+                                                                    .green,
+                                                              ),
+                                                              child: Icon(
+                                                                Icons.check,
+                                                                size: 25,
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                            )
+                                                          : SizedBox(
+                                                              width: 25,
+                                                            ),
+                                                    ],
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            Divider(
+                                              color: Colors.grey[200],
+                                              thickness: 1,
+                                              indent: 16,
+                                              endIndent: 16,
+                                            ),
+                                          ],
+                                        ),
+                                        onPressed: () {
+                                          setModalState(() {
+                                            isSelectCheckout = "cashandqr";
+                                          });
+                                          setState(() {
+                                            isSelectCheckout = "cashandqr";
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               )
                             ],
                           ),
                         ),
                       ),
                     ),
-                    // Container(
-                    //   color: Styles.primaryColor,
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.all(16.0),
-                    //     child: Row(
-                    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //       children: [
-                    //         Text("ยอดรวม", style: Styles.white24(context)),
-                    //         Text(
-                    //             "฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(100)} บาท",
-                    //             style: Styles.white24(context)),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // )
+                  ],
+                ),
+              );
+            },
+          );
+        });
+      },
+    );
+  }
+
+  void _showAssignMoney(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height and scrolling
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return DraggableScrollableSheet(
+            expand: false, // Allows dragging but does not expand fully
+            initialChildSize: 0.6, // 60% of screen height
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return Container(
+                width: screenWidth * 0.95,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Styles.primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.attach_money_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              Text('กรอกจำนวณเงิน',
+                                  style: Styles.white24(context)),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: screenHeight * 0.9,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: Column(
+                            children: [
+                              TextField(
+                                autofocus: true,
+                                style: Styles.black18(context),
+                                controller: countController,
+                                maxLines: 1,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  contentPadding: EdgeInsets.all(16),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.all(8),
+                                        elevation: 0, // Disable shadow
+                                        shadowColor: Colors
+                                            .transparent, // Ensure no shadow color
+                                        backgroundColor: Styles.primaryColor,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            side: BorderSide.none),
+                                      ),
+                                      onPressed: () {
+                                        if (isDouble(countController.text)) {
+                                          // if(countController.text.toDouble())
+                                          setState(() {
+                                            double countD =
+                                                countController.text.toDouble();
+                                            money = countD.toDouble();
+                                          });
+                                          Navigator.pop(context);
+                                        } else {
+                                          toastification.show(
+                                            autoCloseDuration:
+                                                const Duration(seconds: 5),
+                                            context: context,
+                                            primaryColor: Colors.red,
+                                            type: ToastificationType.error,
+                                            style:
+                                                ToastificationStyle.flatColored,
+                                            title: Text(
+                                              "กรุณาใส่จำนวนให้ถูกต้อง",
+                                              style: Styles.red18(context),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Text(
+                                        "ตกลง",
+                                        style: Styles.white18(context),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );

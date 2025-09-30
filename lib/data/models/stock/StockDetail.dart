@@ -23,13 +23,13 @@ class StockDetailData {
 
   factory StockDetailData.fromJson(Map<String, dynamic> json) {
     return StockDetailData(
-      productId: json['productId'] ?? '',
-      productName: json['productName'] ?? '',
-      stock: StockGroup.fromJson(json['STOCK'] ?? {}),
-      inData: InOutGroup.fromJson(json['IN'] ?? {}),
-      outData: InOutGroup.fromJson(json['OUT'] ?? {}),
+      productId: json['productId']?.toString() ?? '',
+      productName: json['productName']?.toString() ?? '',
+      stock: StockGroup.fromJson(json['STOCK'] is Map ? json['STOCK'] : {}),
+      inData: InOutGroup.fromJson(json['IN'] is Map ? json['IN'] : {}),
+      outData: InOutGroup.fromJson(json['OUT'] is Map ? json['OUT'] : {}),
       balance: (json['BALANCE'] as List<dynamic>?)
-              ?.map((e) => UnitQty.fromJson(e))
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       summary: (json['summary'] as num?)?.toDouble() ?? 0.0,
@@ -49,10 +49,10 @@ class StockGroup {
   factory StockGroup.fromJson(Map<String, dynamic> json) {
     return StockGroup(
       stock: (json['stock'] as List<dynamic>?)
-              ?.map((e) => UnitQty.fromJson(e))
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      date: json['date'] ?? '',
+      date: json['date']?.toString() ?? '',
     );
   }
 }
@@ -71,7 +71,6 @@ class InOutGroup {
   final List<UnitQty>? promotionStock;
   final List<UnitQty>? change;
 
-  // เพิ่ม field ใหม่
   final double? summaryStockIn;
   final double? orderSum;
   final double? promotionSum;
@@ -102,48 +101,60 @@ class InOutGroup {
     final rawStock = json['stock'];
     final stockList = (rawStock is Map && rawStock['stock'] is List)
         ? (rawStock['stock'] as List<dynamic>)
-            .map((e) => UnitQty.fromJson(e))
+            .map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
             .toList()
         : (rawStock is List)
-            ? rawStock.map((e) => UnitQty.fromJson(e)).toList()
+            ? rawStock
+                .map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
+                .toList()
             : <UnitQty>[];
 
     return InOutGroup(
       stock: stockList,
       withdrawStock: (json['withdrawStock'] as List<dynamic>?)
-              ?.map((e) => UnitQty.fromJson(e))
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       withdraw: (json['withdraw'] as List<dynamic>?)
-          ?.map((e) => Withdraw.fromJson(e))
-          .toList(),
+              ?.map((e) => Withdraw.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       refundStock: (json['refundStock'] as List<dynamic>?)
-              ?.map((e) => UnitQty.fromJson(e))
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       refund: (json['refund'] as List<dynamic>?)
-          ?.map((e) => RefundOrder.fromJson(e))
-          .toList(),
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => RefundOrder.fromJson(e))
+              .toList() ??
+          [],
       summaryStock: (json['summaryStock'] as List<dynamic>?)
-              ?.map((e) => UnitQty.fromJson(e))
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       summary: (json['summary'] as num?)?.toDouble() ?? 0.0,
       orderStock: (json['orderStock'] as List<dynamic>?)
-          ?.map((e) => UnitQty.fromJson(e))
-          .toList(),
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       order: (json['order'] as List<dynamic>?)
-          ?.map((e) => Orders.fromJson(e))
-          .toList(),
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => Orders.fromJson(e))
+              .toList() ??
+          [],
       changeDetail: (json['changeDetail'] as List<dynamic>?)
-          ?.map((e) => Orders.fromJson(e))
-          .toList(),
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => Orders.fromJson(e))
+              .toList() ??
+          [],
       promotionStock: (json['promotionStock'] as List<dynamic>?)
-          ?.map((e) => UnitQty.fromJson(e))
-          .toList(),
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       change: (json['change'] as List<dynamic>?)
-          ?.map((e) => UnitQty.fromJson(e))
-          .toList(),
+              ?.map((e) => UnitQty.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       summaryStockIn: (json['summaryStockIn'] as num?)?.toDouble(),
       orderSum: (json['orderSum'] as num?)?.toDouble(),
       changeSum: (json['changeSum'] as num?)?.toDouble(),
@@ -166,9 +177,11 @@ class UnitQty {
 
   factory UnitQty.fromJson(Map<String, dynamic> json) {
     return UnitQty(
-      unit: json['unit'] ?? '',
-      qty: json['qty'] ?? 0,
-      unitName: json['unitName'], // optional
+      unit: json['unit']?.toString() ?? '',
+      qty: json['qty'] is int
+          ? json['qty']
+          : int.tryParse(json['qty']?.toString() ?? '') ?? 0,
+      unitName: json['unitName']?.toString(),
     );
   }
 }

@@ -15,6 +15,7 @@ class OrderDetail {
   final double vat;
   final double totalExVat;
   final double total;
+  double? qr;
   final Shipping shipping;
   final String paymentMethod;
   final String paymentStatus;
@@ -39,6 +40,7 @@ class OrderDetail {
     required this.vat,
     required this.totalExVat,
     required this.total,
+    this.qr,
     required this.shipping,
     required this.paymentMethod,
     required this.paymentStatus,
@@ -71,6 +73,7 @@ class OrderDetail {
       vat: json['vat'].toDouble(),
       totalExVat: json['totalExVat'].toDouble(),
       total: json['total'].toDouble(),
+      qr: json['qr'].toDouble() ?? 0.0,
       shipping: Shipping.fromJson(json['shipping']),
       paymentMethod: json['paymentMethod'],
       paymentStatus: json['paymentStatus'],

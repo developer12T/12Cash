@@ -43,6 +43,7 @@ class _StockDetailState extends State<StockDetail> {
           "period": period,
         },
       );
+
       if (response.statusCode == 200) {
         if (mounted) {
           setState(() {
@@ -50,7 +51,10 @@ class _StockDetailState extends State<StockDetail> {
           });
         }
       }
-    } catch (e) {
+    } catch (e, s) {
+      print('❌ Error while parsing StockDetailData: $e');
+      print('Stack trace: $s');
+      // print('Raw JSON: $jsonData');
       print("Error _getStockDetail: $e");
     }
   }
