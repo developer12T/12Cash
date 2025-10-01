@@ -223,6 +223,8 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         return Colors.blue.shade700; // อนุมัติแล้ว
       case 'onprocess':
         return Colors.orange; // กำลังดำเนินการ
+      case 'supapproved':
+        return Colors.orange; // กำลังดำเนินการ
       case 'success':
         return Colors.green.shade600; // สำเร็จ
       case 'confirm':
@@ -272,6 +274,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
     final bool isLow99 = (lowStatus?.trim() == '99');
     final bool isCredit = (wd0?.withdrawType?.trim().toLowerCase() == 'credit');
     final bool isNewTrip = (wd0?.newTrip?.trim().toLowerCase() == 'false');
+    final bool isApproved = (wd0?.status?.trim().toLowerCase() == 'approved');
 
     final String? st = wd0?.status?.trim().toLowerCase();
 // ถ้าไม่มีสถานะ => ถือว่า "ยังไม่ยืนยัน" (ให้แสดงปุ่ม)
@@ -279,7 +282,7 @@ class _WithdrawDetailScreenState extends State<WithdrawDetailScreen>
         (st == null) || (st != 'confirm' && st != 'confrim');
 
     final bool showReceiveButton =
-        (isLow99 || isCredit) && notConfirmed && isNewTrip;
+        (isLow99 || isCredit) && notConfirmed && isNewTrip && isApproved;
 
     // print(isNewTrip);
 

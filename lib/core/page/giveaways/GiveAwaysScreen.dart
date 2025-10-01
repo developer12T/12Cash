@@ -2130,6 +2130,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                         withinStock) {
                                                       final int applied =
                                                           addQty; // capture ไว้กันหลุดค่า
+                                                      context.loaderOverlay
+                                                          .show();
                                                       await _addCart(product);
                                                       await _getCart();
 
@@ -2141,6 +2143,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                 1 <<
                                                                     31); // กันค่าติดลบ
                                                       });
+                                                      context.loaderOverlay
+                                                          .hide();
                                                     } else {
                                                       toastification.show(
                                                         autoCloseDuration:
@@ -2163,6 +2167,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                     }
                                                   } else {
                                                     if (withinStock) {
+                                                      context.loaderOverlay
+                                                          .show();
                                                       final int applied =
                                                           addQty; // capture ไว้กันหลุดค่า
                                                       await _addCart(product);
@@ -2176,6 +2182,8 @@ class _GiveAwaysScreenState extends State<GiveAwaysScreen> with RouteAware {
                                                                 1 <<
                                                                     31); // กันค่าติดลบ
                                                       });
+                                                      context.loaderOverlay
+                                                          .hide();
                                                     } else {
                                                       toastification.show(
                                                         autoCloseDuration:

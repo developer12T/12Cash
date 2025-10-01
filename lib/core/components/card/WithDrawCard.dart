@@ -38,6 +38,8 @@ class WithDrawCard extends StatelessWidget {
         return Colors.blue.shade700; // อนุมัติแล้ว
       case 'onprocess':
         return Colors.orange; // กำลังดำเนินการ
+      case 'supapproved':
+        return Colors.orange; // กำลังดำเนินการ
       case 'success':
         return Colors.green.shade600; // สำเร็จ
       case 'confirm':
