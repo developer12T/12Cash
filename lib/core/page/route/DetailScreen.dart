@@ -96,7 +96,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
-  double raduis = 0;
+  // double raduis = 50;
 
   List<FlSpot> spots = [];
   late SocketService socketService;
@@ -230,29 +230,29 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  Future<void> _getRadius() async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
-      var response = await apiService.request(
-        endpoint: 'api/cash/route/getRadius?period=${period}',
-        method: 'GET',
-      );
-      if (response.statusCode == 200) {
-        final data = response.data['data'];
-        setState(() {
-          raduis = data['radius'].toDouble();
-        });
-      }
-    } catch (e) {
-      print("Error _getRadius $e");
-    }
-  }
+  // Future<void> _getRadius() async {
+  //   try {
+  //     ApiService apiService = ApiService();
+  //     await apiService.init();
+  //     var response = await apiService.request(
+  //       endpoint: 'api/cash/route/getRadius?period=${period}',
+  //       method: 'GET',
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final data = response.data['data'];
+  //       setState(() {
+  //         raduis = data['radius'].toDouble();
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print("Error _getRadius $e");
+  //   }
+  // }
 
   Future<void> _checkLatLongStatus() async {
     try {
       await fetchLocation();
-      await _getRadius();
+      // await _getRadius();
       // print("_checkLatLongStatus ${latitude}");
       // print("_checkLatLongStatus ${longitude}");
 
@@ -268,15 +268,29 @@ class _DetailScreenState extends State<DetailScreen> {
       print("_checkLatLongStatus ${longitudeDirection}");
       // setState(() {
       //   checkStoreLatLongStatus = true;
+
       // });
 
       // print(longitude);
-      if (!isOutOfRange(
-          latitude.toDouble(),
-          longitude.toDouble(),
-          latitudeDirection.toDouble(),
-          longitudeDirection.toDouble(),
-          raduis)) {
+      // if (!isOutOfRange(
+      //     latitude.toDouble(),
+      //     longitude.toDouble(),
+      //     latitudeDirection.toDouble(),
+      //     longitudeDirection.toDouble(),
+      //     raduis)) {
+      //   setState(() {
+      //     checkStoreLatLongStatus = true;
+      //   });
+      // }
+
+      const double radius = 50; // เมตร
+
+      final double originLat = double.parse(latitude);
+      final double originLng = double.parse(longitude);
+      final double destLat = double.parse(latitudeDirection);
+      final double destLng = double.parse(longitudeDirection);
+
+      if (!isOutOfRange(originLat, originLng, destLat, destLng, radius)) {
         setState(() {
           checkStoreLatLongStatus = true;
         });
@@ -968,7 +982,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                       type: ToastificationType.error,
                                       style: ToastificationStyle.flatColored,
                                       title: Text(
-                                        "ระยะทางเกิน ${raduis} เมตร",
+                                        "ระยะทางเกิน 50 เมตร",
                                         style: Styles.red18(context),
                                       ),
                                     );
