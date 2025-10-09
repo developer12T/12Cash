@@ -101,7 +101,7 @@ class _DetailScreenState extends State<DetailScreen> {
   List<FlSpot> spots = [];
   late SocketService socketService;
 
-  bool checkStoreLatLongStatus = false;
+  bool checkStoreLatLongStatus = true;
 
   // String
 
@@ -266,6 +266,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
       print("_checkLatLongStatus ${latitudeDirection}");
       print("_checkLatLongStatus ${longitudeDirection}");
+
       // setState(() {
       //   checkStoreLatLongStatus = true;
 
