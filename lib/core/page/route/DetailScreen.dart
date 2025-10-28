@@ -101,7 +101,7 @@ class _DetailScreenState extends State<DetailScreen> {
   List<FlSpot> spots = [];
   late SocketService socketService;
 
-  bool checkStoreLatLongStatus = true;
+  bool checkStoreLatLongStatus = false;
 
   // String
 
@@ -266,23 +266,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
       print("_checkLatLongStatus ${latitudeDirection}");
       print("_checkLatLongStatus ${longitudeDirection}");
-
-      // setState(() {
-      //   checkStoreLatLongStatus = true;
-
-      // });
-
-      // print(longitude);
-      // if (!isOutOfRange(
-      //     latitude.toDouble(),
-      //     longitude.toDouble(),
-      //     latitudeDirection.toDouble(),
-      //     longitudeDirection.toDouble(),
-      //     raduis)) {
-      //   setState(() {
-      //     checkStoreLatLongStatus = true;
-      //   });
-      // }
 
       const double radius = 50; // เมตร
 
