@@ -11,6 +11,7 @@ import 'package:_12sale_app/core/components/modal_sheet/ProductSheet.dart';
 import 'package:_12sale_app/core/components/search/ProductSearch.dart';
 import 'package:_12sale_app/core/components/search/StoreBottomSheet.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
+import 'package:_12sale_app/core/components/service/ProductService.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
@@ -47,15 +48,15 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
 
   final Throttler _throttler = Throttler();
 
-  List<Product> productList = [];
+  // List<Product> productList = [];
   List<Product> filteredProductList = [];
 
   List<CartList> cartList = [];
-  bool _loadingProduct = true;
+  // bool _loadingProduct = true;
 
   // Filter Set
-  List<String> groupList = ['ผงปรุงรส'];
-  List<String> selectedGroups = ['ผงปรุงรส'];
+  List<String> groupList = [];
+  List<String> selectedGroups = [];
 
   List<String> brandList = [];
   List<String> selectedBrands = [];
@@ -86,11 +87,20 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   int stockQty = 0;
   // String lotStock = "";
 
+  List<Product> _product = [];
+  bool _isLoading = false;
+  int _page = 1;
+  bool _hasMore = true;
+  String _query = '';
+
   List<Store> storeList = [];
   final ScrollController _cartScrollController = ScrollController();
-  final ScrollController _productScrollController = ScrollController();
-  final ScrollController _productListScrollController = ScrollController();
-  final ScrollController _storeScrollController = ScrollController();
+
+  // final ScrollController _productListController = ScrollController();
+  final ScrollController _productGridController = ScrollController();
+  final ScrollController _listController = ScrollController();
+  final ScrollController _listController2 = ScrollController();
+
   TextEditingController countController = TextEditingController();
   TextEditingController searchController = TextEditingController();
 
@@ -101,14 +111,79 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   void initState() {
     super.initState();
     _getFliter();
-    _getProduct(true);
+    // _getProduct(true);
     _getFliterSize();
     _getStore();
+    _loadProduct();
+    _listController2.addListener(_onScroll);
+    // _productGridController.addListener(_onScrollGird);
+  }
+
+  void _onSearch(String query) {
+    _query = query.trim();
+    _loadProduct(reset: true);
   }
 
   @override
   void didPopNext() {
     _getCart();
+  }
+
+  // void _onScroll() {
+  //   final controller = _isGridView ? _productGridController : _listController;
+  //   if (controller.position.pixels >=
+  //       controller.position.maxScrollExtent - 100) {
+  //     _loadProduct();
+  //   }
+  // }
+
+  void _onScroll() {
+    // final controller = _isGridView ? _productGridController : _listController;
+    if (_listController2.position.pixels >=
+        _listController2.position.maxScrollExtent - 100) {
+      _loadProduct();
+    }
+  }
+
+  // void _onScrollGird() {
+  //   // print(
+  //   //     "_productScrollController.position.pixels ${_productScrollController.position.pixels}");
+  //   // print(
+  //   //     "_productScrollController.position.maxScrollExtent ${_productScrollController.position.maxScrollExtent - 100}");
+
+  //   if (_productGridController.position.pixels >=
+  //       _productGridController.position.maxScrollExtent - 100) {
+  //     _loadProduct();
+  //   }
+  // }
+
+  Future<void> _loadProduct({bool reset = false}) async {
+    if (_isLoading || (!_hasMore && !reset)) return;
+
+    setState(() => _isLoading = true);
+    if (reset) {
+      _page = 1;
+      _product.clear();
+      _hasMore = true;
+    }
+
+    try {
+      final fetched = await ProductService.fetchProduct(page: _page);
+
+      setState(() {
+        _product.addAll(fetched);
+        _isLoading = false;
+        _hasMore = fetched.isNotEmpty;
+        filteredProductList = List.from(_product);
+        if (_hasMore) _page++;
+      });
+
+      print("_product ${fetched}");
+      print(fetched);
+    } catch (e) {
+      setState(() => _isLoading = false);
+      print("Error fetching _loadProduct: $e");
+    }
   }
 
   @override
@@ -152,8 +227,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     // Unsubscribe when the widget is disposed
     routeObserver.unsubscribe(this);
     _cartScrollController.dispose();
-    _productScrollController.dispose();
-    _productListScrollController.dispose();
+    _productGridController.dispose();
+    _listController.dispose();
     super.dispose();
   }
 
@@ -247,7 +322,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
           );
           if (response.statusCode == 200) {
             await _getTotalCart(setModalState);
-            await _getProduct(true);
+            await _loadProduct();
             toastification.show(
               autoCloseDuration: const Duration(seconds: 5),
               context: context,
@@ -441,45 +516,45 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     } catch (e) {}
   }
 
-  Future<void> _getProduct(bool limit) async {
-    try {
-      ApiService apiService = ApiService();
-      await apiService.init();
+  // Future<void> _getProduct(bool limit) async {
+  //   try {
+  //     ApiService apiService = ApiService();
+  //     await apiService.init();
 
-      var response = await apiService.request(
-        endpoint: 'api/cash/product/get',
-        method: 'POST',
-        body: {
-          "type": "sale",
-          "limit": limit,
-          "period": "${period}",
-          "area": "${User.area}",
-          "group": selectedGroups,
-          "brand": selectedBrands,
-          "size": selectedSizes,
-          "flavour": selectedFlavours
-        },
-      );
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'];
+  //     var response = await apiService.request(
+  //       endpoint: 'api/cash/product/get',
+  //       method: 'POST',
+  //       body: {
+  //         "type": "sale",
+  //         "limit": limit,
+  //         "period": "${period}",
+  //         "area": "${User.area}",
+  //         "group": selectedGroups,
+  //         "brand": selectedBrands,
+  //         "size": selectedSizes,
+  //         "flavour": selectedFlavours
+  //       },
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> data = response.data['data'];
 
-        setState(() {
-          productList = data.map((item) => Product.fromJson(item)).toList();
-          filteredProductList = List.from(productList);
-        });
+  //       setState(() {
+  //         productList = data.map((item) => Product.fromJson(item)).toList();
+  //         filteredProductList = List.from(productList);
+  //       });
 
-        Timer(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            setState(() {
-              _loadingProduct = false;
-            });
-          }
-        });
-      }
-    } catch (e) {
-      print("Error occurred _getProduct: $e");
-    }
-  }
+  //       Timer(const Duration(milliseconds: 500), () {
+  //         if (mounted) {
+  //           setState(() {
+  //             _loadingProduct = false;
+  //           });
+  //         }
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print("Error occurred _getProduct: $e");
+  //   }
+  // }
 
   Future<void> _getFliter() async {
     try {
@@ -651,7 +726,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
       body: LayoutBuilder(
         builder: (context, constraints) {
           return LoadingSkeletonizer(
-            loading: _loadingProduct,
+            loading: _isLoading,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -787,15 +862,14 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 sizeList.clear();
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
-                                                _getProduct(false).then((_) =>
+                                                _loadProduct().then((_) =>
                                                     Timer(Duration(seconds: 3),
                                                         () {
                                                       context.loaderOverlay
                                                           .hide();
                                                     }));
                                               },
-                                              onSearch: () =>
-                                                  _getProduct(false),
+                                              onSearch: () => _loadProduct(),
                                             );
                                           },
                                           child: badgeFilter(
@@ -843,15 +917,14 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 sizeList.clear();
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
-                                                _getProduct(false).then((_) =>
+                                                _loadProduct().then((_) =>
                                                     Timer(Duration(seconds: 3),
                                                         () {
                                                       context.loaderOverlay
                                                           .hide();
                                                     }));
                                               },
-                                              onSearch: () =>
-                                                  _getProduct(false),
+                                              onSearch: () => _loadProduct(),
                                             );
                                           },
                                           child: badgeFilter(
@@ -894,15 +967,14 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                 selectedFlavours.clear();
                                                 flavourList.clear();
                                                 context.loaderOverlay.show();
-                                                _getProduct(false).then((_) =>
+                                                _loadProduct().then((_) =>
                                                     Timer(Duration(seconds: 3),
                                                         () {
                                                       context.loaderOverlay
                                                           .hide();
                                                     }));
                                               },
-                                              onSearch: () =>
-                                                  _getProduct(false),
+                                              onSearch: () => _loadProduct(),
                                             );
                                           },
                                           child: badgeFilter(
@@ -931,7 +1003,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                           onTap: () {
                                             _clearFilter();
                                             context.loaderOverlay.show();
-                                            _getProduct(false).then((_) =>
+                                            _loadProduct().then((_) =>
                                                 Timer(Duration(seconds: 3), () {
                                                   context.loaderOverlay.hide();
                                                 }));
@@ -1021,7 +1093,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                       onChanged: (query) {
                                         if (query != "") {
                                           setState(() {
-                                            filteredProductList = productList
+                                            filteredProductList = _product
                                                 .where((item) =>
                                                     item.name
                                                         .toLowerCase()
@@ -1047,7 +1119,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                           });
                                         } else {
                                           setState(() {
-                                            filteredProductList = productList;
+                                            filteredProductList = _product;
                                           });
                                         }
                                       },
@@ -1070,135 +1142,116 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                             SizedBox(
                               height: 8,
                             ),
-                            _isGridView
-                                ? Expanded(
-                                    child: Column(
-                                      children: [
-                                        Expanded(
-                                          child: ListView.builder(
-                                            // controller:
-                                            //     _productScrollController,
-                                            itemCount:
-                                                (filteredProductList.length / 2)
-                                                    .ceil(),
-                                            itemBuilder: (context, index) {
-                                              final firstIndex = index * 2;
-                                              final secondIndex =
-                                                  firstIndex + 1;
-                                              return Row(
-                                                children: [
-                                                  Expanded(
-                                                    child:
-                                                        OrderMenuListVerticalCard(
-                                                      item: filteredProductList[
-                                                          firstIndex],
-                                                      onDetailsPressed:
-                                                          () async {
-                                                        setState(() {
-                                                          selectedUnit = '';
-                                                          selectedSize = '';
-                                                          price = 0.00;
-                                                          count = 1;
-                                                          total = 0.00;
-                                                          // lotStock = '';
-                                                          stockQty = 0;
-                                                        });
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: _product.length,
+                                controller: _listController2,
+                                itemBuilder: (context, index) {
+                                  return OrderMenuListCard(
+                                    product: _product[index],
+                                    onTap: () {
+                                      print(_product[index]);
+                                      setState(() {
+                                        selectedUnit = '';
+                                        selectedSize = '';
+                                        price = 0.00;
+                                        count = 1;
+                                        total = 0.00;
+                                        stockQty = 0;
+                                      });
+                                      // _showProductSheet(
+                                      //     context, _product[index]);
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                            // Expanded(
+                            //   child: _isGridView
+                            //       ? GridView.builder(
+                            //           gridDelegate:
+                            //               const SliverGridDelegateWithFixedCrossAxisCount(
+                            //             crossAxisCount: 2,
+                            //             childAspectRatio: 0.9,
+                            //           ),
+                            //           // controller: _productGridController,
+                            //           itemCount: (_product.length / 2).ceil(),
+                            //           itemBuilder: (context, index) {
+                            //             final firstIndex = index * 2;
+                            //             final secondIndex = firstIndex + 1;
+                            //             return Row(
+                            //               children: [
+                            //                 Expanded(
+                            //                   child: OrderMenuListVerticalCard(
+                            //                     item: _product[firstIndex],
+                            //                     onDetailsPressed: () async {
+                            //                       setState(() {
+                            //                         selectedUnit = '';
+                            //                         selectedSize = '';
+                            //                         price = 0.00;
+                            //                         count = 1;
+                            //                         total = 0.00;
+                            //                         // lotStock = '';
+                            //                         stockQty = 0;
+                            //                       });
 
-                                                        _showProductSheet(
-                                                            context,
-                                                            filteredProductList[
-                                                                firstIndex]);
-                                                      },
-                                                    ),
-                                                  ),
-                                                  if (secondIndex <
-                                                      filteredProductList
-                                                          .length)
-                                                    Expanded(
-                                                      child:
-                                                          OrderMenuListVerticalCard(
-                                                        item:
-                                                            filteredProductList[
-                                                                secondIndex],
-                                                        onDetailsPressed: () {
-                                                          setState(() {
-                                                            selectedUnit = '';
-                                                            selectedSize = '';
-                                                            price = 0.00;
-                                                            count = 1;
-                                                            total = 0.00;
-                                                            // lotStock = '';
-                                                            stockQty = 0;
-                                                          });
-                                                          _showProductSheet(
-                                                              context,
-                                                              filteredProductList[
-                                                                  secondIndex]);
-                                                        },
-                                                      ),
-                                                    )
-                                                  else
-                                                    Expanded(
-                                                      child:
-                                                          SizedBox(), // Placeholder for spacing if no second card
-                                                    ),
-                                                ],
-                                              );
-                                            },
-                                          ),
-                                        )
-
-                                        // Row(
-                                        //   children: [
-                                        //     Expanded(
-                                        //       child: OrderMenuListVerticalCard(
-                                        //         onDetailsPressed: () {},
-                                        //       ),
-                                        //     ),
-                                        //     Expanded(
-                                        //       child: OrderMenuListVerticalCard(
-                                        //         onDetailsPressed: () {},
-                                        //       ),
-                                        //     ),
-                                        //   ],
-                                        // ),
-                                      ],
-                                    ),
-                                  )
-                                : Expanded(
-                                    child: Column(
-                                      children: [
-                                        Expanded(
-                                          child: ListView.builder(
-                                            itemCount:
-                                                filteredProductList.length,
-                                            itemBuilder: (context, index) {
-                                              return OrderMenuListCard(
-                                                product:
-                                                    filteredProductList[index],
-                                                onTap: () {
-                                                  print(filteredProductList[
-                                                      index]);
-                                                  setState(() {
-                                                    selectedUnit = '';
-                                                    selectedSize = '';
-                                                    price = 0.00;
-                                                    count = 1;
-                                                    total = 0.00;
-                                                    stockQty = 0;
-                                                  });
-                                                  _showProductSheet(
-                                                      context,
-                                                      filteredProductList[
-                                                          index]);
-                                                },
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                            //                       _showProductSheet(context,
+                            //                           _product[firstIndex]);
+                            //                     },
+                            //                   ),
+                            //                 ),
+                            //                 if (secondIndex < _product.length)
+                            //                   Expanded(
+                            //                     child:
+                            //                         OrderMenuListVerticalCard(
+                            //                       item: _product[secondIndex],
+                            //                       onDetailsPressed: () {
+                            //                         setState(() {
+                            //                           selectedUnit = '';
+                            //                           selectedSize = '';
+                            //                           price = 0.00;
+                            //                           count = 1;
+                            //                           total = 0.00;
+                            //                           // lotStock = '';
+                            //                           stockQty = 0;
+                            //                         });
+                            //                         _showProductSheet(context,
+                            //                             _product[secondIndex]);
+                            //                       },
+                            //                     ),
+                            //                   )
+                            //                 else
+                            //                   Expanded(
+                            //                     child:
+                            //                         SizedBox(), // Placeholder for spacing if no second card
+                            //                   ),
+                            //               ],
+                            //             );
+                            //           },
+                            //         )
+                            //       : ListView.builder(
+                            //           itemCount: _product.length,
+                            //           controller: _listController,
+                            //           itemBuilder: (context, index) {
+                            //             return OrderMenuListCard(
+                            //               product: _product[index],
+                            //               onTap: () {
+                            //                 print(_product[index]);
+                            //                 setState(() {
+                            //                   selectedUnit = '';
+                            //                   selectedSize = '';
+                            //                   price = 0.00;
+                            //                   count = 1;
+                            //                   total = 0.00;
+                            //                   stockQty = 0;
+                            //                 });
+                            //                 _showProductSheet(
+                            //                     context, _product[index]);
+                            //               },
+                            //             );
+                            //           },
+                            //         ),
+                            // ),
                             Container(
                               margin: EdgeInsets.only(top: 8),
                               child: Row(
@@ -1389,7 +1442,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                     Expanded(
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
-                        controller: scrollController,
+                        // controller: scrollController,
                         child: Container(
                           height: screenHeight * 0.9,
                           color: Colors.white,
@@ -1750,7 +1803,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                         .show();
                                                     await _addCart(product);
                                                     await _getCart();
-                                                    await _getProduct(true);
+                                                    await _loadProduct();
                                                     setModalState(() {
                                                       stockQty -= count;
                                                     });
@@ -1888,13 +1941,13 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                             children: [
                               Expanded(
                                   child: Scrollbar(
-                                controller: _cartScrollController,
+                                // controller: _cartScrollController,
                                 thickness: 10,
                                 thumbVisibility: true,
                                 trackVisibility: true,
                                 radius: Radius.circular(16),
                                 child: ListView.builder(
-                                  controller: _cartScrollController,
+                                  // controller: _cartScrollController,
                                   itemCount: cartlist.length,
                                   itemBuilder: (context, index) {
                                     return Column(
@@ -2129,8 +2182,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
                                                                     cartlist[
                                                                         index],
                                                                     setModalState);
-                                                                await _getProduct(
-                                                                    true);
+                                                                await _loadProduct();
                                                                 setModalState(
                                                                   () {
                                                                     cartList.removeWhere((item) => (item.id ==
