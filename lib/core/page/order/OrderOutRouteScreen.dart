@@ -93,6 +93,8 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
   bool _hasMore = true;
   String _query = '';
 
+  bool _isPaginating = false;
+
   List<Store> storeList = [];
   final ScrollController _cartScrollController = ScrollController();
 
@@ -116,51 +118,51 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     _getStore();
     _loadProduct();
     _listController2.addListener(_onScroll);
-    // _productGridController.addListener(_onScrollGird);
+    _productGridController.addListener(_onScrollGird);
   }
 
-  void _onSearch(String query) {
-    _query = query.trim();
-    _loadProduct(reset: true);
-  }
+  // void _onSearch(String query) {
+  //   _query = query.trim();
+  //   _loadProduct(reset: true);
+  // }
 
   @override
   void didPopNext() {
     _getCart();
   }
 
-  // void _onScroll() {
-  //   final controller = _isGridView ? _productGridController : _listController;
-  //   if (controller.position.pixels >=
-  //       controller.position.maxScrollExtent - 100) {
-  //     _loadProduct();
-  //   }
-  // }
-
-  void _onScroll() {
-    // final controller = _isGridView ? _productGridController : _listController;
-    if (_listController2.position.pixels >=
-        _listController2.position.maxScrollExtent - 100) {
-      _loadProduct();
+  Future<void> _paginate() async {
+    _isPaginating = true;
+    try {
+      await _loadProduct(); // ดึงหน้าถัดไป และทำ setState ภายใน
+    } finally {
+      _isPaginating = false;
     }
   }
 
-  // void _onScrollGird() {
-  //   // print(
-  //   //     "_productScrollController.position.pixels ${_productScrollController.position.pixels}");
-  //   // print(
-  //   //     "_productScrollController.position.maxScrollExtent ${_productScrollController.position.maxScrollExtent - 100}");
+  void _onScroll() {
+    if (!_listController2.hasClients || _isPaginating || !_hasMore) return;
 
-  //   if (_productGridController.position.pixels >=
-  //       _productGridController.position.maxScrollExtent - 100) {
-  //     _loadProduct();
-  //   }
-  // }
+    // เหลือคอนเทนต์ข้างหน้า < 200px ค่อยโหลดเพิ่ม
+    if (_listController2.position.extentAfter < 200) {
+      _paginate();
+    }
+  }
+
+  void _onScrollGird() {
+    if (!_productGridController.hasClients || _isPaginating || !_hasMore)
+      return;
+
+    // เหลือคอนเทนต์ข้างหน้า < 200px ค่อยโหลดเพิ่ม
+    if (_productGridController.position.extentAfter < 200) {
+      _paginate();
+    }
+  }
 
   Future<void> _loadProduct({bool reset = false}) async {
     if (_isLoading || (!_hasMore && !reset)) return;
 
-    setState(() => _isLoading = true);
+    // setState(() => _isLoading = true);
     if (reset) {
       _page = 1;
       _product.clear();
@@ -168,7 +170,14 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     }
 
     try {
-      final fetched = await ProductService.fetchProduct(page: _page);
+      final fetched = await ProductService.fetchProduct(
+        page: _page,
+        selectedGroups: selectedGroups,
+        selectedBrands: selectedBrands,
+        selectedFlavours: selectedFlavours,
+        selectedSizes: selectedSizes,
+        q: searchController.text,
+      );
 
       setState(() {
         _product.addAll(fetched);
@@ -228,7 +237,7 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
     routeObserver.unsubscribe(this);
     _cartScrollController.dispose();
     _productGridController.dispose();
-    _listController.dispose();
+    _listController2.dispose();
     super.dispose();
   }
 
@@ -725,644 +734,590 @@ class _OrderOutRouteScreenState extends State<OrderOutRouteScreen>
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return LoadingSkeletonizer(
-            loading: _isLoading,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(
-                    height: 8,
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  height: 8,
+                ),
+                BoxShadowCustom(
+                    child: Container(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.store,
+                                    color: Styles.primaryColor,
+                                    size: 30,
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                        selectedStoreId != ""
+                                            ? selectedStore
+                                            : " กรุณาเลือกร้านค้า",
+                                        style: Styles.black18(context)),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Text("เลือกร้านค้า", style: Styles.grey18(context))
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(0),
+                                    elevation: 0, // Disable shadow
+                                    shadowColor: Colors
+                                        .transparent, // Ensure no shadow color
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius
+                                          .zero, // No rounded corners
+                                      side: BorderSide.none, // Remove border
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      selectedStoreId != ""
+                                          ? Expanded(
+                                              child: Text(
+                                                  selectedStoreId != ""
+                                                      ? "${selectedStoreId}  ${selectedStoreShopType} ${selectedStoreTel} ${selectedStoreAddress}"
+                                                      : " ",
+                                                  style:
+                                                      Styles.black18(context)),
+                                            )
+                                          : SizedBox(),
+                                      Icon(
+                                        Icons.keyboard_arrow_right_sharp,
+                                        color: Styles.grey,
+                                        size: 30,
+                                      ),
+                                    ],
+                                  ),
+                                  onPressed: () {
+                                    _showAddressSheet(context);
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
                   ),
-                  BoxShadowCustom(
-                      child: Container(
+                )),
+                SizedBox(
+                  height: 8,
+                ),
+                Expanded(
+                  child: BoxShadowCustom(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
+                                flex: 4,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          BadageFilter.showFilterSheet(
+                                            context: context,
+                                            title: 'เลือกกลุ่ม',
+                                            title2: 'กลุ่ม',
+                                            itemList: groupList,
+                                            selectedItems: selectedGroups,
+                                            onItemSelected: (data, selected) {
+                                              if (selected) {
+                                                selectedGroups.add(data);
+                                              } else {
+                                                selectedGroups.remove(data);
+                                              }
+                                              _getFliterGroup();
+                                            },
+                                            onClear: () {
+                                              selectedGroups.clear();
+                                              selectedBrands.clear();
+                                              selectedSizes.clear();
+                                              selectedFlavours.clear();
+                                              brandList.clear();
+                                              sizeList.clear();
+                                              flavourList.clear();
+                                              context.loaderOverlay.show();
+                                              _loadProduct(reset: true).then(
+                                                  (_) => Timer(
+                                                          Duration(seconds: 3),
+                                                          () {
+                                                        context.loaderOverlay
+                                                            .hide();
+                                                      }));
+                                            },
+                                            onSearch: () =>
+                                                _loadProduct(reset: true),
+                                          );
+                                        },
+                                        child: badgeFilter(
+                                          isSelected: selectedGroups.isNotEmpty
+                                              ? true
+                                              : false,
+                                          child: Text(
+                                            selectedGroups.isEmpty
+                                                ? 'กลุ่ม'
+                                                : selectedGroups.join(', '),
+                                            style: selectedGroups.isEmpty
+                                                ? Styles.black18(context)
+                                                : Styles.pirmary18(context),
+                                            overflow: TextOverflow
+                                                .ellipsis, // Truncate if too long
+                                            maxLines: 1, // Restrict to 1 line
+                                            softWrap: false, // Avoid wrapping
+                                          ),
+                                          width:
+                                              selectedGroups.isEmpty ? 85 : 120,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          BadageFilter.showFilterSheet(
+                                            context: context,
+                                            title: 'เลือกขนาด',
+                                            title2: 'ขนาด',
+                                            itemList: sizeList,
+                                            selectedItems: selectedSizes,
+                                            onItemSelected: (data, selected) {
+                                              if (selected) {
+                                                selectedSizes.add(data);
+                                              } else {
+                                                selectedSizes.remove(data);
+                                              }
+                                              _getFliterSize();
+                                            },
+                                            onClear: () {
+                                              selectedSizes.clear();
+                                              selectedFlavours.clear();
+                                              brandList.clear();
+                                              sizeList.clear();
+                                              flavourList.clear();
+                                              context.loaderOverlay.show();
+                                              _loadProduct(reset: true).then(
+                                                  (_) => Timer(
+                                                          Duration(seconds: 3),
+                                                          () {
+                                                        context.loaderOverlay
+                                                            .hide();
+                                                      }));
+                                            },
+                                            onSearch: () =>
+                                                _loadProduct(reset: true),
+                                          );
+                                        },
+                                        child: badgeFilter(
+                                          isSelected: selectedSizes.isNotEmpty
+                                              ? true
+                                              : false,
+                                          child: Text(
+                                            selectedSizes.isEmpty
+                                                ? 'ขนาด'
+                                                : selectedSizes.join(', '),
+                                            style: selectedSizes.isEmpty
+                                                ? Styles.black18(context)
+                                                : Styles.pirmary18(context),
+                                            overflow: TextOverflow
+                                                .ellipsis, // Truncate if too long
+                                            maxLines: 1, // Restrict to 1 line
+                                            softWrap: false, // Avoid wrapping
+                                          ),
+                                          width:
+                                              selectedSizes.isEmpty ? 120 : 120,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          BadageFilter.showFilterSheet(
+                                            context: context,
+                                            title: 'เลือกรสชาติ',
+                                            title2: 'รสชาติ',
+                                            itemList: flavourList,
+                                            selectedItems: selectedFlavours,
+                                            onItemSelected: (data, selected) {
+                                              if (selected) {
+                                                selectedFlavours.add(data);
+                                              } else {
+                                                selectedFlavours.remove(data);
+                                              }
+                                            },
+                                            onClear: () {
+                                              selectedFlavours.clear();
+                                              flavourList.clear();
+                                              context.loaderOverlay.show();
+                                              _loadProduct(reset: true).then(
+                                                  (_) => Timer(
+                                                          Duration(seconds: 3),
+                                                          () {
+                                                        context.loaderOverlay
+                                                            .hide();
+                                                      }));
+                                            },
+                                            onSearch: () =>
+                                                _loadProduct(reset: true),
+                                          );
+                                        },
+                                        child: badgeFilter(
+                                          isSelected:
+                                              selectedFlavours.isNotEmpty
+                                                  ? true
+                                                  : false,
+                                          child: Text(
+                                            selectedFlavours.isEmpty
+                                                ? 'รสชาติ'
+                                                : selectedFlavours.join(', '),
+                                            style: selectedFlavours.isEmpty
+                                                ? Styles.black18(context)
+                                                : Styles.pirmary18(context),
+                                            overflow: TextOverflow
+                                                .ellipsis, // Truncate if too long
+                                            maxLines: 1, // Restrict to 1 line
+                                            softWrap: false, // Avoid wrapping
+                                          ),
+                                          width: selectedFlavours.isEmpty
+                                              ? 120
+                                              : 120,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          _clearFilter();
+                                          context.loaderOverlay.show();
+                                          _loadProduct(reset: true).then((_) =>
+                                              Timer(Duration(seconds: 3), () {
+                                                context.loaderOverlay.hide();
+                                              }));
+                                        },
+                                        child: badgeFilter(
+                                          openIcon: false,
+                                          child: Text(
+                                            'ล้างตัวเลือก',
+                                            style: Styles.grey18(context),
+                                          ),
+                                          width: 110,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
                                 child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Icon(
-                                      Icons.store,
-                                      color: Styles.primaryColor,
-                                      size: 30,
+                                    SizedBox(
+                                      width: 5,
                                     ),
-                                    const SizedBox(
-                                      width: 8,
+                                    CustomSlidingSegmentedControl<int>(
+                                      initialValue: 1,
+                                      fixedWidth: 50,
+                                      children: {
+                                        1: Icon(
+                                          FontAwesomeIcons.tableList,
+                                          color: _isSelectedGridView == 1
+                                              ? Styles.primaryColor
+                                              : Styles.white,
+                                        ),
+                                        2: Icon(
+                                          FontAwesomeIcons.tableCellsLarge,
+                                          color: _isSelectedGridView == 2
+                                              ? Styles.primaryColor
+                                              : Styles.white,
+                                        ),
+                                      },
+                                      onValueChanged: (v) {
+                                        if (_isSelectedGridView != v) {
+                                          if (!_isGridView) {
+                                            setState(() {
+                                              _isGridView = true;
+                                            });
+                                          } else {
+                                            setState(() {
+                                              _isGridView = false;
+                                            });
+                                          }
+                                        }
+                                        setState(() {
+                                          _isSelectedGridView = v;
+                                        });
+                                      },
+                                      decoration: BoxDecoration(
+                                        color: Styles.primaryColor,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      thumbDecoration: BoxDecoration(
+                                        color: Styles.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      duration:
+                                          const Duration(milliseconds: 500),
                                     ),
-                                    Expanded(
-                                      child: Text(
-                                          selectedStoreId != ""
-                                              ? selectedStore
-                                              : " กรุณาเลือกร้านค้า",
-                                          style: Styles.black18(context)),
-                                    )
                                   ],
                                 ),
                               ),
-                              Text("เลือกร้านค้า",
-                                  style: Styles.grey18(context))
                             ],
                           ),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Container(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.all(0),
-                                      elevation: 0, // Disable shadow
-                                      shadowColor: Colors
-                                          .transparent, // Ensure no shadow color
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius
-                                            .zero, // No rounded corners
-                                        side: BorderSide.none, // Remove border
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: TextField(
+                                    autofocus: true,
+                                    style: Styles.black18(context),
+                                    controller: searchController,
+                                    onChanged: (query) {
+                                      if (query != "") {
+                                        const duration = Duration(seconds: 1);
+                                        _debouncer.debounce(
+                                          duration: duration,
+                                          onDebounce: () {
+                                            _loadProduct(reset: true);
+                                          },
+                                        );
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: "ค้นหาสินค้า...",
+                                      hintStyle: Styles.grey18(context),
+                                      prefixIcon: Icon(Icons.search),
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(16.0),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Expanded(
+                            child: _isGridView
+                                ? ListView.builder(
+                                    key: ValueKey(_isGridView),
+                                    controller: _productGridController,
+                                    itemCount: (_product.length / 2).ceil(),
+                                    itemBuilder: (context, index) {
+                                      final firstIndex = index * 2;
+                                      final secondIndex = firstIndex + 1;
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                            child: OrderMenuListVerticalCard(
+                                              item: _product[firstIndex],
+                                              onDetailsPressed: () async {
+                                                setState(() {
+                                                  selectedUnit = '';
+                                                  selectedSize = '';
+                                                  price = 0.00;
+                                                  count = 1;
+                                                  total = 0.00;
+                                                  // lotStock = '';
+                                                  stockQty = 0;
+                                                });
+
+                                                _showProductSheet(context,
+                                                    _product[firstIndex]);
+                                              },
+                                            ),
+                                          ),
+                                          if (secondIndex < _product.length)
+                                            Expanded(
+                                              child: OrderMenuListVerticalCard(
+                                                item: _product[secondIndex],
+                                                onDetailsPressed: () {
+                                                  setState(() {
+                                                    selectedUnit = '';
+                                                    selectedSize = '';
+                                                    price = 0.00;
+                                                    count = 1;
+                                                    total = 0.00;
+                                                    // lotStock = '';
+                                                    stockQty = 0;
+                                                  });
+                                                  _showProductSheet(context,
+                                                      _product[secondIndex]);
+                                                },
+                                              ),
+                                            )
+                                          else
+                                            Expanded(
+                                              child:
+                                                  SizedBox(), // Placeholder for spacing if no second card
+                                            ),
+                                        ],
+                                      );
+                                    },
+                                  )
+                                : ListView.builder(
+                                    key: ValueKey(_isGridView),
+                                    itemCount: _product.length,
+                                    controller: _listController2,
+                                    itemBuilder: (context, index) {
+                                      return OrderMenuListCard(
+                                        product: _product[index],
+                                        onTap: () {
+                                          print(_product[index]);
+                                          setState(() {
+                                            selectedUnit = '';
+                                            selectedSize = '';
+                                            price = 0.00;
+                                            count = 1;
+                                            total = 0.00;
+                                            stockQty = 0;
+                                          });
+                                          // _showProductSheet(
+                                          //     context, _product[index]);
+                                        },
+                                      );
+                                    },
+                                  ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Stack(
+                                  alignment: Alignment(1.3, -1.5),
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        await _getCart();
+                                        _showCartSheet(context, cartList);
+                                      },
+                                      child: Icon(
+                                        Icons.shopping_bag_outlined,
+                                        color: Colors.white,
+                                        size: 35,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.all(4),
+                                        backgroundColor: Styles.primaryColor,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
                                       ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        selectedStoreId != ""
-                                            ? Expanded(
-                                                child: Text(
-                                                    selectedStoreId != ""
-                                                        ? "${selectedStoreId}  ${selectedStoreShopType} ${selectedStoreTel} ${selectedStoreAddress}"
-                                                        : " ",
-                                                    style: Styles.black18(
-                                                        context)),
-                                              )
-                                            : SizedBox(),
-                                        Icon(
-                                          Icons.keyboard_arrow_right_sharp,
-                                          color: Styles.grey,
-                                          size: 30,
-                                        ),
-                                      ],
-                                    ),
+                                    cartList.isNotEmpty
+                                        ? Container(
+                                            width:
+                                                25, // Set the width of the button
+                                            height: 25,
+                                            // constraints: BoxConstraints(minHeight: 32, minWidth: 32),
+                                            decoration: BoxDecoration(
+                                              // This controls the shadow
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  spreadRadius: 1,
+                                                  blurRadius: 5,
+                                                  color: Colors.black
+                                                      .withAlpha(50),
+                                                )
+                                              ],
+                                              borderRadius:
+                                                  BorderRadius.circular(180),
+                                              color: Colors
+                                                  .red, // This would be color of the Badge
+                                            ),
+                                            // This is your Badge
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    "ยอดรวม ฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalCart)} บาท",
+                                    style: Styles.black24(context),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  // Ensures text does not overflow the screen
+                                  child: ButtonFullWidth(
+                                    text: 'สั่งซื้อ',
+                                    blackGroundColor: Styles.primaryColor,
+                                    textStyle: Styles.white18(context),
                                     onPressed: () {
-                                      _showAddressSheet(context);
+                                      if (cartList.isNotEmpty) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                CreateOrderScreen(
+                                                    routeId: '',
+                                                    storeId: selectedStoreId,
+                                                    storeName: selectedStore,
+                                                    storeAddress:
+                                                        selectedStoreAddress),
+                                          ),
+                                        );
+                                      } else {
+                                        toastification.show(
+                                          autoCloseDuration:
+                                              const Duration(seconds: 5),
+                                          context: context,
+                                          primaryColor: Colors.red,
+                                          type: ToastificationType.error,
+                                          style:
+                                              ToastificationStyle.flatColored,
+                                          title: Text(
+                                            "กรุณาเลือกรายการสินค้า",
+                                            style: Styles.red18(context),
+                                          ),
+                                        );
+                                      }
                                     },
                                   ),
                                 ),
-                              )
-                            ],
-                          )
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  )),
-                  SizedBox(
-                    height: 8,
                   ),
-                  Expanded(
-                    child: BoxShadowCustom(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 4,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            BadageFilter.showFilterSheet(
-                                              context: context,
-                                              title: 'เลือกกลุ่ม',
-                                              title2: 'กลุ่ม',
-                                              itemList: groupList,
-                                              selectedItems: selectedGroups,
-                                              onItemSelected: (data, selected) {
-                                                if (selected) {
-                                                  selectedGroups.add(data);
-                                                } else {
-                                                  selectedGroups.remove(data);
-                                                }
-                                                _getFliterGroup();
-                                              },
-                                              onClear: () {
-                                                selectedGroups.clear();
-                                                selectedBrands.clear();
-                                                selectedSizes.clear();
-                                                selectedFlavours.clear();
-                                                brandList.clear();
-                                                sizeList.clear();
-                                                flavourList.clear();
-                                                context.loaderOverlay.show();
-                                                _loadProduct().then((_) =>
-                                                    Timer(Duration(seconds: 3),
-                                                        () {
-                                                      context.loaderOverlay
-                                                          .hide();
-                                                    }));
-                                              },
-                                              onSearch: () => _loadProduct(),
-                                            );
-                                          },
-                                          child: badgeFilter(
-                                            isSelected:
-                                                selectedGroups.isNotEmpty
-                                                    ? true
-                                                    : false,
-                                            child: Text(
-                                              selectedGroups.isEmpty
-                                                  ? 'กลุ่ม'
-                                                  : selectedGroups.join(', '),
-                                              style: selectedGroups.isEmpty
-                                                  ? Styles.black18(context)
-                                                  : Styles.pirmary18(context),
-                                              overflow: TextOverflow
-                                                  .ellipsis, // Truncate if too long
-                                              maxLines: 1, // Restrict to 1 line
-                                              softWrap: false, // Avoid wrapping
-                                            ),
-                                            width: selectedGroups.isEmpty
-                                                ? 85
-                                                : 120,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            BadageFilter.showFilterSheet(
-                                              context: context,
-                                              title: 'เลือกขนาด',
-                                              title2: 'ขนาด',
-                                              itemList: sizeList,
-                                              selectedItems: selectedSizes,
-                                              onItemSelected: (data, selected) {
-                                                if (selected) {
-                                                  selectedSizes.add(data);
-                                                } else {
-                                                  selectedSizes.remove(data);
-                                                }
-                                                _getFliterSize();
-                                              },
-                                              onClear: () {
-                                                selectedSizes.clear();
-                                                selectedFlavours.clear();
-                                                brandList.clear();
-                                                sizeList.clear();
-                                                flavourList.clear();
-                                                context.loaderOverlay.show();
-                                                _loadProduct().then((_) =>
-                                                    Timer(Duration(seconds: 3),
-                                                        () {
-                                                      context.loaderOverlay
-                                                          .hide();
-                                                    }));
-                                              },
-                                              onSearch: () => _loadProduct(),
-                                            );
-                                          },
-                                          child: badgeFilter(
-                                            isSelected: selectedSizes.isNotEmpty
-                                                ? true
-                                                : false,
-                                            child: Text(
-                                              selectedSizes.isEmpty
-                                                  ? 'ขนาด'
-                                                  : selectedSizes.join(', '),
-                                              style: selectedSizes.isEmpty
-                                                  ? Styles.black18(context)
-                                                  : Styles.pirmary18(context),
-                                              overflow: TextOverflow
-                                                  .ellipsis, // Truncate if too long
-                                              maxLines: 1, // Restrict to 1 line
-                                              softWrap: false, // Avoid wrapping
-                                            ),
-                                            width: selectedSizes.isEmpty
-                                                ? 120
-                                                : 120,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            BadageFilter.showFilterSheet(
-                                              context: context,
-                                              title: 'เลือกรสชาติ',
-                                              title2: 'รสชาติ',
-                                              itemList: flavourList,
-                                              selectedItems: selectedFlavours,
-                                              onItemSelected: (data, selected) {
-                                                if (selected) {
-                                                  selectedFlavours.add(data);
-                                                } else {
-                                                  selectedFlavours.remove(data);
-                                                }
-                                              },
-                                              onClear: () {
-                                                selectedFlavours.clear();
-                                                flavourList.clear();
-                                                context.loaderOverlay.show();
-                                                _loadProduct().then((_) =>
-                                                    Timer(Duration(seconds: 3),
-                                                        () {
-                                                      context.loaderOverlay
-                                                          .hide();
-                                                    }));
-                                              },
-                                              onSearch: () => _loadProduct(),
-                                            );
-                                          },
-                                          child: badgeFilter(
-                                            isSelected:
-                                                selectedFlavours.isNotEmpty
-                                                    ? true
-                                                    : false,
-                                            child: Text(
-                                              selectedFlavours.isEmpty
-                                                  ? 'รสชาติ'
-                                                  : selectedFlavours.join(', '),
-                                              style: selectedFlavours.isEmpty
-                                                  ? Styles.black18(context)
-                                                  : Styles.pirmary18(context),
-                                              overflow: TextOverflow
-                                                  .ellipsis, // Truncate if too long
-                                              maxLines: 1, // Restrict to 1 line
-                                              softWrap: false, // Avoid wrapping
-                                            ),
-                                            width: selectedFlavours.isEmpty
-                                                ? 120
-                                                : 120,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _clearFilter();
-                                            context.loaderOverlay.show();
-                                            _loadProduct().then((_) =>
-                                                Timer(Duration(seconds: 3), () {
-                                                  context.loaderOverlay.hide();
-                                                }));
-                                          },
-                                          child: badgeFilter(
-                                            openIcon: false,
-                                            child: Text(
-                                              'ล้างตัวเลือก',
-                                              style: Styles.grey18(context),
-                                            ),
-                                            width: 110,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      CustomSlidingSegmentedControl<int>(
-                                        initialValue: 1,
-                                        fixedWidth: 50,
-                                        children: {
-                                          1: Icon(
-                                            FontAwesomeIcons.tableList,
-                                            color: _isSelectedGridView == 1
-                                                ? Styles.primaryColor
-                                                : Styles.white,
-                                          ),
-                                          2: Icon(
-                                            FontAwesomeIcons.tableCellsLarge,
-                                            color: _isSelectedGridView == 2
-                                                ? Styles.primaryColor
-                                                : Styles.white,
-                                          ),
-                                        },
-                                        onValueChanged: (v) {
-                                          if (_isSelectedGridView != v) {
-                                            if (!_isGridView) {
-                                              setState(() {
-                                                _isGridView = true;
-                                              });
-                                            } else {
-                                              setState(() {
-                                                _isGridView = false;
-                                              });
-                                            }
-                                          }
-                                          setState(() {
-                                            _isSelectedGridView = v;
-                                          });
-                                        },
-                                        decoration: BoxDecoration(
-                                          color: Styles.primaryColor,
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        thumbDecoration: BoxDecoration(
-                                          color: Styles.white,
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        duration:
-                                            const Duration(milliseconds: 500),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 1,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: TextField(
-                                      autofocus: true,
-                                      style: Styles.black18(context),
-                                      controller: searchController,
-                                      onChanged: (query) {
-                                        if (query != "") {
-                                          setState(() {
-                                            filteredProductList = _product
-                                                .where((item) =>
-                                                    item.name
-                                                        .toLowerCase()
-                                                        .contains(query
-                                                            .toLowerCase()) ||
-                                                    item.brand.toLowerCase().contains(
-                                                        query.toLowerCase()) ||
-                                                    item.group
-                                                        .toLowerCase()
-                                                        .contains(query
-                                                            .toLowerCase()) ||
-                                                    item.flavour
-                                                        .toLowerCase()
-                                                        .contains(query
-                                                            .toLowerCase()) ||
-                                                    item.id.toLowerCase().contains(
-                                                        query.toLowerCase()) ||
-                                                    item.size
-                                                        .toLowerCase()
-                                                        .contains(
-                                                            query.toLowerCase()))
-                                                .toList();
-                                          });
-                                        } else {
-                                          setState(() {
-                                            filteredProductList = _product;
-                                          });
-                                        }
-                                      },
-                                      decoration: InputDecoration(
-                                        hintText: "ค้นหาสินค้า...",
-                                        hintStyle: Styles.grey18(context),
-                                        prefixIcon: Icon(Icons.search),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16.0),
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 8,
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: _product.length,
-                                controller: _listController2,
-                                itemBuilder: (context, index) {
-                                  return OrderMenuListCard(
-                                    product: _product[index],
-                                    onTap: () {
-                                      print(_product[index]);
-                                      setState(() {
-                                        selectedUnit = '';
-                                        selectedSize = '';
-                                        price = 0.00;
-                                        count = 1;
-                                        total = 0.00;
-                                        stockQty = 0;
-                                      });
-                                      // _showProductSheet(
-                                      //     context, _product[index]);
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                            // Expanded(
-                            //   child: _isGridView
-                            //       ? GridView.builder(
-                            //           gridDelegate:
-                            //               const SliverGridDelegateWithFixedCrossAxisCount(
-                            //             crossAxisCount: 2,
-                            //             childAspectRatio: 0.9,
-                            //           ),
-                            //           // controller: _productGridController,
-                            //           itemCount: (_product.length / 2).ceil(),
-                            //           itemBuilder: (context, index) {
-                            //             final firstIndex = index * 2;
-                            //             final secondIndex = firstIndex + 1;
-                            //             return Row(
-                            //               children: [
-                            //                 Expanded(
-                            //                   child: OrderMenuListVerticalCard(
-                            //                     item: _product[firstIndex],
-                            //                     onDetailsPressed: () async {
-                            //                       setState(() {
-                            //                         selectedUnit = '';
-                            //                         selectedSize = '';
-                            //                         price = 0.00;
-                            //                         count = 1;
-                            //                         total = 0.00;
-                            //                         // lotStock = '';
-                            //                         stockQty = 0;
-                            //                       });
-
-                            //                       _showProductSheet(context,
-                            //                           _product[firstIndex]);
-                            //                     },
-                            //                   ),
-                            //                 ),
-                            //                 if (secondIndex < _product.length)
-                            //                   Expanded(
-                            //                     child:
-                            //                         OrderMenuListVerticalCard(
-                            //                       item: _product[secondIndex],
-                            //                       onDetailsPressed: () {
-                            //                         setState(() {
-                            //                           selectedUnit = '';
-                            //                           selectedSize = '';
-                            //                           price = 0.00;
-                            //                           count = 1;
-                            //                           total = 0.00;
-                            //                           // lotStock = '';
-                            //                           stockQty = 0;
-                            //                         });
-                            //                         _showProductSheet(context,
-                            //                             _product[secondIndex]);
-                            //                       },
-                            //                     ),
-                            //                   )
-                            //                 else
-                            //                   Expanded(
-                            //                     child:
-                            //                         SizedBox(), // Placeholder for spacing if no second card
-                            //                   ),
-                            //               ],
-                            //             );
-                            //           },
-                            //         )
-                            //       : ListView.builder(
-                            //           itemCount: _product.length,
-                            //           controller: _listController,
-                            //           itemBuilder: (context, index) {
-                            //             return OrderMenuListCard(
-                            //               product: _product[index],
-                            //               onTap: () {
-                            //                 print(_product[index]);
-                            //                 setState(() {
-                            //                   selectedUnit = '';
-                            //                   selectedSize = '';
-                            //                   price = 0.00;
-                            //                   count = 1;
-                            //                   total = 0.00;
-                            //                   stockQty = 0;
-                            //                 });
-                            //                 _showProductSheet(
-                            //                     context, _product[index]);
-                            //               },
-                            //             );
-                            //           },
-                            //         ),
-                            // ),
-                            Container(
-                              margin: EdgeInsets.only(top: 8),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Stack(
-                                    alignment: Alignment(1.3, -1.5),
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          await _getCart();
-                                          _showCartSheet(context, cartList);
-                                        },
-                                        child: Icon(
-                                          Icons.shopping_bag_outlined,
-                                          color: Colors.white,
-                                          size: 35,
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          padding: EdgeInsets.all(4),
-                                          backgroundColor: Styles.primaryColor,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                      ),
-                                      cartList.isNotEmpty
-                                          ? Container(
-                                              width:
-                                                  25, // Set the width of the button
-                                              height: 25,
-                                              // constraints: BoxConstraints(minHeight: 32, minWidth: 32),
-                                              decoration: BoxDecoration(
-                                                // This controls the shadow
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    spreadRadius: 1,
-                                                    blurRadius: 5,
-                                                    color: Colors.black
-                                                        .withAlpha(50),
-                                                  )
-                                                ],
-                                                borderRadius:
-                                                    BorderRadius.circular(180),
-                                                color: Colors
-                                                    .red, // This would be color of the Badge
-                                              ),
-                                              // This is your Badge
-                                            )
-                                          : Container(),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      "ยอดรวม ฿${NumberFormat.currency(locale: 'th_TH', symbol: '').format(totalCart)} บาท",
-                                      style: Styles.black24(context),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    // Ensures text does not overflow the screen
-                                    child: ButtonFullWidth(
-                                      text: 'สั่งซื้อ',
-                                      blackGroundColor: Styles.primaryColor,
-                                      textStyle: Styles.white18(context),
-                                      onPressed: () {
-                                        if (cartList.isNotEmpty) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CreateOrderScreen(
-                                                      routeId: '',
-                                                      storeId: selectedStoreId,
-                                                      storeName: selectedStore,
-                                                      storeAddress:
-                                                          selectedStoreAddress),
-                                            ),
-                                          );
-                                        } else {
-                                          toastification.show(
-                                            autoCloseDuration:
-                                                const Duration(seconds: 5),
-                                            context: context,
-                                            primaryColor: Colors.red,
-                                            type: ToastificationType.error,
-                                            style:
-                                                ToastificationStyle.flatColored,
-                                            title: Text(
-                                              "กรุณาเลือกรายการสินค้า",
-                                              style: Styles.red18(context),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
           );
         },

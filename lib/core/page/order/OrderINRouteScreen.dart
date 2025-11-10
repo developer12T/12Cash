@@ -9,6 +9,7 @@ import 'package:_12sale_app/core/components/card/order/OrderMenuListCard.dart';
 import 'package:_12sale_app/core/components/card/order/OrderMenuListVerticalCard.dart';
 import 'package:_12sale_app/core/components/search/ProductSearch.dart';
 import 'package:_12sale_app/core/components/search/StoreSearch.dart';
+import 'package:_12sale_app/core/components/service/ProductService.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/page/order/CreateOrderScreen.dart';
 import 'package:_12sale_app/core/styles/style.dart';
@@ -55,8 +56,8 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
 
   bool _loadingProduct = true;
 
-  List<String> groupList = ['ผงปรุงรส'];
-  List<String> selectedGroups = ['ผงปรุงรส'];
+  List<String> groupList = [];
+  List<String> selectedGroups = [];
 
   List<String> brandList = [];
   List<String> selectedBrands = [];
@@ -95,13 +96,24 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
   String period =
       "${DateTime.now().year}${DateFormat('MM').format(DateTime.now())}";
 
+  bool _isLoading = false;
+  int _page = 1;
+  bool _hasMore = true;
+  List<Product> _product = [];
+  final ScrollController _productGridController = ScrollController();
+  final ScrollController _listController2 = ScrollController();
+  bool _isPaginating = false;
+
   @override
   void initState() {
     super.initState();
     _getFliter();
-    _getProduct(true);
+    // _getProduct(true);
+    _loadProduct();
     _getFliterSize();
     _getCart();
+    _listController2.addListener(_onScroll);
+    _productGridController.addListener(_onScrollGird);
   }
 
   @override
@@ -136,6 +148,34 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
 
   bool isInteger(String input) {
     return int.tryParse(input) != null;
+  }
+
+  void _onScroll() {
+    if (!_listController2.hasClients || _isPaginating || !_hasMore) return;
+
+    // เหลือคอนเทนต์ข้างหน้า < 200px ค่อยโหลดเพิ่ม
+    if (_listController2.position.extentAfter < 200) {
+      _paginate();
+    }
+  }
+
+  void _onScrollGird() {
+    if (!_productGridController.hasClients || _isPaginating || !_hasMore)
+      return;
+
+    // เหลือคอนเทนต์ข้างหน้า < 200px ค่อยโหลดเพิ่ม
+    if (_productGridController.position.extentAfter < 200) {
+      _paginate();
+    }
+  }
+
+  Future<void> _paginate() async {
+    _isPaginating = true;
+    try {
+      await _loadProduct(); // ดึงหน้าถัดไป และทำ setState ภายใน
+    } finally {
+      _isPaginating = false;
+    }
   }
 
   Future<void> _deleteCart(CartList cart, StateSetter setModalState) async {
@@ -448,6 +488,42 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
     }
   }
 
+  Future<void> _loadProduct({bool reset = false}) async {
+    if (_isLoading || (!_hasMore && !reset)) return;
+
+    // setState(() => _isLoading = true);
+    if (reset) {
+      _page = 1;
+      _product.clear();
+      _hasMore = true;
+    }
+
+    try {
+      final fetched = await ProductService.fetchProduct(
+        page: _page,
+        selectedGroups: selectedGroups,
+        selectedBrands: selectedBrands,
+        selectedFlavours: selectedFlavours,
+        selectedSizes: selectedSizes,
+        q: searchController.text,
+      );
+
+      setState(() {
+        _product.addAll(fetched);
+        _isLoading = false;
+        _hasMore = fetched.isNotEmpty;
+        filteredProductList = List.from(_product);
+        if (_hasMore) _page++;
+      });
+
+      print("_product ${fetched}");
+      print(fetched);
+    } catch (e) {
+      setState(() => _isLoading = false);
+      print("Error fetching _loadProduct: $e");
+    }
+  }
+
   Future<void> _getFliter() async {
     try {
       ApiService apiService = ApiService();
@@ -619,7 +695,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
             // padding: const EdgeInsets.all(16.0),
             // margin: const EdgeInsets.all(8.0),
             child: LoadingSkeletonizer(
-              loading: _loadingProduct,
+              loading: _isLoading,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -745,16 +821,18 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                   sizeList.clear();
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
-                                                  _getProduct(false).then((_) =>
-                                                      Timer(
-                                                          Duration(seconds: 1),
-                                                          () {
-                                                        context.loaderOverlay
-                                                            .hide();
-                                                      }));
+                                                  _loadProduct(reset: true)
+                                                      .then((_) => Timer(
+                                                              Duration(
+                                                                  seconds: 3),
+                                                              () {
+                                                            context
+                                                                .loaderOverlay
+                                                                .hide();
+                                                          }));
                                                 },
                                                 onSearch: () =>
-                                                    _getProduct(false),
+                                                    _loadProduct(reset: true),
                                               );
                                             },
                                             child: badgeFilter(
@@ -785,63 +863,6 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                             onTap: () {
                                               BadageFilter.showFilterSheet(
                                                 context: context,
-                                                title: 'เลือกแบรนด์',
-                                                title2: 'แบรนด์',
-                                                itemList: brandList,
-                                                selectedItems: selectedBrands,
-                                                onItemSelected:
-                                                    (data, selected) {
-                                                  if (selected) {
-                                                    selectedBrands.add(data);
-                                                  } else {
-                                                    selectedBrands.remove(data);
-                                                  }
-                                                  _getFliterBrand();
-                                                },
-                                                onClear: () {
-                                                  selectedBrands.clear();
-                                                  selectedSizes.clear();
-                                                  selectedFlavours.clear();
-                                                  brandList.clear();
-                                                  sizeList.clear();
-                                                  flavourList.clear();
-                                                  context.loaderOverlay.show();
-                                                  _getProduct(false).then((_) =>
-                                                      context.loaderOverlay
-                                                          .hide());
-                                                },
-                                                onSearch: () =>
-                                                    _getProduct(false),
-                                              );
-                                            },
-                                            child: badgeFilter(
-                                              isSelected:
-                                                  selectedBrands.isNotEmpty
-                                                      ? true
-                                                      : false,
-                                              child: Text(
-                                                selectedBrands.isEmpty
-                                                    ? 'แบรนด์'
-                                                    : selectedBrands.join(', '),
-                                                style: selectedBrands.isEmpty
-                                                    ? Styles.black18(context)
-                                                    : Styles.pirmary18(context),
-                                                overflow: TextOverflow
-                                                    .ellipsis, // Truncate if too long
-                                                maxLines:
-                                                    1, // Restrict to 1 line
-                                                softWrap:
-                                                    false, // Avoid wrapping
-                                              ),
-                                              width: selectedBrands.isEmpty
-                                                  ? 120
-                                                  : 120,
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              BadageFilter.showFilterSheet(
-                                                context: context,
                                                 title: 'เลือกขนาด',
                                                 title2: 'ขนาด',
                                                 itemList: sizeList,
@@ -862,12 +883,18 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                   sizeList.clear();
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
-                                                  _getProduct(false).then((_) =>
-                                                      context.loaderOverlay
-                                                          .hide());
+                                                  _loadProduct(reset: true)
+                                                      .then((_) => Timer(
+                                                              Duration(
+                                                                  seconds: 3),
+                                                              () {
+                                                            context
+                                                                .loaderOverlay
+                                                                .hide();
+                                                          }));
                                                 },
                                                 onSearch: () =>
-                                                    _getProduct(false),
+                                                    _loadProduct(reset: true),
                                               );
                                             },
                                             child: badgeFilter(
@@ -915,16 +942,18 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                   selectedFlavours.clear();
                                                   flavourList.clear();
                                                   context.loaderOverlay.show();
-                                                  _getProduct(false).then((_) =>
-                                                      Timer(
-                                                          Duration(seconds: 1),
-                                                          () {
-                                                        context.loaderOverlay
-                                                            .hide();
-                                                      }));
+                                                  _loadProduct(reset: true)
+                                                      .then((_) => Timer(
+                                                              Duration(
+                                                                  seconds: 3),
+                                                              () {
+                                                            context
+                                                                .loaderOverlay
+                                                                .hide();
+                                                          }));
                                                 },
                                                 onSearch: () =>
-                                                    _getProduct(false),
+                                                    _loadProduct(reset: true),
                                               );
                                             },
                                             child: badgeFilter(
@@ -956,18 +985,19 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                             onTap: () {
                                               _clearFilter();
                                               context.loaderOverlay.show();
-                                              _getProduct(false).then((_) =>
-                                                  Timer(Duration(seconds: 1),
-                                                      () {
-                                                    context.loaderOverlay
-                                                        .hide();
-                                                  }));
+                                              _loadProduct(reset: true).then(
+                                                  (_) => Timer(
+                                                          Duration(seconds: 3),
+                                                          () {
+                                                        context.loaderOverlay
+                                                            .hide();
+                                                      }));
                                             },
                                             child: badgeFilter(
                                               openIcon: false,
                                               child: Text(
                                                 'ล้างตัวเลือก',
-                                                style: Styles.black18(context),
+                                                style: Styles.grey18(context),
                                               ),
                                               width: 110,
                                             ),
@@ -1038,6 +1068,7 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                               Row(
                                 children: [
                                   Expanded(
+                                    flex: 1,
                                     child: Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: TextField(
@@ -1046,38 +1077,14 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                         controller: searchController,
                                         onChanged: (query) {
                                           if (query != "") {
-                                            setState(() {
-                                              filteredProductList = productList
-                                                  .where((item) =>
-                                                      item.name
-                                                          .toLowerCase()
-                                                          .contains(query
-                                                              .toLowerCase()) ||
-                                                      item.brand
-                                                          .toLowerCase()
-                                                          .contains(query
-                                                              .toLowerCase()) ||
-                                                      item.group
-                                                          .toLowerCase()
-                                                          .contains(query
-                                                              .toLowerCase()) ||
-                                                      item.flavour
-                                                          .toLowerCase()
-                                                          .contains(query
-                                                              .toLowerCase()) ||
-                                                      item.id
-                                                          .toLowerCase()
-                                                          .contains(query
-                                                              .toLowerCase()) ||
-                                                      item.size
-                                                          .toLowerCase()
-                                                          .contains(query.toLowerCase()))
-                                                  .toList();
-                                            });
-                                          } else {
-                                            setState(() {
-                                              filteredProductList = productList;
-                                            });
+                                            const duration =
+                                                Duration(seconds: 1);
+                                            _debouncer.debounce(
+                                              duration: duration,
+                                              onDebounce: () {
+                                                _loadProduct(reset: true);
+                                              },
+                                            );
                                           }
                                         },
                                         decoration: InputDecoration(
@@ -1096,135 +1103,95 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                   ),
                                 ],
                               ),
-                              _isGridView
-                                  ? Expanded(
-                                      child: Column(
-                                        children: [
-                                          Expanded(
-                                            child: ListView.builder(
-                                              itemCount:
-                                                  (filteredProductList.length /
-                                                          2)
-                                                      .ceil(),
-                                              itemBuilder: (context, index) {
-                                                final firstIndex = index * 2;
-                                                final secondIndex =
-                                                    firstIndex + 1;
-                                                return Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child:
-                                                          OrderMenuListVerticalCard(
-                                                        item:
-                                                            filteredProductList[
-                                                                firstIndex],
-                                                        onDetailsPressed:
-                                                            () async {
-                                                          setState(() {
-                                                            selectedUnit = '';
-                                                            selectedSize = '';
-                                                            price = 0.00;
-                                                            count = 1;
-                                                            total = 0.00;
-                                                            // lotStock = '';
-                                                            stockQty = 0;
-                                                          });
-
-                                                          _showProductSheet(
-                                                              context,
-                                                              filteredProductList[
-                                                                  firstIndex]);
-                                                        },
-                                                      ),
-                                                    ),
-                                                    if (secondIndex <
-                                                        filteredProductList
-                                                            .length)
-                                                      Expanded(
-                                                        child:
-                                                            OrderMenuListVerticalCard(
-                                                          item:
-                                                              filteredProductList[
-                                                                  secondIndex],
-                                                          onDetailsPressed: () {
-                                                            setState(() {
-                                                              selectedUnit = '';
-                                                              selectedSize = '';
-                                                              price = 0.00;
-                                                              count = 1;
-                                                              total = 0.00;
-                                                              // lotStock = '';
-                                                              stockQty = 0;
-                                                            });
-                                                            _showProductSheet(
-                                                                context,
-                                                                filteredProductList[
-                                                                    secondIndex]);
-                                                          },
-                                                        ),
-                                                      )
-                                                    else
-                                                      Expanded(
-                                                        child:
-                                                            SizedBox(), // Placeholder for spacing if no second card
-                                                      ),
-                                                  ],
-                                                );
-                                              },
-                                            ),
-                                          )
-
-                                          // Row(
-                                          //   children: [
-                                          //     Expanded(
-                                          //       child: OrderMenuListVerticalCard(
-                                          //         onDetailsPressed: () {},
-                                          //       ),
-                                          //     ),
-                                          //     Expanded(
-                                          //       child: OrderMenuListVerticalCard(
-                                          //         onDetailsPressed: () {},
-                                          //       ),
-                                          //     ),
-                                          //   ],
-                                          // ),
-                                        ],
-                                      ),
-                                    )
-                                  : Expanded(
-                                      child: Column(
-                                        children: [
-                                          Expanded(
-                                            child: ListView.builder(
-                                              itemCount:
-                                                  filteredProductList.length,
-                                              itemBuilder: (context, index) {
-                                                return OrderMenuListCard(
-                                                  product: filteredProductList[
-                                                      index],
-                                                  onTap: () {
-                                                    print(filteredProductList[
-                                                        index]);
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Expanded(
+                                child: _isGridView
+                                    ? ListView.builder(
+                                        key: ValueKey(_isGridView),
+                                        controller: _productGridController,
+                                        itemCount: (_product.length / 2).ceil(),
+                                        itemBuilder: (context, index) {
+                                          final firstIndex = index * 2;
+                                          final secondIndex = firstIndex + 1;
+                                          return Row(
+                                            children: [
+                                              Expanded(
+                                                child:
+                                                    OrderMenuListVerticalCard(
+                                                  item: _product[firstIndex],
+                                                  onDetailsPressed: () async {
                                                     setState(() {
                                                       selectedUnit = '';
                                                       selectedSize = '';
                                                       price = 0.00;
                                                       count = 1;
                                                       total = 0.00;
+                                                      // lotStock = '';
                                                       stockQty = 0;
                                                     });
-                                                    _showProductSheet(
-                                                        context,
-                                                        filteredProductList[
-                                                            index]);
+
+                                                    _showProductSheet(context,
+                                                        _product[firstIndex]);
                                                   },
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ],
+                                                ),
+                                              ),
+                                              if (secondIndex < _product.length)
+                                                Expanded(
+                                                  child:
+                                                      OrderMenuListVerticalCard(
+                                                    item: _product[secondIndex],
+                                                    onDetailsPressed: () {
+                                                      setState(() {
+                                                        selectedUnit = '';
+                                                        selectedSize = '';
+                                                        price = 0.00;
+                                                        count = 1;
+                                                        total = 0.00;
+                                                        // lotStock = '';
+                                                        stockQty = 0;
+                                                      });
+                                                      _showProductSheet(
+                                                          context,
+                                                          _product[
+                                                              secondIndex]);
+                                                    },
+                                                  ),
+                                                )
+                                              else
+                                                Expanded(
+                                                  child:
+                                                      SizedBox(), // Placeholder for spacing if no second card
+                                                ),
+                                            ],
+                                          );
+                                        },
+                                      )
+                                    : ListView.builder(
+                                        key: ValueKey(_isGridView),
+                                        itemCount: _product.length,
+                                        controller: _listController2,
+                                        itemBuilder: (context, index) {
+                                          return OrderMenuListCard(
+                                            product: _product[index],
+                                            onTap: () {
+                                              print(_product[index]);
+                                              setState(() {
+                                                selectedUnit = '';
+                                                selectedSize = '';
+                                                price = 0.00;
+                                                count = 1;
+                                                total = 0.00;
+                                                stockQty = 0;
+                                              });
+                                              // _showProductSheet(
+                                              //     context, _product[index]);
+                                            },
+                                          );
+                                        },
                                       ),
-                                    ),
+                              ),
                               Container(
                                 margin: EdgeInsets.only(top: 8),
                                 child: Row(

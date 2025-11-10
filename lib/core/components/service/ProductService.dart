@@ -10,7 +10,7 @@ class ProductService {
     String? period,
     int page = 1,
     int limit = 5,
-    String? q,
+    String q = "",
     String channel = 'cash', // ตัวอย่าง channel
     List<String> selectedGroups = const [],
     List<String> selectedBrands = const [],
@@ -30,6 +30,7 @@ class ProductService {
         "area": "${User.area}",
         "period": "${period}",
         "page": page,
+        "query": q,
         "limit": limit,
         "group": selectedGroups,
         "brand": selectedBrands,

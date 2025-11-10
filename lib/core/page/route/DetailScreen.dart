@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/components/alert/AllAlert.dart';
 import 'package:_12sale_app/core/components/chart/SummarybyMonth.dart';
@@ -42,6 +45,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -102,6 +107,10 @@ class _DetailScreenState extends State<DetailScreen> {
   late SocketService socketService;
 
   bool checkStoreLatLongStatus = false;
+  GoogleMapController? _controller;
+  Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  String _distanceText = '';
 
   // String
 
@@ -112,15 +121,151 @@ class _DetailScreenState extends State<DetailScreen> {
     _getCauses();
     _getOrder();
     getDataSummary();
-    _getStore();
+    _setupMapData();
+    // _getStore();
     // _getLatLongStore();
-    _checkLatLongStatus();
+    // _checkLatLongStatus();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     socketService = Provider.of<SocketService>(context, listen: false);
+  }
+
+  Future<BitmapDescriptor> makeBadgeMarker({
+    required String text, // 'ใหม่' หรือ 'เก่า'
+    Color bgColor = const Color(0xFFB30000),
+    Color textColor = Colors.white,
+    Color borderColor = Colors.white,
+    double diameter = 50, // px (จะคูณด้วย DPR ให้คม)
+    double borderWidth = 6,
+    double fontSize = 18,
+    FontWeight fontWeight = FontWeight.w700,
+  }) async {
+    final dpr = ui.window.devicePixelRatio; // ให้คมบนจอ HiDPI
+    final size = (diameter * dpr).toInt();
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final paint = Paint()..isAntiAlias = true;
+
+    final center = Offset(size / 2, size / 2);
+    final radius = size / 2.0;
+
+    // วาดพื้น (วงกลม)
+    paint
+      ..style = PaintingStyle.fill
+      ..color = bgColor;
+    canvas.drawCircle(center, radius, paint);
+
+    // วาดขอบ
+    if (borderWidth > 0) {
+      paint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderWidth * dpr
+        ..color = borderColor;
+      canvas.drawCircle(center, radius - (borderWidth * dpr) / 2, paint);
+    }
+
+    // วาดตัวอักษร
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: fontSize * dpr,
+          fontWeight: fontWeight,
+          height: 1.0,
+        ),
+      ),
+      textDirection: ui.TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+    tp.layout();
+    final textOffset = center - Offset(tp.width / 2, tp.height / 2);
+    tp.paint(canvas, textOffset);
+
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(size, size);
+    final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
+  }
+
+  void _setupMapData() async {
+    context.loaderOverlay.show();
+    await _getStore();
+    await _checkLatLongStatus();
+    final oldPoint =
+        LatLng(latitudeDirection.toDouble(), longitudeDirection.toDouble());
+    final newPoint = LatLng(latitude.toDouble(), longitude.toDouble());
+
+    final oldIcon =
+        await makeBadgeMarker(text: 'ร้าน', bgColor: const Color(0xFF212020));
+    final newIcon =
+        await makeBadgeMarker(text: 'คุณ', bgColor: const Color(0xFFB30000));
+
+    // ✅ Marker จุดเก่า
+    final oldMarker = Marker(
+      markerId: const MarkerId('old'),
+      position: oldPoint,
+      infoWindow: const InfoWindow(title: 'พิกัดเดิม'),
+      icon: oldIcon,
+    );
+
+    // ✅ Marker จุดใหม่
+    final newMarker = Marker(
+      markerId: const MarkerId('new'),
+      position: newPoint,
+      infoWindow: const InfoWindow(title: 'พิกัดใหม่'),
+      icon: newIcon,
+    );
+
+    // ✅ เส้นเชื่อมระหว่าง 2 จุด (ระยะตรง)
+    final polyline = Polyline(
+      polylineId: const PolylineId('line'),
+      points: [oldPoint, newPoint],
+      color: Colors.blue,
+      width: 4,
+    );
+
+    // ✅ คำนวณระยะทาง (เมตร)
+    final distanceMeters = Geolocator.distanceBetween(
+      oldPoint.latitude,
+      oldPoint.longitude,
+      newPoint.latitude,
+      newPoint.longitude,
+    );
+
+    String formatted;
+    if (distanceMeters >= 1000) {
+      formatted = '${(distanceMeters / 1000).toStringAsFixed(2)} กม.';
+    } else {
+      formatted = '${distanceMeters.toStringAsFixed(0)} ม.';
+    }
+
+    setState(() {
+      _markers = {oldMarker, newMarker};
+      _polylines = {polyline};
+      _distanceText = formatted;
+    });
+
+    // ✅ ปรับกล้องให้เห็นทั้งสองจุด
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (_controller != null) {
+        final bounds = LatLngBounds(
+          southwest: LatLng(
+            min(oldPoint.latitude, newPoint.latitude),
+            min(oldPoint.longitude, newPoint.longitude),
+          ),
+          northeast: LatLng(
+            max(oldPoint.latitude, newPoint.latitude),
+            max(oldPoint.longitude, newPoint.longitude),
+          ),
+        );
+        _controller!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
+      }
+    });
+    context.loaderOverlay.hide();
   }
 
   Future<void> getDataSummary() async {
@@ -792,6 +937,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    final startPosition = LatLng(latitude.toDouble(), longitude.toDouble());
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
@@ -814,6 +960,72 @@ class _DetailScreenState extends State<DetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                BoxShadowCustom(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        if (_distanceText.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            color: Colors.blue.shade50,
+                            width: double.infinity,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '🛣️ ระยะทางประมาณห่าง: $_distanceText',
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(8),
+                                    elevation: 0, // Disable shadow
+                                    shadowColor: Colors
+                                        .transparent, // Ensure no shadow color
+                                    backgroundColor: Styles.primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      side: BorderSide(
+                                          color: Colors.grey[300]!, width: 1),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    _setupMapData();
+                                    // _showGiveTypesSheet(context);
+                                  },
+                                  child: Text(
+                                    "Refresh Location",
+                                    style: Styles.white18(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        SizedBox(
+                          height: 300,
+                          child: GoogleMap(
+                            initialCameraPosition:
+                                CameraPosition(target: startPosition, zoom: 14),
+                            onMapCreated: (controller) =>
+                                _controller = controller,
+                            markers: _markers,
+                            polylines: _polylines,
+                            myLocationEnabled: false,
+                            zoomControlsEnabled: true,
+                            compassEnabled: true,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
                 BoxShadowCustom(
                   // color: Styles.primaryColor,
                   child: Padding(
