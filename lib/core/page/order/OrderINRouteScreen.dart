@@ -1185,8 +1185,8 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                                 total = 0.00;
                                                 stockQty = 0;
                                               });
-                                              // _showProductSheet(
-                                              //     context, _product[index]);
+                                              _showProductSheet(
+                                                  context, _product[index]);
                                             },
                                           );
                                         },
