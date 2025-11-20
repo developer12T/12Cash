@@ -863,6 +863,69 @@ class _OrderINRouteScreenState extends State<OrderINRouteScreen>
                                             onTap: () {
                                               BadageFilter.showFilterSheet(
                                                 context: context,
+                                                title: 'เลือกแบรนด์',
+                                                title2: 'แบรนด์',
+                                                itemList: brandList,
+                                                selectedItems: selectedBrands,
+                                                onItemSelected:
+                                                    (data, selected) {
+                                                  if (selected) {
+                                                    selectedBrands.add(data);
+                                                  } else {
+                                                    selectedBrands.remove(data);
+                                                  }
+                                                  _getFliterBrand();
+                                                },
+                                                onClear: () {
+                                                  selectedBrands.clear();
+                                                  selectedSizes.clear();
+                                                  selectedFlavours.clear();
+                                                  sizeList.clear();
+                                                  brandList.clear();
+                                                  flavourList.clear();
+                                                  context.loaderOverlay.show();
+                                                  _loadProduct(reset: true)
+                                                      .then((_) => Timer(
+                                                              Duration(
+                                                                  seconds: 3),
+                                                              () {
+                                                            context
+                                                                .loaderOverlay
+                                                                .hide();
+                                                          }));
+                                                },
+                                                onSearch: () =>
+                                                    _loadProduct(reset: true),
+                                              );
+                                            },
+                                            child: badgeFilter(
+                                              isSelected:
+                                                  selectedBrands.isNotEmpty
+                                                      ? true
+                                                      : false,
+                                              child: Text(
+                                                selectedBrands.isEmpty
+                                                    ? 'แบรนด์'
+                                                    : selectedBrands.join(', '),
+                                                style: selectedBrands.isEmpty
+                                                    ? Styles.black18(context)
+                                                    : Styles.pirmary18(context),
+                                                overflow: TextOverflow
+                                                    .ellipsis, // Truncate if too long
+                                                maxLines:
+                                                    1, // Restrict to 1 line
+                                                softWrap:
+                                                    false, // Avoid wrapping
+                                              ),
+                                              width: selectedBrands.isEmpty
+                                                  ? 120
+                                                  : 120,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              BadageFilter.showFilterSheet(
+                                                context: context,
                                                 title: 'เลือกขนาด',
                                                 title2: 'ขนาด',
                                                 itemList: sizeList,
