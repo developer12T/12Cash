@@ -697,123 +697,84 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  Future<void> checkInStore(BuildContext context) async {
+  Future<void> notSale(BuildContext context) async {
     try {
       await fetchLocation();
       ApiService apiService = ApiService();
       await apiService.init();
-      print('selectedCause ${selectedCause == 'เลือกเหตุผล'}');
-      Dio dio = Dio();
-      // MultipartFile? imageFile;
-      File imageFile = File(checkinImagePath!);
 
-      // ใช้ฟังก์ชัน compressImages ที่เราสร้าง
-      MultipartFile compressedFile = await compressImages(imageFile);
+      String note =
+          selectedCause == "อื่นๆ" ? noteController.text : selectedCause;
+      print("TestNote ${note}");
 
-      // imageFile = await MultipartFile.fromFile(checkinImagePath!);
-      // convert = await compressImages(imageFile!);
+      var formData = FormData.fromMap(
+        {
+          'routeId': storeDetail?.id,
+          'storeId': widget.customerNo,
+          'note': note,
+          // 'checkInImage': compressedFile,
+          "latitude": latitude,
+          "longtitude": longitude
+        },
+      );
+      print({
+        'routeId': storeDetail?.id,
+        'storeId': widget.customerNo,
+        'note': note,
+        // 'checkInImage': compressedFile,
+        "latitude": latitude,
+        "longtitude": longitude
+      });
 
-      if (selectedCause == 'เลือกเหตุผล') {
-        Navigator.of(context).pop();
+      var response = await apiService.request2(
+        endpoint: 'api/cash/route/checkInNotSale',
+        method: 'POST',
+        body: formData,
+        headers: {
+          'x-channel': 'cash',
+          'Content-Type': 'multipart/form-data',
+        },
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        socketService.emitEvent('route/checkIn', {
+          'message': 'Check In successfully',
+        });
+        print("Response API ${response.data}");
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,
-          primaryColor: Colors.red,
-          type: ToastificationType.error,
+          primaryColor: Colors.green,
+          type: ToastificationType.success,
           style: ToastificationStyle.flatColored,
           title: Text(
-            "กรุณาเลือกเหตุผลที่เช็คอิน",
-            style: Styles.red18(context),
+            "store.processtimeline_screen.toasting_success".tr(),
+            style: Styles.black18(context),
           ),
         );
-      } else {
-        if (checkinImagePath != null) {
-          // print(
-          //     "Check Data  : routeId ${widget.routeId}, storeId${widget.customerNo}, note${selectedCause}, checkInImage${imageFile}, latitude${latitude}, longtitude${longitude}");
+        // setState(() {
+        //   statusCheck = 3;
+        //   storeDetail?.listStore[0].status = '3';
+        // });
 
-          String note =
-              selectedCause == "อื่นๆ" ? noteController.text : selectedCause;
-          print("TestNote ${note}");
-          var formData = FormData.fromMap(
-            {
-              'routeId': storeDetail?.id,
-              'storeId': widget.customerNo,
-              'note': note,
-              'checkInImage': compressedFile,
-              // "note":
-              //     noteController.text != "" ? noteController.text : selectedCause,
-              // "checkInImage": imageFile,
-              "latitude": latitude,
-              "longtitude": longitude
-            },
-          );
-
-          var response = await apiService.request2(
-            endpoint: 'api/cash/route/checkIn',
-            method: 'POST',
-            body: formData,
-            headers: {
-              'x-channel': 'cash',
-              'Content-Type': 'multipart/form-data',
-            },
-          );
-
-          if (response.statusCode == 201 || response.statusCode == 200) {
-            socketService.emitEvent('route/checkIn', {
-              'message': 'Check In successfully',
-            });
-            print("Response API ${response.data}");
-            toastification.show(
-              autoCloseDuration: const Duration(seconds: 5),
-              context: context,
-              primaryColor: Colors.green,
-              type: ToastificationType.success,
-              style: ToastificationStyle.flatColored,
-              title: Text(
-                "store.processtimeline_screen.toasting_success".tr(),
-                style: Styles.black18(context),
-              ),
-            );
-            setState(() {
-              statusCheck = 3;
-              storeDetail?.listStore[0].status = '3';
-            });
-            // await Future.delayed(Duration(milliseconds: 3000));
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ShopRouteScreen(
-                  route: widget.route,
-                  routeId: widget.routeId,
-                ),
-              ),
-              (route) => route.isFirst,
-            );
-
-            // Navigator.pushAndRemoveUntil(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => HomeScreen(
-            //       index: 1,
-            //     ),
-            //   ),
-            //   (route) => route.isFirst,
-            // );
-
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => ShopRouteScreen(
-            //       route: widget.route,
-            //       routeId: widget.routeId,
-            //     ),
-            //   ),
-            // );
-          }
-        }
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailScreen(
+              customerNo: widget.customerNo,
+              routeId: widget.routeId,
+              route: widget.route,
+              latitude: widget.latitude,
+              longtitude: widget.longtitude,
+            ),
+          ),
+          (route) => route.isFirst,
+        );
       }
     } on ApiException catch (e) {
+      context.loaderOverlay.hide();
       if (e.statusCode == 409) {
+        // context.loaderOverlay.hide();
         toastification.show(
           autoCloseDuration: const Duration(seconds: 5),
           context: context,
@@ -826,51 +787,56 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         );
       }
-      print('Error in checkInStore: ${e.message}');
-      context.loaderOverlay.hide();
     } catch (e) {
-      print('Error checkInStore: $e');
+      print('Error notSale: $e');
       context.loaderOverlay.hide();
     }
   }
 
-  Future<void> checkInStoreAndSell(BuildContext context) async {
+  Future<void> checkInStore(BuildContext context) async {
     try {
       await fetchLocation();
-      Dio dio = Dio();
-
       ApiService apiService = ApiService();
       await apiService.init();
-
-      File imageFile = File(checkinSellImagePath!);
-      MultipartFile compressedFile = await compressImages(imageFile);
+      // print('selectedCause ${selectedCause == 'เลือกเหตุผล'}');
+      // Dio dio = Dio();
       // MultipartFile? imageFile;
-      // imageFile = await MultipartFile.fromFile(checkinSellImagePath!);
+      File imageFile = File(checkinImagePath!);
 
-      if (checkinSellImagePath != null) {
+      // ใช้ฟังก์ชัน compressImages ที่เราสร้าง
+      MultipartFile compressedFile = await compressImages(imageFile);
+
+      // imageFile = await MultipartFile.fromFile(checkinImagePath!);
+      // convert = await compressImages(imageFile!);
+
+      if (checkinImagePath != null) {
+        // print(
+        //     "Check Data  : routeId ${widget.routeId}, storeId${widget.customerNo}, note${selectedCause}, checkInImage${imageFile}, latitude${latitude}, longtitude${longitude}");
+
+        String note =
+            selectedCause == "อื่นๆ" ? noteController.text : selectedCause;
+        print("TestNote ${note}");
         var formData = FormData.fromMap(
           {
             'routeId': storeDetail?.id,
             'storeId': widget.customerNo,
-            'note': "ขายสินค้า",
+            // 'note': note,
             'checkInImage': compressedFile,
             "latitude": latitude,
             "longtitude": longitude
           },
         );
-        // var response = await dio.post(
-        //   '${ApiService.apiHost}/api/cash/route/checkInVisit',
-        //   data: formData,
-        //   options: Options(
-        //     headers: {
-        //       "Content-Type": "multipart/form-data",
-        //       'x-channel': 'cash',
-        //     },
-        //   ),
-        // );
+        print({
+          'routeId': storeDetail?.id,
+          'storeId': widget.customerNo,
+          'note': note,
+          'checkInImage': compressedFile,
+          "latitude": latitude,
+          "longtitude": longitude
+        });
 
         var response = await apiService.request2(
-          endpoint: 'api/cash/route/checkInVisit',
+          endpoint: 'api/cash/route/checkInVisitNew',
           method: 'POST',
           body: formData,
           headers: {
@@ -878,8 +844,9 @@ class _DetailScreenState extends State<DetailScreen> {
             'Content-Type': 'multipart/form-data',
           },
         );
+
         if (response.statusCode == 201 || response.statusCode == 200) {
-          socketService.emitEvent('route/checkInVisit', {
+          socketService.emitEvent('route/checkIn', {
             'message': 'Check In successfully',
           });
           print("Response API ${response.data}");
@@ -891,21 +858,22 @@ class _DetailScreenState extends State<DetailScreen> {
             style: ToastificationStyle.flatColored,
             title: Text(
               "store.processtimeline_screen.toasting_success".tr(),
-              style: Styles.black18(context),
+              style: Styles.green18(context),
             ),
           );
           setState(() {
-            statusCheck = 2;
-            storeDetail?.listStore[0].status = '2';
+            statusCheck = 1;
+            storeDetail?.listStore[0].status = '1';
           });
-          context.loaderOverlay.show();
-          // await Future.delayed(Duration(milliseconds: 3000));
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) => OrderINRouteScreen(
-                storeDetail: storeDetail,
+              builder: (context) => DetailScreen(
+                customerNo: widget.customerNo,
                 routeId: widget.routeId,
+                route: widget.route,
+                latitude: widget.latitude,
+                longtitude: widget.longtitude,
               ),
             ),
             (route) => route.isFirst,
@@ -926,10 +894,11 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         );
       }
+
       print('Error in checkInStore: ${e.message}');
       context.loaderOverlay.hide();
     } catch (e) {
-      print('Error checkInStoreAndSell: $e');
+      print('Error checkInStore: $e');
       context.loaderOverlay.hide();
     }
   }
@@ -1108,84 +1077,105 @@ class _DetailScreenState extends State<DetailScreen> {
                                 }
                               },
                             ),
-                            MenuButton(
-                              icon: Icons.store_rounded,
-                              label: "ไม่ซื้อ",
-                              // color: Styles.success!,
-                              color: statusCheck > 0
-                                  ? Colors.grey
-                                  : Styles.secondaryColor,
-                              onPressed: () async {
-                                await _getStore();
-                                await _checkLatLongStatus();
-                                if (statusCheck <= 0) {
-                                  if (checkStoreLatLongStatus) {
-                                    _showCheckInSheet(context);
-                                    setState(
-                                      () {
-                                        selectedCause = "เลือกเหตุผล";
-                                      },
-                                    );
-                                  } else {
-                                    toastification.show(
-                                      autoCloseDuration:
-                                          const Duration(seconds: 5),
-                                      context: context,
-                                      primaryColor: Colors.red,
-                                      type: ToastificationType.error,
-                                      style: ToastificationStyle.flatColored,
-                                      title: Text(
-                                        "ระยะทางเกิน 50 เมตร",
-                                        style: Styles.red18(context),
+                            statusCheck == 0
+                                ? MenuButton(
+                                    icon: Icons.location_on_outlined,
+                                    label: "เช็คอิน",
+                                    color: (statusCheck == 0)
+                                        ? Styles.success!
+                                        : Colors.grey,
+                                    onPressed: () async {
+                                      await _getStore();
+                                      await _checkLatLongStatus();
+                                      if (checkStoreLatLongStatus) {
+                                        _showCheckInSheet(context);
+                                      } else {
+                                        toastification.show(
+                                          autoCloseDuration:
+                                              const Duration(seconds: 5),
+                                          context: context,
+                                          primaryColor: Colors.red,
+                                          type: ToastificationType.error,
+                                          style:
+                                              ToastificationStyle.flatColored,
+                                          title: Text(
+                                            "ระยะทางเกิน 50 เมตร",
+                                            style: Styles.red18(context),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  )
+                                : SizedBox(),
+                            statusCheck == 1
+                                ? Row(
+                                    children: [
+                                      MenuButton(
+                                        icon:
+                                            Icons.remove_shopping_cart_outlined,
+                                        label: "ไม่ซื้อ",
+                                        color: Styles.failTextColor,
+                                        onPressed: () async {
+                                          _showCheckInSheetNotSale(context);
+                                          await _getStore();
+                                          await _checkLatLongStatus();
+                                        },
                                       ),
-                                    );
-                                  }
-                                }
-                              },
-                            ),
-                            MenuButton(
-                              icon: Icons.add_shopping_cart_rounded,
-                              label: "เช็คอิน/ขาย",
-                              color: (statusCheck == 1 || statusCheck == 0) &&
-                                      DateTime.now().isBefore(dateCheck)
-                                  ? Styles.success!
-                                  : Colors.grey,
-                              onPressed: () async {
-                                await _getStore();
-                                await _checkLatLongStatus();
-                                if (statusCheck == 1) {
-                                  if (DateTime.now().isBefore(dateCheck)) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            OrderINRouteScreen(
-                                          storeDetail: storeDetail,
-                                          routeId: widget.routeId,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                } else if (statusCheck == 0) {
-                                  if (checkStoreLatLongStatus) {
-                                    _showCheckInAndSellSheet(context);
-                                  } else {
-                                    toastification.show(
-                                      autoCloseDuration:
-                                          const Duration(seconds: 5),
-                                      context: context,
-                                      primaryColor: Colors.red,
-                                      type: ToastificationType.error,
-                                      style: ToastificationStyle.flatColored,
-                                      title: Text(
-                                        "ระยะทางเกิน 50 เมตร",
-                                        style: Styles.red18(context),
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                            ),
+                                      MenuButton(
+                                        icon: Icons.shopping_cart_outlined,
+                                        label: "ขาย",
+                                        color: Styles.success!,
+                                        onPressed: () async {
+                                          await _getStore();
+                                          await _checkLatLongStatus();
+                                          if (statusCheck == 1) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    OrderINRouteScreen(
+                                                  storeDetail: storeDetail,
+                                                  routeId: widget.routeId,
+                                                ),
+                                              ),
+                                            );
+                                            // if (DateTime.now()
+                                            //     .isBefore(dateCheck)) {
+                                            //   Navigator.push(
+                                            //     context,
+                                            //     MaterialPageRoute(
+                                            //       builder: (context) =>
+                                            //           OrderINRouteScreen(
+                                            //         storeDetail: storeDetail,
+                                            //         routeId: widget.routeId,
+                                            //       ),
+                                            //     ),
+                                            //   );
+                                            // }
+                                          } else if (statusCheck == 0) {
+                                            if (checkStoreLatLongStatus) {
+                                              // _showCheckInSheet(context);
+                                            } else {
+                                              toastification.show(
+                                                autoCloseDuration:
+                                                    const Duration(seconds: 5),
+                                                context: context,
+                                                primaryColor: Colors.red,
+                                                type: ToastificationType.error,
+                                                style: ToastificationStyle
+                                                    .flatColored,
+                                                title: Text(
+                                                  "ระยะทางเกิน 50 เมตร",
+                                                  style: Styles.red18(context),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                      )
+                                    ],
+                                  )
+                                : SizedBox(),
                           ],
                         ),
                       ],
@@ -1482,6 +1472,107 @@ class _DetailScreenState extends State<DetailScreen> {
                       // await uploadFormDataWithDio(imagePath, 'store', context);
                     },
                   ),
+                  Container(
+                    // margin: EdgeInsets.symmetric(vertical: 16),
+                    // padding: const EdgeInsets.all(8.0),
+                    width: double.infinity, // Full width button
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (checkinImagePath != null) {
+                          await checkInStore(context);
+                        } else {
+                          toastification.show(
+                            autoCloseDuration: const Duration(seconds: 5),
+                            context: context,
+                            primaryColor: Colors.red,
+                            type: ToastificationType.error,
+                            style: ToastificationStyle.flatColored,
+                            title: Text(
+                              "กรุณาถ่ายรูปก่อนเช็คอิน",
+                              style: Styles.red18(context),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Styles.primaryColor,
+                        // padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text('เช็คอิน', style: Styles.white24(context)),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  void _showCheckInSheetNotSale(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Makes the bottom sheet full screen height
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Colors.grey, width: 0.5),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (
+        BuildContext context,
+      ) {
+        double screenWidth = MediaQuery.of(context).size.width;
+        // double screenHeight = MediaQuery.of(context).size.height;
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+          return Container(
+            width: screenWidth * 0.9, // Fixed width
+            // height: screenHeight * 0.8,
+            padding: EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 16.0,
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with close button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'เลือกเหตุผลที่ร้านค้าไม่ซื้อ',
+                        style: Styles.headerBlack32(context),
+                        textAlign: TextAlign.center,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close bottom sheet
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Store Information
+                  Text(
+                    '${storeDetail?.listStore[0].storeInfo.name}',
+                    style: Styles.black24(context),
+                  ),
+                  Text(
+                    '${widget.customerNo}',
+                    style: Styles.black24(context),
+                  ),
+
                   Row(
                     children: [
                       Expanded(
@@ -1619,74 +1710,20 @@ class _DetailScreenState extends State<DetailScreen> {
                     width: double.infinity, // Full width button
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (checkinImagePath != null) {
-                          if (selectedCause != 'เลือกเหตุผล') {
-                            if (selectedCause == 'อื่นๆ') {
-                              if (noteController.text == "") {
-                                toastification.show(
-                                  autoCloseDuration: const Duration(seconds: 5),
-                                  context: context,
-                                  primaryColor: Colors.red,
-                                  type: ToastificationType.error,
-                                  style: ToastificationStyle.flatColored,
-                                  title: Text(
-                                    "กรุณาใส่เหตุผลที่เช็คอิน",
-                                    style: Styles.black18(context),
-                                  ),
-                                );
-                              } else {
-                                Alert(
-                                  context: context,
-                                  title:
-                                      "store.processtimeline_screen.alert.title"
-                                          .tr(),
-                                  style: AlertStyle(
-                                    animationType: AnimationType.grow,
-                                    isCloseButton: true,
-                                    isOverlayTapDismiss: false,
-                                    descStyle: Styles.black18(context),
-                                    descTextAlign: TextAlign.start,
-                                    animationDuration:
-                                        const Duration(milliseconds: 400),
-                                    alertBorder: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(22.0),
-                                      side: const BorderSide(
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    titleStyle: Styles.headerBlack32(context),
-                                    alertAlignment: Alignment.center,
-                                  ),
-                                  desc:
-                                      "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
-                                  buttons: [
-                                    DialogButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      color: Styles.failTextColor,
-                                      child: Text(
-                                        "store.processtimeline_screen.alert.cancel"
-                                            .tr(),
-                                        style: Styles.white18(context),
-                                      ),
-                                    ),
-                                    DialogButton(
-                                      onPressed: () async {
-                                        context.loaderOverlay.show();
-                                        await checkInStore(context);
-
-                                        // calculateDistance()
-                                        context.loaderOverlay.hide();
-                                      },
-                                      color: Styles.successButtonColor,
-                                      child: Text(
-                                        "store.processtimeline_screen.alert.submit"
-                                            .tr(),
-                                        style: Styles.white18(context),
-                                      ),
-                                    )
-                                  ],
-                                ).show();
-                              }
+                        if (selectedCause != 'เลือกเหตุผล') {
+                          if (selectedCause == 'อื่นๆ') {
+                            if (noteController.text == "") {
+                              toastification.show(
+                                autoCloseDuration: const Duration(seconds: 5),
+                                context: context,
+                                primaryColor: Colors.red,
+                                type: ToastificationType.error,
+                                style: ToastificationStyle.flatColored,
+                                title: Text(
+                                  "กรุณาใส่เหตุผลที่เช็คอิน",
+                                  style: Styles.black18(context),
+                                ),
+                              );
                             } else {
                               Alert(
                                 context: context,
@@ -1725,7 +1762,10 @@ class _DetailScreenState extends State<DetailScreen> {
                                   DialogButton(
                                     onPressed: () async {
                                       context.loaderOverlay.show();
-                                      await checkInStore(context);
+                                      await notSale(context);
+
+                                      // calculateDistance()
+                                      context.loaderOverlay.hide();
                                     },
                                     color: Styles.successButtonColor,
                                     child: Text(
@@ -1738,17 +1778,53 @@ class _DetailScreenState extends State<DetailScreen> {
                               ).show();
                             }
                           } else {
-                            toastification.show(
-                              autoCloseDuration: const Duration(seconds: 5),
+                            Alert(
                               context: context,
-                              primaryColor: Colors.red,
-                              type: ToastificationType.error,
-                              style: ToastificationStyle.flatColored,
-                              title: Text(
-                                "กรุณาเลือกเหตุผลที่เช็คอิน",
-                                style: Styles.red18(context),
+                              title: "store.processtimeline_screen.alert.title"
+                                  .tr(),
+                              style: AlertStyle(
+                                animationType: AnimationType.grow,
+                                isCloseButton: true,
+                                isOverlayTapDismiss: false,
+                                descStyle: Styles.black18(context),
+                                descTextAlign: TextAlign.start,
+                                animationDuration:
+                                    const Duration(milliseconds: 400),
+                                alertBorder: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(22.0),
+                                  side: const BorderSide(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                titleStyle: Styles.headerBlack32(context),
+                                alertAlignment: Alignment.center,
                               ),
-                            );
+                              desc:
+                                  "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
+                              buttons: [
+                                DialogButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Styles.failTextColor,
+                                  child: Text(
+                                    "store.processtimeline_screen.alert.cancel"
+                                        .tr(),
+                                    style: Styles.white18(context),
+                                  ),
+                                ),
+                                DialogButton(
+                                  onPressed: () async {
+                                    context.loaderOverlay.show();
+                                    await notSale(context);
+                                  },
+                                  color: Styles.successButtonColor,
+                                  child: Text(
+                                    "store.processtimeline_screen.alert.submit"
+                                        .tr(),
+                                    style: Styles.white18(context),
+                                  ),
+                                )
+                              ],
+                            ).show();
                           }
                         } else {
                           toastification.show(
@@ -1758,8 +1834,8 @@ class _DetailScreenState extends State<DetailScreen> {
                             type: ToastificationType.error,
                             style: ToastificationStyle.flatColored,
                             title: Text(
-                              "กรุณาถ่ายรูปก่อนเช็คอิน",
-                              style: Styles.black18(context),
+                              "กรุณาเลือกเหตุผลที่เช็คอิน",
+                              style: Styles.red18(context),
                             ),
                           );
                         }
@@ -1771,164 +1847,8 @@ class _DetailScreenState extends State<DetailScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('เช็คอิน', style: Styles.white24(context)),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  )
-                ],
-              ),
-            ),
-          );
-        });
-      },
-    );
-  }
-
-  void _showCheckInAndSellSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Makes the bottom sheet full screen height
-      shape: const RoundedRectangleBorder(
-        side: BorderSide(color: Colors.grey, width: 0.5),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (
-        BuildContext context,
-      ) {
-        double screenWidth = MediaQuery.of(context).size.width;
-        // double screenHeight = MediaQuery.of(context).size.height;
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-          return Container(
-            width: screenWidth * 0.9, // Fixed width
-            // height: screenHeight * 0.8,
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              top: 16.0,
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header with close button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'เช็คอินร้านค้า',
-                        style: Styles.headerBlack32(context),
-                        textAlign: TextAlign.center,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close bottom sheet
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Store Information
-                  Text(
-                    '${storeDetail?.listStore[0].storeInfo.name}',
-                    style: Styles.black24(context),
-                  ),
-                  Text(
-                    '${widget.customerNo}',
-                    style: Styles.black24(context),
-                  ),
-                  CameraExpand(
-                    icon: Icons.photo_camera,
-                    imagePath: checkinSellImagePath != ""
-                        ? checkinSellImagePath
-                        : null,
-                    label: "หน้าร้านค้า",
-                    onImageSelected: (String imagePath) async {
-                      setState(() {
-                        checkinSellImagePath = imagePath;
-                      });
-                    },
-                  ),
-                  Container(
-                    width: double.infinity, // Full width button
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if (checkinSellImagePath != null) {
-                          Alert(
-                            context: context,
-                            title:
-                                "store.processtimeline_screen.alert.title".tr(),
-                            style: AlertStyle(
-                              animationType: AnimationType.grow,
-                              isCloseButton: true,
-                              isOverlayTapDismiss: false,
-                              descStyle: Styles.black18(context),
-                              descTextAlign: TextAlign.start,
-                              animationDuration:
-                                  const Duration(milliseconds: 400),
-                              alertBorder: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(22.0),
-                                side: const BorderSide(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              titleStyle: Styles.headerBlack32(context),
-                              alertAlignment: Alignment.center,
-                            ),
-                            desc:
-                                "คุณต้องการยืนยันการเช็คอินร้านค้าใช่หรือไม่ ?",
-                            buttons: [
-                              DialogButton(
-                                onPressed: () => Navigator.pop(context),
-                                color: Styles.failTextColor,
-                                child: Text(
-                                  "store.processtimeline_screen.alert.cancel"
-                                      .tr(),
-                                  style: Styles.white18(context),
-                                ),
-                              ),
-                              DialogButton(
-                                onPressed: () async {
-                                  context.loaderOverlay.show();
-                                  await checkInStoreAndSell(context);
-                                  context.loaderOverlay.hide();
-                                },
-                                color: Styles.successButtonColor,
-                                child: Text(
-                                  "store.processtimeline_screen.alert.submit"
-                                      .tr(),
-                                  style: Styles.white18(context),
-                                ),
-                              )
-                            ],
-                          ).show();
-                        } else {
-                          toastification.show(
-                            autoCloseDuration: const Duration(seconds: 5),
-                            context: context,
-                            primaryColor: Colors.red,
-                            type: ToastificationType.error,
-                            style: ToastificationStyle.flatColored,
-                            title: Text(
-                              "กรุณาถ่ายรูปก่อนเช็คอิน",
-                              style: Styles.black18(context),
-                            ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Styles.primaryColor,
-                        // padding: EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text('เช็คอิน', style: Styles.white24(context)),
+                      child:
+                          Text('บันทึกข้อมูล', style: Styles.white24(context)),
                     ),
                   ),
                   SizedBox(

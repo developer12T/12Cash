@@ -140,6 +140,30 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+class VersionCheck {
+  static const String lastVersionKey = 'last_version';
+
+  static Future<bool> shouldForceLogout() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // เวอร์ชันปัจจุบันของแอป
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = info.version; // เช่น 1.0.2
+
+    // เวอร์ชันเก่าที่เคยบันทึกไว้
+    final savedVersion = prefs.getString(lastVersionKey);
+
+    // ถ้า version ไม่ตรง → อัปเดตใหม่
+    if (savedVersion != currentVersion) {
+      // อัปเดตเวอร์ชันใหม่ลง prefs
+      await prefs.setString(lastVersionKey, currentVersion);
+      return true; // ต้อง logout
+    }
+
+    return false;
+  }
+}
+
 class _MyAppState extends State<MyApp> {
   Timer? _logoutTimer;
 

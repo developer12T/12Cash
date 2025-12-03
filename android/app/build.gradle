@@ -31,7 +31,7 @@ android {
         minSdk = 21  // Ensure minSdk is at least 21
         targetSdk = 35
         versionCode = 34
-        versionName = "2.4.5"
+        versionName = "2.4.6"
         multiDexEnabled = true  // ✅ Enable MultiDex if not already enabled
     }
 
