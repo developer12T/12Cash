@@ -6,6 +6,7 @@ import 'package:_12sale_app/core/page/route/AjustRoute.dart';
 import 'package:_12sale_app/core/page/order/OrderOutRouteScreen.dart';
 import 'package:_12sale_app/core/page/route/RouteScreen.dart';
 import 'package:_12sale_app/core/page/store/ProcessTimelineScreen.dart';
+import 'package:_12sale_app/core/page/store/SearchStore.dart';
 import 'package:_12sale_app/core/page/store/StoreScreen.dart';
 import 'package:_12sale_app/data/models/CartAll.dart';
 import 'package:_12sale_app/data/models/RefundFilter.dart';
@@ -155,9 +156,22 @@ class _HomeScreenState extends State<HomeScreen> {
   void _getFuction(int isSelect) async {
     switch (_selectedIndex) {
       case 0:
-        return () {}();
+        return () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SearchStore(),
+            ),
+          );
+        }();
       case 1:
         return () {
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => SearchStore(),
+          //   ),
+          // );
           // Navigator.push(
           //   context,
           //   MaterialPageRoute(
@@ -212,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (_selectedIndex) {
       case 0:
         return const Icon(
-          Icons.home,
+          Icons.search_outlined,
           size: 40,
           color: Styles.primaryColor,
         );
