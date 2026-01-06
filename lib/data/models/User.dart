@@ -21,6 +21,7 @@ class User {
       new BluetoothInfo(macAdress: "", name: "");
   static bool connectPrinter = false;
   static int? expiryMs = 0;
+  static String versionApp = "1.0.0";
 }
 
 class ImageModel {

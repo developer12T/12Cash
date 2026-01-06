@@ -77,6 +77,10 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
   late GoogleMapController _mapController;
   Map<PolylineId, Polyline> polylines = <PolylineId, Polyline>{};
   PolylineId? selectedPolyline;
+  int? totalStoreCheckInNotSell;
+  int? totalStoreSell;
+  int? visitPerDay;
+  int? salePerDay;
 
   String province = "";
   String amphoe = "";
@@ -329,6 +333,7 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
     _initializePolylines();
     _initializeMarkers();
     _getRouteVisit();
+    getRouteEffectiveAll();
   }
 
   @override
@@ -356,6 +361,39 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
     // Unsubscribe when the widget is disposed
     routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  Future<void> getRouteEffectiveAll() async {
+    try {
+      ApiService apiService = ApiService();
+      await apiService.init();
+      // ✅ วันที่ปัจจุบัน (local)
+      final now = DateTime.now();
+      final today =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+      final endpoint = 'api/cash/route/getRouteEffectiveAll'
+          '?area=${User.area}'
+          '&startDate=$today'
+          '&endDate=$today';
+
+      var response = await apiService.request(
+        endpoint: endpoint,
+        method: 'GET',
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // final List<dynamic> data = response.data['data'];
+
+        setState(() {
+          totalStoreCheckInNotSell = response.data['totalStoreCheckInNotSell'];
+          totalStoreSell = response.data['totalStoreSell'];
+          visitPerDay = response.data['target']['visitPerDay'];
+          salePerDay = response.data['target']['salePerDay'];
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<List<Location>> _fetchProvince(String filter) async {
@@ -423,6 +461,60 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
     } catch (e) {
       print("Error occurred: $e");
       return {};
+    }
+  }
+
+  Widget progressButton({
+    required BuildContext context,
+    required String label,
+    required int current,
+    required int target,
+    VoidCallback? onPressed,
+  }) {
+    final color = progressColor(current, target);
+
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color.withOpacity(0.15),
+          foregroundColor: color,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: color),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: Styles.black16(context).copyWith(color: color),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$current / $target',
+              style: Styles.black18(context)
+                  .copyWith(color: color, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color progressColor(int current, int target) {
+    if (target == 0) return Colors.grey;
+
+    final ratio = current / target;
+
+    if (ratio >= 0.8) {
+      return Colors.green;
+    } else if (ratio >= 0.5) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
     }
   }
 
@@ -630,6 +722,32 @@ class _RoutescreenState extends State<Routescreen> with RouteAware {
                   ),
                 ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  progressButton(
+                    context: context,
+                    label: 'เป้าเยี่ยมประจำวัน',
+                    current: totalStoreCheckInNotSell ?? 0,
+                    target: visitPerDay ?? 25,
+                    onPressed: () {
+                      // TODO: action เช่น เปิด list ร้านที่เข้าเยี่ยม
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  progressButton(
+                    context: context,
+                    label: 'เป้าขายประจำวัน',
+                    current: totalStoreSell ?? 0,
+                    target: salePerDay ?? 15,
+                    onPressed: () {
+                      // TODO: action เช่น เปิด list ร้านที่ขายได้
+                    },
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: LoadingSkeletonizer(

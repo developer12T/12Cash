@@ -2,8 +2,13 @@ import 'dart:math';
 import 'package:_12sale_app/core/components/Appbar.dart';
 import 'package:_12sale_app/core/styles/style.dart';
 import 'package:_12sale_app/data/models/StoreLocation.dart';
+import 'package:_12sale_app/data/service/apiService.dart';
+import 'package:_12sale_app/data/service/locationService.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+
+import '../../../data/models/User.dart';
 
 class SearchStore extends StatefulWidget {
   const SearchStore({super.key});
@@ -37,32 +42,8 @@ double _deg2rad(double deg) => deg * (pi / 180);
 /* ===================== */
 /* Mock Store Data       */
 /* ===================== */
-final mockStores = [
-  StoreLocation(
-    storeId: 'S001',
-    storeName: 'ร้านกาแฟบางนา',
-    lat: 13.6681,
-    lng: 100.6040,
-  ),
-  StoreLocation(
-    storeId: 'S002',
-    storeName: 'ร้านอาหารสุขุมวิท',
-    lat: 13.6615,
-    lng: 100.6090,
-  ),
-  StoreLocation(
-    storeId: 'S003',
-    storeName: 'ร้านสะดวกซื้อ',
-    lat: 13.6640,
-    lng: 100.6005,
-  ),
-  StoreLocation(
-    storeId: 'S004',
-    storeName: 'ร้านขายยา',
-    lat: 13.6702,
-    lng: 100.6120,
-  ),
-];
+List<StoreLocation> mockStores = [];
+final LocationService locationService = LocationService();
 
 /* ===================== */
 /* State                 */
@@ -78,25 +59,39 @@ class _SearchStoreState extends State<SearchStore> {
   List<StoreLocation> _allStores = [];
   List<StoreLocation> _nearbyStores = [];
 
-  double _radiusKm = 2;
+  double latitude = 0;
+  double longitude = 0;
 
-  static const CameraPosition _initialCamera = CameraPosition(
-    target: LatLng(13.736717, 100.523186),
-    zoom: 12,
-  );
+  double _radiusKm = 2;
+  CameraPosition? _initialCamera;
+
+  // static const CameraPosition _initialCamera = CameraPosition(
+  //   target: LatLng(13.736717, 100.523186),
+  //   zoom: 12,
+  // );
 
   @override
   void initState() {
     super.initState();
-    _loadInitialStores();
+    _getNearbyStores();
+    // _loadInitialStores();
+  }
+
+  void moveToCurrentLocation() {
+    if (_mapController != null && latitude != 0 && longitude != 0) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(latitude, longitude),
+          15,
+        ),
+      );
+    }
   }
 
   /* ===================== */
   /* Load All Stores       */
   /* ===================== */
   void _loadInitialStores() {
-    _allStores = mockStores;
-
     setState(() {
       _markers.clear();
       _circles.clear();
@@ -111,6 +106,82 @@ class _SearchStoreState extends State<SearchStore> {
         );
       }
     });
+  }
+
+  Future<bool> fetchLocation() async {
+    try {
+      await locationService.initialize();
+
+      double? lat = await locationService.getLatitude();
+      double? lon = await locationService.getLongitude();
+
+      if (lat == null || lon == null) {
+        throw Exception('Location is null');
+      }
+
+      setState(() {
+        latitude = lat;
+        longitude = lon;
+      });
+
+      setState(() {
+        _initialCamera = CameraPosition(
+          target: LatLng(latitude, longitude),
+          zoom: 10,
+        );
+      });
+
+      print('📍 LOCATION: $latitude , $longitude');
+      return true;
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          latitude = 0;
+          longitude = 0;
+        });
+      }
+      print("❌ Location Error: $e");
+      return false;
+    }
+  }
+
+  Future<void> _getNearbyStores() async {
+    try {
+      context.loaderOverlay.show();
+
+      final hasLocation = await fetchLocation();
+      if (!hasLocation || latitude == 0 || longitude == 0) {
+        throw Exception('Location not ready');
+      }
+
+      ApiService apiService = ApiService();
+      await apiService.init();
+
+      var response = await apiService.request(
+        endpoint: 'api/cash/store/getNearbyStores',
+        method: 'POST',
+        body: {
+          "area": "${User.area}",
+          "lat": latitude,
+          "long": longitude,
+          "distance": 50
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'];
+        _allStores = data.map((item) => StoreLocation.fromJson(item)).toList();
+
+        print('🏪 STORES: ${_allStores.length}');
+      }
+
+      _loadInitialStores();
+      moveToCurrentLocation();
+    } catch (e) {
+      print("❌ API Error: $e");
+    } finally {
+      context.loaderOverlay.hide();
+    }
   }
 
   /* ===================== */
@@ -134,9 +205,19 @@ class _SearchStoreState extends State<SearchStore> {
       }
     });
 
-    _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(_initialCamera),
-    );
+    // _mapController?.animateCamera(
+    //   CameraUpdate.newCameraPosition(_initialCamera),
+    // );
+
+    // ⭐ กลับไปตำแหน่งปัจจุบันแทน initialCamera
+    if (_mapController != null && latitude != 0 && longitude != 0) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(latitude, longitude),
+          14,
+        ),
+      );
+    }
   }
 
   /* ===================== */
@@ -252,7 +333,7 @@ class _SearchStoreState extends State<SearchStore> {
   }
 
   /* ===================== */
-  /* UI                   */
+  /* UI                    */
   /* ===================== */
   @override
   Widget build(BuildContext context) {
@@ -267,7 +348,7 @@ class _SearchStoreState extends State<SearchStore> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAllStores,
         icon: const Icon(Icons.store_mall_directory),
-        label: Text('แสดงทุกร้าน', style: Styles.black16(context)),
+        label: Text('แสดงทุกร้านในระยะ 50 กม.', style: Styles.black16(context)),
       ),
       body: Column(
         children: [
@@ -277,12 +358,25 @@ class _SearchStoreState extends State<SearchStore> {
           Expanded(
             flex: 2,
             child: GoogleMap(
-              initialCameraPosition: _initialCamera,
+              initialCameraPosition: _initialCamera ??
+                  const CameraPosition(
+                    target: LatLng(13.736717, 100.523186),
+                    zoom: 10,
+                  ),
               markers: _markers,
               circles: _circles,
               onLongPress: _onLongPress,
               onMapCreated: (controller) {
-                _mapController = controller;
+                _mapController = controller; // ⭐ สำคัญมาก
+
+                if (latitude != 0 && longitude != 0) {
+                  _mapController!.animateCamera(
+                    CameraUpdate.newLatLngZoom(
+                      LatLng(latitude, longitude),
+                      15,
+                    ),
+                  );
+                }
               },
               myLocationEnabled: true,
               myLocationButtonEnabled: true,

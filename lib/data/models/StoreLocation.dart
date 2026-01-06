@@ -1,12 +1,14 @@
 class StoreLocation {
   final String storeId;
   final String storeName;
+  final String storeAddress;
   final double lat;
   final double lng;
 
   StoreLocation({
     required this.storeId,
     required this.storeName,
+    required this.storeAddress,
     required this.lat,
     required this.lng,
   });
@@ -15,8 +17,9 @@ class StoreLocation {
     return StoreLocation(
       storeId: json['storeId'],
       storeName: json['storeName'],
-      lat: json['location'][0],
-      lng: json['location'][1],
+      storeAddress: json['storeAddress'],
+      lat: json['lat'],
+      lng: json['lng'],
     );
   }
 }
