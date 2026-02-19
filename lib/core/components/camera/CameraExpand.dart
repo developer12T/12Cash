@@ -99,7 +99,7 @@ class _CameraExpandState extends State<CameraExpand>
       'type': build.type,
       'isPhysicalDevice': build.isPhysicalDevice,
       'systemFeatures': build.systemFeatures,
-      'serialNumber': build.serialNumber,
+      'serialNumber': build.id,
       'isLowRamDevice': build.isLowRamDevice,
     };
   }

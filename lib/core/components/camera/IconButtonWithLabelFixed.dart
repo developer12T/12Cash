@@ -150,7 +150,7 @@ class _IconButtonWithLabelFixedState extends State<IconButtonWithLabelFixed>
       'type': build.type,
       'isPhysicalDevice': build.isPhysicalDevice,
       'systemFeatures': build.systemFeatures,
-      'serialNumber': build.serialNumber,
+      'serialNumber': build.id,
       'isLowRamDevice': build.isLowRamDevice,
     };
   }
